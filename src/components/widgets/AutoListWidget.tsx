@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { RefreshCw, X } from 'lucide-react';
 import type { WidgetProps, ioBrokerState } from '../../types';
 import { getObjectViewDirect, getObjectDirect, useIoBroker } from '../../hooks/useIoBroker';
+import { saveAll } from '../../store/persistManager';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -226,7 +227,10 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
       const found = await discoverDatapoints(opts);
       const existingIds = new Set(entries.map(e => e.id));
       const newEntries = found.filter(d => !existingIds.has(d.id)).map(d => ({ id: d.id, label: d.name, rooms: d.rooms }));
-      if (newEntries.length > 0) saveOpts({ entries: [...entries, ...newEntries] });
+      if (newEntries.length > 0) {
+        saveOpts({ entries: [...entries, ...newEntries] });
+        saveAll(); // flush to localStorage immediately — auto-sync bypasses the admin save buffer
+      }
     } finally {
       setSyncing(false);
     }
