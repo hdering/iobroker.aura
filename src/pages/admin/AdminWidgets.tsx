@@ -588,7 +588,10 @@ function NewWidgetDialog({
   const isCalendar = type === 'calendar';
   const isHeader = type === 'header';
   const isList = type === 'list';
-  const canAdd = isHeader || isClock ? true : isCalendar ? false : isList ? !!groupId : !!datapoint.trim();
+  const isAutoList = type === 'autolist';
+  const isGroup = type === 'group';
+  const noDatapoint = isClock || isCalendar || isHeader || isAutoList || isGroup;
+  const canAdd = noDatapoint ? !isCalendar : isList ? !!groupId : !!datapoint.trim();
 
   const handleAdd = () => {
     if (!canAdd || !targetTabId) return;
@@ -598,7 +601,7 @@ function NewWidgetDialog({
       type,
       layout,
       title: title || (isList && selectedGroup ? selectedGroup.name : def.label),
-      datapoint: isClock || isCalendar || isHeader ? '' : isList ? groupId : datapoint.trim(),
+      datapoint: noDatapoint ? '' : isList ? groupId : datapoint.trim(),
       gridPos: { x: 0, y: Infinity, w: def.defaultW, h: def.defaultH },
       options: unit ? { unit } : {},
     });
@@ -651,7 +654,7 @@ function NewWidgetDialog({
             className={inputCls} style={inputStyle} />
         </div>
 
-        {!isClock && !isCalendar && !isHeader && !isList && (
+        {!noDatapoint && !isList && (
           <div>
             <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>Datenpunkt-ID *</label>
             <div className="flex gap-1.5">
