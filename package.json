@@ -1,6 +1,6 @@
 {
   "name": "iobroker.aura",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Modern visualization dashboard for ioBroker",
   "main": "lib/main.js",
   "license": "MIT",
@@ -11,7 +11,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/hdering/iobroker.aura"
+    "url": "git+https://github.com/hdering/iobroker.aura.git"
   },
   "bugs": {
     "url": "https://github.com/hdering/iobroker.aura/issues"
