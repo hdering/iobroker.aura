@@ -8,24 +8,12 @@ import { TabWizard } from '../../components/config/TabWizard';
 import { WidgetPreview } from '../../components/config/WidgetPreview';
 import { DatapointPicker } from '../../components/config/DatapointPicker';
 import type { WidgetConfig, WidgetType, WidgetLayout } from '../../types';
+import { WIDGET_REGISTRY, WIDGET_BY_TYPE } from '../../widgetRegistry';
 
-const WIDGET_TYPES: { type: WidgetType; label: string; defaultW: number; defaultH: number }[] = [
-  { type: 'switch', label: 'Schalter', defaultW: 2, defaultH: 2 },
-  { type: 'value', label: 'Wert-Anzeige', defaultW: 2, defaultH: 2 },
-  { type: 'dimmer', label: 'Dimmer', defaultW: 2, defaultH: 2 },
-  { type: 'thermostat', label: 'Thermostat', defaultW: 3, defaultH: 3 },
-  { type: 'chart', label: 'Diagramm', defaultW: 4, defaultH: 3 },
-  { type: 'list', label: 'Gruppenliste', defaultW: 3, defaultH: 4 },
-  { type: 'clock', label: 'Uhrzeit', defaultW: 2, defaultH: 2 },
-  { type: 'calendar', label: 'Kalender', defaultW: 4, defaultH: 4 },
-  { type: 'header', label: 'Abschnittstitel', defaultW: 12, defaultH: 1 },
-  { type: 'group',  label: 'Gruppe',          defaultW: 4,  defaultH: 4 },
-  { type: 'echart', label: 'EChart',          defaultW: 6,  defaultH: 4 },
-  { type: 'evcc',   label: 'evcc',            defaultW: 6,  defaultH: 5 },
-  { type: 'weather', label: 'Wetter',         defaultW: 4,  defaultH: 3 },
-  { type: 'gauge',   label: 'Gauge',          defaultW: 3,  defaultH: 3 },
-  { type: 'camera',  label: 'Kamera',         defaultW: 4,  defaultH: 4 },
-];
+// Derived from central registry – add new widgets only in widgetRegistry.tsx
+const WIDGET_TYPES = WIDGET_REGISTRY.map(({ type, label, defaultW, defaultH }) => ({
+  type, label, defaultW, defaultH,
+}));
 
 const LAYOUTS: { id: WidgetLayout; label: string }[] = [
   { id: 'default', label: 'Standard' },
@@ -52,17 +40,18 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
   const { groups } = useGroupStore();
 
   const def = WIDGET_TYPES.find((w) => w.type === type)!;
-  const isList = type === 'list';
-  const isClock = type === 'clock';
+  const addMode = WIDGET_BY_TYPE[type].addMode;
+  const isList = addMode === 'group';
   const isCalendar = type === 'calendar';
-  const isHeader = type === 'header';
-  const isGroup = type === 'group';
   const isEchart = type === 'echart';
   const isEvcc = type === 'evcc';
   const isWeather = type === 'weather';
   const isCamera = type === 'camera';
-  const noDatapointNeeded = isHeader || isClock || isGroup || isEchart || isEvcc || isWeather || isCamera;
-  const canAdd = noDatapointNeeded ? true : isCalendar ? !!icalUrl.trim() : isList ? !!groupId : !!datapoint.trim();
+  const noDatapointNeeded = addMode !== 'datapoint';
+  const canAdd = addMode === 'datapoint' ? !!datapoint.trim()
+               : addMode === 'group'     ? !!groupId
+               : addMode === 'wizard-only' ? !!icalUrl.trim()
+               : true;
 
   const handleAdd = () => {
     if (!canAdd) return;
@@ -72,7 +61,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
       type,
       layout,
       title: title || (isList && selectedGroup ? selectedGroup.name : def.label),
-      datapoint: noDatapointNeeded || isCalendar ? '' : isList ? groupId : datapoint.trim(),
+      datapoint: noDatapointNeeded ? '' : isList ? groupId : datapoint.trim(),
       gridPos: { x: 0, y: Infinity, w: def.defaultW, h: def.defaultH },
       options: isCalendar
         ? {
@@ -148,7 +137,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
                   Weitere Kalender nach dem Hinzufügen im Widget-Editor ergänzen.
                 </p>
               </div>
-            ) : !isClock && isList ? (
+            ) : isList ? (
               <div className="space-y-1.5">
                 <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Gruppe *</label>
                 {groups.length === 0 ? (
@@ -167,7 +156,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
                   </select>
                 )}
               </div>
-            ) : !isClock && !isCalendar && !isHeader && !isGroup && !isEchart && !isEvcc && !isWeather && !isCamera ? (
+            ) : addMode === 'datapoint' ? (
               <div className="space-y-1.5">
                 <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Datenpunkt-ID *</label>
                 <div className="flex gap-1.5">
