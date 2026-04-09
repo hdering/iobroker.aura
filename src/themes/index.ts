@@ -132,6 +132,51 @@ export const THEMES: Theme[] = [
       '--accent-red': '#f87171',
     },
   },
+  // ── Material Design 3 ──────────────────────────────────────────────────────
+  // Colors from the MD3 baseline scheme (Material Theme Builder)
+  // Primary: #6750A4 (purple/violet) · Shape: medium (12dp) · Elevation via shadow
+  {
+    id: 'md3-light',
+    name: 'Material 3',
+    dark: false,
+    vars: {
+      '--app-bg':              '#FFFBFE',   // MD3 background
+      '--app-surface':         '#F3EDF7',   // MD3 surface-container
+      '--app-border':          '#CAC4D0',   // MD3 outline-variant
+      '--widget-bg':           '#FFFFFF',   // MD3 surface (cards at elevation 0)
+      '--widget-border':       'transparent',
+      '--widget-border-width': '0px',
+      '--widget-radius':       '0.75rem',   // MD3 medium shape = 12dp
+      '--widget-shadow':       '0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15)', // elevation 1
+      '--text-primary':        '#1C1B1F',   // MD3 on-background
+      '--text-secondary':      '#49454F',   // MD3 on-surface-variant
+      '--accent':              '#6750A4',   // MD3 primary
+      '--accent-green':        '#386A20',   // MD3-aligned green
+      '--accent-yellow':       '#7D5700',   // MD3-aligned amber/tertiary
+      '--accent-red':          '#B3261E',   // MD3 error
+    },
+  },
+  {
+    id: 'md3-dark',
+    name: 'Material 3 Dark',
+    dark: true,
+    vars: {
+      '--app-bg':              '#1C1B1F',   // MD3 background dark
+      '--app-surface':         '#2B2930',   // MD3 surface-container-high dark
+      '--app-border':          '#49454F',   // MD3 outline-variant dark
+      '--widget-bg':           '#211F26',   // MD3 surface-container dark
+      '--widget-border':       'transparent',
+      '--widget-border-width': '0px',
+      '--widget-radius':       '0.75rem',
+      '--widget-shadow':       'none',      // MD3 dark: tonal elevation, no shadows
+      '--text-primary':        '#E6E1E5',   // MD3 on-background dark
+      '--text-secondary':      '#CAC4D0',   // MD3 on-surface-variant dark
+      '--accent':              '#D0BCFF',   // MD3 primary dark
+      '--accent-green':        '#B6CCB0',   // MD3-aligned green dark
+      '--accent-yellow':       '#F9C642',   // MD3-aligned amber dark
+      '--accent-red':          '#F2B8B5',   // MD3 error dark
+    },
+  },
 ];
 
 export const DEFAULT_THEME_ID = 'dark';
