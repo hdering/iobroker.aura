@@ -4,6 +4,11 @@
   "description": "Modern visualization dashboard for ioBroker",
   "main": "lib/main.js",
   "license": "MIT",
+  "files": [
+    "lib/",
+    "www/",
+    "io-package.json"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/hdering/iobroker.aura"
