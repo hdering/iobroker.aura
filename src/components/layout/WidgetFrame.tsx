@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { LayoutGrid, X, Pencil, Database, Sparkles, EyeOff, ChevronDown, Plus, Trash2 } from 'lucide-react';
-import type { WidgetConfig, WidgetLayout, WidgetCondition } from '../../types';
+import { X, Pencil, Database, Sparkles, EyeOff, ChevronDown, Plus, Trash2 } from 'lucide-react';
+import type { WidgetConfig, WidgetCondition } from '../../types';
 import { DatapointPicker } from '../config/DatapointPicker';
 import { ConditionEditor } from '../config/ConditionEditor';
 import { getObjectDirect } from '../../hooks/useIoBroker';
@@ -54,17 +54,6 @@ function getWidgetMap() {
     autolist:   AutoListWidget,
   } as const;
 }
-
-const LAYOUTS: { id: WidgetLayout; label: string }[] = [
-  { id: 'default', label: 'Standard' },
-  { id: 'card', label: 'Karte' },
-  { id: 'compact', label: 'Kompakt' },
-  { id: 'minimal', label: 'Minimal' },
-];
-const CALENDAR_LAYOUTS: { id: WidgetLayout; label: string }[] = [
-  ...LAYOUTS,
-  { id: 'agenda', label: 'Agenda' },
-];
 
 // ── CalendarEditPanel ──────────────────────────────────────────────────────
 
@@ -462,7 +451,7 @@ function PortalDropdown({
 }
 
 export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: WidgetFrameProps) {
-  const [openPanel, setOpenPanel] = useState<'menu' | 'layout' | 'edit' | 'conditions' | null>(null);
+  const [openPanel, setOpenPanel] = useState<'menu' | 'edit' | 'conditions' | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   // Stable reference: never create a new [] on every render (would cause infinite effect loop)
@@ -601,21 +590,6 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
               Bearbeiten
             </button>
 
-            {/* Layout */}
-            {!isGroup && (
-              <button
-                onClick={() => { openPanelFor('layout'); setConfirmDelete(false); }}
-                className="flex items-center gap-2.5 px-3 py-2 text-sm rounded-md text-left hover:opacity-80 transition-opacity"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                <LayoutGrid size={13} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
-                Layout
-                {currentLayout !== 'default' && (
-                  <span className="ml-auto text-[11px] capitalize" style={{ color: 'var(--accent)' }}>{currentLayout}</span>
-                )}
-              </button>
-            )}
-
             {/* Bedingungen */}
             <button
               onClick={() => { openPanelFor('conditions'); setConfirmDelete(false); }}
@@ -665,65 +639,6 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
         </PortalDropdown>
       )}
 
-      {/* Layout Dropdown Portal */}
-      {openPanel === 'layout' && menuBtnRef.current && (
-        <PortalDropdown anchorRef={menuBtnRef as React.RefObject<HTMLElement>} onClose={() => openPanelFor(null)}>
-          <div className="p-1.5 flex flex-col gap-0.5 min-w-[120px]">
-            {(config.type === 'calendar' ? CALENDAR_LAYOUTS : LAYOUTS).map((l) => (
-              <button key={l.id}
-                onClick={() => { onConfigChange({ ...config, layout: l.id }); openPanelFor(null); }}
-                className="px-3 py-2 text-sm text-left rounded-md transition-opacity hover:opacity-80 flex items-center justify-between gap-4"
-                style={{ background: currentLayout === l.id ? 'var(--accent)22' : 'transparent', color: currentLayout === l.id ? 'var(--accent)' : 'var(--text-primary)' }}
-              >
-                {l.label}
-                {currentLayout === l.id && <span>✓</span>}
-              </button>
-            ))}
-            {/* Position-Picker (nur für Standard-Layout) */}
-            {currentLayout === 'default' && (() => {
-              const POSITIONS = ['tl','tc','tr','cl','cc','cr','bl','bc','br'] as const;
-              const currentContentPos = config.options?.contentPosition as string | undefined;
-              const currentTitlePos = config.options?.titlePosition as string | undefined;
-
-              function PositionGrid({ value, onChange }: { value: string | undefined; onChange: (v: string | undefined) => void }) {
-                return (
-                  <div className="grid grid-cols-3 gap-1 px-2 pb-2">
-                    {POSITIONS.map((pos) => {
-                      const active = value === pos;
-                      return (
-                        <button key={pos}
-                          onClick={(e) => { e.stopPropagation(); onChange(active ? undefined : pos); }}
-                          className="w-6 h-6 rounded transition-opacity hover:opacity-80"
-                          style={{ background: active ? 'var(--accent)' : 'var(--app-bg)', border: `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}` }}
-                          title={pos}
-                        />
-                      );
-                    })}
-                  </div>
-                );
-              }
-
-              return (
-                <>
-                  <div className="h-px my-1 mx-1" style={{ background: 'var(--app-border)' }} />
-                  <p className="px-3 text-[11px] pb-1" style={{ color: 'var(--text-secondary)' }}>Inhalt-Position</p>
-                  <PositionGrid
-                    value={currentContentPos}
-                    onChange={(v) => onConfigChange({ ...config, options: { ...config.options, contentPosition: v } })}
-                  />
-                  <div className="h-px my-1 mx-1" style={{ background: 'var(--app-border)' }} />
-                  <p className="px-3 text-[11px] pb-1" style={{ color: 'var(--text-secondary)' }}>Titel-Position</p>
-                  <PositionGrid
-                    value={currentTitlePos}
-                    onChange={(v) => onConfigChange({ ...config, options: { ...config.options, titlePosition: v } })}
-                  />
-                </>
-              );
-            })()}
-          </div>
-        </PortalDropdown>
-      )}
-
       {/* Edit Modal */}
       {openPanel === 'edit' && (
         <CenteredModal
@@ -733,40 +648,42 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
         >
           {/* ── Stil ── */}
           <div>
-            <p className="text-[11px] font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>Stil</p>
-            <div className="space-y-2">
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[11px] font-semibold" style={{ color: 'var(--text-secondary)' }}>Stil</p>
+              {overrides && Object.keys(overrides).length > 0 && (
+                <button
+                  onClick={() => { const { styleOverride: _, ...rest } = config.options ?? {}; onConfigChange({ ...config, options: rest }); }}
+                  className="text-[10px] hover:opacity-70"
+                  style={{ color: 'var(--text-secondary)' }}>
+                  Zurücksetzen
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
               {STYLE_FIELDS.map(({ key, label, type }) => (
-                <div key={key} className="flex items-center gap-2">
-                  <label className="text-xs w-28 shrink-0" style={{ color: 'var(--text-secondary)' }}>{label}</label>
+                <div key={key}>
+                  <label className="text-[10px] block mb-0.5" style={{ color: 'var(--text-secondary)' }}>{label}</label>
                   {type === 'color' ? (
-                    <div className="flex gap-1 flex-1">
+                    <div className="flex gap-1">
                       <input type="color" value={overrides?.[key] ?? '#3b82f6'}
                         onChange={(e) => onConfigChange({ ...config, options: { ...config.options, styleOverride: { ...overrides, [key]: e.target.value } } })}
-                        className="w-7 h-6 rounded cursor-pointer border-0 p-0 shrink-0" />
+                        className="w-6 h-[26px] rounded cursor-pointer border-0 p-0 shrink-0" />
                       <input type="text" value={overrides?.[key] ?? ''}
                         onChange={(e) => { const val = e.target.value; const next = { ...overrides, [key]: val }; if (!val) delete next[key]; onConfigChange({ ...config, options: { ...config.options, styleOverride: Object.keys(next).length ? next : undefined } }); }}
                         placeholder="auto"
-                        className="flex-1 text-xs rounded px-1.5 py-1 min-w-0 focus:outline-none"
+                        className="flex-1 text-[10px] rounded px-1.5 py-1 min-w-0 focus:outline-none font-mono"
                         style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }} />
                     </div>
                   ) : (
                     <input type="text" value={overrides?.[key] ?? ''}
                       onChange={(e) => { const val = e.target.value; const next = { ...overrides, [key]: val }; if (!val) delete next[key]; onConfigChange({ ...config, options: { ...config.options, styleOverride: Object.keys(next).length ? next : undefined } }); }}
                       placeholder="auto"
-                      className="flex-1 text-xs rounded px-1.5 py-1 focus:outline-none"
+                      className="w-full text-[10px] rounded px-1.5 py-1 focus:outline-none font-mono"
                       style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }} />
                   )}
                 </div>
               ))}
             </div>
-            {overrides && Object.keys(overrides).length > 0 && (
-              <button
-                onClick={() => { const { styleOverride: _, ...rest } = config.options ?? {}; onConfigChange({ ...config, options: rest }); }}
-                className="w-full mt-2 py-1.5 text-xs rounded-md hover:opacity-80"
-                style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
-                Zurücksetzen
-              </button>
-            )}
           </div>
           <div className="h-px" style={{ background: 'var(--app-border)' }} />
           <div className="space-y-2.5">

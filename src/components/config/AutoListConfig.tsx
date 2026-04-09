@@ -299,17 +299,19 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
   return (
     <>
       {/* ── Filters ── */}
-      <MultiSelect label="Rollen" options={availRoles} selected={selRoles}
-        onChange={setSelRoles} loading={optLoading} />
-      <MultiSelect label="Raum" options={availRooms} selected={selRooms}
-        onChange={setSelRooms} loading={optLoading} />
-      <MultiSelect label="Funktion" options={availFuncs} selected={selFuncs}
-        onChange={setSelFuncs} loading={optLoading} />
-      <div>
-        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>ID enthält</label>
-        <input className={iCls} style={iSty} placeholder="z.B. hm-rpc, shelly" value={idPat}
-          onChange={e => setIdPat(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && canSearch && search()} />
+      <div className="grid grid-cols-2 gap-2">
+        <MultiSelect label="Rollen" options={availRoles} selected={selRoles}
+          onChange={setSelRoles} loading={optLoading} />
+        <MultiSelect label="Raum" options={availRooms} selected={selRooms}
+          onChange={setSelRooms} loading={optLoading} />
+        <MultiSelect label="Funktion" options={availFuncs} selected={selFuncs}
+          onChange={setSelFuncs} loading={optLoading} />
+        <div>
+          <label className="text-xs mb-1 block" style={{ color: 'var(--text-secondary)' }}>ID enthält</label>
+          <input className={iCls} style={iSty} placeholder="z.B. hm-rpc, shelly" value={idPat}
+            onChange={e => setIdPat(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && canSearch && search()} />
+        </div>
       </div>
 
       <button
