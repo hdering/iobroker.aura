@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { ioBrokerState, ObjectViewResult } from '../types';
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore – socket.io-client v2 hat kein ESM-Export; Vite handhabt CJS-Interop
 import io from 'socket.io-client';
 
 interface IoBrokerSocket {
@@ -17,17 +15,28 @@ let socket: IoBrokerSocket | null = null;
 const subscribers = new Map<string, Set<(state: ioBrokerState) => void>>();
 const connectionListeners = new Set<(connected: boolean) => void>();
 
-// Always use same origin:
-// - Dev: Vite dev server proxies /socket.io → configured ioBroker (no CORS)
-// - Prod (adapter): ioBroker web adapter is same origin, serves /socket.io itself
-let currentUrl = window.location.origin;
+// Determine initial socket URL:
+// - Dev: Vite dev server proxies /socket.io → configured ioBroker (no CORS), use same origin
+// - Prod: read persisted ioBroker URL from localStorage (set by connectionStore)
+function getInitialUrl(): string {
+  if (import.meta.env.DEV) return window.location.origin;
+  try {
+    const stored = localStorage.getItem('aura-connection');
+    if (stored) {
+      const parsed = JSON.parse(stored) as { state?: { ioBrokerUrl?: string } };
+      if (parsed.state?.ioBrokerUrl) return parsed.state.ioBrokerUrl;
+    }
+  } catch { /* ignore */ }
+  return window.location.origin;
+}
+
+let currentUrl = getInitialUrl();
 
 function createSocket(url: string): IoBrokerSocket {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const s = (io as any)(url, {
+  const s = io(url, {
     path: '/socket.io',
-    transports: ['polling'],
-  }) as IoBrokerSocket;
+    transports: ['websocket', 'polling'],
+  }) as unknown as IoBrokerSocket;
 
   s.on('connect', () => {
     connectionListeners.forEach((fn) => fn(true));
