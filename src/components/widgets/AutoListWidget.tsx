@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { Plus, RefreshCw, X } from 'lucide-react';
+import { RefreshCw, X } from 'lucide-react';
 import type { WidgetProps, ioBrokerState } from '../../types';
 import { getObjectViewDirect, useIoBroker } from '../../hooks/useIoBroker';
 
@@ -105,7 +105,6 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
   const entries: AutoListEntry[] = opts.entries ?? [];
   const { subscribe, setState, getState } = useIoBroker();
   const [states, setStates] = useState<Record<string, ioBrokerState | null>>({});
-  const [addInput, setAddInput] = useState('');
   const [syncing, setSyncing] = useState(false);
   const syncMs = (opts.syncIntervalMin ?? 5) * 60_000;
 
@@ -148,13 +147,6 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
   }, [runSync, syncMs]);
 
   const removeEntry = (id: string) => saveOpts({ entries: entries.filter(e => e.id !== id) });
-
-  const addManual = () => {
-    const id = addInput.trim();
-    if (!id || entries.some(e => e.id === id)) return;
-    saveOpts({ entries: [...entries, { id }] });
-    setAddInput('');
-  };
 
   return (
     <div className="flex flex-col h-full">
@@ -238,23 +230,6 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
         </div>
       )}
 
-      {/* Edit-mode manual add */}
-      {editMode && (
-        <div className="shrink-0 flex gap-1 px-3 py-2" style={{ borderTop: '1px solid var(--widget-border)' }}>
-          <input
-            value={addInput}
-            onChange={e => setAddInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && addManual()}
-            placeholder="Datenpunkt-ID manuell…"
-            className="flex-1 text-[11px] rounded px-2 py-1 font-mono focus:outline-none min-w-0"
-            style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
-          />
-          <button onClick={addManual} className="shrink-0 hover:opacity-80 p-1 rounded"
-            style={{ color: 'var(--accent)' }} title="Hinzufügen">
-            <Plus size={14} />
-          </button>
-        </div>
-      )}
     </div>
   );
 }
