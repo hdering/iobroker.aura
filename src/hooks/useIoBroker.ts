@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { ioBrokerState, ObjectViewResult } from '../types';
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore – socket.io-client v2 hat kein ESM-Export
 import io from 'socket.io-client';
 
 interface IoBrokerSocket {
@@ -34,10 +36,11 @@ function getInitialUrl(): string {
 let currentUrl = getInitialUrl();
 
 function createSocket(url: string): IoBrokerSocket {
-  const s = io(url, {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const s = (io as any)(url, {
     path: '/socket.io',
     transports: ['websocket', 'polling'],
-  }) as unknown as IoBrokerSocket;
+  }) as IoBrokerSocket;
 
   s.on('connect', () => {
     connectionListeners.forEach((fn) => fn(true));
