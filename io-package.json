@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "title": "Aura",
     "titleLang": {
       "en": "Aura Dashboard",
@@ -18,6 +18,8 @@
     "webExtension": "www/",
     "noIntro": true,
     "singleton": true,
+    "adminUI": { "config": "none" },
+    "localLink": "/aura/",
     "authors": ["Aura"],
     "keywords": ["visualization", "dashboard"]
   },
