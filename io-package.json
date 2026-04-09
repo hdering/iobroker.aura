@@ -1,11 +1,11 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.1.4",
-    "title": "Aura",
+    "version": "0.1.5",
+    "title": "Aura Visualisierung",
     "titleLang": {
-      "en": "Aura Dashboard",
-      "de": "Aura Dashboard"
+      "en": "Aura Visualisation",
+      "de": "Aura Visualisierung"
     },
     "desc": {
       "en": "Modern visualization dashboard for ioBroker",
@@ -21,8 +21,8 @@
     "adminUI": { "config": "none" },
     "localLink": "",
     "localLinks": {
-      "_default": "%protocol%://%ip%:8082/aura/",
-      "Admin": "%protocol%://%ip%:8082/aura/#/admin"
+      "🖥️ Frontend (Dashboard)": "%protocol%://%ip%:8082/aura/",
+      "⚙️ Backend (Admin)": "%protocol%://%ip%:8082/aura/#/admin"
     },
     "authors": ["Aura"],
     "keywords": ["visualization", "dashboard"]
