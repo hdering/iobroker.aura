@@ -9,8 +9,9 @@ import type { WidgetConfig, WidgetCondition } from '../../types';
 import { DatapointPicker } from '../config/DatapointPicker';
 import { ConditionEditor } from '../config/ConditionEditor';
 import { getObjectDirect } from '../../hooks/useIoBroker';
-import { WIDGET_REGISTRY } from '../../widgetRegistry';
+import { WIDGET_REGISTRY, WIDGET_BY_TYPE } from '../../widgetRegistry';
 import { AutoListConfig } from '../config/AutoListConfig';
+import { WidgetPreview } from '../config/WidgetPreview';
 import { detectHistoryAdapters, RANGE_LABELS, type ChartTimeRange, type DetectedAdapter } from '../../hooks/useChartHistory';
 import { useConditionStyle, notifyHiddenState, cleanupHiddenState } from '../../hooks/useConditionStyle';
 import { SwitchWidget } from '../widgets/SwitchWidget';
@@ -888,6 +889,22 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
               ))}
             </div>
           </div>
+          <div className="h-px" style={{ background: 'var(--app-border)' }} />
+
+          {/* ── Live preview ── */}
+          <div className="flex items-center gap-3 px-1">
+            <WidgetPreview type={config.type} layout={config.layout} title={config.title} />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+                {config.title || WIDGET_BY_TYPE[config.type]?.label}
+              </p>
+              <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                {WIDGET_BY_TYPE[config.type]?.label}
+                {config.layout && config.layout !== 'default' ? ` · ${config.layout}` : ''}
+              </p>
+            </div>
+          </div>
+
           <div className="h-px" style={{ background: 'var(--app-border)' }} />
           <div className="space-y-2.5">
               <div>
