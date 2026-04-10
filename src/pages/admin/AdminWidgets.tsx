@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { usePortalTarget } from '../../contexts/PortalTargetContext';
 import {
   ChevronDown, ChevronRight, Copy, Trash2, Pencil,
   Plus, Database, X, Check, Search, RotateCcw,
@@ -340,6 +341,7 @@ function WidgetRow({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [dropdownPos, setDropdownPos] = useState<{ top: number; right: number } | null>(null);
   const { layouts } = useDashboardStore();
+  const portalTarget = usePortalTarget();
   // Default target: first tab of first layout (excluding source)
   const firstTarget = layouts.flatMap((l) => l.tabs.map((t) => ({ layoutId: l.id, tabId: t.id }))).find(
     (x) => !(x.layoutId === entry.tab.id || x.tabId === entry.tab.id),
@@ -490,7 +492,7 @@ function WidgetRow({
                 </button>
               </div>
             </div>,
-            document.body,
+            portalTarget,
           )}
 
           {/* Delete */}

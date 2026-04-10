@@ -460,9 +460,14 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
   const [openPanel, setOpenPanel] = useState<'menu' | 'edit' | 'conditions' | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [showMoveMenu, setShowMoveMenu] = useState(false);
-  const { addWidgetToTab } = useDashboardStore();
-  const { tabs, activeTabId } = useActiveLayout();
-  const otherTabs = tabs.filter((t) => t.id !== activeTabId);
+  const { addWidgetToLayoutTab, removeWidgetFromLayoutTab, layouts, activeLayoutId } = useDashboardStore();
+  const { activeTabId } = useActiveLayout();
+  // All layout→tab combos except the current tab
+  const moveTargets = layouts.flatMap((l) =>
+    l.tabs
+      .filter((t) => !(l.id === activeLayoutId && t.id === activeTabId))
+      .map((t) => ({ layoutId: l.id, layoutName: l.name, tabId: t.id, tabName: t.name })),
+  );
 
   // Stable reference: never create a new [] on every render (would cause infinite effect loop)
   const conditions = (config.options?.conditions as WidgetCondition[] | undefined) ?? NO_CONDITIONS;
@@ -628,7 +633,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
             </button>
 
             {/* Verschieben */}
-            {otherTabs.length > 0 && (
+            {moveTargets.length > 0 && (
               <>
                 <button
                   onClick={() => setShowMoveMenu((v) => !v)}
@@ -641,20 +646,34 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                 </button>
                 {showMoveMenu && (
                   <div className="mx-1 mb-0.5 rounded-md overflow-hidden" style={{ border: '1px solid var(--app-border)' }}>
-                    {otherTabs.map((tab) => (
-                      <button
-                        key={tab.id}
-                        onClick={() => {
-                          addWidgetToTab(tab.id, { ...config, gridPos: { ...config.gridPos, y: Infinity } });
-                          onRemove(config.id);
-                          openPanelFor(null);
-                        }}
-                        className="w-full text-left px-3 py-1.5 text-xs hover:opacity-80 transition-opacity"
-                        style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', display: 'block', borderBottom: '1px solid var(--app-border)' }}
-                      >
-                        {tab.name}
-                      </button>
-                    ))}
+                    {layouts.map((layout) => {
+                      const targets = moveTargets.filter((m) => m.layoutId === layout.id);
+                      if (targets.length === 0) return null;
+                      return (
+                        <div key={layout.id}>
+                          {layouts.length > 1 && (
+                            <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider"
+                              style={{ background: 'var(--app-surface)', color: 'var(--text-secondary)', borderBottom: '1px solid var(--app-border)' }}>
+                              {layout.name}
+                            </p>
+                          )}
+                          {targets.map((m) => (
+                            <button
+                              key={m.tabId}
+                              onClick={() => {
+                                addWidgetToLayoutTab(m.layoutId, m.tabId, { ...config, gridPos: { ...config.gridPos, y: Infinity } });
+                                removeWidgetFromLayoutTab(activeLayoutId, activeTabId, config.id);
+                                openPanelFor(null);
+                              }}
+                              className="w-full text-left px-3 py-1.5 text-xs hover:opacity-80 transition-opacity"
+                              style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', display: 'block', borderBottom: '1px solid var(--app-border)' }}
+                            >
+                              {m.tabName}
+                            </button>
+                          ))}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </>
