@@ -456,6 +456,128 @@ function PortalDropdown({
   );
 }
 
+// ── Weather config sub-component (needs local state for geocoding) ──────────
+interface WeatherConfigSectionProps {
+  o: Record<string, unknown>;
+  set: (patch: Record<string, unknown>) => void;
+}
+function WeatherConfigSection({ o, set }: WeatherConfigSectionProps) {
+  const [addressInput, setAddressInput] = useState('');
+  const [geocoding,    setGeocoding]    = useState(false);
+  const [geoError,     setGeoError]     = useState('');
+
+  const iCls = 'w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none';
+  const iSty = { background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' };
+
+  const geocodeAddress = async () => {
+    if (!addressInput.trim()) return;
+    setGeocoding(true);
+    setGeoError('');
+    try {
+      const res = await fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(addressInput.trim())}&count=1&language=de&format=json`,
+      );
+      const json = await res.json() as { results?: { latitude: number; longitude: number; name: string; admin1?: string }[] };
+      if (json.results?.[0]) {
+        const r = json.results[0];
+        set({
+          latitude:     r.latitude,
+          longitude:    r.longitude,
+          locationName: r.admin1 ? `${r.name}, ${r.admin1}` : r.name,
+        });
+        setAddressInput('');
+      } else {
+        setGeoError('Kein Ort gefunden');
+      }
+    } catch {
+      setGeoError('Fehler bei der Suche');
+    } finally {
+      setGeocoding(false);
+    }
+  };
+
+  const showForecast = (o.showForecast as boolean) ?? true;
+  const showToday    = (o.showToday    as boolean) ?? true;
+
+  return (
+    <>
+      <div>
+        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Standort suchen</label>
+        <div className="flex gap-1.5">
+          <input
+            type="text"
+            value={addressInput}
+            onChange={(e) => setAddressInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); geocodeAddress(); } }}
+            placeholder="Stadt oder Adresse eingeben"
+            className={iCls + ' flex-1'}
+            style={iSty}
+          />
+          <button
+            onClick={geocodeAddress}
+            disabled={geocoding || !addressInput.trim()}
+            className="text-xs px-2.5 rounded-lg shrink-0"
+            style={{ background: 'var(--accent)', color: '#fff', opacity: (geocoding || !addressInput.trim()) ? 0.5 : 1 }}
+          >
+            {geocoding ? '…' : 'Suchen'}
+          </button>
+        </div>
+        {geoError && <p className="text-[10px] mt-1" style={{ color: '#ef4444' }}>{geoError}</p>}
+      </div>
+      <div className="flex gap-2">
+        <div className="flex-1">
+          <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Breitengrad</label>
+          <input type="number" step={0.0001} value={(o.latitude as number) ?? 48.1}
+            onChange={(e) => set({ latitude: Number(e.target.value) })} className={iCls} style={iSty} />
+        </div>
+        <div className="flex-1">
+          <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Längengrad</label>
+          <input type="number" step={0.0001} value={(o.longitude as number) ?? 11.6}
+            onChange={(e) => set({ longitude: Number(e.target.value) })} className={iCls} style={iSty} />
+        </div>
+      </div>
+      <div>
+        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Standortname</label>
+        <input type="text" value={(o.locationName as string) ?? ''}
+          onChange={(e) => set({ locationName: e.target.value || undefined })}
+          placeholder="z.B. München" className={iCls} style={iSty} />
+      </div>
+      <div>
+        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Aktualisierung (Min.)</label>
+        <input type="number" min={5} max={1440} value={(o.refreshMinutes as number) ?? 30}
+          onChange={(e) => set({ refreshMinutes: Number(e.target.value) })} className={iCls} style={iSty} />
+      </div>
+      <div className="flex items-center justify-between">
+        <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Vorhersage anzeigen</label>
+        <button onClick={() => set({ showForecast: !showForecast })}
+          className="relative w-9 h-5 rounded-full transition-colors"
+          style={{ background: showForecast ? 'var(--accent)' : 'var(--app-border)' }}>
+          <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+            style={{ left: showForecast ? '18px' : '2px' }} />
+        </button>
+      </div>
+      {showForecast && (
+        <>
+          <div>
+            <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Vorhersagetage</label>
+            <input type="number" min={1} max={7} value={(o.forecastDays as number) ?? 5}
+              onChange={(e) => set({ forecastDays: Number(e.target.value) })} className={iCls} style={iSty} />
+          </div>
+          <div className="flex items-center justify-between">
+            <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Heutigen Tag anzeigen</label>
+            <button onClick={() => set({ showToday: !showToday })}
+              className="relative w-9 h-5 rounded-full transition-colors"
+              style={{ background: showToday ? 'var(--accent)' : 'var(--app-border)' }}>
+              <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                style={{ left: showToday ? '18px' : '2px' }} />
+            </button>
+          </div>
+        </>
+      )}
+    </>
+  );
+}
+
 export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: WidgetFrameProps) {
   const [openPanel, setOpenPanel] = useState<'menu' | 'edit' | 'conditions' | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -1051,39 +1173,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                 const o   = config.options ?? {};
                 const set = (patch: Record<string, unknown>) =>
                   onConfigChange({ ...config, options: { ...o, ...patch } });
-                const wCls = 'w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none';
-                const wSty = { background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' };
-                return (
-                  <>
-                    <div className="flex gap-2">
-                      <div className="flex-1">
-                        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Breitengrad</label>
-                        <input type="number" step={0.01} value={(o.latitude as number) ?? 48.1} onChange={(e) => set({ latitude: Number(e.target.value) })} className={wCls} style={wSty} />
-                      </div>
-                      <div className="flex-1">
-                        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Längengrad</label>
-                        <input type="number" step={0.01} value={(o.longitude as number) ?? 11.6} onChange={(e) => set({ longitude: Number(e.target.value) })} className={wCls} style={wSty} />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Standortname</label>
-                      <input type="text" value={(o.locationName as string) ?? ''} onChange={(e) => set({ locationName: e.target.value || undefined })} placeholder="z.B. München" className={wCls} style={wSty} />
-                    </div>
-                    <div>
-                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Aktualisierung (Min.)</label>
-                      <input type="number" min={5} max={1440} value={(o.refreshMinutes as number) ?? 30} onChange={(e) => set({ refreshMinutes: Number(e.target.value) })} className={wCls} style={wSty} />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Vorhersage anzeigen</label>
-                      <button onClick={() => set({ showForecast: !(o.showForecast ?? true) })}
-                        className="relative w-9 h-5 rounded-full transition-colors"
-                        style={{ background: (o.showForecast ?? true) ? 'var(--accent)' : 'var(--app-border)' }}>
-                        <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
-                          style={{ left: (o.showForecast ?? true) ? '18px' : '2px' }} />
-                      </button>
-                    </div>
-                  </>
-                );
+                return <WeatherConfigSection o={o} set={set} />;
               })()}
 
               {/* ── Camera config ── */}

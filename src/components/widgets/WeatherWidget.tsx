@@ -43,7 +43,8 @@ export function WeatherWidget({ config }: WidgetProps) {
   const locationName  = (opts.locationName as string)   ?? '';
   const refreshMin    = (opts.refreshMinutes as number) ?? 30;
   const showForecast  = (opts.showForecast as boolean)  ?? true;
-  const forecastDays  = (opts.forecastDays as number)   ?? 6;
+  const forecastDays  = (opts.forecastDays as number)   ?? 5;
+  const showToday     = (opts.showToday as boolean)     ?? true;
   const layout        = config.layout ?? 'default';
 
   const [data, setData]       = useState<WeatherData | null>(null);
@@ -54,13 +55,14 @@ export function WeatherWidget({ config }: WidgetProps) {
     let cancelled = false;
     const fetchWeather = async () => {
       try {
-        const days = Math.min(Math.max(forecastDays + 1, 4), 8);
+        // Request enough days: forecastDays future days + today
+        const apiForecastDays = Math.min(forecastDays + 1, 8);
         const url =
           `https://api.open-meteo.com/v1/forecast` +
           `?latitude=${lat}&longitude=${lon}` +
           `&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,apparent_temperature` +
           `&daily=weather_code,temperature_2m_max,temperature_2m_min` +
-          `&timezone=auto&forecast_days=${days}&wind_speed_unit=kmh`;
+          `&timezone=auto&forecast_days=${apiForecastDays}&wind_speed_unit=kmh`;
         const res = await fetch(url);
         if (!res.ok) throw new Error('HTTP error');
         const json = await res.json() as WeatherData;
@@ -128,21 +130,26 @@ export function WeatherWidget({ config }: WidgetProps) {
     );
   }
 
-  // ── Forecast items (skip today = index 0, take up to forecastDays) ────────
-  const fcCount = Math.min(forecastDays, data.daily.time.length - 1);
-  const fcItems = Array.from({ length: fcCount }, (_, i) => i + 1).map((i) => ({
-    day:  dayName(data.daily.time[i]),
-    info: getWeatherInfo(data.daily.weather_code[i]),
-    max:  Math.round(data.daily.temperature_2m_max[i]),
-    min:  Math.round(data.daily.temperature_2m_min[i]),
-  }));
+  // ── Forecast items ────────────────────────────────────────────────────────
+  // startIdx: 0 = include today, 1 = skip today
+  const startIdx = showToday ? 0 : 1;
+  const fcItems: { day: string; info: ReturnType<typeof getWeatherInfo>; max: number; min: number; isToday: boolean }[] = [];
+  for (let i = startIdx; i < data.daily.time.length && fcItems.length < forecastDays; i++) {
+    fcItems.push({
+      day:     i === 0 ? 'Heute' : dayName(data.daily.time[i]),
+      info:    getWeatherInfo(data.daily.weather_code[i]),
+      max:     Math.round(data.daily.temperature_2m_max[i]),
+      min:     Math.round(data.daily.temperature_2m_min[i]),
+      isToday: i === 0,
+    });
+  }
 
   // Global temperature scale for bar positioning
-  const allMins = fcItems.map((d) => d.min);
-  const allMaxs = fcItems.map((d) => d.max);
+  const allMins  = fcItems.map((d) => d.min);
+  const allMaxs  = fcItems.map((d) => d.max);
   const globalMin = Math.min(...allMins);
   const globalMax = Math.max(...allMaxs);
-  const scale = globalMax - globalMin || 1;
+  const scale     = globalMax - globalMin || 1;
 
   // ── DEFAULT / CARD ────────────────────────────────────────────────────────
   return (
@@ -180,7 +187,7 @@ export function WeatherWidget({ config }: WidgetProps) {
                 {/* Day name */}
                 <span
                   className="text-xs font-semibold shrink-0 w-7"
-                  style={{ color: 'var(--text-secondary)' }}
+                  style={{ color: fc.isToday ? 'var(--accent)' : 'var(--text-secondary)' }}
                 >
                   {fc.day}
                 </span>
@@ -204,7 +211,9 @@ export function WeatherWidget({ config }: WidgetProps) {
                     style={{
                       left:       `${leftPct}%`,
                       width:      `${Math.max(widthPct, 4)}%`,
-                      background: 'linear-gradient(to right, #06b6d4, #3b82f6)',
+                      background: fc.isToday
+                        ? 'linear-gradient(to right, var(--accent), var(--accent)cc)'
+                        : 'linear-gradient(to right, #06b6d4, #3b82f6)',
                     }}
                   />
                 </div>
@@ -212,7 +221,7 @@ export function WeatherWidget({ config }: WidgetProps) {
                 {/* Max temp */}
                 <span
                   className="text-xs font-semibold shrink-0 w-7 tabular-nums"
-                  style={{ color: 'var(--text-primary)' }}
+                  style={{ color: fc.isToday ? 'var(--accent)' : 'var(--text-primary)' }}
                 >
                   {fc.max}°
                 </span>
