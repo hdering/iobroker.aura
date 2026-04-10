@@ -935,84 +935,89 @@ function GroupEditor({ group }: { group: DatapointGroup }) {
   );
 }
 
-// ── Default Sizes Section ─────────────────────────────────────────────────────
+// ── Default Sizes Dialog ──────────────────────────────────────────────────────
 
-function DefaultSizesSection() {
+function DefaultSizesDialog({ onClose }: { onClose: () => void }) {
   const { widgetDefaults, setWidgetDefault, resetWidgetDefault } = useConfigStore();
-  const [open, setOpen] = useState(true);
 
   return (
-    <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--app-border)' }}>
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-3 px-5 py-4 text-left hover:opacity-80 transition-opacity"
-        style={{ background: 'var(--app-surface)' }}
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div
+        className="rounded-xl w-full max-w-md shadow-2xl flex flex-col"
+        style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)', maxHeight: '80vh' }}
+        onClick={(e) => e.stopPropagation()}
       >
-        <span className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-          style={{ background: '#8b5cf622', color: '#8b5cf6' }}>
-          <RotateCcw size={15} />
-        </span>
-        <span className="font-semibold text-sm flex-1" style={{ color: 'var(--text-primary)' }}>
-          Standard-Größen
-        </span>
-        <span style={{ color: 'var(--text-secondary)' }}>
-          {open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-        </span>
-      </button>
-
-      {open && (
-        <div className="p-4" style={{ background: 'var(--app-bg)' }}>
-          <p className="text-xs mb-4" style={{ color: 'var(--text-secondary)' }}>
-            Lege die Standard-Größe (Breite × Höhe in Grid-Einheiten) für jeden Widget-Typ fest.
-            Wird beim Erstellen eines neuen Widgets verwendet.
-          </p>
-          <div className="space-y-2">
-            {WIDGET_REGISTRY.map((meta) => {
-              const override = widgetDefaults[meta.type];
-              const w = override?.w ?? meta.defaultW;
-              const h = override?.h ?? meta.defaultH;
-              const isOverridden = !!override;
-              return (
-                <div key={meta.type}
-                  className="flex items-center gap-3 rounded-lg px-3 py-2.5"
-                  style={{ background: 'var(--app-surface)', border: `1px solid ${isOverridden ? meta.color + '44' : 'var(--app-border)'}` }}
-                >
-                  <span className="w-6 h-6 rounded flex items-center justify-center shrink-0"
-                    style={{ background: meta.color + '22', color: meta.color }}>
-                    <meta.Icon size={13} />
-                  </span>
-                  <span className="flex-1 text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>
-                    {meta.label}
-                  </span>
-                  <span className="text-[10px] mr-1 shrink-0" style={{ color: 'var(--text-secondary)' }}>B</span>
-                  <input
-                    type="number" min={1} max={20} value={w}
-                    onChange={(e) => setWidgetDefault(meta.type, Number(e.target.value) || 1, h)}
-                    className="w-12 text-center text-xs rounded-lg px-1 py-1 focus:outline-none"
-                    style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
-                  />
-                  <span className="text-[10px] mx-1 shrink-0" style={{ color: 'var(--text-secondary)' }}>H</span>
-                  <input
-                    type="number" min={1} max={20} value={h}
-                    onChange={(e) => setWidgetDefault(meta.type, w, Number(e.target.value) || 1)}
-                    className="w-12 text-center text-xs rounded-lg px-1 py-1 focus:outline-none"
-                    style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
-                  />
-                  <button
-                    onClick={() => resetWidgetDefault(meta.type)}
-                    disabled={!isOverridden}
-                    title="Auf Standard zurücksetzen"
-                    className="ml-1 hover:opacity-70 disabled:opacity-20 shrink-0"
-                    style={{ color: 'var(--accent-red)' }}
-                  >
-                    <RotateCcw size={13} />
-                  </button>
-                </div>
-              );
-            })}
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 shrink-0"
+          style={{ borderBottom: '1px solid var(--app-border)' }}>
+          <div>
+            <h2 className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>Standard-Größen</h2>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+              Breite × Höhe in Grid-Einheiten beim Erstellen neuer Widgets
+            </p>
           </div>
+          <button onClick={onClose} className="hover:opacity-60 ml-4 shrink-0" style={{ color: 'var(--text-secondary)' }}>
+            <X size={18} />
+          </button>
         </div>
-      )}
+
+        {/* List */}
+        <div className="overflow-y-auto p-4 space-y-2">
+          {WIDGET_REGISTRY.map((meta) => {
+            const override = widgetDefaults[meta.type];
+            const w = override?.w ?? meta.defaultW;
+            const h = override?.h ?? meta.defaultH;
+            const isOverridden = !!override;
+            return (
+              <div key={meta.type}
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5"
+                style={{ background: 'var(--app-bg)', border: `1px solid ${isOverridden ? meta.color + '55' : 'var(--app-border)'}` }}
+              >
+                <span className="w-6 h-6 rounded flex items-center justify-center shrink-0"
+                  style={{ background: meta.color + '22', color: meta.color }}>
+                  <meta.Icon size={13} />
+                </span>
+                <span className="flex-1 text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+                  {meta.label}
+                </span>
+                <span className="text-[10px] mr-1 shrink-0" style={{ color: 'var(--text-secondary)' }}>B</span>
+                <input
+                  type="number" min={1} max={20} value={w}
+                  onChange={(e) => setWidgetDefault(meta.type, Number(e.target.value) || 1, h)}
+                  className="w-12 text-center text-xs rounded-lg px-1 py-1 focus:outline-none"
+                  style={{ background: 'var(--app-surface)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
+                />
+                <span className="text-[10px] mx-1 shrink-0" style={{ color: 'var(--text-secondary)' }}>H</span>
+                <input
+                  type="number" min={1} max={20} value={h}
+                  onChange={(e) => setWidgetDefault(meta.type, w, Number(e.target.value) || 1)}
+                  className="w-12 text-center text-xs rounded-lg px-1 py-1 focus:outline-none"
+                  style={{ background: 'var(--app-surface)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
+                />
+                <button
+                  onClick={() => resetWidgetDefault(meta.type)}
+                  disabled={!isOverridden}
+                  title="Auf Standard zurücksetzen"
+                  className="ml-1 hover:opacity-70 disabled:opacity-20 shrink-0"
+                  style={{ color: 'var(--accent-red)' }}
+                >
+                  <RotateCcw size={13} />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-3 shrink-0 flex justify-end"
+          style={{ borderTop: '1px solid var(--app-border)' }}>
+          <button onClick={onClose}
+            className="px-4 py-2 text-sm rounded-lg hover:opacity-80"
+            style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+            Schließen
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1159,6 +1164,7 @@ export function AdminWidgets() {
   const { addWidgetToTab, updateWidgetInTab, removeWidgetInTab } = useDashboardStore();
   const tabs = useActiveLayout().tabs;
   const [showCreate, setShowCreate] = useState(false);
+  const [showSizes, setShowSizes] = useState(false);
   const [search, setSearch] = useState('');
 
   // Flatten all widgets with their tab
@@ -1210,13 +1216,22 @@ export function AdminWidgets() {
             {allEntries.length} Widget{allEntries.length !== 1 ? 's' : ''} auf {tabs.length} Tab{tabs.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-xl hover:opacity-80"
-          style={{ background: 'var(--accent)' }}
-        >
-          <Plus size={15} /> Neues Widget
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowSizes(true)}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl hover:opacity-80"
+            style={{ background: 'var(--app-surface)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
+          >
+            <RotateCcw size={15} /> Standard-Größen
+          </button>
+          <button
+            onClick={() => setShowCreate(true)}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-xl hover:opacity-80"
+            style={{ background: 'var(--accent)' }}
+          >
+            <Plus size={15} /> Neues Widget
+          </button>
+        </div>
       </div>
 
       {/* Search */}
@@ -1278,9 +1293,6 @@ export function AdminWidgets() {
         </div>
       )}
 
-      {/* Default sizes section */}
-      <DefaultSizesSection />
-
       {/* Groups section */}
       <div>
         <p className="text-xs font-semibold uppercase tracking-widest mb-3 px-1" style={{ color: 'var(--text-secondary)' }}>
@@ -1295,6 +1307,10 @@ export function AdminWidgets() {
           onAdd={(tabId, widget) => addWidgetToTab(tabId, widget)}
           onClose={() => setShowCreate(false)}
         />
+      )}
+
+      {showSizes && (
+        <DefaultSizesDialog onClose={() => setShowSizes(false)} />
       )}
     </div>
   );
