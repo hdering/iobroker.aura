@@ -785,7 +785,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
               : { position: 'absolute', bottom: 6, left: 8 };
         return (
           <div
-            className="nodrag pointer-events-none text-[9px] opacity-50"
+            className="nodrag pointer-events-none text-[8px] opacity-50 whitespace-nowrap"
             style={{ ...posStyle, color: 'var(--text-secondary)' }}
           >
             {text}
