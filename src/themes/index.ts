@@ -210,6 +210,56 @@ export const THEMES: Theme[] = [
       '--accent-red':          '#f87171',
     },
   },
+  // ── Apple Liquid Glass ────────────────────────────────────────────────────
+  // Inspired by Apple's Liquid Glass design language (iOS 26 / visionOS).
+  // Key traits: pastel gradient background, highly transparent widget cards,
+  // strong backdrop-filter (blur + saturate + brightness), specular top-edge
+  // highlight via inset box-shadow, and Apple system color accents.
+  {
+    id: 'liquid-glass',
+    name: 'Liquid Glass',
+    dark: false,
+    vars: {
+      '--app-bg':              'linear-gradient(145deg, #dbeafe 0%, #e0e7ff 45%, #fce7f3 100%)',
+      '--app-surface':         'rgba(255,255,255,0.38)',
+      '--app-border':          'rgba(255,255,255,0.68)',
+      '--widget-bg':           'rgba(255,255,255,0.40)',
+      '--widget-border':       'rgba(255,255,255,0.72)',
+      '--widget-border-width': '1px',
+      '--widget-radius':       '1.5rem',
+      // inset top highlight = specular glass glint; outer = soft coloured glow
+      '--widget-shadow':       'inset 0 1px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(99,102,241,0.14), 0 2px 8px rgba(0,0,0,0.06)',
+      '--widget-backdrop':     'blur(24px) saturate(200%) brightness(110%)',
+      '--text-primary':        '#1c1c2e',
+      '--text-secondary':      '#6b6b8e',
+      '--accent':              '#007aff',   // Apple blue
+      '--accent-green':        '#34c759',   // Apple green
+      '--accent-yellow':       '#ff9f0a',   // Apple orange/yellow
+      '--accent-red':          '#ff3b30',   // Apple red
+    },
+  },
+  {
+    id: 'liquid-glass-dark',
+    name: 'Liquid Glass Dark',
+    dark: true,
+    vars: {
+      '--app-bg':              'linear-gradient(145deg, #0d0d1f 0%, #101028 50%, #0d1a2e 100%)',
+      '--app-surface':         'rgba(255,255,255,0.05)',
+      '--app-border':          'rgba(255,255,255,0.10)',
+      '--widget-bg':           'rgba(255,255,255,0.07)',
+      '--widget-border':       'rgba(255,255,255,0.14)',
+      '--widget-border-width': '1px',
+      '--widget-radius':       '1.5rem',
+      '--widget-shadow':       'inset 0 1px 0 rgba(255,255,255,0.12), 0 8px 40px rgba(0,0,0,0.55)',
+      '--widget-backdrop':     'blur(30px) saturate(200%) brightness(88%)',
+      '--text-primary':        '#f5f5f7',
+      '--text-secondary':      '#86868b',
+      '--accent':              '#0a84ff',   // Apple blue dark
+      '--accent-green':        '#30d158',   // Apple green dark
+      '--accent-yellow':       '#ffd60a',   // Apple yellow dark
+      '--accent-red':          '#ff453a',   // Apple red dark
+    },
+  },
 ];
 
 export const DEFAULT_THEME_ID = 'dark';
