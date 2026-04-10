@@ -850,20 +850,51 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
           wide={config.type === 'echart' || config.type === 'autolist'}
           onClose={() => openPanelFor(null)}
         >
-          {/* ── Stil ── */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <p className="text-[11px] font-semibold" style={{ color: 'var(--text-secondary)' }}>Stil</p>
-              {overrides && Object.keys(overrides).length > 0 && (
-                <button
-                  onClick={() => { const { styleOverride: _, ...rest } = config.options ?? {}; onConfigChange({ ...config, options: rest }); }}
-                  className="text-[10px] hover:opacity-70"
-                  style={{ color: 'var(--text-secondary)' }}>
-                  Zurücksetzen
-                </button>
-              )}
+          {/* ─── 1. Name / Titel ──────────────────────────────────────────── */}
+          <div className="space-y-2.5">
+            <div>
+              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Name</label>
+              <input
+                type="text"
+                value={config.title}
+                onChange={(e) => onConfigChange({ ...config, title: e.target.value })}
+                className="w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
+                style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
+              />
             </div>
-            <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Name ausblenden</label>
+              <button
+                onClick={() => onConfigChange({ ...config, options: { ...(config.options ?? {}), hideTitle: !(config.options?.hideTitle) } })}
+                className="relative w-9 h-5 rounded-full transition-colors"
+                style={{ background: config.options?.hideTitle ? 'var(--accent)' : 'var(--app-border)' }}
+              >
+                <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                  style={{ left: config.options?.hideTitle ? '18px' : '2px' }} />
+              </button>
+            </div>
+          </div>
+
+          <div className="h-px" style={{ background: 'var(--app-border)' }} />
+
+          {/* ─── 2. Stil (eingeklappt) ─────────────────────────────────────── */}
+          <details className="group">
+            <summary className="flex items-center justify-between cursor-pointer list-none select-none">
+              <span className="text-[11px] font-semibold" style={{ color: 'var(--text-secondary)' }}>Stil</span>
+              <div className="flex items-center gap-2">
+                {overrides && Object.keys(overrides).length > 0 && (
+                  <button
+                    onClick={(e) => { e.preventDefault(); const { styleOverride: _, ...rest } = config.options ?? {}; onConfigChange({ ...config, options: rest }); }}
+                    className="text-[10px] hover:opacity-70"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
+                    Zurücksetzen
+                  </button>
+                )}
+                <ChevronDown size={13} className="transition-transform group-open:rotate-180" style={{ color: 'var(--text-secondary)' }} />
+              </div>
+            </summary>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 mt-2.5">
               {STYLE_FIELDS.map(({ key, label, type }) => (
                 <div key={key}>
                   <label className="text-[10px] block mb-0.5" style={{ color: 'var(--text-secondary)' }}>{label}</label>
@@ -888,142 +919,128 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                 </div>
               ))}
             </div>
-          </div>
-          <div className="h-px" style={{ background: 'var(--app-border)' }} />
+          </details>
 
           <div className="h-px" style={{ background: 'var(--app-border)' }} />
+
+          {/* ─── 3. Widget-Typ · Layout · Icon ─────────────────────────────── */}
           <div className="space-y-2.5">
-              <div>
-                <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Widget-Typ</label>
-                <select
-                  value={config.type}
-                  onChange={(e) => onConfigChange({ ...config, type: e.target.value as WidgetConfig['type'] })}
-                  className="w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
-                  style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
-                >
-                  {WIDGET_REGISTRY.map((m) => (
-                    <option key={m.type} value={m.type}>{m.label}</option>
-                  ))}
-                </select>
-              </div>
+            <div>
+              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Widget-Typ</label>
+              <select
+                value={config.type}
+                onChange={(e) => onConfigChange({ ...config, type: e.target.value as WidgetConfig['type'] })}
+                className="w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
+                style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
+              >
+                {WIDGET_REGISTRY.map((m) => (
+                  <option key={m.type} value={m.type}>{m.label}</option>
+                ))}
+              </select>
+            </div>
 
-              {/* Layout-Auswahl mit Live-Vorschau */}
-              {config.type !== 'header' && (() => {
-                const activeLayout = config.layout ?? 'default';
-                const layouts: { value: string; label: string }[] = [
-                  { value: 'default',  label: 'Standard' },
-                  { value: 'card',     label: 'Karte' },
-                  { value: 'compact',  label: 'Kompakt' },
-                  { value: 'minimal',  label: 'Minimal' },
-                  ...(config.type === 'calendar' ? [{ value: 'agenda', label: 'Agenda' }] : []),
-                ];
-                return (
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-1 flex-wrap">
-                      <label className="text-[11px] shrink-0 mr-0.5" style={{ color: 'var(--text-secondary)' }}>Layout</label>
-                      {layouts.map(({ value, label }) => {
-                        const active = activeLayout === value;
-                        return (
-                          <button
-                            key={value}
-                            onClick={() => onConfigChange({ ...config, layout: value as WidgetConfig['layout'] })}
-                            className="text-[10px] px-2 py-0.5 rounded-full transition-colors"
-                            style={{
-                              background: active ? 'var(--accent)' : 'var(--app-bg)',
-                              color:      active ? '#fff' : 'var(--text-secondary)',
-                              border:     `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}`,
-                            }}
-                          >
-                            {label}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <WidgetPreview type={config.type} layout={config.layout} title={config.title} scale={1.1} />
+            {/* Layout-Auswahl mit Live-Vorschau (non-header) */}
+            {config.type !== 'header' && (() => {
+              const activeLayout = config.layout ?? 'default';
+              const layouts: { value: string; label: string }[] = [
+                { value: 'default', label: 'Standard' },
+                { value: 'card',    label: 'Karte' },
+                { value: 'compact', label: 'Kompakt' },
+                { value: 'minimal', label: 'Minimal' },
+                ...(config.type === 'calendar' ? [{ value: 'agenda', label: 'Agenda' }] : []),
+              ];
+              return (
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-1 flex-wrap">
+                    <label className="text-[11px] shrink-0 mr-0.5" style={{ color: 'var(--text-secondary)' }}>Layout</label>
+                    {layouts.map(({ value, label }) => {
+                      const active = activeLayout === value;
+                      return (
+                        <button
+                          key={value}
+                          onClick={() => onConfigChange({ ...config, layout: value as WidgetConfig['layout'] })}
+                          className="text-[10px] px-2 py-0.5 rounded-full transition-colors"
+                          style={{
+                            background: active ? 'var(--accent)' : 'var(--app-bg)',
+                            color:      active ? '#fff' : 'var(--text-secondary)',
+                            border:     `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}`,
+                          }}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
                   </div>
-                );
-              })()}
-
-              {/* Header-spezifische Felder */}
-              {config.type === 'header' && (() => {
-                const o = config.options ?? {};
-                const set = (patch: Record<string, unknown>) =>
-                  onConfigChange({ ...config, options: { ...o, ...patch } });
-                return (
-                  <>
-                    <div>
-                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Untertitel (optional)</label>
-                      <input
-                        type="text"
-                        value={(o.subtitle as string) ?? ''}
-                        onChange={(e) => set({ subtitle: e.target.value || undefined })}
-                        placeholder="z.B. Erdgeschoss"
-                        className="w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
-                        style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Stil</label>
-                      <select
-                        value={config.layout ?? 'default'}
-                        onChange={(e) => onConfigChange({ ...config, layout: e.target.value as WidgetConfig['layout'] })}
-                        className="w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
-                        style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
-                      >
-                        <option value="default">Standard (Akzentlinie + Titel)</option>
-                        <option value="compact">Kompakt (Linie links)</option>
-                        <option value="minimal">Minimal (Trennlinie + Text)</option>
-                      </select>
-                    </div>
-                  </>
-                );
-              })()}
-              <div>
-                <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Name</label>
-                <input
-                  type="text"
-                  value={config.title}
-                  onChange={(e) => onConfigChange({ ...config, title: e.target.value })}
-                  className="w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
-                  style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Name ausblenden</label>
-                <button
-                  onClick={() => onConfigChange({ ...config, options: { ...(config.options ?? {}), hideTitle: !(config.options?.hideTitle) } })}
-                  className="relative w-9 h-5 rounded-full transition-colors"
-                  style={{ background: config.options?.hideTitle ? 'var(--accent)' : 'var(--app-border)' }}
-                >
-                  <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
-                    style={{ left: config.options?.hideTitle ? '18px' : '2px' }} />
-                </button>
-              </div>
-
-              {/* ── Icon picker ── */}
-              <div>
-                <label className="text-[11px] mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>Icon</label>
-                <div className="flex flex-wrap gap-1">
-                  {ICON_PICKER_ENTRIES.map(([name, Icon]) => {
-                    const selected = (config.options?.icon ?? '') === name;
-                    return (
-                      <button
-                        key={name}
-                        title={name}
-                        onClick={() => onConfigChange({ ...config, options: { ...(config.options ?? {}), icon: name } })}
-                        className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
-                        style={{
-                          background: selected ? 'var(--accent)' : 'var(--app-bg)',
-                          color:      selected ? '#fff' : 'var(--text-secondary)',
-                          border:     `1px solid ${selected ? 'var(--accent)' : 'var(--app-border)'}`,
-                        }}
-                      >
-                        <Icon size={13} />
-                      </button>
-                    );
-                  })}
+                  <WidgetPreview type={config.type} layout={config.layout} title={config.title} scale={1.1} />
                 </div>
+              );
+            })()}
+
+            {/* Header-spezifische Felder */}
+            {config.type === 'header' && (() => {
+              const o = config.options ?? {};
+              const set = (patch: Record<string, unknown>) =>
+                onConfigChange({ ...config, options: { ...o, ...patch } });
+              return (
+                <>
+                  <div>
+                    <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Untertitel (optional)</label>
+                    <input
+                      type="text"
+                      value={(o.subtitle as string) ?? ''}
+                      onChange={(e) => set({ subtitle: e.target.value || undefined })}
+                      placeholder="z.B. Erdgeschoss"
+                      className="w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
+                      style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Stil</label>
+                    <select
+                      value={config.layout ?? 'default'}
+                      onChange={(e) => onConfigChange({ ...config, layout: e.target.value as WidgetConfig['layout'] })}
+                      className="w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
+                      style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
+                    >
+                      <option value="default">Standard (Akzentlinie + Titel)</option>
+                      <option value="compact">Kompakt (Linie links)</option>
+                      <option value="minimal">Minimal (Trennlinie + Text)</option>
+                    </select>
+                  </div>
+                </>
+              );
+            })()}
+
+            {/* Icon picker */}
+            <div>
+              <label className="text-[11px] mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>Icon</label>
+              <div className="flex flex-wrap gap-1">
+                {ICON_PICKER_ENTRIES.map(([name, Icon]) => {
+                  const selected = (config.options?.icon ?? '') === name;
+                  return (
+                    <button
+                      key={name}
+                      title={name}
+                      onClick={() => onConfigChange({ ...config, options: { ...(config.options ?? {}), icon: name } })}
+                      className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
+                      style={{
+                        background: selected ? 'var(--accent)' : 'var(--app-bg)',
+                        color:      selected ? '#fff' : 'var(--text-secondary)',
+                        border:     `1px solid ${selected ? 'var(--accent)' : 'var(--app-border)'}`,
+                      }}
+                    >
+                      <Icon size={13} />
+                    </button>
+                  );
+                })}
               </div>
+            </div>
+          </div>
+
+          <div className="h-px" style={{ background: 'var(--app-border)' }} />
+
+          {/* ─── 4. Widget-spezifische Einstellungen ───────────────────────── */}
+          <div className="space-y-2.5">
               {config.type === 'clock' && (() => {
                 const o = config.options ?? {};
                 const set = (patch: Record<string, unknown>) =>
