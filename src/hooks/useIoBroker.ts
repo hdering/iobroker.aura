@@ -198,6 +198,34 @@ export function getHistoryDirect(
   });
 }
 
+// ── Direct state subscription (non-hook) ──────────────────────────────────────
+/** Subscribe to a datapoint without a React hook. Returns an unsubscribe function. */
+export function subscribeStateDirect(id: string, callback: (state: ioBrokerState) => void): () => void {
+  if (!id) return () => {};
+  if (!subscribers.has(id)) {
+    subscribers.set(id, new Set());
+    getSocket().emit('subscribe', id);
+  }
+  subscribers.get(id)!.add(callback);
+  return () => {
+    const subs = subscribers.get(id);
+    if (subs) {
+      subs.delete(callback);
+      if (subs.size === 0) {
+        subscribers.delete(id);
+        getSocket().emit('unsubscribe', id);
+      }
+    }
+  };
+}
+
+/** Get the current state of a datapoint without a React hook. */
+export function getStateDirect(id: string): Promise<ioBrokerState | null> {
+  return new Promise((resolve) => {
+    getSocket().emit('getState', id, (_err: unknown, state: ioBrokerState | null) => resolve(state ?? null));
+  });
+}
+
 // Standalone-Funktion – kein Hook, kein Reconnect-Seiteneffekt
 export function getObjectViewDirect(
   type: 'state' | 'channel' | 'device' | 'enum',

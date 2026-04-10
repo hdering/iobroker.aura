@@ -6,10 +6,9 @@ import { exportWidget } from '../../utils/widgetExportImport';
 import { ICON_PICKER_ENTRIES } from '../../utils/widgetIconMap';
 import { useDashboardStore, useActiveLayout } from '../../store/dashboardStore';
 import type { WidgetConfig, WidgetCondition } from '../../types';
-import { useDatapoint } from '../../hooks/useDatapoint';
 import { DatapointPicker } from '../config/DatapointPicker';
 import { ConditionEditor } from '../config/ConditionEditor';
-import { getObjectDirect } from '../../hooks/useIoBroker';
+import { getObjectDirect, subscribeStateDirect, getStateDirect } from '../../hooks/useIoBroker';
 import { WIDGET_REGISTRY } from '../../widgetRegistry';
 import { AutoListConfig } from '../config/AutoListConfig';
 import { WidgetPreview } from '../config/WidgetPreview';
@@ -640,9 +639,24 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
   const overrides = config.options?.styleOverride as Record<string, string> | undefined;
 
   // Last-change timestamp overlay
-  const { state: dpState } = useDatapoint(config.datapoint ?? '');
   const showLastChange = !!(config.options?.showLastChange);
   const lastChangePos  = (config.options?.lastChangePosition as string | undefined) ?? 'left';
+  const [lastChangedTs, setLastChangedTs] = useState<number>(0);
+
+  useEffect(() => {
+    const id = config.datapoint;
+    if (!id) return;
+
+    // Fetch initial value immediately (no hook dependency on "connected")
+    getStateDirect(id).then((s) => {
+      if (s) setLastChangedTs(s.lc > 0 ? s.lc : s.ts);
+    });
+
+    // Subscribe to live updates
+    return subscribeStateDirect(id, (s) => {
+      setLastChangedTs(s.lc > 0 ? s.lc : s.ts);
+    });
+  }, [config.datapoint]);
 
   const cssOverride = Object.fromEntries(
     Object.entries({
@@ -739,8 +753,8 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
       />
 
       {/* Last-change timestamp overlay */}
-      {showLastChange && dpState != null && dpState.lc > 0 && (() => {
-        const text = formatLastChange(dpState.lc);
+      {showLastChange && lastChangedTs > 0 && (() => {
+        const text = formatLastChange(lastChangedTs);
         const posStyle: React.CSSProperties =
           lastChangePos === 'center'
             ? { position: 'absolute', bottom: 6, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap' }
