@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
-import { Plus, Trash2, Edit3, Check, Cpu, PenLine, Database, Wand2, Smartphone, GripVertical } from 'lucide-react';
+import { Plus, Trash2, Edit3, Check, Cpu, PenLine, Database, Wand2, Smartphone, GripVertical, Upload } from 'lucide-react';
+import { ImportWidgetDialog } from '../../components/config/ImportWidgetDialog';
 import { useDashboardStore } from '../../store/dashboardStore';
 import { useGroupStore } from '../../store/groupStore';
 import { Dashboard } from '../../components/layout/Dashboard';
@@ -341,6 +342,7 @@ export function AdminEditor() {
   const [showWizard, setShowWizard] = useState(false);
   const [showTabWizard, setShowTabWizard] = useState(false);
   const [showManual, setShowManual] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [showMobileOrder, setShowMobileOrder] = useState(false);
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renamingValue, setRenamingValue] = useState('');
@@ -374,6 +376,11 @@ export function AdminEditor() {
           className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium hover:opacity-80"
           style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}>
           <PenLine size={15} /> Manuell
+        </button>
+        <button onClick={() => setShowImport(true)}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium hover:opacity-80"
+          style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}>
+          <Upload size={15} /> Importieren
         </button>
         <button onClick={() => setShowWizard(true)}
           className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:opacity-80"
@@ -493,6 +500,19 @@ export function AdminEditor() {
       )}
       {showManual && (
         <ManualWidgetDialog onAdd={addWidget} onClose={() => setShowManual(false)} />
+      )}
+      {showImport && (
+        <ImportWidgetDialog
+          tabs={tabs}
+          onAdd={(widget, tabId) => {
+            if (tabId && tabId !== activeTabId) {
+              // Switch to that tab first, then add
+              useDashboardStore.getState().setActiveTab(tabId);
+            }
+            addWidget(widget);
+          }}
+          onClose={() => setShowImport(false)}
+        />
       )}
     </div>
   );

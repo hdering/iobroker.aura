@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { usePortalTarget } from '../../contexts/PortalTargetContext';
-import { X, Pencil, Database, Sparkles, EyeOff, ChevronDown, Plus, Trash2 } from 'lucide-react';
+import { X, Pencil, Database, Sparkles, EyeOff, ChevronDown, Plus, Trash2, Download } from 'lucide-react';
+import { exportWidget } from '../../utils/widgetExportImport';
 import type { WidgetConfig, WidgetCondition } from '../../types';
 import { DatapointPicker } from '../config/DatapointPicker';
 import { ConditionEditor } from '../config/ConditionEditor';
@@ -608,6 +609,16 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                   {conditions.length}
                 </span>
               )}
+            </button>
+
+            {/* Exportieren */}
+            <button
+              onClick={() => { exportWidget(config); openPanelFor(null); }}
+              className="flex items-center gap-2.5 px-3 py-2 text-sm rounded-md text-left hover:opacity-80 transition-opacity"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              <Download size={13} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
+              Exportieren
             </button>
 
             <div className="h-px my-0.5 mx-1" style={{ background: 'var(--app-border)' }} />
