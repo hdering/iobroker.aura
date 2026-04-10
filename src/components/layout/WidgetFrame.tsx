@@ -715,7 +715,11 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
         </div>
       )}
 
-      <Widget config={config} editMode={editMode} onConfigChange={onConfigChange} />
+      <Widget
+        config={config.options?.hideTitle ? { ...config, title: '' } : config}
+        editMode={editMode}
+        onConfigChange={onConfigChange}
+      />
 
       {/* Options Menu Dropdown */}
       {openPanel === 'menu' && menuBtnRef.current && (
@@ -942,6 +946,17 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                   className="w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
                   style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
                 />
+              </div>
+              <div className="flex items-center justify-between">
+                <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Name ausblenden</label>
+                <button
+                  onClick={() => onConfigChange({ ...config, options: { ...(config.options ?? {}), hideTitle: !(config.options?.hideTitle) } })}
+                  className="relative w-9 h-5 rounded-full transition-colors"
+                  style={{ background: config.options?.hideTitle ? 'var(--accent)' : 'var(--app-border)' }}
+                >
+                  <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                    style={{ left: config.options?.hideTitle ? '18px' : '2px' }} />
+                </button>
               </div>
               {config.type === 'clock' && (() => {
                 const o = config.options ?? {};
