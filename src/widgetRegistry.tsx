@@ -78,7 +78,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
   },
   {
     type: 'chart',
-    label: 'Diagramm',      shortLabel: 'Diagramm',
+    label: 'Diagramm (einfach)', shortLabel: 'Diagramm',
     Icon: BarChart2,        color: '#8b5cf6',
     defaultW: 4,            defaultH: 3,
     addMode: 'datapoint',
@@ -86,7 +86,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
   },
   {
     type: 'echart',
-    label: 'EChart',        shortLabel: 'EChart',
+    label: 'Diagramm (erweitert (echarts))', shortLabel: 'EChart',
     Icon: BarChart2,        color: '#10b981',
     defaultW: 4,            defaultH: 3,
     addMode: 'datapoint',
