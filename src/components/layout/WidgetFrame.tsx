@@ -739,7 +739,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
       />
 
       {/* Last-change timestamp overlay */}
-      {!editMode && showLastChange && dpState?.lc && (() => {
+      {showLastChange && dpState != null && dpState.lc > 0 && (() => {
         const text = formatLastChange(dpState.lc);
         const posStyle: React.CSSProperties =
           lastChangePos === 'center'
