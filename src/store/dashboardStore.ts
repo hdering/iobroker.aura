@@ -9,6 +9,8 @@ export interface Tab {
   name: string;
   slug: string;
   widgets: WidgetConfig[];
+  icon?: string;       // icon name from WIDGET_ICON_MAP
+  hideLabel?: boolean; // show only icon, hide text
 }
 
 export interface DashboardLayout {
@@ -84,6 +86,7 @@ interface DashboardState {
   addTab: (name: string) => void;
   removeTab: (id: string) => void;
   renameTab: (id: string, name: string) => void;
+  updateTab: (id: string, patch: Partial<Pick<Tab, 'name' | 'slug' | 'icon' | 'hideLabel'>>) => void;
   setTabSlug: (id: string, slug: string) => void;
   setActiveTab: (id: string) => void;
 
@@ -187,6 +190,13 @@ export const useDashboardStore = create<DashboardState>()(
         set((s) =>
           ({ layouts: patchLayout(s.layouts, s.activeLayoutId, (l) => ({
             ...l, tabs: l.tabs.map((t) => (t.id === id ? { ...t, name } : t)),
+          })) })
+        ),
+
+      updateTab: (id, patch) =>
+        set((s) =>
+          ({ layouts: patchLayout(s.layouts, s.activeLayoutId, (l) => ({
+            ...l, tabs: l.tabs.map((t) => (t.id === id ? { ...t, ...patch } : t)),
           })) })
         ),
 
