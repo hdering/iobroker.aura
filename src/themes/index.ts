@@ -210,6 +210,98 @@ export const THEMES: Theme[] = [
       '--accent-red':          '#f87171',
     },
   },
+  // ── Catppuccin ────────────────────────────────────────────────────────────
+  // Soothing pastel theme by catppuccin/home-assistant.
+  // Colors: Base → app bg, Mantle → surface, Surface0 → widget bg,
+  //         Surface1 → widget border, Mauve → primary accent.
+  {
+    id: 'catppuccin-latte',
+    name: 'Catppuccin Latte',
+    dark: false,
+    vars: {
+      '--app-bg':              '#eff1f5',   // Base
+      '--app-surface':         '#e6e9ef',   // Mantle
+      '--app-border':          '#ccd0da',   // Surface0
+      '--widget-bg':           '#ccd0da',   // Surface0
+      '--widget-border':       '#bcc0cc',   // Surface1
+      '--widget-border-width': '1px',
+      '--widget-radius':       '0.75rem',
+      '--widget-shadow':       '0 2px 8px rgba(76,79,105,0.10)',
+      '--widget-backdrop':     'none',
+      '--text-primary':        '#4c4f69',   // Text
+      '--text-secondary':      '#6c6f85',   // Subtext0
+      '--accent':              '#8839ef',   // Mauve
+      '--accent-green':        '#40a02b',   // Green
+      '--accent-yellow':       '#fe640b',   // Peach
+      '--accent-red':          '#d20f39',   // Red
+    },
+  },
+  {
+    id: 'catppuccin-frappe',
+    name: 'Catppuccin Frappé',
+    dark: true,
+    vars: {
+      '--app-bg':              '#303446',   // Base
+      '--app-surface':         '#292c3c',   // Mantle
+      '--app-border':          '#414559',   // Surface0
+      '--widget-bg':           '#414559',   // Surface0
+      '--widget-border':       '#51576d',   // Surface1
+      '--widget-border-width': '1px',
+      '--widget-radius':       '0.75rem',
+      '--widget-shadow':       'none',
+      '--widget-backdrop':     'none',
+      '--text-primary':        '#c6d0f5',   // Text
+      '--text-secondary':      '#a5adce',   // Subtext0
+      '--accent':              '#ca9ee6',   // Mauve
+      '--accent-green':        '#a6d189',   // Green
+      '--accent-yellow':       '#ef9f76',   // Peach
+      '--accent-red':          '#e78284',   // Red
+    },
+  },
+  {
+    id: 'catppuccin-macchiato',
+    name: 'Catppuccin Macchiato',
+    dark: true,
+    vars: {
+      '--app-bg':              '#24273a',   // Base
+      '--app-surface':         '#1e2030',   // Mantle
+      '--app-border':          '#363a4f',   // Surface0
+      '--widget-bg':           '#363a4f',   // Surface0
+      '--widget-border':       '#494d64',   // Surface1
+      '--widget-border-width': '1px',
+      '--widget-radius':       '0.75rem',
+      '--widget-shadow':       'none',
+      '--widget-backdrop':     'none',
+      '--text-primary':        '#cad3f5',   // Text
+      '--text-secondary':      '#a5adcb',   // Subtext0
+      '--accent':              '#c6a0f6',   // Mauve
+      '--accent-green':        '#a6da95',   // Green
+      '--accent-yellow':       '#f5a97f',   // Peach
+      '--accent-red':          '#ed8796',   // Red
+    },
+  },
+  {
+    id: 'catppuccin-mocha',
+    name: 'Catppuccin Mocha',
+    dark: true,
+    vars: {
+      '--app-bg':              '#1e1e2e',   // Base
+      '--app-surface':         '#181825',   // Mantle
+      '--app-border':          '#313244',   // Surface0
+      '--widget-bg':           '#313244',   // Surface0
+      '--widget-border':       '#45475a',   // Surface1
+      '--widget-border-width': '1px',
+      '--widget-radius':       '0.75rem',
+      '--widget-shadow':       'none',
+      '--widget-backdrop':     'none',
+      '--text-primary':        '#cdd6f4',   // Text
+      '--text-secondary':      '#a6adc8',   // Subtext0
+      '--accent':              '#cba6f7',   // Mauve
+      '--accent-green':        '#a6e3a1',   // Green
+      '--accent-yellow':       '#fab387',   // Peach
+      '--accent-red':          '#f38ba8',   // Red
+    },
+  },
   // ── Apple Liquid Glass ────────────────────────────────────────────────────
   // Inspired by Apple's Liquid Glass design language (iOS 26 / visionOS).
   // Key traits: pastel gradient background, highly transparent widget cards,
