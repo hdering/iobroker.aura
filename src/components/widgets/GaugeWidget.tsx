@@ -19,6 +19,11 @@ function valueToAngle(value: number, min: number, max: number): number {
   return -180 + ((clamped - min) / (max - min)) * 180;
 }
 
+export interface ColorZone {
+  max: number;
+  color: string;
+}
+
 export interface PointerDef {
   value: number;
   color: string;
@@ -33,32 +38,23 @@ interface GaugeSVGProps {
   decimals: number;
   strokeWidth: number;
   colorZones: boolean;
-  zone1Max: number;
-  zone2Max: number;
-  zone1Color: string;
-  zone2Color: string;
-  zone3Color: string;
+  zones: ColorZone[];
   showMinMax: boolean;
   scale?: number;
 }
 
 function GaugeSVG({
   pointers, min, max, unit, decimals, strokeWidth,
-  colorZones, zone1Max, zone2Max, zone1Color, zone2Color, zone3Color,
-  showMinMax, scale = 1,
+  colorZones, zones, showMinMax, scale = 1,
 }: GaugeSVGProps) {
   const cx = 100, cy = 100, r = 80;
   const primary = pointers[0];
 
-  const zone1Angle = valueToAngle(zone1Max, min, max);
-  const zone2Angle = valueToAngle(zone2Max, min, max);
-
-  // Primary pointer color (zone-based or fixed)
+  // Determine primary color (zone-based or fixed)
   let primaryColor = primary.color;
-  if (colorZones) {
-    if (primary.value <= zone1Max)      primaryColor = zone1Color;
-    else if (primary.value <= zone2Max) primaryColor = zone2Color;
-    else                                primaryColor = zone3Color;
+  if (colorZones && zones.length > 0) {
+    const match = zones.find((z) => primary.value <= z.max);
+    primaryColor = match ? match.color : zones[zones.length - 1].color;
   }
 
   const displayVal = isNaN(primary.value)
@@ -76,15 +72,25 @@ function GaugeSVG({
       <path d={describeArc(cx, cy, r, -180, 0)} fill="none"
         stroke="var(--app-border)" strokeWidth={strokeWidth} strokeLinecap="round" />
 
-      {/* Color zone arcs */}
-      {colorZones ? (
+      {/* Color zone arcs or single fill arc */}
+      {colorZones && zones.length > 0 ? (
         <>
-          <path d={describeArc(cx, cy, r, -180, zone1Angle)} fill="none" stroke={zone1Color} strokeWidth={strokeWidth} strokeLinecap="round" />
-          <path d={describeArc(cx, cy, r, zone1Angle, zone2Angle)} fill="none" stroke={zone2Color} strokeWidth={strokeWidth} strokeLinecap="round" />
-          <path d={describeArc(cx, cy, r, zone2Angle, 0)} fill="none" stroke={zone3Color} strokeWidth={strokeWidth} strokeLinecap="round" />
+          {zones.map((zone, i) => {
+            const prevMax   = i === 0 ? min : zones[i - 1].max;
+            const startAngle = valueToAngle(prevMax, min, max);
+            const endAngle   = valueToAngle(zone.max, min, max);
+            if (endAngle <= startAngle) return null;
+            return (
+              <path key={i}
+                d={describeArc(cx, cy, r, startAngle, endAngle)}
+                fill="none" stroke={zone.color}
+                strokeWidth={strokeWidth} strokeLinecap="round" />
+            );
+          })}
           {/* Primary value overlay */}
           <path d={describeArc(cx, cy, r, -180, valueToAngle(primary.value, min, max))}
-            fill="none" stroke={primaryColor} strokeWidth={strokeWidth + 2} strokeLinecap="round" opacity="0.4" />
+            fill="none" stroke={primaryColor} strokeWidth={strokeWidth + 2}
+            strokeLinecap="round" opacity="0.4" />
         </>
       ) : (
         <path d={describeArc(cx, cy, r, -180, valueToAngle(primary.value, min, max))}
@@ -93,12 +99,12 @@ function GaugeSVG({
 
       {/* Needles (render from last to first so primary is on top) */}
       {[...pointers].reverse().map((ptr, revIdx) => {
-        const idx       = pointers.length - 1 - revIdx;
-        const angle     = valueToAngle(ptr.value, min, max);
-        const len       = needleLengths[Math.min(idx, needleLengths.length - 1)];
-        const tip       = polarToCartesian(cx, cy, len, angle);
-        const sw        = idx === 0 ? 2.5 : idx === 1 ? 2.0 : 1.5;
-        const color     = idx === 0 ? primaryColor : ptr.color;
+        const idx   = pointers.length - 1 - revIdx;
+        const angle = valueToAngle(ptr.value, min, max);
+        const len   = needleLengths[Math.min(idx, needleLengths.length - 1)];
+        const tip   = polarToCartesian(cx, cy, len, angle);
+        const sw    = idx === 0 ? 2.5 : idx === 1 ? 2.0 : 1.5;
+        const color = idx === 0 ? primaryColor : ptr.color;
         return (
           <line key={idx}
             x1={cx} y1={cy} x2={tip.x} y2={tip.y}
@@ -106,7 +112,7 @@ function GaugeSVG({
         );
       })}
 
-      {/* Center circle (primary color) */}
+      {/* Center circle */}
       <circle cx={cx} cy={cy} r={5} fill={primaryColor} />
 
       {/* Primary value text */}
@@ -134,23 +140,20 @@ export function GaugeWidget({ config }: WidgetProps) {
   const opts   = config.options ?? {};
   const layout = config.layout ?? 'default';
 
-  // Primary datapoint
   const { value }    = useDatapoint(config.datapoint);
 
-  // Dynamic min/max datapoints
-  const minDp        = (opts.minDatapoint as string) ?? '';
-  const maxDp        = (opts.maxDatapoint as string) ?? '';
+  const minDp  = (opts.minDatapoint as string) ?? '';
+  const maxDp  = (opts.maxDatapoint as string) ?? '';
   const { value: minDpVal } = useDatapoint(minDp);
   const { value: maxDpVal } = useDatapoint(maxDp);
 
-  // Pointer 2 & 3
-  const ptr2Dp    = (opts.pointer2Datapoint as string) ?? '';
-  const ptr3Dp    = (opts.pointer3Datapoint as string) ?? '';
+  const ptr2Dp = (opts.pointer2Datapoint as string) ?? '';
+  const ptr3Dp = (opts.pointer3Datapoint as string) ?? '';
   const { value: val2 } = useDatapoint(ptr2Dp);
   const { value: val3 } = useDatapoint(ptr3Dp);
 
-  const staticMin = (opts.minValue    as number) ?? 0;
-  const staticMax = (opts.maxValue    as number) ?? 100;
+  const staticMin = (opts.minValue as number) ?? 0;
+  const staticMax = (opts.maxValue as number) ?? 100;
 
   const resolvedMin = minDp && minDpVal !== undefined && minDpVal !== null
     ? parseFloat(String(minDpVal)) : staticMin;
@@ -171,14 +174,17 @@ export function GaugeWidget({ config }: WidgetProps) {
   const effectiveMin = resolvedMin;
   const range        = effectiveMax - effectiveMin;
 
-  // Zone thresholds
-  const zone1Max = (opts.zone1Max as number) ?? effectiveMin + range * 0.33;
-  const zone2Max = (opts.zone2Max as number) ?? effectiveMin + range * 0.66;
-
-  // Zone colors (user-defined or defaults)
-  const zone1Color = (opts.zone1Color as string) ?? '#10b981';
-  const zone2Color = (opts.zone2Color as string) ?? '#f59e0b';
-  const zone3Color = (opts.zone3Color as string) ?? '#ef4444';
+  // Build zones array – new format (opts.zones) takes priority,
+  // falls back to legacy zone1Max/zone2Max/zone1Color/… properties.
+  const zones: ColorZone[] = (() => {
+    const raw = opts.zones as ColorZone[] | undefined;
+    if (raw && raw.length > 0) return raw;
+    return [
+      { max: (opts.zone1Max as number) ?? effectiveMin + range * 0.33, color: (opts.zone1Color as string) ?? '#10b981' },
+      { max: (opts.zone2Max as number) ?? effectiveMin + range * 0.66, color: (opts.zone2Color as string) ?? '#f59e0b' },
+      { max: effectiveMax,                                              color: (opts.zone3Color as string) ?? '#ef4444' },
+    ];
+  })();
 
   // Build pointers array
   const ptr1Color = (opts.pointer1Color as string) ?? 'var(--accent)';
@@ -204,40 +210,33 @@ export function GaugeWidget({ config }: WidgetProps) {
 
   const gaugeProps: GaugeSVGProps = {
     pointers, min: effectiveMin, max: effectiveMax,
-    unit, decimals, strokeWidth, colorZones,
-    zone1Max, zone2Max, zone1Color, zone2Color, zone3Color, showMinMax,
+    unit, decimals, strokeWidth, colorZones, zones, showMinMax,
   };
 
-  // Secondary pointer badges (rendered as HTML below SVG)
+  // Secondary pointer badges
   const secondaryBadges = pointers.slice(1).map((ptr, i) => {
     const dispVal = isNaN(ptr.value)
       ? '–'
       : decimals === 0 ? String(Math.round(ptr.value)) : ptr.value.toFixed(decimals);
     return (
-      <span
-        key={i}
+      <span key={i}
         className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded"
-        style={{ background: `${ptr.color}22`, color: ptr.color, border: `1px solid ${ptr.color}55` }}
-      >
+        style={{ background: `${ptr.color}22`, color: ptr.color, border: `1px solid ${ptr.color}55` }}>
         <span className="font-bold tabular-nums">{dispVal}{unit}</span>
         {ptr.label && <span className="opacity-80">{ptr.label}</span>}
       </span>
     );
   });
 
-  // ── MINIMAL ──────────────────────────────────────────────────────────────
   if (layout === 'minimal') {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-1">
         <GaugeSVG {...gaugeProps} scale={0.85} />
-        {secondaryBadges.length > 0 && (
-          <div className="flex flex-wrap justify-center gap-1">{secondaryBadges}</div>
-        )}
+        {secondaryBadges.length > 0 && <div className="flex flex-wrap justify-center gap-1">{secondaryBadges}</div>}
       </div>
     );
   }
 
-  // ── COMPACT ───────────────────────────────────────────────────────────────
   if (layout === 'compact') {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-1">
@@ -245,14 +244,11 @@ export function GaugeWidget({ config }: WidgetProps) {
         {config.title && (
           <p className="text-[11px] truncate text-center" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
         )}
-        {secondaryBadges.length > 0 && (
-          <div className="flex flex-wrap justify-center gap-1">{secondaryBadges}</div>
-        )}
+        {secondaryBadges.length > 0 && <div className="flex flex-wrap justify-center gap-1">{secondaryBadges}</div>}
       </div>
     );
   }
 
-  // ── DEFAULT / CARD ────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col h-full">
       {config.title && (

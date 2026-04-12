@@ -1471,42 +1471,64 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                           style={{ left: colorZones ? '18px' : '2px' }} />
                       </button>
                     </div>
-                    {colorZones && (
-                      <>
-                        {/* Zone 1 */}
-                        <div className="flex items-center gap-2">
-                          <input type="color" value={(o.zone1Color as string) ?? '#10b981'}
-                            onChange={(e) => set({ zone1Color: e.target.value })}
-                            className="w-8 h-7 rounded cursor-pointer shrink-0" style={{ border: '1px solid var(--app-border)', padding: '1px' }} />
-                          <div className="flex-1">
-                            <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Zone 1 bis</label>
-                            <input type="number" value={(o.zone1Max as number) ?? min + range * 0.33}
-                              onChange={(e) => set({ zone1Max: Number(e.target.value) })} className={gCls} style={gSty} />
-                          </div>
+                    {colorZones && (() => {
+                      // Build zones with fallback from legacy zone1Max/zone2Max props
+                      type CZ = { max: number; color: string };
+                      const rawZones = o.zones as CZ[] | undefined;
+                      const zones: CZ[] = (rawZones && rawZones.length > 0) ? rawZones : [
+                        { max: (o.zone1Max as number) ?? min + range * 0.33, color: (o.zone1Color as string) ?? '#10b981' },
+                        { max: (o.zone2Max as number) ?? min + range * 0.66, color: (o.zone2Color as string) ?? '#f59e0b' },
+                        { max: max,                                           color: (o.zone3Color as string) ?? '#ef4444' },
+                      ];
+                      const setZones = (z: CZ[]) => set({ zones: z, zone1Max: undefined, zone2Max: undefined, zone1Color: undefined, zone2Color: undefined, zone3Color: undefined });
+                      const updateZone = (i: number, patch: Partial<CZ>) => setZones(zones.map((z, idx) => idx === i ? { ...z, ...patch } : z));
+                      const removeZone = (i: number) => { if (zones.length > 1) setZones(zones.filter((_, idx) => idx !== i)); };
+                      const addZone = () => {
+                        const insertBefore = zones.length - 1;
+                        const prevMax = insertBefore > 0 ? zones[insertBefore - 1].max : min;
+                        const nextMax = zones[insertBefore].max;
+                        const newMax  = Math.round((prevMax + nextMax) / 2);
+                        const newZones = [...zones];
+                        newZones.splice(insertBefore, 0, { max: newMax, color: '#6366f1' });
+                        setZones(newZones);
+                      };
+                      return (
+                        <div className="space-y-2">
+                          {zones.map((zone, i) => {
+                            const isLast = i === zones.length - 1;
+                            return (
+                              <div key={i} className="flex items-center gap-2">
+                                <button onClick={() => removeZone(i)}
+                                  className="text-[11px] w-5 h-5 flex items-center justify-center rounded shrink-0 transition-opacity"
+                                  style={{ color: 'var(--text-secondary)', background: 'var(--app-bg)', border: '1px solid var(--app-border)', opacity: zones.length <= 1 ? 0.3 : 1 }}>×</button>
+                                <input type="color" value={zone.color}
+                                  onChange={(e) => updateZone(i, { color: e.target.value })}
+                                  className="w-8 h-7 rounded cursor-pointer shrink-0" style={{ border: '1px solid var(--app-border)', padding: '1px' }} />
+                                <div className="flex-1">
+                                  <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
+                                    Zone {i + 1} {isLast ? '(Rest)' : 'bis'}
+                                  </label>
+                                  {isLast ? (
+                                    <div className="text-[10px] py-2 px-2.5 rounded-lg" style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+                                      bis {max}
+                                    </div>
+                                  ) : (
+                                    <input type="number" value={zone.max}
+                                      onChange={(e) => updateZone(i, { max: Number(e.target.value) })}
+                                      className={gCls} style={gSty} />
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                          <button onClick={addZone}
+                            className="w-full text-[11px] py-1.5 rounded-lg transition-colors hover:opacity-80"
+                            style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+                            + Zone hinzufügen
+                          </button>
                         </div>
-                        {/* Zone 2 */}
-                        <div className="flex items-center gap-2">
-                          <input type="color" value={(o.zone2Color as string) ?? '#f59e0b'}
-                            onChange={(e) => set({ zone2Color: e.target.value })}
-                            className="w-8 h-7 rounded cursor-pointer shrink-0" style={{ border: '1px solid var(--app-border)', padding: '1px' }} />
-                          <div className="flex-1">
-                            <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Zone 2 bis</label>
-                            <input type="number" value={(o.zone2Max as number) ?? min + range * 0.66}
-                              onChange={(e) => set({ zone2Max: Number(e.target.value) })} className={gCls} style={gSty} />
-                          </div>
-                        </div>
-                        {/* Zone 3 */}
-                        <div className="flex items-center gap-2">
-                          <input type="color" value={(o.zone3Color as string) ?? '#ef4444'}
-                            onChange={(e) => set({ zone3Color: e.target.value })}
-                            className="w-8 h-7 rounded cursor-pointer shrink-0" style={{ border: '1px solid var(--app-border)', padding: '1px' }} />
-                          <div className="flex-1">
-                            <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Zone 3 (Rest)</label>
-                            <div className="text-[10px] py-2 px-2.5 rounded-lg" style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>ab Zone 2 bis Max</div>
-                          </div>
-                        </div>
-                      </>
-                    )}
+                      );
+                    })()}
 
                     {sectionHdr('Zeiger')}
                     {/* Pointer 1 (primary) */}
