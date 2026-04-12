@@ -36,6 +36,11 @@ export function ImageWidget({ config }: WidgetProps) {
       return `data:image/jpeg;base64,${str}`;
     }
     if (!imageUrl) return '';
+    // base64 or data URI in URL field – use as-is, no cache-bust
+    if (imageUrl.startsWith('data:') || (!imageUrl.startsWith('http') && imageUrl.length > 64)) {
+      if (imageUrl.startsWith('data:')) return imageUrl;
+      return `data:image/jpeg;base64,${imageUrl}`;
+    }
     const sep = imageUrl.includes('?') ? '&' : '?';
     return tick > 0 ? `${imageUrl}${sep}_t=${tick}` : imageUrl;
   })();

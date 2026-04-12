@@ -719,7 +719,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
   const [, forceRedraw] = useState(0);
 
   useEffect(() => {
-    const id = config.datapoint;
+    const id = (config.options?.lastChangeDatapoint as string | undefined) || config.datapoint;
     if (!id) return;
 
     getStateDirect(id).then((s) => {
@@ -729,7 +729,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
     return subscribeStateDirect(id, (s) => {
       setLastChangedTs(s.lc > 0 ? s.lc : s.ts);
     });
-  }, [config.datapoint]);
+  }, [config.datapoint, config.options?.lastChangeDatapoint]);
 
   // Periodically redraw the relative-time string
   useEffect(() => {
@@ -755,13 +755,13 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
   // Verhindert Drag bei Klick auf Controls
   const stopDrag = (e: React.MouseEvent | React.PointerEvent) => e.stopPropagation();
 
-  const isHeader = config.type === 'header';
-  const isGroup  = config.type === 'group';
-  const isTransparentGroup = isGroup && !!(config.options?.transparent);
+  const isHeader    = config.type === 'header';
+  const isGroup     = config.type === 'group';
+  const isTransparent = !!(config.options?.transparent);
 
   return (
     <div
-      style={isHeader || isTransparentGroup ? {
+      style={isHeader || isTransparent ? {
         background: 'transparent',
         borderRadius: 0,
         boxShadow: 'none',
@@ -783,7 +783,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
         ...(!editMode && conditionResult.hidden && !conditionResult.reflow
           ? { visibility: 'hidden', pointerEvents: 'none' } : {}),
       }}
-      className={`relative h-full transition-all overflow-visible ${isHeader ? 'px-2 py-0' : isGroup ? 'p-0' : 'p-4'} ${editMode ? 'ring-2 ring-accent/40 rounded-xl' : ''} ${!editMode && conditionResult.effect === 'pulse' ? 'animate-pulse' : ''} ${!editMode && conditionResult.effect === 'blink' ? 'animate-[blink_1s_step-end_infinite]' : ''}`}
+      className={`relative h-full transition-all overflow-visible ${isHeader ? 'px-2 py-0' : (isGroup || isTransparent) ? 'p-0' : 'p-4'} ${editMode ? 'ring-2 ring-accent/40 rounded-xl' : ''} ${!editMode && conditionResult.effect === 'pulse' ? 'animate-pulse' : ''} ${!editMode && conditionResult.effect === 'blink' ? 'animate-[blink_1s_step-end_infinite]' : ''}`}
     >
       {editMode && conditionResult.hidden && (
         <div className="nodrag absolute inset-0 z-20 rounded-[inherit] flex items-start justify-end pointer-events-none p-1.5">
@@ -1112,6 +1112,34 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                 </div>
               </div>
             )}
+            {showLastChange && !config.datapoint && (
+              <div>
+                <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
+                  Datenpunkt <span style={{ opacity: 0.6 }}>(für Zeitstempel, da kein Haupt-Datenpunkt)</span>
+                </label>
+                <input type="text"
+                  value={(config.options?.lastChangeDatapoint as string) ?? ''}
+                  onChange={(e) => onConfigChange({ ...config, options: { ...(config.options ?? {}), lastChangeDatapoint: e.target.value || undefined } })}
+                  placeholder="z.B. evcc.0.status.pvPower"
+                  className="w-full text-xs rounded-lg px-2.5 py-2 font-mono focus:outline-none"
+                  style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
+                />
+              </div>
+            )}
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>Transparenz-Modus</label>
+                <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-secondary)', opacity: 0.7 }}>Hintergrund, Rahmen und Schatten entfernen</p>
+              </div>
+              <button
+                onClick={() => onConfigChange({ ...config, options: { ...(config.options ?? {}), transparent: !(config.options?.transparent) } })}
+                className="relative w-9 h-5 rounded-full transition-colors shrink-0"
+                style={{ background: config.options?.transparent ? 'var(--accent)' : 'var(--app-border)' }}
+              >
+                <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                  style={{ left: config.options?.transparent ? '18px' : '2px' }} />
+              </button>
+            </div>
           </div>
 
           <div className="h-px" style={{ background: 'var(--app-border)' }} />
@@ -1592,30 +1620,6 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                 );
               })()}
 
-              {/* ── Group config ── */}
-              {config.type === 'group' && (() => {
-                const o   = config.options ?? {};
-                const set = (patch: Record<string, unknown>) =>
-                  onConfigChange({ ...config, options: { ...o, ...patch } });
-                const transparent = !!(o.transparent);
-                return (
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <label className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>Transparenz-Modus</label>
-                      <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-secondary)', opacity: 0.7 }}>
-                        Hintergrund, Rahmen und Schatten entfernen
-                      </p>
-                    </div>
-                    <button onClick={() => set({ transparent: !transparent })}
-                      className="relative w-9 h-5 rounded-full transition-colors shrink-0"
-                      style={{ background: transparent ? 'var(--accent)' : 'var(--app-border)' }}>
-                      <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
-                        style={{ left: transparent ? '18px' : '2px' }} />
-                    </button>
-                  </div>
-                );
-              })()}
-
               {/* ── Weather config ── */}
               {config.type === 'weather' && (() => {
                 const o   = config.options ?? {};
@@ -1680,10 +1684,12 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                 return (
                   <>
                     <div>
-                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Bild-URL</label>
+                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
+                        Bild-URL oder base64 <span style={{ opacity: 0.6 }}>(https://… · data:image/… · base64-String)</span>
+                      </label>
                       <input type="text" value={imageUrl}
                         onChange={(e) => set({ imageUrl: e.target.value || undefined })}
-                        placeholder="https://…/bild.jpg"
+                        placeholder="https://…/bild.jpg oder base64-String"
                         className={iCls + ' font-mono'} style={iSty} />
                     </div>
                     <div>
@@ -1719,7 +1725,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                         ))}
                       </div>
                     </div>
-                    {imageUrl && (
+                    {imageUrl && !imageUrl.startsWith('data:') && imageUrl.startsWith('http') && (
                       <div>
                         <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
                           Aktualisierungsintervall <span style={{ opacity: 0.6 }}>(Sek., 0 = kein)</span>

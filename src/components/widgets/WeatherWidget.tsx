@@ -322,6 +322,9 @@ export function WeatherWidget({ config }: WidgetProps) {
   // ── DEFAULT / CARD ────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col h-full gap-2 overflow-auto">
+      {config.title && !config.options?.hideTitle && (
+        <p className="text-xs truncate mb-1" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+      )}
       {/* ── Current weather header ── */}
       <div className="flex items-start gap-3 shrink-0">
         <span style={{ fontSize: layout === 'card' ? '2.8rem' : '2.2rem', lineHeight: 1 }}>

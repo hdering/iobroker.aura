@@ -688,6 +688,9 @@ export function EvccWidget({ config }: WidgetProps) {
   if (layout === 'flow') {
     return (
       <div className="flex flex-col gap-2 h-full overflow-auto">
+        {config.title && !config.options?.hideTitle && (
+          <p className="text-xs truncate shrink-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+        )}
         <div className="shrink-0" style={{ height: showBattery ? 190 : 160 }}>
           <EnergyFlowSVG site={site} loadpoints={loadpoints} showBattery={showBattery} visibleLpIndices={visibleLpIndices} />
         </div>
@@ -701,6 +704,9 @@ export function EvccWidget({ config }: WidgetProps) {
   // ── Layout: default / card ────────────────────────────────────────────────
   return (
     <div className="flex flex-col gap-2 h-full overflow-auto">
+      {config.title && !config.options?.hideTitle && (
+        <p className="text-xs truncate shrink-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+      )}
       <div className="shrink-0">
         <EnergyFlowRow site={site} showBattery={showBattery} />
       </div>
