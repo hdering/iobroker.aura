@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Sun, Home, Zap, Battery, Car, Plug, PlugZap } from 'lucide-react';
+import { Zap, Car, Plug, PlugZap } from 'lucide-react';
 import { useIoBroker } from '../../hooks/useIoBroker';
 import type { WidgetProps, WidgetConfig, ioBrokerState } from '../../types';
 import { useT } from '../../i18n';
@@ -7,6 +7,7 @@ import { useT } from '../../i18n';
 // ── helpers ───────────────────────────────────────────────────────────────────
 
 function fmtKW(w: number): string {
+  if (w < 100) return (w / 1000).toFixed(2) + ' kW';
   return (w / 1000).toFixed(1) + ' kW';
 }
 
@@ -22,7 +23,6 @@ function fmtSoc(v: number): string {
   return Math.round(v) + '%';
 }
 
-// mode number → pvControl value
 const MODE_MAP: Record<string, number> = { off: 0, pv: 1, minpv: 2, now: 3 };
 const MODES: { key: string; label: string; activeColor: string }[] = [
   { key: 'off',   label: 'AUS',    activeColor: '#6b7280' },
@@ -31,7 +31,7 @@ const MODES: { key: string; label: string; activeColor: string }[] = [
   { key: 'now',   label: 'SOFORT', activeColor: '#ef4444' },
 ];
 
-// ── site state ────────────────────────────────────────────────────────────────
+// ── state types ───────────────────────────────────────────────────────────────
 
 interface SiteState {
   pvPower: number;
@@ -99,9 +99,11 @@ function useEvccData(prefix: string, loadpointCount: number) {
   }, []);
 
   useEffect(() => {
+    setSite({ ...DEFAULT_SITE });
+    setLoadpoints(Array.from({ length: loadpointCount }, () => ({ ...DEFAULT_LP })));
+
     const cleanups: (() => void)[] = [];
 
-    // site datapoints
     const sitePoints: [string, keyof SiteState][] = [
       ['pvPower', 'pvPower'], ['gridPower', 'gridPower'], ['homePower', 'homePower'],
       ['batteryPower', 'batteryPower'], ['batterySoc', 'batterySoc'],
@@ -116,11 +118,9 @@ function useEvccData(prefix: string, loadpointCount: number) {
       getState(id).then((s) => { if (s) updateSite(key, s.val); });
     }
 
-    // loadpoint datapoints
     for (let n = 1; n <= loadpointCount; n++) {
       const idx = n - 1;
       const base = `${prefix}.loadpoint.${n}.status`;
-
       const lpPoints: [string, keyof LoadpointState][] = [
         ['chargePower', 'chargePower'], ['chargedEnergy', 'chargedEnergy'],
         ['charging', 'charging'], ['connected', 'connected'], ['mode', 'mode'],
@@ -131,7 +131,6 @@ function useEvccData(prefix: string, loadpointCount: number) {
         ['chargeDuration', 'chargeDuration'], ['phasesActive', 'phasesActive'],
         ['title', 'title'],
       ];
-
       for (const [dp, key] of lpPoints) {
         const id = `${base}.${dp}`;
         const cb = (s: ioBrokerState) => updateLp(idx, key, s.val);
@@ -146,123 +145,277 @@ function useEvccData(prefix: string, loadpointCount: number) {
   return { site, loadpoints };
 }
 
-// ── EnergyFlowRow ─────────────────────────────────────────────────────────────
+// ── Animated flow line ────────────────────────────────────────────────────────
 
-function EnergyFlowRow({ site, showBattery, compact }: { site: SiteState; showBattery: boolean; compact: boolean }) {
-  const t = useT();
-  const gridImport = site.gridPower > 0;
-  const gridExport = site.gridPower < 0;
-  const gridColor = gridImport ? '#ef4444' : gridExport ? '#10b981' : 'var(--text-secondary)';
-  const battCharge = site.batteryPower < 0;
-  const battColor = battCharge ? '#3b82f6' : '#f59e0b';
-
-  if (compact) {
-    return (
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="flex items-center gap-1 text-xs font-medium">
-          <Sun size={13} color="#f59e0b" />
-          <span style={{ color: '#f59e0b' }}>{fmtKW(site.pvPower)}</span>
-        </span>
-        <span style={{ color: 'var(--text-secondary)', fontSize: 10 }}>·</span>
-        <span className="flex items-center gap-1 text-xs font-medium">
-          <Home size={13} color="var(--text-secondary)" />
-          <span style={{ color: 'var(--text-primary)' }}>{fmtKW(site.homePower)}</span>
-        </span>
-        <span style={{ color: 'var(--text-secondary)', fontSize: 10 }}>·</span>
-        <span className="flex items-center gap-1 text-xs font-medium">
-          <Zap size={13} color={gridColor} />
-          <span style={{ color: gridColor }}>{fmtKW(Math.abs(site.gridPower))}</span>
-        </span>
-        {showBattery && site.batterySoc > 0 && (
-          <>
-            <span style={{ color: 'var(--text-secondary)', fontSize: 10 }}>·</span>
-            <span className="flex items-center gap-1 text-xs font-medium">
-              <Battery size={13} color={battColor} />
-              <span style={{ color: battColor }}>{fmtSoc(site.batterySoc)}</span>
-            </span>
-          </>
-        )}
-      </div>
-    );
-  }
+function FlowPath({
+  x1, y1, x2, y2,
+  active, color, reverse = false,
+  power = 0,
+}: {
+  x1: number; y1: number; x2: number; y2: number;
+  active: boolean; color: string; reverse?: boolean;
+  power?: number;
+}) {
+  // Speed based on power (faster = more power)
+  const dur = active ? Math.max(0.6, 2.0 - (power / 5000)) : 2;
+  const fwd = `M ${x1} ${y1} L ${x2} ${y2}`;
+  const rev = `M ${x2} ${y2} L ${x1} ${y1}`;
+  const animPath = reverse ? rev : fwd;
 
   return (
-    <div className="space-y-1.5">
-      {/* main flow row */}
-      <div className="flex items-center justify-between gap-1">
-        {/* Solar */}
-        <div className="flex flex-col items-center gap-0.5 min-w-0">
-          <Sun size={18} color="#f59e0b" />
-          <span className="text-xs font-semibold whitespace-nowrap" style={{ color: '#f59e0b' }}>
-            {fmtKW(site.pvPower)}
+    <g>
+      {/* Static background line */}
+      <line x1={x1} y1={y1} x2={x2} y2={y2}
+        stroke={active ? color : 'var(--app-border)'}
+        strokeWidth={active ? 2 : 1.5}
+        strokeOpacity={active ? 0.25 : 0.4} />
+
+      {/* Animated dots */}
+      {active && [0, 0.35, 0.7].map((offset, i) => (
+        <circle key={i} r={2.8} fill={color} opacity={0.9}>
+          <animateMotion
+            dur={`${dur}s`}
+            begin={`${-offset * dur}s`}
+            repeatCount="indefinite"
+            path={animPath}
+          />
+        </circle>
+      ))}
+    </g>
+  );
+}
+
+// ── Energy flow SVG ───────────────────────────────────────────────────────────
+
+function EnergyFlowSVG({
+  site,
+  loadpoints,
+  showBattery,
+  visibleLpIndices,
+}: {
+  site: SiteState;
+  loadpoints: LoadpointState[];
+  showBattery: boolean;
+  visibleLpIndices: number[];
+}) {
+  const t = useT();
+
+  const hasSolar   = site.pvPower > 10;
+  const gridImport = site.gridPower > 10;
+  const gridExport = site.gridPower < -10;
+  const battCharge = site.batteryPower < -10;  // negative = charging
+  const battDisch  = site.batteryPower > 10;   // positive = discharging
+  const hasBatt    = showBattery;
+  const visLps     = visibleLpIndices.map((i) => loadpoints[i]).filter(Boolean);
+  const chargingLps = visLps.filter((lp) => lp.chargePower > 10);
+
+  const gridColor = gridImport ? '#ef4444' : gridExport ? '#10b981' : 'var(--text-secondary)';
+  const battColor = battCharge ? '#3b82f6' : '#f59e0b';
+
+  // Layout coordinates (viewBox 0 0 220 170)
+  const cx = 110, cy = 75;  // House center
+  const sx = 35,  sy = 35;  // Solar
+  const gx = 185, gy = 35;  // Grid
+  const bx = 35,  by = 140; // Battery
+  // LP positions distributed vertically on right
+  const lpPositions = visLps.map((_, i) => ({
+    x: 185,
+    y: hasBatt ? 105 + i * 40 : 120 + i * 35,
+  }));
+
+  return (
+    <svg viewBox="0 0 220 170" className="w-full h-full" style={{ overflow: 'visible' }}>
+      {/* ── Connection paths ── */}
+      <FlowPath x1={sx} y1={sy} x2={cx} y2={cy} active={hasSolar} color="#f59e0b" power={site.pvPower} />
+      <FlowPath x1={gx} y1={gy} x2={cx} y2={cy} active={gridImport} color="#ef4444" power={Math.abs(site.gridPower)} />
+      <FlowPath x1={gx} y1={gy} x2={cx} y2={cy} active={gridExport} color="#10b981" reverse power={Math.abs(site.gridPower)} />
+      {hasBatt && (
+        <>
+          <FlowPath x1={bx} y1={by} x2={cx} y2={cy} active={battDisch} color="#f59e0b" power={Math.abs(site.batteryPower)} />
+          <FlowPath x1={bx} y1={by} x2={cx} y2={cy} active={battCharge} color="#3b82f6" reverse power={Math.abs(site.batteryPower)} />
+        </>
+      )}
+      {lpPositions.map((pos, i) => (
+        <FlowPath key={i}
+          x1={cx} y1={cy} x2={pos.x} y2={pos.y}
+          active={chargingLps.includes(visLps[i])} color="#6366f1"
+          power={visLps[i].chargePower} />
+      ))}
+
+      {/* ── Solar node ── */}
+      <circle cx={sx} cy={sy} r={18} fill="#f59e0b22" stroke="#f59e0b" strokeWidth={1.5} />
+      <text x={sx} y={sy + 5} textAnchor="middle" fontSize={14}>☀️</text>
+      <text x={sx} y={sy + 26} textAnchor="middle" fontSize={8} fill="#f59e0b" fontWeight="bold">
+        {hasSolar ? fmtKW(site.pvPower) : '–'}
+      </text>
+      <text x={sx} y={sy + 35} textAnchor="middle" fontSize={7} fill="var(--text-secondary)">{t('evcc.solar')}</text>
+
+      {/* ── Grid node ── */}
+      <circle cx={gx} cy={gy} r={18} fill={`${gridColor}22`} stroke={gridColor} strokeWidth={1.5} />
+      <text x={gx} y={gy + 5} textAnchor="middle" fontSize={13}>⚡</text>
+      <text x={gx} y={gy + 26} textAnchor="middle" fontSize={8} fill={gridColor} fontWeight="bold">
+        {fmtKW(Math.abs(site.gridPower))}
+      </text>
+      <text x={gx} y={gy + 35} textAnchor="middle" fontSize={7} fill="var(--text-secondary)">
+        {gridImport ? t('evcc.grid') : gridExport ? t('evcc.feedIn') : t('evcc.gridLabel')}
+      </text>
+
+      {/* ── House node ── */}
+      <circle cx={cx} cy={cy} r={22} fill="var(--app-surface)" stroke="var(--app-border)" strokeWidth={2} />
+      <text x={cx} y={cy + 5} textAnchor="middle" fontSize={15}>🏠</text>
+      <text x={cx} y={cy + 20} textAnchor="middle" fontSize={8} fill="var(--text-primary)" fontWeight="bold">
+        {fmtKW(site.homePower)}
+      </text>
+      <text x={cx} y={cy + 30} textAnchor="middle" fontSize={7} fill="var(--text-secondary)">{t('evcc.house')}</text>
+
+      {/* ── Battery node ── */}
+      {hasBatt && (
+        <>
+          <circle cx={bx} cy={by} r={18} fill={`${battColor}22`} stroke={battColor} strokeWidth={1.5} />
+          <text x={bx} y={by + 5} textAnchor="middle" fontSize={13}>🔋</text>
+          <text x={bx} y={by + 26} textAnchor="middle" fontSize={8} fill={battColor} fontWeight="bold">
+            {fmtSoc(site.batterySoc)}
+          </text>
+          <text x={bx} y={by + 35} textAnchor="middle" fontSize={7} fill="var(--text-secondary)">
+            {site.batteryPower !== 0 ? fmtKW(Math.abs(site.batteryPower)) : '–'}
+          </text>
+        </>
+      )}
+
+      {/* ── Loadpoint nodes ── */}
+      {lpPositions.map((pos, i) => {
+        const lp = visLps[i];
+        const isCharging = lp.chargePower > 10;
+        const isConnected = lp.connected;
+        const color = isCharging ? '#6366f1' : isConnected ? '#818cf8' : 'var(--text-secondary)';
+        return (
+          <g key={i}>
+            <circle cx={pos.x} cy={pos.y} r={16} fill={`${isConnected ? '#6366f1' : 'var(--app-border)'}22`}
+              stroke={color} strokeWidth={1.5} />
+            <text x={pos.x} y={pos.y + 5} textAnchor="middle" fontSize={12}>{isConnected ? '🚗' : '🔌'}</text>
+            <text x={pos.x} y={pos.y + 24} textAnchor="middle" fontSize={8} fill={color} fontWeight="bold">
+              {isCharging ? fmtKW(lp.chargePower) : lp.vehicleSoc > 0 ? fmtSoc(lp.vehicleSoc) : '–'}
+            </text>
+            {isCharging && (
+              <circle cx={pos.x + 11} cy={pos.y - 11} r={3} fill="#6366f1">
+                <animate attributeName="opacity" values="1;0.3;1" dur="1.2s" repeatCount="indefinite" />
+              </circle>
+            )}
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+// ── Compact row ───────────────────────────────────────────────────────────────
+
+function CompactRow({ site, showBattery }: { site: SiteState; showBattery: boolean }) {
+  const gridColor  = site.gridPower > 0 ? '#ef4444' : site.gridPower < 0 ? '#10b981' : 'var(--text-secondary)';
+  const battColor  = site.batteryPower < 0 ? '#3b82f6' : '#f59e0b';
+  return (
+    <div className="flex items-center gap-2 flex-wrap text-xs">
+      <span className="flex items-center gap-1 font-medium" style={{ color: '#f59e0b' }}>
+        ☀️ {fmtKW(site.pvPower)}
+      </span>
+      <span style={{ color: 'var(--text-secondary)', fontSize: 9 }}>·</span>
+      <span className="flex items-center gap-1 font-medium" style={{ color: 'var(--text-primary)' }}>
+        🏠 {fmtKW(site.homePower)}
+      </span>
+      <span style={{ color: 'var(--text-secondary)', fontSize: 9 }}>·</span>
+      <span className="flex items-center gap-1 font-medium" style={{ color: gridColor }}>
+        ⚡ {fmtKW(Math.abs(site.gridPower))}
+      </span>
+      {showBattery && (
+        <>
+          <span style={{ color: 'var(--text-secondary)', fontSize: 9 }}>·</span>
+          <span className="flex items-center gap-1 font-medium" style={{ color: battColor }}>
+            🔋 {fmtSoc(site.batterySoc)}
           </span>
-          <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{t('evcc.solar')}</span>
-        </div>
+        </>
+      )}
+    </div>
+  );
+}
 
-        {/* arrow solar→home */}
-        <div className="flex-1 flex items-center justify-center">
-          <div className="h-px flex-1" style={{ background: '#f59e0b', opacity: 0.5 }} />
-          <span style={{ color: '#f59e0b', fontSize: 10 }}>▶</span>
-        </div>
+// ── Battery-only view ─────────────────────────────────────────────────────────
 
-        {/* Home */}
-        <div className="flex flex-col items-center gap-0.5 min-w-0">
-          <Home size={18} color="var(--text-secondary)" />
-          <span className="text-xs font-semibold whitespace-nowrap" style={{ color: 'var(--text-primary)' }}>
-            {fmtKW(site.homePower)}
-          </span>
-          <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{t('evcc.house')}</span>
-        </div>
+function BatteryView({ site }: { site: SiteState }) {
+  const battCharge = site.batteryPower < -10;
+  const battDisch  = site.batteryPower > 10;
+  const battColor  = battCharge ? '#3b82f6' : battDisch ? '#f59e0b' : '#10b981';
+  const soc = Math.max(0, Math.min(100, site.batterySoc));
 
-        {/* arrow home↔grid */}
-        <div className="flex-1 flex items-center justify-center">
-          {gridImport ? (
-            <>
-              <span style={{ color: gridColor, fontSize: 10 }}>◀</span>
-              <div className="h-px flex-1" style={{ background: gridColor, opacity: 0.5 }} />
-            </>
-          ) : (
-            <>
-              <div className="h-px flex-1" style={{ background: gridColor, opacity: 0.5 }} />
-              <span style={{ color: gridColor, fontSize: 10 }}>▶</span>
-            </>
-          )}
-        </div>
-
-        {/* Grid */}
-        <div className="flex flex-col items-center gap-0.5 min-w-0">
-          <Zap size={18} color={gridColor} />
-          <span className="text-xs font-semibold whitespace-nowrap" style={{ color: gridColor }}>
-            {fmtKW(Math.abs(site.gridPower))}
-          </span>
-          <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>
-            {gridImport ? t('evcc.grid') : gridExport ? t('evcc.feedIn') : t('evcc.gridLabel')}
+  return (
+    <div className="flex flex-col items-center justify-center h-full gap-3">
+      <div className="text-4xl">🔋</div>
+      {/* SoC bar */}
+      <div className="w-full max-w-[140px]">
+        <div className="relative h-5 rounded-full overflow-hidden" style={{ background: 'var(--app-border)' }}>
+          <div className="absolute inset-y-0 left-0 rounded-full transition-all duration-700"
+            style={{ width: `${soc}%`, background: battColor }} />
+          <span className="absolute inset-0 flex items-center justify-center text-[11px] font-bold" style={{ color: '#fff', textShadow: '0 1px 2px #0005' }}>
+            {fmtSoc(soc)}
           </span>
         </div>
       </div>
+      {site.batteryPower !== 0 && (
+        <div className="text-sm font-semibold" style={{ color: battColor }}>
+          {battCharge ? '↓ ' : battDisch ? '↑ ' : ''}{fmtKW(Math.abs(site.batteryPower))}
+        </div>
+      )}
+      {site.batteryMode && site.batteryMode !== 'normal' && site.batteryMode !== 'unknown' && (
+        <div className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{site.batteryMode}</div>
+      )}
+    </div>
+  );
+}
 
-      {/* battery row */}
-      {showBattery && site.batterySoc > 0 && (
-        <div className="flex items-center justify-center gap-2 pt-0.5">
-          <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: 'var(--app-bg)' }}>
-            {battCharge ? (
-              <span style={{ color: battColor, fontSize: 10 }}>▼</span>
-            ) : (
-              <span style={{ color: battColor, fontSize: 10 }}>▲</span>
-            )}
-            <Battery size={14} color={battColor} />
-            <span className="text-xs font-semibold" style={{ color: battColor }}>
-              {fmtSoc(site.batterySoc)}
-            </span>
-            {site.batteryPower !== 0 && (
-              <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>
-                · {fmtKW(Math.abs(site.batteryPower))}
-              </span>
-            )}
-            {site.batteryMode && site.batteryMode !== 'normal' && site.batteryMode !== 'unknown' && (
-              <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>· {site.batteryMode}</span>
-            )}
-          </div>
+// ── Production-only view ──────────────────────────────────────────────────────
+
+function ProductionView({ site }: { site: SiteState }) {
+  const feedIn = site.gridPower < -10;
+  const feedInW = Math.abs(Math.min(0, site.gridPower));
+
+  return (
+    <div className="flex flex-col items-center justify-center h-full gap-2">
+      <div className="text-3xl">☀️</div>
+      <div className="text-3xl font-black" style={{ color: '#f59e0b' }}>
+        {fmtKW(site.pvPower)}
+      </div>
+      {feedIn && (
+        <div className="flex items-center gap-1 text-xs" style={{ color: '#10b981' }}>
+          <span>↗</span>
+          <span>{fmtKW(feedInW)} Einspeisung</span>
+        </div>
+      )}
+      {site.greenShareHome > 0 && (
+        <div className="text-[10px]" style={{ color: '#10b981' }}>
+          🌿 {Math.round(site.greenShareHome * 100)}% Eigenanteil
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Consumption-only view ─────────────────────────────────────────────────────
+
+function ConsumptionView({ site }: { site: SiteState }) {
+  const gridImport = site.gridPower > 10;
+  const gridColor  = gridImport ? '#ef4444' : '#10b981';
+  return (
+    <div className="flex flex-col items-center justify-center h-full gap-2">
+      <div className="text-3xl">🏠</div>
+      <div className="text-3xl font-black" style={{ color: 'var(--text-primary)' }}>
+        {fmtKW(site.homePower)}
+      </div>
+      <div className="flex items-center gap-1 text-xs" style={{ color: gridColor }}>
+        <span>{gridImport ? '↓ Bezug' : '↑ Einspeisung'}</span>
+        <span className="font-semibold">{fmtKW(Math.abs(site.gridPower))}</span>
+      </div>
+      {site.tariffGrid > 0 && (
+        <div className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>
+          {site.tariffGrid.toFixed(4)} €/kWh
         </div>
       )}
     </div>
@@ -274,15 +427,11 @@ function EnergyFlowRow({ site, showBattery, compact }: { site: SiteState; showBa
 function SocBar({ current, target, color }: { current: number; target: number; color: string }) {
   return (
     <div className="relative h-2 rounded-full overflow-hidden" style={{ background: 'var(--app-border)' }}>
-      <div
-        className="absolute left-0 top-0 h-full rounded-full transition-all duration-500"
-        style={{ width: `${Math.min(100, current)}%`, background: color }}
-      />
+      <div className="absolute left-0 top-0 h-full rounded-full transition-all duration-500"
+        style={{ width: `${Math.min(100, current)}%`, background: color }} />
       {target > 0 && target < 100 && (
-        <div
-          className="absolute top-0 h-full w-0.5"
-          style={{ left: `${target}%`, background: 'var(--text-primary)', opacity: 0.6 }}
-        />
+        <div className="absolute top-0 h-full w-0.5"
+          style={{ left: `${target}%`, background: 'var(--text-primary)', opacity: 0.6 }} />
       )}
     </div>
   );
@@ -290,47 +439,24 @@ function SocBar({ current, target, color }: { current: number; target: number; c
 
 // ── LoadpointCard ─────────────────────────────────────────────────────────────
 
-function LoadpointCard({
-  lp,
-  idx,
-  prefix,
-  compact,
-}: {
-  lp: LoadpointState;
-  idx: number;
-  prefix: string;
-  compact: boolean;
+function LoadpointCard({ lp, idx, prefix, compact }: {
+  lp: LoadpointState; idx: number; prefix: string; compact: boolean;
 }) {
   const t = useT();
   const { setState } = useIoBroker();
-
-  const setMode = (modeKey: string) => {
-    setState(`${prefix}.loadpoint.${idx + 1}.control.pvControl`, MODE_MAP[modeKey]);
-  };
-
-  const setLimitSoc = (v: number) => {
-    setState(`${prefix}.loadpoint.${idx + 1}.control.limitSoc`, v);
-  };
-
-  const lpTitle = lp.title || t('evcc.loadpoint', { n: idx + 1 });
+  const setMode    = (modeKey: string) => setState(`${prefix}.loadpoint.${idx + 1}.control.pvControl`, MODE_MAP[modeKey]);
+  const setLimitSoc = (v: number) => setState(`${prefix}.loadpoint.${idx + 1}.control.limitSoc`, v);
+  const lpTitle    = lp.title || t('evcc.loadpoint', { n: idx + 1 });
   const vehicleName = lp.vehicleTitle || t('evcc.vehicle');
 
   if (compact) {
     return (
       <div className="flex items-center gap-2 flex-wrap text-xs">
-        {lp.connected ? (
-          <PlugZap size={13} color="#6366f1" />
-        ) : (
-          <Plug size={13} color="var(--text-secondary)" />
-        )}
+        {lp.connected ? <PlugZap size={13} color="#6366f1" /> : <Plug size={13} color="var(--text-secondary)" />}
         <span style={{ color: lp.connected ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
           {lp.connected ? vehicleName : lpTitle}
         </span>
-        {lp.vehicleSoc > 0 && (
-          <span style={{ color: '#6366f1' }}>
-            {fmtSoc(lp.vehicleSoc)}→{fmtSoc(lp.effectiveLimitSoc)}
-          </span>
-        )}
+        {lp.vehicleSoc > 0 && <span style={{ color: '#6366f1' }}>{fmtSoc(lp.vehicleSoc)}→{fmtSoc(lp.effectiveLimitSoc)}</span>}
         {lp.charging && (
           <span className="flex items-center gap-1" style={{ color: '#6366f1' }}>
             <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#6366f1' }} />
@@ -346,37 +472,22 @@ function LoadpointCard({
 
   return (
     <div className="space-y-2 pt-2 border-t" style={{ borderColor: 'var(--app-border)' }}>
-      {/* Header row */}
       <div className="flex items-center gap-2">
-        {lp.connected ? (
-          <PlugZap size={16} color="#6366f1" />
-        ) : (
-          <Plug size={16} color="var(--text-secondary)" />
-        )}
+        {lp.connected ? <PlugZap size={16} color="#6366f1" /> : <Plug size={16} color="var(--text-secondary)" />}
         <span className="text-sm font-semibold flex-1 truncate" style={{ color: 'var(--text-primary)' }}>
           {lp.connected ? vehicleName : lpTitle}
         </span>
-
-        {/* charging indicator */}
         {lp.charging && (
           <span className="flex items-center gap-1 text-xs" style={{ color: '#6366f1' }}>
-            <span
-              className="inline-block w-2 h-2 rounded-full animate-pulse"
-              style={{ background: '#6366f1' }}
-            />
+            <span className="inline-block w-2 h-2 rounded-full animate-pulse" style={{ background: '#6366f1' }} />
             {t('evcc.charging')}
           </span>
         )}
-
-        {/* charge power */}
         {lp.chargePower > 0 && (
-          <span className="text-xs font-bold" style={{ color: '#6366f1' }}>
-            {fmtKW(lp.chargePower)}
-          </span>
+          <span className="text-xs font-bold" style={{ color: '#6366f1' }}>{fmtKW(lp.chargePower)}</span>
         )}
       </div>
 
-      {/* SoC bar (only when connected) */}
       {lp.connected && lp.vehicleSoc > 0 && (
         <div className="space-y-1">
           <div className="flex items-center justify-between text-[11px]" style={{ color: 'var(--text-secondary)' }}>
@@ -387,12 +498,8 @@ function LoadpointCard({
             </div>
             <div className="flex items-center gap-1">
               <span>{t('evcc.targetSoc')}</span>
-              <button
-                className="font-semibold hover:opacity-80 transition-opacity"
-                style={{ color: '#6366f1' }}
-                onClick={() => setLimitSoc(Math.min(100, lp.effectiveLimitSoc + 10))}
-                title={t('evcc.adjustTarget')}
-              >
+              <button className="font-semibold hover:opacity-80" style={{ color: '#6366f1' }}
+                onClick={() => setLimitSoc(Math.min(100, lp.effectiveLimitSoc + 10))}>
                 {fmtSoc(lp.effectiveLimitSoc)}
               </button>
               {lp.sessionSolarPercentage > 0 && (
@@ -404,21 +511,12 @@ function LoadpointCard({
         </div>
       )}
 
-      {/* Session info */}
       {lp.charging && (
         <div className="flex items-center gap-3 text-[11px]" style={{ color: 'var(--text-secondary)' }}>
-          {lp.chargeDuration > 0 && (
-            <span>{fmtDuration(lp.chargeDuration)}</span>
-          )}
-          {lp.chargedEnergy > 0 && (
-            <span>{(lp.chargedEnergy / 1000).toFixed(2)} kWh</span>
-          )}
-          {lp.sessionPrice > 0 && (
-            <span>{lp.sessionPrice.toFixed(2)} €</span>
-          )}
-          {lp.phasesActive > 0 && (
-            <span>{lp.phasesActive}ϕ</span>
-          )}
+          {lp.chargeDuration > 0 && <span>{fmtDuration(lp.chargeDuration)}</span>}
+          {lp.chargedEnergy > 0 && <span>{(lp.chargedEnergy / 1000).toFixed(2)} kWh</span>}
+          {lp.sessionPrice > 0 && <span>{lp.sessionPrice.toFixed(2)} €</span>}
+          {lp.phasesActive > 0 && <span>{lp.phasesActive}ϕ</span>}
           {lp.planActive && lp.effectivePlanTime && (
             <span style={{ color: '#f59e0b' }}>
               📅 {new Date(lp.effectivePlanTime).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
@@ -427,22 +525,18 @@ function LoadpointCard({
         </div>
       )}
 
-      {/* Mode buttons */}
       <div className="flex gap-1">
         {MODES.map((m) => {
           const active = lp.mode === m.key;
           return (
-            <button
-              key={m.key}
-              onClick={() => setMode(m.key)}
-              className="flex-1 text-[11px] font-medium rounded-md transition-all duration-150 hover:opacity-90 active:scale-95"
+            <button key={m.key} onClick={() => setMode(m.key)}
+              className="flex-1 text-[11px] font-medium rounded-md transition-all hover:opacity-90 active:scale-95"
               style={{
                 minHeight: 28,
                 background: active ? m.activeColor : 'var(--app-bg)',
                 color: active ? '#fff' : 'var(--text-secondary)',
                 border: `1px solid ${active ? m.activeColor : 'var(--app-border)'}`,
-              }}
-            >
+              }}>
               {m.label}
             </button>
           );
@@ -458,12 +552,17 @@ export function EvccWidget({ config }: WidgetProps) {
   const t = useT();
   const { connected } = useIoBroker();
   const o = config.options ?? {};
-  const prefix = (o.evccPrefix as string | undefined) ?? 'evcc.0';
-  const loadpointCount = Math.max(1, Math.min(4, (o.loadpointCount as number | undefined) ?? 1));
-  const showBattery = (o.showBattery as boolean | undefined) ?? true;
+  const prefix        = (o.evccPrefix      as string)  ?? 'evcc.0';
+  const loadpointCount = Math.max(1, Math.min(8, (o.loadpointCount as number) ?? 1));
+  const showBattery   = (o.showBattery     as boolean) ?? true;
+  const layout        = config.layout ?? 'default';
 
-  const layout = config.layout ?? 'default';
-  const compact = layout === 'compact' || layout === 'minimal';
+  // Which loadpoints to show (0-based indices); default = all
+  const visibleLpIndices: number[] = (() => {
+    const raw = o.visibleLoadpoints as number[] | undefined;
+    if (raw && raw.length > 0) return raw;
+    return Array.from({ length: loadpointCount }, (_, i) => i);
+  })();
 
   const { site, loadpoints } = useEvccData(prefix, loadpointCount);
 
@@ -476,30 +575,65 @@ export function EvccWidget({ config }: WidgetProps) {
     );
   }
 
-  if (compact) {
+  const visLps = visibleLpIndices.map((i) => ({ lp: loadpoints[i], idx: i })).filter(({ lp }) => !!lp);
+
+  // ── Layout: battery only ──────────────────────────────────────────────────
+  if (layout === 'battery') return <BatteryView site={site} />;
+
+  // ── Layout: production only ───────────────────────────────────────────────
+  if (layout === 'production') return <ProductionView site={site} />;
+
+  // ── Layout: consumption only ──────────────────────────────────────────────
+  if (layout === 'consumption') return <ConsumptionView site={site} />;
+
+  // ── Layout: loadpoints only ───────────────────────────────────────────────
+  if (layout === 'loadpoints') {
     return (
-      <div className="flex flex-col gap-1.5 h-full justify-center px-1">
-        <EnergyFlowRow site={site} showBattery={showBattery} compact />
-        {loadpoints.map((lp, i) => (
-          <LoadpointCard key={i} lp={lp} idx={i} prefix={prefix} compact />
+      <div className="flex flex-col gap-2 h-full overflow-auto">
+        {visLps.map(({ lp, idx }) => (
+          <LoadpointCard key={idx} lp={lp} idx={idx} prefix={prefix} compact={false} />
         ))}
       </div>
     );
   }
 
-  return (
-    <div className="flex flex-col gap-3 h-full overflow-auto">
-      {/* Energy overview */}
-      <EnergyFlowRow site={site} showBattery={showBattery} compact={false} />
+  // ── Layout: compact / minimal ─────────────────────────────────────────────
+  if (layout === 'compact' || layout === 'minimal') {
+    return (
+      <div className="flex flex-col gap-1.5 h-full justify-center px-1">
+        <CompactRow site={site} showBattery={showBattery} />
+        {visLps.map(({ lp, idx }) => (
+          <LoadpointCard key={idx} lp={lp} idx={idx} prefix={prefix} compact />
+        ))}
+      </div>
+    );
+  }
 
-      {/* Loadpoints */}
-      {loadpoints.map((lp, i) => (
-        <LoadpointCard key={i} lp={lp} idx={i} prefix={prefix} compact={false} />
+  // ── Layout: default / card / flow ─────────────────────────────────────────
+  const showFlow    = true;
+  const showLpCards = layout !== 'flow';
+
+  return (
+    <div className="flex flex-col gap-2 h-full overflow-auto">
+      {/* Animated energy flow diagram */}
+      {showFlow && (
+        <div className="shrink-0" style={{ height: showBattery ? 190 : 160 }}>
+          <EnergyFlowSVG
+            site={site}
+            loadpoints={loadpoints}
+            showBattery={showBattery}
+            visibleLpIndices={visibleLpIndices}
+          />
+        </div>
+      )}
+
+      {/* Loadpoint cards */}
+      {showLpCards && visLps.map(({ lp, idx }) => (
+        <LoadpointCard key={idx} lp={lp} idx={idx} prefix={prefix} compact={false} />
       ))}
 
-      {/* tariff hint */}
       {site.tariffGrid > 0 && (
-        <div className="text-[10px] text-right" style={{ color: 'var(--text-secondary)' }}>
+        <div className="text-[10px] text-right shrink-0" style={{ color: 'var(--text-secondary)' }}>
           {site.tariffGrid.toFixed(4)} €/kWh
         </div>
       )}
@@ -521,62 +655,78 @@ export function EvccConfig({
   const set = (patch: Record<string, unknown>) =>
     onConfigChange({ ...config, options: { ...o, ...patch } });
 
-  const prefix = (o.evccPrefix as string | undefined) ?? 'evcc.0';
-  const lpCount = (o.loadpointCount as number | undefined) ?? 1;
-  const showBattery = (o.showBattery as boolean | undefined) ?? true;
+  const prefix        = (o.evccPrefix      as string)  ?? 'evcc.0';
+  const lpCount       = (o.loadpointCount  as number)  ?? 1;
+  const showBattery   = (o.showBattery     as boolean) ?? true;
+  const visibleLps    = (o.visibleLoadpoints as number[]) ?? [];
 
   const inputCls = 'w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none';
-  const inputStyle: React.CSSProperties = {
-    background: 'var(--app-bg)',
-    color: 'var(--text-primary)',
-    border: '1px solid var(--app-border)',
+  const inputSty: React.CSSProperties = { background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' };
+
+  const toggleLp = (idx: number) => {
+    const all = Array.from({ length: lpCount }, (_, i) => i);
+    const current = visibleLps.length > 0 ? visibleLps : all;
+    const next = current.includes(idx)
+      ? current.filter((i) => i !== idx)
+      : [...current, idx].sort();
+    // If all selected, store empty (= show all)
+    set({ visibleLoadpoints: next.length === lpCount ? [] : next });
   };
+
+  const all = Array.from({ length: lpCount }, (_, i) => i);
+  const effectiveVisible = visibleLps.length > 0 ? visibleLps : all;
 
   return (
     <>
       <div>
         <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('evcc.prefix')}</label>
-        <input
-          type="text"
-          value={prefix}
+        <input type="text" value={prefix}
           onChange={(e) => set({ evccPrefix: e.target.value || 'evcc.0' })}
-          placeholder="evcc.0"
-          className={inputCls + ' font-mono'}
-          style={inputStyle}
-        />
+          placeholder="evcc.0" className={inputCls + ' font-mono'} style={inputSty} />
       </div>
 
       <div>
-        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('evcc.loadpoints')}</label>
+        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('evcc.loadpoints')} (gesamt)</label>
         <div className="flex gap-1">
-          {[1, 2, 3, 4].map((n) => (
-            <button
-              key={n}
-              onClick={() => set({ loadpointCount: n })}
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+            <button key={n} onClick={() => set({ loadpointCount: n, visibleLoadpoints: [] })}
               className="flex-1 text-xs py-1.5 rounded-lg transition-all"
               style={{
                 background: lpCount === n ? 'var(--accent)' : 'var(--app-bg)',
                 color: lpCount === n ? '#fff' : 'var(--text-secondary)',
                 border: `1px solid ${lpCount === n ? 'var(--accent)' : 'var(--app-border)'}`,
-              }}
-            >
-              {n}
-            </button>
+              }}>{n}</button>
           ))}
         </div>
       </div>
 
+      {lpCount > 1 && (
+        <div>
+          <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Angezeigte Ladepunkte</label>
+          <div className="flex flex-wrap gap-1">
+            {all.map((idx) => {
+              const active = effectiveVisible.includes(idx);
+              return (
+                <button key={idx} onClick={() => toggleLp(idx)}
+                  className="text-xs px-2 py-1 rounded-lg transition-all"
+                  style={{
+                    background: active ? 'var(--accent)' : 'var(--app-bg)',
+                    color: active ? '#fff' : 'var(--text-secondary)',
+                    border: `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}`,
+                  }}>LP {idx + 1}</button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{t('evcc.showBattery')}</label>
-        <button
-          onClick={() => set({ showBattery: !showBattery })}
+        <button onClick={() => set({ showBattery: !showBattery })}
           className="relative w-9 h-5 rounded-full transition-colors"
-          style={{ background: showBattery ? 'var(--accent)' : 'var(--app-border)' }}
-        >
-          <span
-            className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
-            style={{ left: showBattery ? '18px' : '2px' }}
-          />
+          style={{ background: showBattery ? 'var(--accent)' : 'var(--app-border)' }}>
+          <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+            style={{ left: showBattery ? '18px' : '2px' }} />
         </button>
       </div>
     </>

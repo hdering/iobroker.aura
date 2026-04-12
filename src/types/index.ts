@@ -32,7 +32,7 @@ export type WidgetType =
   | 'camera'
   | 'autolist';
 
-export type WidgetLayout = 'default' | 'card' | 'compact' | 'minimal' | 'agenda';
+export type WidgetLayout = 'default' | 'card' | 'compact' | 'minimal' | 'agenda' | 'flow' | 'battery' | 'production' | 'consumption' | 'loadpoints';
 
 export interface ioBrokerState {
   val: boolean | number | string | null;

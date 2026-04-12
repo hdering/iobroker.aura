@@ -370,7 +370,7 @@ export function WeatherWidget({ config }: WidgetProps) {
                       left:       `${leftPct}%`,
                       width:      `${Math.max(widthPct, 4)}%`,
                       background: fc.isToday
-                        ? 'linear-gradient(to right, var(--accent), var(--accent)cc)'
+                        ? 'linear-gradient(to right, var(--accent), color-mix(in srgb, var(--accent) 75%, transparent))'
                         : 'linear-gradient(to right, #06b6d4, #3b82f6)',
                     }}
                   />

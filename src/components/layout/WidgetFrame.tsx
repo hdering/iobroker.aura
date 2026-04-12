@@ -465,8 +465,9 @@ function PortalDropdown({
 interface WeatherConfigSectionProps {
   o: Record<string, unknown>;
   set: (patch: Record<string, unknown>) => void;
+  onOpenPicker: () => void;
 }
-function WeatherConfigSection({ o, set }: WeatherConfigSectionProps) {
+function WeatherConfigSection({ o, set, onOpenPicker }: WeatherConfigSectionProps) {
   const t = useT();
   const [addressInput, setAddressInput] = useState('');
   const [geocoding,    setGeocoding]    = useState(false);
@@ -535,9 +536,21 @@ function WeatherConfigSection({ o, set }: WeatherConfigSectionProps) {
       {/* ── Local temperature sensor ── */}
       <div>
         <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('wf.weather.localTemp')}</label>
-        <input type="text" value={(o.localTempDatapoint as string) ?? ''}
-          onChange={(e) => set({ localTempDatapoint: e.target.value || undefined })}
-          placeholder={t('wf.weather.localTempPh')} className={iCls + ' font-mono'} style={iSty} />
+        <div className="flex gap-1.5">
+          <input type="text" value={(o.localTempDatapoint as string) ?? ''}
+            onChange={(e) => set({ localTempDatapoint: e.target.value || undefined })}
+            placeholder={t('wf.weather.localTempPh')} className={iCls + ' flex-1 font-mono'} style={iSty} />
+          <button
+            onClick={onOpenPicker}
+            className="text-xs px-2.5 rounded-lg shrink-0"
+            style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+          >…</button>
+        </div>
+        {(o.localTempDatapoint as string) && (
+          <button onClick={() => set({ localTempDatapoint: undefined })}
+            className="text-[10px] mt-0.5 hover:opacity-70"
+            style={{ color: 'var(--text-secondary)' }}>✕ entfernen</button>
+        )}
       </div>
 
       <hr style={{ borderColor: 'var(--app-border)' }} />
@@ -691,7 +704,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
       setOpenPanel(panel);
     }
   };
-  const [pickerTarget, setPickerTarget] = useState<'datapoint' | 'actualDatapoint' | null>(null);
+  const [pickerTarget, setPickerTarget] = useState<'datapoint' | 'actualDatapoint' | 'localTempDatapoint' | null>(null);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
   const Widget = getWidgetMap()[config.type];
   const currentLayout = config.layout ?? 'default';
@@ -1176,6 +1189,13 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                 { value: 'compact', label: t('wf.edit.layout.compact') },
                 { value: 'minimal', label: t('wf.edit.layout.minimal') },
                 ...(config.type === 'calendar' ? [{ value: 'agenda', label: t('wf.edit.layout.agenda') }] : []),
+                ...(config.type === 'evcc' ? [
+                  { value: 'flow',        label: 'Nur Fluss' },
+                  { value: 'battery',     label: 'Nur Batterie' },
+                  { value: 'production',  label: 'Nur Produktion' },
+                  { value: 'consumption', label: 'Nur Verbrauch' },
+                  { value: 'loadpoints',  label: 'Nur Ladepunkte' },
+                ] : []),
               ];
               return (
                 <div className="space-y-1.5">
@@ -1387,37 +1407,42 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                 const gCls = 'w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none';
                 const gSty = { background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' };
                 const dynamicMax = !!(o.dynamicMax);
+                const sectionHdr = (label: string) => (
+                  <div className="text-[10px] font-semibold uppercase tracking-wider pt-1" style={{ color: 'var(--text-secondary)' }}>{label}</div>
+                );
                 return (
                   <>
-                    <div>
-                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('wf.gauge.strokeWidth')}</label>
-                      <input type="number" min={1} max={30} value={(o.strokeWidth as number) ?? 12}
-                        onChange={(e) => set({ strokeWidth: Number(e.target.value) })} className={gCls} style={gSty} />
-                    </div>
+                    {sectionHdr('Skala')}
                     <div className="flex gap-2">
                       <div className="flex-1">
-                        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Min (statisch)</label>
+                        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Min</label>
                         <input type="number" value={min} onChange={(e) => set({ minValue: Number(e.target.value) })} className={gCls} style={gSty} />
                       </div>
                       <div className="flex-1">
-                        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Max (statisch)</label>
+                        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Max</label>
                         <input type="number" value={max} onChange={(e) => set({ maxValue: Number(e.target.value) })} className={gCls} style={gSty} />
                       </div>
                     </div>
-                    <div>
-                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Min-Datenpunkt (dynamisch)</label>
-                      <input type="text" value={(o.minDatapoint as string) ?? ''} onChange={(e) => set({ minDatapoint: e.target.value || undefined })}
-                        placeholder="z.B. javascript.0.minWert" className={gCls} style={gSty} />
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Einheit</label>
+                        <input type="text" value={(o.unit as string) ?? ''} onChange={(e) => set({ unit: e.target.value || undefined })} placeholder="°C, %, W" className={gCls} style={gSty} />
+                      </div>
+                      <div className="flex-1">
+                        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Dezimalstellen</label>
+                        <input type="number" min={0} max={4} value={(o.decimals as number) ?? 1} onChange={(e) => set({ decimals: Number(e.target.value) })} className={gCls} style={gSty} />
+                      </div>
                     </div>
-                    <div>
-                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Max-Datenpunkt (dynamisch)</label>
-                      <input type="text" value={(o.maxDatapoint as string) ?? ''} onChange={(e) => set({ maxDatapoint: e.target.value || undefined })}
-                        placeholder="z.B. javascript.0.maxWert" className={gCls} style={gSty} />
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Bogenbreite</label>
+                        <input type="number" min={1} max={30} value={(o.strokeWidth as number) ?? 12} onChange={(e) => set({ strokeWidth: Number(e.target.value) })} className={gCls} style={gSty} />
+                      </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <label className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>Dynamisches Maximum</label>
-                        <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-secondary)', opacity: 0.7 }}>Max automatisch auf aktuellen Wert ausweiten</p>
+                        <p className="text-[10px]" style={{ color: 'var(--text-secondary)', opacity: 0.7 }}>Max auf aktuellen Wert ausweiten</p>
                       </div>
                       <button onClick={() => set({ dynamicMax: !dynamicMax })}
                         className="relative w-9 h-5 rounded-full transition-colors shrink-0"
@@ -1426,37 +1451,6 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                           style={{ left: dynamicMax ? '18px' : '2px' }} />
                       </button>
                     </div>
-                    <div>
-                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Einheit</label>
-                      <input type="text" value={(o.unit as string) ?? ''} onChange={(e) => set({ unit: e.target.value || undefined })} placeholder="z.B. °C, %, W" className={gCls} style={gSty} />
-                    </div>
-                    <div>
-                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Dezimalstellen</label>
-                      <input type="number" min={0} max={4} value={(o.decimals as number) ?? 1} onChange={(e) => set({ decimals: Number(e.target.value) })} className={gCls} style={gSty} />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Farbzonen</label>
-                      <button onClick={() => set({ colorZones: !colorZones })}
-                        className="relative w-9 h-5 rounded-full transition-colors"
-                        style={{ background: colorZones ? 'var(--accent)' : 'var(--app-border)' }}>
-                        <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
-                          style={{ left: colorZones ? '18px' : '2px' }} />
-                      </button>
-                    </div>
-                    {colorZones && (
-                      <>
-                        <div>
-                          <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Grün bis</label>
-                          <input type="number" value={(o.greenMax as number) ?? min + range * 0.33}
-                            onChange={(e) => set({ greenMax: Number(e.target.value) })} className={gCls} style={gSty} />
-                        </div>
-                        <div>
-                          <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Gelb bis</label>
-                          <input type="number" value={(o.yellowMax as number) ?? min + range * 0.66}
-                            onChange={(e) => set({ yellowMax: Number(e.target.value) })} className={gCls} style={gSty} />
-                        </div>
-                      </>
-                    )}
                     <div className="flex items-center justify-between">
                       <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Min/Max anzeigen</label>
                       <button onClick={() => set({ showMinMax: !(o.showMinMax ?? true) })}
@@ -1466,6 +1460,110 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                           style={{ left: (o.showMinMax ?? true) ? '18px' : '2px' }} />
                       </button>
                     </div>
+
+                    {sectionHdr('Farbzonen')}
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Farbzonen aktiv</label>
+                      <button onClick={() => set({ colorZones: !colorZones })}
+                        className="relative w-9 h-5 rounded-full transition-colors"
+                        style={{ background: colorZones ? 'var(--accent)' : 'var(--app-border)' }}>
+                        <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                          style={{ left: colorZones ? '18px' : '2px' }} />
+                      </button>
+                    </div>
+                    {colorZones && (
+                      <>
+                        {/* Zone 1 */}
+                        <div className="flex items-center gap-2">
+                          <input type="color" value={(o.zone1Color as string) ?? '#10b981'}
+                            onChange={(e) => set({ zone1Color: e.target.value })}
+                            className="w-8 h-7 rounded cursor-pointer shrink-0" style={{ border: '1px solid var(--app-border)', padding: '1px' }} />
+                          <div className="flex-1">
+                            <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Zone 1 bis</label>
+                            <input type="number" value={(o.zone1Max as number) ?? min + range * 0.33}
+                              onChange={(e) => set({ zone1Max: Number(e.target.value) })} className={gCls} style={gSty} />
+                          </div>
+                        </div>
+                        {/* Zone 2 */}
+                        <div className="flex items-center gap-2">
+                          <input type="color" value={(o.zone2Color as string) ?? '#f59e0b'}
+                            onChange={(e) => set({ zone2Color: e.target.value })}
+                            className="w-8 h-7 rounded cursor-pointer shrink-0" style={{ border: '1px solid var(--app-border)', padding: '1px' }} />
+                          <div className="flex-1">
+                            <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Zone 2 bis</label>
+                            <input type="number" value={(o.zone2Max as number) ?? min + range * 0.66}
+                              onChange={(e) => set({ zone2Max: Number(e.target.value) })} className={gCls} style={gSty} />
+                          </div>
+                        </div>
+                        {/* Zone 3 */}
+                        <div className="flex items-center gap-2">
+                          <input type="color" value={(o.zone3Color as string) ?? '#ef4444'}
+                            onChange={(e) => set({ zone3Color: e.target.value })}
+                            className="w-8 h-7 rounded cursor-pointer shrink-0" style={{ border: '1px solid var(--app-border)', padding: '1px' }} />
+                          <div className="flex-1">
+                            <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Zone 3 (Rest)</label>
+                            <div className="text-[10px] py-2 px-2.5 rounded-lg" style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>ab Zone 2 bis Max</div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {sectionHdr('Zeiger')}
+                    {/* Pointer 1 (primary) */}
+                    <div>
+                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Zeiger 1 – Datenpunkt</label>
+                      <div className="text-[10px] py-2 px-2.5 rounded-lg font-mono truncate" style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+                        {config.datapoint || '–'}
+                      </div>
+                    </div>
+                    {!colorZones && (
+                      <div className="flex items-center gap-2">
+                        <input type="color" value={(o.pointer1Color as string) ?? '#6366f1'}
+                          onChange={(e) => set({ pointer1Color: e.target.value })}
+                          className="w-8 h-7 rounded cursor-pointer shrink-0" style={{ border: '1px solid var(--app-border)', padding: '1px' }} />
+                        <div className="flex-1">
+                          <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Zeiger 1 – Farbe</label>
+                          <input type="text" value={(o.pointer1Label as string) ?? ''} onChange={(e) => set({ pointer1Label: e.target.value || undefined })}
+                            placeholder="Bezeichnung (optional)" className={gCls} style={gSty} />
+                        </div>
+                      </div>
+                    )}
+                    {/* Pointer 2 */}
+                    <div>
+                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Zeiger 2 – Datenpunkt</label>
+                      <input type="text" value={(o.pointer2Datapoint as string) ?? ''} onChange={(e) => set({ pointer2Datapoint: e.target.value || undefined })}
+                        placeholder="Datenpunkt-ID (leer = deaktiviert)" className={gCls + ' font-mono'} style={gSty} />
+                    </div>
+                    {(o.pointer2Datapoint as string) && (
+                      <div className="flex items-center gap-2">
+                        <input type="color" value={(o.pointer2Color as string) ?? '#f97316'}
+                          onChange={(e) => set({ pointer2Color: e.target.value })}
+                          className="w-8 h-7 rounded cursor-pointer shrink-0" style={{ border: '1px solid var(--app-border)', padding: '1px' }} />
+                        <div className="flex-1">
+                          <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Zeiger 2 – Bezeichnung</label>
+                          <input type="text" value={(o.pointer2Label as string) ?? ''} onChange={(e) => set({ pointer2Label: e.target.value || undefined })}
+                            placeholder="z.B. Außen" className={gCls} style={gSty} />
+                        </div>
+                      </div>
+                    )}
+                    {/* Pointer 3 */}
+                    <div>
+                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Zeiger 3 – Datenpunkt</label>
+                      <input type="text" value={(o.pointer3Datapoint as string) ?? ''} onChange={(e) => set({ pointer3Datapoint: e.target.value || undefined })}
+                        placeholder="Datenpunkt-ID (leer = deaktiviert)" className={gCls + ' font-mono'} style={gSty} />
+                    </div>
+                    {(o.pointer3Datapoint as string) && (
+                      <div className="flex items-center gap-2">
+                        <input type="color" value={(o.pointer3Color as string) ?? '#8b5cf6'}
+                          onChange={(e) => set({ pointer3Color: e.target.value })}
+                          className="w-8 h-7 rounded cursor-pointer shrink-0" style={{ border: '1px solid var(--app-border)', padding: '1px' }} />
+                        <div className="flex-1">
+                          <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Zeiger 3 – Bezeichnung</label>
+                          <input type="text" value={(o.pointer3Label as string) ?? ''} onChange={(e) => set({ pointer3Label: e.target.value || undefined })}
+                            placeholder="z.B. Keller" className={gCls} style={gSty} />
+                        </div>
+                      </div>
+                    )}
                   </>
                 );
               })()}
@@ -1499,7 +1597,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                 const o   = config.options ?? {};
                 const set = (patch: Record<string, unknown>) =>
                   onConfigChange({ ...config, options: { ...o, ...patch } });
-                return <WeatherConfigSection o={o} set={set} />;
+                return <WeatherConfigSection o={o} set={set} onOpenPicker={() => setPickerTarget('localTempDatapoint')} />;
               })()}
 
               {/* ── Camera config ── */}
@@ -1633,10 +1731,16 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
       {/* Datapoint Picker Modal */}
       {pickerTarget && (
         <DatapointPicker
-          currentValue={pickerTarget === 'datapoint' ? config.datapoint : ((config.options?.actualDatapoint as string) ?? '')}
+          currentValue={
+            pickerTarget === 'datapoint'         ? config.datapoint :
+            pickerTarget === 'localTempDatapoint' ? ((config.options?.localTempDatapoint as string) ?? '') :
+            ((config.options?.actualDatapoint as string) ?? '')
+          }
           onSelect={(id) => {
             if (pickerTarget === 'datapoint') {
               onConfigChange({ ...config, datapoint: id });
+            } else if (pickerTarget === 'localTempDatapoint') {
+              onConfigChange({ ...config, options: { ...config.options, localTempDatapoint: id } });
             } else {
               onConfigChange({ ...config, options: { ...config.options, actualDatapoint: id } });
             }
