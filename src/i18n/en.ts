@@ -720,7 +720,9 @@ export const en: Record<TranslationKey, string> = {
   'thermo.actual':    'Actual',
 
   // ── Group Widget ──────────────────────────────────────────────────────────────
-  'group.addWidget':  'Add widget',
+  'group.addWidget':   'Add widget',
+  'group.mobileOrder': 'Mobile order',
+  'group.noWidgets':   'No widgets yet',
 
   // ── EVCC Widget ───────────────────────────────────────────────────────────────
   'evcc.solar':        'Solar',

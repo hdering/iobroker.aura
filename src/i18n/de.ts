@@ -718,7 +718,9 @@ export const de = {
   'thermo.actual':    'Ist',
 
   // ── Group Widget ──────────────────────────────────────────────────────────────
-  'group.addWidget':  'Widget hinzufügen',
+  'group.addWidget':   'Widget hinzufügen',
+  'group.mobileOrder': 'Mobile Reihenfolge',
+  'group.noWidgets':   'Keine Widgets vorhanden',
 
   // ── EVCC Widget ───────────────────────────────────────────────────────────────
   'evcc.solar':        'Solar',
