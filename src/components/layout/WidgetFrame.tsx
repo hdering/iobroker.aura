@@ -502,11 +502,47 @@ function WeatherConfigSection({ o, set }: WeatherConfigSectionProps) {
     }
   };
 
+  const showWeather  = (o.showWeather  as boolean) ?? true;
   const showForecast = (o.showForecast as boolean) ?? true;
   const showToday    = (o.showToday    as boolean) ?? true;
+  const showWarnings = (o.showWarnings as boolean) ?? false;
 
   return (
     <>
+      {/* ── Display toggles ── */}
+      <div className="flex items-center justify-between">
+        <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{t('wf.weather.showWeather')}</label>
+        <button onClick={() => set({ showWeather: !showWeather })}
+          className="relative w-9 h-5 rounded-full transition-colors shrink-0"
+          style={{ background: showWeather ? 'var(--accent)' : 'var(--app-border)' }}>
+          <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+            style={{ left: showWeather ? '18px' : '2px' }} />
+        </button>
+      </div>
+      <div className="flex items-center justify-between">
+        <div>
+          <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{t('wf.weather.showWarnings')}</label>
+          <p className="text-[10px]" style={{ color: 'var(--text-secondary)', opacity: 0.6 }}>{t('wf.weather.warningsHint')}</p>
+        </div>
+        <button onClick={() => set({ showWarnings: !showWarnings })}
+          className="relative w-9 h-5 rounded-full transition-colors shrink-0 ml-2"
+          style={{ background: showWarnings ? 'var(--accent)' : 'var(--app-border)' }}>
+          <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+            style={{ left: showWarnings ? '18px' : '2px' }} />
+        </button>
+      </div>
+
+      {/* ── Local temperature sensor ── */}
+      <div>
+        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('wf.weather.localTemp')}</label>
+        <input type="text" value={(o.localTempDatapoint as string) ?? ''}
+          onChange={(e) => set({ localTempDatapoint: e.target.value || undefined })}
+          placeholder={t('wf.weather.localTempPh')} className={iCls + ' font-mono'} style={iSty} />
+      </div>
+
+      <hr style={{ borderColor: 'var(--app-border)' }} />
+
+      {/* ── Location ── */}
       <div>
         <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('wf.weather.locationSearch')}</label>
         <div className="flex gap-1.5">

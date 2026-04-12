@@ -420,9 +420,14 @@ export const en: Record<TranslationKey, string> = {
   'wf.weather.locationName':    'Location Name',
   'wf.weather.locationPh':      'e.g. Munich',
   'wf.weather.refreshMin':      'Refresh (min.)',
+  'wf.weather.showWeather':     'Show online weather',
   'wf.weather.showForecast':    'Show Forecast',
   'wf.weather.forecastDays':    'Forecast Days',
   'wf.weather.showToday':       'Show Today',
+  'wf.weather.localTemp':       'Local temperature sensor (datapoint)',
+  'wf.weather.localTempPh':     'e.g. hm-rpc.0.xxx.TEMPERATURE',
+  'wf.weather.showWarnings':    'Show weather warnings (DWD)',
+  'wf.weather.warningsHint':    'Requires lat/lon • Germany only',
 
   // Camera config
   'wf.camera.streamUrl': 'Stream URL',
@@ -644,7 +649,14 @@ export const en: Record<TranslationKey, string> = {
   'weather.today':       'Today',
   'weather.humidity':    'Humidity',
   'weather.feelsLike':   'Feels like {feel} · 💨 {wind} km/h',
-  'weather.noData':      'Weather data not available',
+  'weather.noData':          'Weather data not available',
+  'weather.warnings':        'Weather Warnings',
+  'weather.noWarnings':      'No warnings',
+  'weather.warnSeverity.minor':    'Minor',
+  'weather.warnSeverity.moderate': 'Moderate',
+  'weather.warnSeverity.severe':   'Severe',
+  'weather.warnSeverity.extreme':  'Extreme',
+  'weather.localSensor':     '(Local sensor)',
 
   // ── Calendar Widget ───────────────────────────────────────────────────────────
   'calendar.title':      'Calendar',

@@ -418,9 +418,14 @@ export const de = {
   'wf.weather.locationName':    'Standortname',
   'wf.weather.locationPh':      'z.B. München',
   'wf.weather.refreshMin':      'Aktualisierung (Min.)',
+  'wf.weather.showWeather':     'Online-Wetter anzeigen',
   'wf.weather.showForecast':    'Vorhersage anzeigen',
   'wf.weather.forecastDays':    'Vorhersagetage',
   'wf.weather.showToday':       'Heutigen Tag anzeigen',
+  'wf.weather.localTemp':       'Eigener Temperaturfühler (Datenpunkt)',
+  'wf.weather.localTempPh':     'z.B. hm-rpc.0.xxx.TEMPERATURE',
+  'wf.weather.showWarnings':    'Wetterwarnungen anzeigen (DWD)',
+  'wf.weather.warningsHint':    'Benötigt Breitengrad + Längengrad • Nur Deutschland',
 
   // Camera config
   'wf.camera.streamUrl':      'Stream-URL',
@@ -642,7 +647,14 @@ export const de = {
   'weather.today':       'Heute',
   'weather.humidity':    'Luftfeuchtigkeit',
   'weather.feelsLike':   'Gefühlt {feel} · 💨 {wind} km/h',
-  'weather.noData':      'Wetterdaten nicht verfügbar',
+  'weather.noData':          'Wetterdaten nicht verfügbar',
+  'weather.warnings':        'Wetterwarnungen',
+  'weather.noWarnings':      'Keine Warnungen',
+  'weather.warnSeverity.minor':    'Gering',
+  'weather.warnSeverity.moderate': 'Mäßig',
+  'weather.warnSeverity.severe':   'Stark',
+  'weather.warnSeverity.extreme':  'Extrem',
+  'weather.localSensor':     '(Eigener Sensor)',
 
   // ── Calendar Widget ───────────────────────────────────────────────────────────
   'calendar.title':      'Kalender',
