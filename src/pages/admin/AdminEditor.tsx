@@ -360,7 +360,9 @@ export function AdminEditor() {
     const btn = settingsBtnRefs.current.get(tabId);
     if (!btn) return;
     const rect = btn.getBoundingClientRect();
-    setPanelPos({ top: rect.bottom + 6, left: rect.left });
+    const panelW = 256; // w-64
+    const left = Math.min(rect.left, window.innerWidth - panelW - 12);
+    setPanelPos({ top: rect.bottom + 6, left: Math.max(8, left) });
     setSettingsTabId((prev) => (prev === tabId ? null : tabId));
   };
 
@@ -451,7 +453,7 @@ export function AdminEditor() {
                     })()}
                     <button onClick={() => setActiveTab(tab.id)}
                       className="text-xs font-medium" style={{ color: isActive ? 'var(--accent)' : 'var(--text-secondary)' }}>
-                      {!tab.hideLabel ? tab.name : (tab.icon ? '' : tab.name)}
+                      {tab.name}
                     </button>
                     <button
                       ref={(el) => { if (el) settingsBtnRefs.current.set(tab.id, el); else settingsBtnRefs.current.delete(tab.id); }}
@@ -528,8 +530,8 @@ export function AdminEditor() {
         <>
           <div className="fixed inset-0 z-[998]" onClick={() => setSettingsTabId(null)} />
           <div
-            className="fixed z-[999] rounded-xl shadow-2xl p-3 space-y-3 w-64"
-            style={{ top: panelPos.top, left: panelPos.left, background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}
+            className="fixed z-[999] rounded-xl shadow-2xl p-3 space-y-3 w-64 overflow-y-auto"
+            style={{ top: panelPos.top, left: panelPos.left, maxHeight: `calc(100vh - ${panelPos.top + 12}px)`, background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{t('editor.tabMgmt.settings')}</span>
