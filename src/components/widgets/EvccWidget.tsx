@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Zap, Car, Plug, PlugZap } from 'lucide-react';
+import { Sun, Home, Zap, Battery, Car, Plug, PlugZap } from 'lucide-react';
 import { useIoBroker } from '../../hooks/useIoBroker';
 import type { WidgetProps, WidgetConfig, ioBrokerState } from '../../types';
 import { useT } from '../../i18n';
@@ -145,144 +145,204 @@ function useEvccData(prefix: string, loadpointCount: number) {
   return { site, loadpoints };
 }
 
-// ── Animated flow line ────────────────────────────────────────────────────────
+// ── Animated flow arrow (horizontal, CSS-based) ───────────────────────────────
+
+function FlowArrow({ active, color, reverse = false, power = 0 }: {
+  active: boolean; color: string; reverse?: boolean; power?: number;
+}) {
+  const dur = active ? Math.max(0.5, 2.5 - (power / 5000)) : 2;
+  return (
+    <div className="flex-1 relative flex items-center" style={{ height: 16, overflow: 'hidden' }}>
+      <div className="w-full" style={{ height: 1.5, background: active ? color : 'var(--app-border)', opacity: 0.45 }} />
+      {active && (
+        <div style={{
+          position: 'absolute',
+          width: 9, height: 9,
+          borderRadius: '50%',
+          background: color,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          animation: `${reverse ? 'evcc-r' : 'evcc-f'} ${dur}s linear infinite`,
+        }} />
+      )}
+    </div>
+  );
+}
+
+// ── Animated flow arrow (vertical, SVG-based) ─────────────────────────────────
+
+function VertFlowArrow({ active, color, power = 0, down = true }: {
+  active: boolean; color: string; power?: number; down?: boolean;
+}) {
+  const dur = active ? Math.max(0.5, 2.5 - (power / 5000)) : 2;
+  const H = 24;
+  const path = down ? `M 5 0 L 5 ${H}` : `M 5 ${H} L 5 0`;
+  return (
+    <svg width={10} height={H} style={{ overflow: 'visible' }}>
+      <line x1="5" y1="0" x2="5" y2={H}
+        stroke={active ? color : 'var(--app-border)'}
+        strokeWidth={1.5} strokeOpacity={0.45} />
+      {active && (
+        <circle r={4.5} fill={color} opacity={0.9}>
+          <animateMotion dur={`${dur}s`} repeatCount="indefinite" path={path} />
+        </circle>
+      )}
+    </svg>
+  );
+}
+
+// ── Energy flow row (default/card layout) ─────────────────────────────────────
+
+function EnergyFlowRow({ site, showBattery }: { site: SiteState; showBattery: boolean }) {
+  const t = useT();
+  const hasSolar   = site.pvPower > 10;
+  const gridImport = site.gridPower > 10;
+  const gridExport = site.gridPower < -10;
+  const battCharge = site.batteryPower < -10;
+  const battDisch  = site.batteryPower > 10;
+  const battActive = battCharge || battDisch;
+  const gridColor  = gridImport ? '#ef4444' : gridExport ? '#10b981' : 'var(--text-secondary)';
+  const battColor  = battCharge ? '#3b82f6' : '#f59e0b';
+
+  return (
+    <div className="flex flex-col">
+      {/* CSS keyframes injected once */}
+      <style>{`
+        @keyframes evcc-f { 0%{left:-6px} 100%{left:calc(100% + 3px)} }
+        @keyframes evcc-r { 0%{left:calc(100% + 3px)} 100%{left:-6px} }
+      `}</style>
+
+      {/* Main row: Solar → House ↔ Grid */}
+      <div className="flex items-center">
+        {/* Solar */}
+        <div className="flex flex-col items-center gap-0.5" style={{ width: 58 }}>
+          <Sun size={16} color="#f59e0b" />
+          <span className="text-xs font-semibold tabular-nums" style={{ color: '#f59e0b' }}>{fmtKW(site.pvPower)}</span>
+          <span className="text-[9px]" style={{ color: 'var(--text-secondary)' }}>{t('evcc.solar')}</span>
+        </div>
+
+        <FlowArrow active={hasSolar} color="#f59e0b" power={site.pvPower} />
+
+        {/* House */}
+        <div className="flex flex-col items-center gap-0.5" style={{ width: 58 }}>
+          <Home size={16} color="var(--text-secondary)" />
+          <span className="text-xs font-semibold tabular-nums" style={{ color: 'var(--text-primary)' }}>{fmtKW(site.homePower)}</span>
+          <span className="text-[9px]" style={{ color: 'var(--text-secondary)' }}>{t('evcc.house')}</span>
+        </div>
+
+        <FlowArrow active={gridImport || gridExport} color={gridColor} reverse={gridImport} power={Math.abs(site.gridPower)} />
+
+        {/* Grid */}
+        <div className="flex flex-col items-center gap-0.5" style={{ width: 58 }}>
+          <Zap size={16} color={gridColor} />
+          <span className="text-xs font-semibold tabular-nums" style={{ color: gridColor }}>{fmtKW(Math.abs(site.gridPower))}</span>
+          <span className="text-[9px]" style={{ color: 'var(--text-secondary)' }}>
+            {gridImport ? t('evcc.grid') : gridExport ? t('evcc.feedIn') : t('evcc.gridLabel')}
+          </span>
+        </div>
+      </div>
+
+      {/* Battery – centered under House (House is exactly at horizontal center) */}
+      {showBattery && (
+        <div className="flex flex-col items-center">
+          <VertFlowArrow active={battActive} color={battColor} power={Math.abs(site.batteryPower)} down={battCharge} />
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl"
+            style={{ background: `${battColor}18`, border: `1px solid ${battColor}44` }}>
+            <Battery size={13} color={battColor} />
+            <span className="text-xs font-bold tabular-nums" style={{ color: battColor }}>{fmtSoc(site.batterySoc)}</span>
+            {site.batteryPower !== 0 && (
+              <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>· {fmtKW(Math.abs(site.batteryPower))}</span>
+            )}
+            {site.batteryMode && site.batteryMode !== 'normal' && site.batteryMode !== 'unknown' && (
+              <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>· {site.batteryMode}</span>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Energy flow SVG (flow layout only) ───────────────────────────────────────
 
 function FlowPath({
-  x1, y1, x2, y2,
-  active, color, reverse = false,
-  power = 0,
+  x1, y1, x2, y2, active, color, reverse = false, power = 0,
 }: {
   x1: number; y1: number; x2: number; y2: number;
-  active: boolean; color: string; reverse?: boolean;
-  power?: number;
+  active: boolean; color: string; reverse?: boolean; power?: number;
 }) {
-  // Speed based on power (faster = more power)
   const dur = active ? Math.max(0.6, 2.0 - (power / 5000)) : 2;
   const fwd = `M ${x1} ${y1} L ${x2} ${y2}`;
   const rev = `M ${x2} ${y2} L ${x1} ${y1}`;
   const animPath = reverse ? rev : fwd;
-
   return (
     <g>
-      {/* Static background line */}
       <line x1={x1} y1={y1} x2={x2} y2={y2}
         stroke={active ? color : 'var(--app-border)'}
         strokeWidth={active ? 2 : 1.5}
         strokeOpacity={active ? 0.25 : 0.4} />
-
-      {/* Animated dots */}
       {active && [0, 0.35, 0.7].map((offset, i) => (
         <circle key={i} r={2.8} fill={color} opacity={0.9}>
-          <animateMotion
-            dur={`${dur}s`}
-            begin={`${-offset * dur}s`}
-            repeatCount="indefinite"
-            path={animPath}
-          />
+          <animateMotion dur={`${dur}s`} begin={`${-offset * dur}s`} repeatCount="indefinite" path={animPath} />
         </circle>
       ))}
     </g>
   );
 }
 
-// ── Energy flow SVG ───────────────────────────────────────────────────────────
-
 function EnergyFlowSVG({
-  site,
-  loadpoints,
-  showBattery,
-  visibleLpIndices,
+  site, loadpoints, showBattery, visibleLpIndices,
 }: {
-  site: SiteState;
-  loadpoints: LoadpointState[];
-  showBattery: boolean;
-  visibleLpIndices: number[];
+  site: SiteState; loadpoints: LoadpointState[]; showBattery: boolean; visibleLpIndices: number[];
 }) {
   const t = useT();
-
   const hasSolar   = site.pvPower > 10;
   const gridImport = site.gridPower > 10;
   const gridExport = site.gridPower < -10;
-  const battCharge = site.batteryPower < -10;  // negative = charging
-  const battDisch  = site.batteryPower > 10;   // positive = discharging
-  const hasBatt    = showBattery;
+  const battCharge = site.batteryPower < -10;
+  const battDisch  = site.batteryPower > 10;
   const visLps     = visibleLpIndices.map((i) => loadpoints[i]).filter(Boolean);
   const chargingLps = visLps.filter((lp) => lp.chargePower > 10);
-
-  const gridColor = gridImport ? '#ef4444' : gridExport ? '#10b981' : 'var(--text-secondary)';
-  const battColor = battCharge ? '#3b82f6' : '#f59e0b';
-
-  // Layout coordinates (viewBox 0 0 220 170)
-  const cx = 110, cy = 75;  // House center
-  const sx = 35,  sy = 35;  // Solar
-  const gx = 185, gy = 35;  // Grid
-  const bx = 35,  by = 140; // Battery
-  // LP positions distributed vertically on right
-  const lpPositions = visLps.map((_, i) => ({
-    x: 185,
-    y: hasBatt ? 105 + i * 40 : 120 + i * 35,
-  }));
+  const gridColor  = gridImport ? '#ef4444' : gridExport ? '#10b981' : 'var(--text-secondary)';
+  const battColor  = battCharge ? '#3b82f6' : '#f59e0b';
+  const cx = 110, cy = 75, sx = 35, sy = 35, gx = 185, gy = 35, bx = 35, by = 140;
+  const lpPositions = visLps.map((_, i) => ({ x: 185, y: showBattery ? 105 + i * 40 : 120 + i * 35 }));
 
   return (
     <svg viewBox="0 0 220 170" className="w-full h-full" style={{ overflow: 'visible' }}>
-      {/* ── Connection paths ── */}
       <FlowPath x1={sx} y1={sy} x2={cx} y2={cy} active={hasSolar} color="#f59e0b" power={site.pvPower} />
       <FlowPath x1={gx} y1={gy} x2={cx} y2={cy} active={gridImport} color="#ef4444" power={Math.abs(site.gridPower)} />
       <FlowPath x1={gx} y1={gy} x2={cx} y2={cy} active={gridExport} color="#10b981" reverse power={Math.abs(site.gridPower)} />
-      {hasBatt && (
+      {showBattery && (
         <>
           <FlowPath x1={bx} y1={by} x2={cx} y2={cy} active={battDisch} color="#f59e0b" power={Math.abs(site.batteryPower)} />
           <FlowPath x1={bx} y1={by} x2={cx} y2={cy} active={battCharge} color="#3b82f6" reverse power={Math.abs(site.batteryPower)} />
         </>
       )}
       {lpPositions.map((pos, i) => (
-        <FlowPath key={i}
-          x1={cx} y1={cy} x2={pos.x} y2={pos.y}
-          active={chargingLps.includes(visLps[i])} color="#6366f1"
-          power={visLps[i].chargePower} />
+        <FlowPath key={i} x1={cx} y1={cy} x2={pos.x} y2={pos.y}
+          active={chargingLps.includes(visLps[i])} color="#6366f1" power={visLps[i].chargePower} />
       ))}
-
-      {/* ── Solar node ── */}
       <circle cx={sx} cy={sy} r={18} fill="#f59e0b22" stroke="#f59e0b" strokeWidth={1.5} />
-      <text x={sx} y={sy + 5} textAnchor="middle" fontSize={14}>☀️</text>
-      <text x={sx} y={sy + 26} textAnchor="middle" fontSize={8} fill="#f59e0b" fontWeight="bold">
-        {hasSolar ? fmtKW(site.pvPower) : '–'}
-      </text>
-      <text x={sx} y={sy + 35} textAnchor="middle" fontSize={7} fill="var(--text-secondary)">{t('evcc.solar')}</text>
-
-      {/* ── Grid node ── */}
+      <text x={sx} y={sy+5} textAnchor="middle" fontSize={14}>☀️</text>
+      <text x={sx} y={sy+26} textAnchor="middle" fontSize={8} fill="#f59e0b" fontWeight="bold">{hasSolar ? fmtKW(site.pvPower) : '–'}</text>
+      <text x={sx} y={sy+35} textAnchor="middle" fontSize={7} fill="var(--text-secondary)">{t('evcc.solar')}</text>
       <circle cx={gx} cy={gy} r={18} fill={`${gridColor}22`} stroke={gridColor} strokeWidth={1.5} />
-      <text x={gx} y={gy + 5} textAnchor="middle" fontSize={13}>⚡</text>
-      <text x={gx} y={gy + 26} textAnchor="middle" fontSize={8} fill={gridColor} fontWeight="bold">
-        {fmtKW(Math.abs(site.gridPower))}
-      </text>
-      <text x={gx} y={gy + 35} textAnchor="middle" fontSize={7} fill="var(--text-secondary)">
-        {gridImport ? t('evcc.grid') : gridExport ? t('evcc.feedIn') : t('evcc.gridLabel')}
-      </text>
-
-      {/* ── House node ── */}
+      <text x={gx} y={gy+5} textAnchor="middle" fontSize={13}>⚡</text>
+      <text x={gx} y={gy+26} textAnchor="middle" fontSize={8} fill={gridColor} fontWeight="bold">{fmtKW(Math.abs(site.gridPower))}</text>
+      <text x={gx} y={gy+35} textAnchor="middle" fontSize={7} fill="var(--text-secondary)">{gridImport ? t('evcc.grid') : gridExport ? t('evcc.feedIn') : t('evcc.gridLabel')}</text>
       <circle cx={cx} cy={cy} r={22} fill="var(--app-surface)" stroke="var(--app-border)" strokeWidth={2} />
-      <text x={cx} y={cy + 5} textAnchor="middle" fontSize={15}>🏠</text>
-      <text x={cx} y={cy + 20} textAnchor="middle" fontSize={8} fill="var(--text-primary)" fontWeight="bold">
-        {fmtKW(site.homePower)}
-      </text>
-      <text x={cx} y={cy + 30} textAnchor="middle" fontSize={7} fill="var(--text-secondary)">{t('evcc.house')}</text>
-
-      {/* ── Battery node ── */}
-      {hasBatt && (
+      <text x={cx} y={cy+5} textAnchor="middle" fontSize={15}>🏠</text>
+      <text x={cx} y={cy+20} textAnchor="middle" fontSize={8} fill="var(--text-primary)" fontWeight="bold">{fmtKW(site.homePower)}</text>
+      <text x={cx} y={cy+30} textAnchor="middle" fontSize={7} fill="var(--text-secondary)">{t('evcc.house')}</text>
+      {showBattery && (
         <>
           <circle cx={bx} cy={by} r={18} fill={`${battColor}22`} stroke={battColor} strokeWidth={1.5} />
-          <text x={bx} y={by + 5} textAnchor="middle" fontSize={13}>🔋</text>
-          <text x={bx} y={by + 26} textAnchor="middle" fontSize={8} fill={battColor} fontWeight="bold">
-            {fmtSoc(site.batterySoc)}
-          </text>
-          <text x={bx} y={by + 35} textAnchor="middle" fontSize={7} fill="var(--text-secondary)">
-            {site.batteryPower !== 0 ? fmtKW(Math.abs(site.batteryPower)) : '–'}
-          </text>
+          <text x={bx} y={by+5} textAnchor="middle" fontSize={13}>🔋</text>
+          <text x={bx} y={by+26} textAnchor="middle" fontSize={8} fill={battColor} fontWeight="bold">{fmtSoc(site.batterySoc)}</text>
+          <text x={bx} y={by+35} textAnchor="middle" fontSize={7} fill="var(--text-secondary)">{site.batteryPower !== 0 ? fmtKW(Math.abs(site.batteryPower)) : '–'}</text>
         </>
       )}
-
-      {/* ── Loadpoint nodes ── */}
       {lpPositions.map((pos, i) => {
         const lp = visLps[i];
         const isCharging = lp.chargePower > 10;
@@ -290,14 +350,13 @@ function EnergyFlowSVG({
         const color = isCharging ? '#6366f1' : isConnected ? '#818cf8' : 'var(--text-secondary)';
         return (
           <g key={i}>
-            <circle cx={pos.x} cy={pos.y} r={16} fill={`${isConnected ? '#6366f1' : 'var(--app-border)'}22`}
-              stroke={color} strokeWidth={1.5} />
-            <text x={pos.x} y={pos.y + 5} textAnchor="middle" fontSize={12}>{isConnected ? '🚗' : '🔌'}</text>
-            <text x={pos.x} y={pos.y + 24} textAnchor="middle" fontSize={8} fill={color} fontWeight="bold">
+            <circle cx={pos.x} cy={pos.y} r={16} fill={`${isConnected ? '#6366f1' : 'var(--app-border)'}22`} stroke={color} strokeWidth={1.5} />
+            <text x={pos.x} y={pos.y+5} textAnchor="middle" fontSize={12}>{isConnected ? '🚗' : '🔌'}</text>
+            <text x={pos.x} y={pos.y+24} textAnchor="middle" fontSize={8} fill={color} fontWeight="bold">
               {isCharging ? fmtKW(lp.chargePower) : lp.vehicleSoc > 0 ? fmtSoc(lp.vehicleSoc) : '–'}
             </text>
             {isCharging && (
-              <circle cx={pos.x + 11} cy={pos.y - 11} r={3} fill="#6366f1">
+              <circle cx={pos.x+11} cy={pos.y-11} r={3} fill="#6366f1">
                 <animate attributeName="opacity" values="1;0.3;1" dur="1.2s" repeatCount="indefinite" />
               </circle>
             )}
@@ -609,26 +668,28 @@ export function EvccWidget({ config }: WidgetProps) {
     );
   }
 
-  // ── Layout: default / card / flow ─────────────────────────────────────────
-  const showFlow    = true;
-  const showLpCards = layout !== 'flow';
+  // ── Layout: flow (SVG node graph) ────────────────────────────────────────
+  if (layout === 'flow') {
+    return (
+      <div className="flex flex-col gap-2 h-full overflow-auto">
+        <div className="shrink-0" style={{ height: showBattery ? 190 : 160 }}>
+          <EnergyFlowSVG site={site} loadpoints={loadpoints} showBattery={showBattery} visibleLpIndices={visibleLpIndices} />
+        </div>
+        {visLps.map(({ lp, idx }) => (
+          <LoadpointCard key={idx} lp={lp} idx={idx} prefix={prefix} compact={false} />
+        ))}
+      </div>
+    );
+  }
 
+  // ── Layout: default / card ────────────────────────────────────────────────
   return (
     <div className="flex flex-col gap-2 h-full overflow-auto">
-      {/* Animated energy flow diagram */}
-      {showFlow && (
-        <div className="shrink-0" style={{ height: showBattery ? 190 : 160 }}>
-          <EnergyFlowSVG
-            site={site}
-            loadpoints={loadpoints}
-            showBattery={showBattery}
-            visibleLpIndices={visibleLpIndices}
-          />
-        </div>
-      )}
+      <div className="shrink-0">
+        <EnergyFlowRow site={site} showBattery={showBattery} />
+      </div>
 
-      {/* Loadpoint cards */}
-      {showLpCards && visLps.map(({ lp, idx }) => (
+      {visLps.map(({ lp, idx }) => (
         <LoadpointCard key={idx} lp={lp} idx={idx} prefix={prefix} compact={false} />
       ))}
 
