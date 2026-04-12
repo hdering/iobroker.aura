@@ -23,6 +23,8 @@ export type AddMode =
   | 'free'        // no datapoint / special config (clock, header, …)
   | 'wizard-only' // cannot be added manually (calendar)
 
+export type WidgetGroup = 'control' | 'special' | 'layout';
+
 export interface WidgetMeta {
   type: WidgetType;
   /** Full German name shown in dialogs, admin lists, … */
@@ -41,9 +43,17 @@ export interface WidgetMeta {
   defaultH: number;
   /** How the widget is added via the "Manuell" dialog */
   addMode: AddMode;
+  /** UI grouping in widget pickers */
+  widgetGroup: WidgetGroup;
   /** Mock data shown in WidgetPreview thumbnails */
   mock: { t: string; v: string; u?: string; sub?: string };
 }
+
+export const WIDGET_GROUPS: { id: WidgetGroup; label: string }[] = [
+  { id: 'control', label: 'Steuerung & Anzeige' },
+  { id: 'special', label: 'Spezial' },
+  { id: 'layout',  label: 'Layout' },
+];
 
 export const WIDGET_REGISTRY: WidgetMeta[] = [
   {
@@ -51,23 +61,15 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     label: 'Schalter',      shortLabel: 'Schalter',
     Icon: Zap,              iconName: 'Zap',        color: '#22c55e',
     defaultW: 2,            defaultH: 2,
-    addMode: 'datapoint',
+    addMode: 'datapoint',   widgetGroup: 'control',
     mock: { t: 'Wohnzimmer', v: 'AN' },
-  },
-  {
-    type: 'value',
-    label: 'Wert-Anzeige',  shortLabel: 'Wert',
-    Icon: TrendingUp,       iconName: 'TrendingUp', color: '#3b82f6',
-    defaultW: 3,            defaultH: 2,
-    addMode: 'datapoint',
-    mock: { t: 'Temperatur', v: '21.5', u: '°C' },
   },
   {
     type: 'dimmer',
     label: 'Dimmer',        shortLabel: 'Dimmer',
     Icon: SlidersHorizontal, iconName: 'SlidersHorizontal', color: '#f59e0b',
     defaultW: 3,            defaultH: 2,
-    addMode: 'datapoint',
+    addMode: 'datapoint',   widgetGroup: 'control',
     mock: { t: 'Licht', v: '75', u: '%' },
   },
   {
@@ -75,39 +77,47 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     label: 'Thermostat',    shortLabel: 'Thermostat',
     Icon: Thermometer,      iconName: 'Thermometer', color: '#ef4444',
     defaultW: 3,            defaultH: 3,
-    addMode: 'datapoint',
+    addMode: 'datapoint',   widgetGroup: 'control',
     mock: { t: 'Heizung', v: '21.0', sub: 'Ist: 19.5°' },
   },
   {
-    type: 'chart',
-    label: 'Diagramm (einfach)', shortLabel: 'Diagramm',
-    Icon: BarChart2,        iconName: 'BarChart2',  color: '#8b5cf6',
-    defaultW: 4,            defaultH: 3,
-    addMode: 'datapoint',
-    mock: { t: 'Verbrauch', v: '245', u: 'W' },
-  },
-  {
-    type: 'echart',
-    label: 'Diagramm (erweitert (echarts))', shortLabel: 'EChart',
-    Icon: BarChart2,        iconName: 'BarChart2',  color: '#10b981',
-    defaultW: 4,            defaultH: 3,
-    addMode: 'datapoint',
-    mock: { t: 'EChart', v: '' },
+    type: 'value',
+    label: 'Wert-Anzeige',  shortLabel: 'Wert',
+    Icon: TrendingUp,       iconName: 'TrendingUp', color: '#3b82f6',
+    defaultW: 3,            defaultH: 2,
+    addMode: 'datapoint',   widgetGroup: 'control',
+    mock: { t: 'Temperatur', v: '21.5', u: '°C' },
   },
   {
     type: 'gauge',
     label: 'Gauge',         shortLabel: 'Gauge',
     Icon: Gauge,            iconName: 'Gauge',      color: '#f97316',
     defaultW: 2,            defaultH: 3,
-    addMode: 'datapoint',
+    addMode: 'datapoint',   widgetGroup: 'control',
     mock: { t: 'Gauge', v: '72', u: 'kW' },
+  },
+  {
+    type: 'chart',
+    label: 'Diagramm (einfach)', shortLabel: 'Diagramm',
+    Icon: BarChart2,        iconName: 'BarChart2',  color: '#8b5cf6',
+    defaultW: 4,            defaultH: 3,
+    addMode: 'datapoint',   widgetGroup: 'control',
+    mock: { t: 'Verbrauch', v: '245', u: 'W' },
+  },
+  {
+    type: 'echart',
+    label: 'Diagramm (erweitert)', shortLabel: 'EChart',
+    Icon: BarChart2,        iconName: 'BarChart2',  color: '#10b981',
+    defaultW: 4,            defaultH: 3,
+    addMode: 'datapoint',   widgetGroup: 'control',
+    mock: { t: 'EChart', v: '' },
   },
   {
     type: 'list',
     label: 'Gruppenliste',  shortLabel: 'Liste',
     Icon: List,             iconName: 'List',       color: '#06b6d4',
     defaultW: 3,            defaultH: 4,
-    addMode: 'group',
+    addMode: 'group',       widgetGroup: 'control',
     mock: { t: 'Alle Geräte', v: '' },
   },
   {
@@ -115,7 +125,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     label: 'Auto-Liste',    shortLabel: 'Auto-Liste',
     Icon: List,             iconName: 'List',       color: '#14b8a6',
     defaultW: 3,            defaultH: 5,
-    addMode: 'free',
+    addMode: 'free',        widgetGroup: 'control',
     mock: { t: 'Auto-Liste', v: '' },
   },
   {
@@ -123,31 +133,31 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     label: 'Uhrzeit',       shortLabel: 'Uhr',
     Icon: Clock,            iconName: 'Clock',      color: '#ec4899',
     defaultW: 2,            defaultH: 2,
-    addMode: 'free',
+    addMode: 'free',        widgetGroup: 'special',
     mock: { t: 'Uhrzeit', v: '12:34' },
-  },
-  {
-    type: 'calendar',
-    label: 'Kalender',      shortLabel: 'Kalender',
-    Icon: CalendarDays,     iconName: 'CalendarDays', color: '#f97316',
-    defaultW: 4,            defaultH: 4,
-    addMode: 'wizard-only',
-    mock: { t: 'Kalender', v: '3' },
   },
   {
     type: 'weather',
     label: 'Wetter',        shortLabel: 'Wetter',
     Icon: Cloud,            iconName: 'Cloud',      color: '#0ea5e9',
     defaultW: 3,            defaultH: 3,
-    addMode: 'free',
+    addMode: 'free',        widgetGroup: 'special',
     mock: { t: 'Wetter', v: '18°', sub: '⛅ Bewölkt' },
+  },
+  {
+    type: 'calendar',
+    label: 'Kalender',      shortLabel: 'Kalender',
+    Icon: CalendarDays,     iconName: 'CalendarDays', color: '#f97316',
+    defaultW: 4,            defaultH: 4,
+    addMode: 'wizard-only', widgetGroup: 'special',
+    mock: { t: 'Kalender', v: '3' },
   },
   {
     type: 'evcc',
     label: 'evcc',          shortLabel: 'evcc',
     Icon: Zap,              iconName: 'Zap',        color: '#6366f1',
     defaultW: 4,            defaultH: 4,
-    addMode: 'free',
+    addMode: 'free',        widgetGroup: 'special',
     mock: { t: 'evcc', v: '' },
   },
   {
@@ -155,7 +165,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     label: 'Kamera',        shortLabel: 'Kamera',
     Icon: Camera,           iconName: 'Camera',     color: '#6b7280',
     defaultW: 3,            defaultH: 3,
-    addMode: 'free',
+    addMode: 'free',        widgetGroup: 'special',
     mock: { t: 'Kamera', v: '' },
   },
   {
@@ -163,7 +173,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     label: 'Abschnittstitel', shortLabel: 'Abschnitt',
     Icon: Heading2,         iconName: 'Heading2',   color: '#94a3b8',
     defaultW: 12,           defaultH: 1,
-    addMode: 'free',
+    addMode: 'free',        widgetGroup: 'layout',
     mock: { t: 'Abschnitt', v: '' },
   },
   {
@@ -171,7 +181,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     label: 'Gruppe',        shortLabel: 'Gruppe',
     Icon: Layers2,          iconName: 'Layers2',    color: '#a78bfa',
     defaultW: 4,            defaultH: 4,
-    addMode: 'free',
+    addMode: 'free',        widgetGroup: 'layout',
     mock: { t: 'Gruppe', v: '' },
   },
 ];

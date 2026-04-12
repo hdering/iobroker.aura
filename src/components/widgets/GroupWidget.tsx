@@ -3,17 +3,13 @@ import ReactGridLayout from 'react-grid-layout';
 import { Plus, X, GripVertical, Smartphone } from 'lucide-react';
 import type { WidgetProps, WidgetConfig, WidgetType } from '../../types';
 import { useConfigStore } from '../../store/configStore';
-import { WIDGET_BY_TYPE } from '../../widgetRegistry';
+import { WIDGET_BY_TYPE, WIDGET_REGISTRY, WIDGET_GROUPS } from '../../widgetRegistry';
 // WidgetFrame is imported here — circular dep is safe because GroupWidget only
 // uses WidgetFrame inside its render function, never at module-init time.
 import { WidgetFrame } from '../layout/WidgetFrame';
 import { useT } from '../../i18n';
 
 const CHILD_MARGIN = 6;
-
-const CHILD_TYPE_LIST: WidgetType[] = [
-  'switch', 'value', 'dimmer', 'thermostat', 'chart', 'list', 'clock', 'calendar', 'header', 'group',
-];
 
 const DEFAULT_SIZE: Partial<Record<WidgetType, { w: number; h: number }>> = {
   thermostat: { w: 3, h: 3 },
@@ -131,18 +127,29 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
   const addBar = editMode ? (
     <div className="nodrag shrink-0 px-2 pb-2 pt-1" style={{ borderTop: transparent ? 'none' : '1px solid var(--widget-border)' }}>
       {showTypePicker ? (
-        <div className="flex flex-wrap items-center gap-1">
-          {CHILD_TYPE_LIST.map((type) => (
-            <button
-              key={type}
-              onClick={() => { setChildren([...children, makeChild(type, children)]); setShowTypePicker(false); }}
-              className="text-[10px] px-2 py-1 rounded-lg hover:opacity-80"
-              style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
-            >
-              {t(`widget.${type}` as never)}
-            </button>
-          ))}
-          <button onClick={() => setShowTypePicker(false)} className="hover:opacity-60 p-1" style={{ color: 'var(--text-secondary)' }}>
+        <div className="space-y-1">
+          {WIDGET_GROUPS.map((g) => {
+            const types = WIDGET_REGISTRY.filter((m) => m.widgetGroup === g.id && m.type !== 'calendar');
+            if (types.length === 0) return null;
+            return (
+              <div key={g.id}>
+                <div className="text-[9px] uppercase tracking-wider px-0.5 pb-0.5" style={{ color: 'var(--text-secondary)' }}>{g.label}</div>
+                <div className="flex flex-wrap gap-1">
+                  {types.map((m) => (
+                    <button
+                      key={m.type}
+                      onClick={() => { setChildren([...children, makeChild(m.type, children)]); setShowTypePicker(false); }}
+                      className="text-[10px] px-2 py-1 rounded-lg hover:opacity-80"
+                      style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
+                    >
+                      {t(`widget.${m.type}` as never)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+          <button onClick={() => setShowTypePicker(false)} className="hover:opacity-60 p-1 mt-0.5" style={{ color: 'var(--text-secondary)' }}>
             <X size={12} />
           </button>
         </div>

@@ -10,7 +10,7 @@ import type { WidgetConfig, WidgetCondition } from '../../types';
 import { DatapointPicker } from '../config/DatapointPicker';
 import { ConditionEditor } from '../config/ConditionEditor';
 import { getObjectDirect, subscribeStateDirect, getStateDirect } from '../../hooks/useIoBroker';
-import { WIDGET_REGISTRY } from '../../widgetRegistry';
+import { WIDGET_REGISTRY, WIDGET_GROUPS } from '../../widgetRegistry';
 import { AutoListConfig } from '../config/AutoListConfig';
 import { WidgetPreview } from '../config/WidgetPreview';
 import { detectHistoryAdapters, RANGE_LABELS, type ChartTimeRange, type DetectedAdapter } from '../../hooks/useChartHistory';
@@ -1121,8 +1121,12 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                 className="w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
                 style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
               >
-                {WIDGET_REGISTRY.map((m) => (
-                  <option key={m.type} value={m.type}>{m.label}</option>
+                {WIDGET_GROUPS.map((g) => (
+                  <optgroup key={g.id} label={g.label}>
+                    {WIDGET_REGISTRY.filter((m) => m.widgetGroup === g.id).map((m) => (
+                      <option key={m.type} value={m.type}>{m.label}</option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
             </div>

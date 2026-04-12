@@ -11,7 +11,7 @@ import { TabWizard } from '../../components/config/TabWizard';
 import { WidgetPreview } from '../../components/config/WidgetPreview';
 import { DatapointPicker } from '../../components/config/DatapointPicker';
 import type { WidgetConfig, WidgetType, WidgetLayout } from '../../types';
-import { WIDGET_REGISTRY, WIDGET_BY_TYPE, getEffectiveSize } from '../../widgetRegistry';
+import { WIDGET_REGISTRY, WIDGET_GROUPS, WIDGET_BY_TYPE, getEffectiveSize } from '../../widgetRegistry';
 import { useConfigStore } from '../../store/configStore';
 import { useT } from '../../i18n';
 
@@ -98,7 +98,13 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
               <select value={type} onChange={(e) => { setType(e.target.value as WidgetType); setGroupId(''); setDatapoint(''); }}
                 className="w-full rounded-xl px-3 py-2.5 text-sm focus:outline-none"
                 style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}>
-                {WIDGET_REGISTRY.map((w) => <option key={w.type} value={w.type}>{w.label}</option>)}
+                {WIDGET_GROUPS.map((g) => (
+                  <optgroup key={g.id} label={g.label}>
+                    {WIDGET_REGISTRY.filter((w) => w.widgetGroup === g.id).map((w) => (
+                      <option key={w.type} value={w.type}>{w.label}</option>
+                    ))}
+                  </optgroup>
+                ))}
               </select>
             </div>
 
