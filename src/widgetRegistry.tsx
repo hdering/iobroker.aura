@@ -12,7 +12,7 @@
 
 import {
   Zap, TrendingUp, SlidersHorizontal, Thermometer, BarChart2, List,
-  Clock, CalendarDays, Heading2, Layers2, Cloud, Gauge, Camera,
+  Clock, CalendarDays, Heading2, Layers2, Cloud, Gauge, Camera, ImageIcon,
   type LucideIcon,
 } from 'lucide-react';
 import type { WidgetType } from './types';
@@ -167,6 +167,14 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 3,            defaultH: 3,
     addMode: 'free',        widgetGroup: 'special',
     mock: { t: 'Kamera', v: '' },
+  },
+  {
+    type: 'image',
+    label: 'Bild',          shortLabel: 'Bild',
+    Icon: ImageIcon,        iconName: 'ImageIcon',  color: '#0ea5e9',
+    defaultW: 3,            defaultH: 3,
+    addMode: 'free',        widgetGroup: 'special',
+    mock: { t: 'Bild', v: '' },
   },
   {
     type: 'header',

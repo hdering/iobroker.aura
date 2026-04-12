@@ -30,7 +30,8 @@ export type WidgetType =
   | 'weather'
   | 'gauge'
   | 'camera'
-  | 'autolist';
+  | 'autolist'
+  | 'image';
 
 export type WidgetLayout = 'default' | 'card' | 'compact' | 'minimal' | 'agenda' | 'flow' | 'battery' | 'production' | 'consumption' | 'loadpoints';
 

@@ -34,6 +34,7 @@ import { EvccConfig } from '../widgets/EvccWidget';
 import { WeatherWidget } from '../widgets/WeatherWidget';
 import { GaugeWidget } from '../widgets/GaugeWidget';
 import { CameraWidget } from '../widgets/CameraWidget';
+import { ImageWidget } from '../widgets/ImageWidget';
 import { AutoListWidget } from '../widgets/AutoListWidget';
 
 // Stable empty array – avoids creating a new reference on every render when no conditions are set
@@ -58,6 +59,7 @@ function getWidgetMap() {
     gauge:      GaugeWidget,
     camera:     CameraWidget,
     autolist:   AutoListWidget,
+    image:      ImageWidget,
   } as const;
 }
 
@@ -1350,7 +1352,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                 <CalendarEditPanel config={config} onConfigChange={onConfigChange} />
               )}
 
-              {config.type !== 'list' && config.type !== 'clock' && config.type !== 'calendar' && config.type !== 'header' && config.type !== 'group' && config.type !== 'evcc' && config.type !== 'echart' && config.type !== 'weather' && config.type !== 'camera' && config.type !== 'autolist' && (
+              {config.type !== 'list' && config.type !== 'clock' && config.type !== 'calendar' && config.type !== 'header' && config.type !== 'group' && config.type !== 'evcc' && config.type !== 'echart' && config.type !== 'weather' && config.type !== 'camera' && config.type !== 'autolist' && config.type !== 'image' && (
                 <div>
                   <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('wf.edit.datapointId')}</label>
                   <div className="flex gap-1">
@@ -1656,6 +1658,77 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                           style={{ left: (o.showTimestamp ?? true) ? '18px' : '2px' }} />
                       </button>
                     </div>
+                  </>
+                );
+              })()}
+              {/* ── Image config ── */}
+              {config.type === 'image' && (() => {
+                const o   = config.options ?? {};
+                const set = (patch: Record<string, unknown>) =>
+                  onConfigChange({ ...config, options: { ...o, ...patch } });
+                const iCls = 'w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none';
+                const iSty: React.CSSProperties = { background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' };
+                const fit            = (o.fit             as string) ?? 'contain';
+                const refreshSeconds = (o.refreshInterval as number) ?? 0;
+                const imageUrl       = (o.imageUrl        as string) ?? '';
+                const FIT_OPTIONS = [
+                  { value: 'none',    label: 'Original' },
+                  { value: 'contain', label: 'Einpassen' },
+                  { value: 'width',   label: 'Breite' },
+                  { value: 'height',  label: 'Höhe' },
+                ];
+                return (
+                  <>
+                    <div>
+                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Bild-URL</label>
+                      <input type="text" value={imageUrl}
+                        onChange={(e) => set({ imageUrl: e.target.value || undefined })}
+                        placeholder="https://…/bild.jpg"
+                        className={iCls + ' font-mono'} style={iSty} />
+                    </div>
+                    <div>
+                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
+                        Datenpunkt <span style={{ opacity: 0.6 }}>(base64 oder URL, überschreibt Bild-URL)</span>
+                      </label>
+                      <div className="flex gap-1">
+                        <input type="text"
+                          value={(o.imageDatapoint as string) ?? ''}
+                          onChange={(e) => set({ imageDatapoint: e.target.value || undefined })}
+                          placeholder="z.B. cameras.0.snapshot"
+                          className={`flex-1 ${iCls} font-mono min-w-0`} style={iSty} />
+                        <button
+                          onClick={() => setPickerTarget('datapoint')}
+                          className="px-2 rounded-lg hover:opacity-80 shrink-0"
+                          style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+                          title="Aus ioBroker wählen">
+                          <Database size={13} />
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[11px] mb-2 block" style={{ color: 'var(--text-secondary)' }}>Bildgröße</label>
+                      <div className="flex gap-1">
+                        {FIT_OPTIONS.map(({ value, label }) => (
+                          <button key={value} onClick={() => set({ fit: value })}
+                            className="flex-1 text-[11px] py-1.5 rounded-lg transition-colors"
+                            style={{
+                              background: fit === value ? 'var(--accent)' : 'var(--app-bg)',
+                              color: fit === value ? '#fff' : 'var(--text-secondary)',
+                              border: `1px solid ${fit === value ? 'var(--accent)' : 'var(--app-border)'}`,
+                            }}>{label}</button>
+                        ))}
+                      </div>
+                    </div>
+                    {imageUrl && (
+                      <div>
+                        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
+                          Aktualisierungsintervall <span style={{ opacity: 0.6 }}>(Sek., 0 = kein)</span>
+                        </label>
+                        <input type="number" min={0} value={refreshSeconds}
+                          onChange={(e) => set({ refreshInterval: Number(e.target.value) || undefined })}
+                          className={iCls} style={iSty} />
+                      </div>
+                    )}
                   </>
                 );
               })()}
