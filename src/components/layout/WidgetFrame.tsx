@@ -36,6 +36,7 @@ import { GaugeWidget } from '../widgets/GaugeWidget';
 import { CameraWidget } from '../widgets/CameraWidget';
 import { ImageWidget } from '../widgets/ImageWidget';
 import { IframeWidget } from '../widgets/IframeWidget';
+import { FillWidget } from '../widgets/FillWidget';
 import { AutoListWidget } from '../widgets/AutoListWidget';
 
 // Stable empty array – avoids creating a new reference on every render when no conditions are set
@@ -62,6 +63,7 @@ function getWidgetMap() {
     autolist:   AutoListWidget,
     image:      ImageWidget,
     iframe:     IframeWidget,
+    fill:       FillWidget,
   } as const;
 }
 
@@ -1799,6 +1801,158 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                           style={{ left: (o.sandbox ?? false) ? '18px' : '2px' }} />
                       </button>
                     </div>
+                  </>
+                );
+              })()}
+
+              {/* ── Fill / Tank config ── */}
+              {config.type === 'fill' && (() => {
+                const o   = config.options ?? {};
+                const set = (patch: Record<string, unknown>) =>
+                  onConfigChange({ ...config, options: { ...o, ...patch } });
+                const min        = (o.minValue   as number)  ?? 0;
+                const max        = (o.maxValue   as number)  ?? 100;
+                const colorZones = (o.colorZones as boolean) ?? false;
+                const range      = max - min;
+                const fCls = 'w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none';
+                const fSty = { background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' };
+                const hdr = (label: string) => (
+                  <div className="text-[10px] font-semibold uppercase tracking-wider pt-1" style={{ color: 'var(--text-secondary)' }}>{label}</div>
+                );
+                return (
+                  <>
+                    {hdr('Anzeige')}
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Orientierung</label>
+                      <div className="flex rounded-lg overflow-hidden" style={{ border: '1px solid var(--app-border)' }}>
+                        {(['vertical', 'horizontal'] as const).map(v => (
+                          <button key={v}
+                            onClick={() => set({ orientation: v })}
+                            className="px-3 py-1 text-[11px] transition-colors"
+                            style={{
+                              background: (o.orientation ?? 'vertical') === v ? 'var(--accent)' : 'var(--app-bg)',
+                              color:      (o.orientation ?? 'vertical') === v ? '#fff' : 'var(--text-secondary)',
+                            }}>
+                            {v === 'vertical' ? 'Vertikal' : 'Horizontal'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
+                        Balkenbreite/-höhe <span style={{ opacity: 0.6 }}>(% des Widgets)</span>
+                      </label>
+                      <input type="number" min={20} max={100} value={(o.barSize as number) ?? 80}
+                        onChange={(e) => set({ barSize: Number(e.target.value) })}
+                        className={fCls} style={fSty} />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Skala anzeigen</label>
+                      <button onClick={() => set({ showTicks: !(o.showTicks ?? true) })}
+                        className="relative w-9 h-5 rounded-full transition-colors"
+                        style={{ background: (o.showTicks ?? true) ? 'var(--accent)' : 'var(--app-border)' }}>
+                        <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                          style={{ left: (o.showTicks ?? true) ? '18px' : '2px' }} />
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Wert anzeigen</label>
+                      <button onClick={() => set({ showValue: !(o.showValue ?? true) })}
+                        className="relative w-9 h-5 rounded-full transition-colors"
+                        style={{ background: (o.showValue ?? true) ? 'var(--accent)' : 'var(--app-border)' }}>
+                        <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                          style={{ left: (o.showValue ?? true) ? '18px' : '2px' }} />
+                      </button>
+                    </div>
+
+                    {hdr('Skala')}
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Min</label>
+                        <input type="number" value={min} onChange={(e) => set({ minValue: Number(e.target.value) })} className={fCls} style={fSty} />
+                      </div>
+                      <div className="flex-1">
+                        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Max</label>
+                        <input type="number" value={max} onChange={(e) => set({ maxValue: Number(e.target.value) })} className={fCls} style={fSty} />
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Einheit</label>
+                        <input type="text" value={(o.unit as string) ?? ''} onChange={(e) => set({ unit: e.target.value || undefined })} placeholder="%, L, m³" className={fCls} style={fSty} />
+                      </div>
+                      <div className="flex-1">
+                        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Dezimalstellen</label>
+                        <input type="number" min={0} max={4} value={(o.decimals as number) ?? 0} onChange={(e) => set({ decimals: Number(e.target.value) })} className={fCls} style={fSty} />
+                      </div>
+                    </div>
+
+                    {hdr('Farbzonen')}
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Farbzonen aktiv</label>
+                      <button onClick={() => set({ colorZones: !colorZones })}
+                        className="relative w-9 h-5 rounded-full transition-colors"
+                        style={{ background: colorZones ? 'var(--accent)' : 'var(--app-border)' }}>
+                        <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                          style={{ left: colorZones ? '18px' : '2px' }} />
+                      </button>
+                    </div>
+                    {colorZones && (() => {
+                      type CZ = { max: number; color: string };
+                      const rawZones = o.zones as CZ[] | undefined;
+                      const zones: CZ[] = (rawZones && rawZones.length > 0) ? rawZones : [
+                        { max: min + range * 0.33, color: '#ef4444' },
+                        { max: min + range * 0.66, color: '#f59e0b' },
+                        { max: max,                color: '#22c55e' },
+                      ];
+                      const setZones   = (z: CZ[]) => set({ zones: z });
+                      const updateZone = (i: number, patch: Partial<CZ>) => setZones(zones.map((z, idx) => idx === i ? { ...z, ...patch } : z));
+                      const removeZone = (i: number) => { if (zones.length > 1) setZones(zones.filter((_, idx) => idx !== i)); };
+                      const addZone    = () => {
+                        const insertBefore = zones.length - 1;
+                        const prevMax  = insertBefore > 0 ? zones[insertBefore - 1].max : min;
+                        const nextMax  = zones[insertBefore].max;
+                        const newZones = [...zones];
+                        newZones.splice(insertBefore, 0, { max: Math.round((prevMax + nextMax) / 2), color: '#6366f1' });
+                        setZones(newZones);
+                      };
+                      return (
+                        <div className="space-y-2">
+                          {zones.map((zone, i) => {
+                            const isLast = i === zones.length - 1;
+                            return (
+                              <div key={i} className="flex items-center gap-2">
+                                <button onClick={() => removeZone(i)}
+                                  className="text-[11px] w-5 h-5 flex items-center justify-center rounded shrink-0"
+                                  style={{ color: 'var(--text-secondary)', background: 'var(--app-bg)', border: '1px solid var(--app-border)', opacity: zones.length <= 1 ? 0.3 : 1 }}>×</button>
+                                <input type="color" value={zone.color}
+                                  onChange={(e) => updateZone(i, { color: e.target.value })}
+                                  className="w-8 h-7 rounded cursor-pointer shrink-0" style={{ border: '1px solid var(--app-border)', padding: '1px' }} />
+                                <div className="flex-1">
+                                  <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
+                                    Zone {i + 1} {isLast ? '(Rest)' : 'bis'}
+                                  </label>
+                                  {isLast ? (
+                                    <div className="text-[10px] py-2 px-2.5 rounded-lg" style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+                                      bis {max}
+                                    </div>
+                                  ) : (
+                                    <input type="number" value={zone.max}
+                                      onChange={(e) => updateZone(i, { max: Number(e.target.value) })}
+                                      className={fCls} style={fSty} />
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                          <button onClick={addZone}
+                            className="w-full text-[11px] py-1.5 rounded-lg transition-colors hover:opacity-80"
+                            style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+                            + Zone hinzufügen
+                          </button>
+                        </div>
+                      );
+                    })()}
                   </>
                 );
               })()}

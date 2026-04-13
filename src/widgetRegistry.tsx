@@ -12,7 +12,7 @@
 
 import {
   Zap, TrendingUp, SlidersHorizontal, Thermometer, BarChart2, List,
-  Clock, CalendarDays, Heading2, Layers2, Cloud, Gauge, Camera, ImageIcon, MonitorDot,
+  Clock, CalendarDays, Heading2, Layers2, Cloud, Gauge, Camera, ImageIcon, MonitorDot, Droplets,
   type LucideIcon,
 } from 'lucide-react';
 import type { WidgetType } from './types';
@@ -175,6 +175,14 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 3,            defaultH: 3,
     addMode: 'free',        widgetGroup: 'special',
     mock: { t: 'Bild', v: '' },
+  },
+  {
+    type: 'fill',
+    label: 'Füllstandsanzeige', shortLabel: 'Füllstand',
+    Icon: Droplets,             iconName: 'Droplets',    color: '#0ea5e9',
+    defaultW: 2,                defaultH: 4,
+    addMode: 'datapoint',       widgetGroup: 'control',
+    mock: { t: 'Wassertank', v: '68', u: '%' },
   },
   {
     type: 'iframe',

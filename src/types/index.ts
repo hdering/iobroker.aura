@@ -32,7 +32,8 @@ export type WidgetType =
   | 'camera'
   | 'autolist'
   | 'image'
-  | 'iframe';
+  | 'iframe'
+  | 'fill';
 
 export type WidgetLayout = 'default' | 'card' | 'compact' | 'minimal' | 'agenda' | 'flow' | 'battery' | 'production' | 'consumption' | 'loadpoints';
 
