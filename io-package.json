@@ -42,6 +42,7 @@
       "gauge",
       "chart"
     ],
+    "icon": "admin/aura.svg",
     "extIcon": "https://raw.githubusercontent.com/hdering/ioBroker.aura/main/admin/aura.svg",
     "type": "visualization",
     "licenseInformation": {
@@ -63,8 +64,7 @@
       "Admin": "%protocol%://%ip%:8082/aura/#/admin"
     },
     "dependencies": [
-      { "js-controller": ">=5.0.19" },
-      { "admin": ">=6.0.0" }
+      { "js-controller": ">=5.0.19" }
     ],
     "news": {
       "0.3.73": {
