@@ -89,6 +89,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.3.89 (2026-04-13)
+- Version bump
+
 ### 0.3.88 (2026-04-13)
 - Fix E1012: remove admin/ prefix from icon field
 

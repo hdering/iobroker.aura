@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.3.88",
+    "version": "0.3.89",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -72,6 +72,19 @@
       }
     ],
     "news": {
+      "0.3.89": {
+        "en": "Version bump",
+        "de": "Versions-Bump",
+        "ru": "Обновление версии",
+        "pt": "Incremento de versão",
+        "nl": "Versieverhoging",
+        "fr": "Incrément de version",
+        "it": "Aggiornamento versione",
+        "es": "Incremento de versión",
+        "pl": "Inkrementacja wersji",
+        "uk": "Оновлення версії",
+        "zh-cn": "版本更新"
+      },
       "0.3.88": {
         "en": "Fix E1012: remove admin/ prefix from icon field",
         "de": "E1012 behoben: admin/-Präfix aus icon-Feld entfernt",
