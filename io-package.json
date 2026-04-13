@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.3.75",
+    "version": "0.3.76",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -68,6 +68,19 @@
       { "js-controller": ">=6.0.11" }
     ],
     "news": {
+      "0.3.76": {
+        "en": "Fix lint: disable no-var-requires for CommonJS adapter entry point",
+        "de": "Lint-Fehler behoben: no-var-requires für CommonJS-Adapter-Einstiegspunkt deaktiviert",
+        "ru": "Исправлен lint: отключён no-var-requires для CommonJS-точки входа адаптера",
+        "pt": "Corrigido lint: no-var-requires desativado para ponto de entrada CommonJS",
+        "nl": "Lint gerepareerd: no-var-requires uitgeschakeld voor CommonJS adapter entry point",
+        "fr": "Lint corrigé: no-var-requires désactivé pour le point d'entrée CommonJS",
+        "it": "Lint corretto: no-var-requires disabilitato per il punto d'ingresso CommonJS",
+        "es": "Lint corregido: no-var-requires desactivado para el punto de entrada CommonJS",
+        "pl": "Naprawiono lint: no-var-requires wyłączony dla punktu wejścia CommonJS",
+        "uk": "Виправлено lint: вимкнено no-var-requires для точки входу CommonJS",
+        "zh-cn": "修复 lint：为 CommonJS 适配器入口点禁用 no-var-requires"
+      },
       "0.3.75": {
         "en": "Fix npm publish: use automation token for 2FA-protected CI publishing",
         "de": "npm-Veröffentlichung korrigiert: Automation-Token für 2FA-geschütztes CI-Publishing",

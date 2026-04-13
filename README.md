@@ -89,6 +89,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.3.76 (2026-04-13)
+- Fix lint: disable no-var-requires for CommonJS adapter entry point
+
 ### 0.3.75 (2026-04-13)
 - Fix npm publish: use automation token for 2FA-protected CI publishing
 
