@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.3.74",
+    "version": "0.3.75",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -68,6 +68,19 @@
       { "js-controller": ">=6.0.11" }
     ],
     "news": {
+      "0.3.75": {
+        "en": "Fix npm publish: use automation token for 2FA-protected CI publishing",
+        "de": "npm-Veröffentlichung korrigiert: Automation-Token für 2FA-geschütztes CI-Publishing",
+        "ru": "Исправлена публикация npm: использование токена автоматизации для CI с 2FA",
+        "pt": "Corrigida publicação npm: usar token de automação para CI com 2FA",
+        "nl": "npm-publicatie gerepareerd: automation token voor CI met 2FA",
+        "fr": "Correction publication npm: token d'automatisation pour CI protégé par 2FA",
+        "it": "Corretta pubblicazione npm: token di automazione per CI con 2FA",
+        "es": "Corrección publicación npm: token de automatización para CI con 2FA",
+        "pl": "Naprawiono publikację npm: token automatyzacji dla CI z 2FA",
+        "uk": "Виправлено публікацію npm: токен автоматизації для CI з 2FA",
+        "zh-cn": "修复 npm 发布：使用自动化令牌用于受 2FA 保护的 CI 发布"
+      },
       "0.3.74": {
         "en": "ioBroker repository compliance: PNG icon, platform field, updated dependencies and workflow",
         "de": "ioBroker-Repository-Konformität: PNG-Icon, platform-Feld, aktualisierte Abhängigkeiten und Workflow",

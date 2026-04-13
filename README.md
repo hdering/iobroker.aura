@@ -89,6 +89,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.3.75 (2026-04-13)
+- Fix npm publish: use automation token for 2FA-protected CI publishing
+
 ### 0.3.74 (2026-04-13)
 - ioBroker repository compliance: PNG icon, platform field, updated dependencies and workflow
 
