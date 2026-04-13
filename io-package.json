@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.3.78",
+    "version": "0.3.79",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -68,6 +68,19 @@
       { "js-controller": ">=6.0.11" }
     ],
     "news": {
+      "0.3.79": {
+        "en": "Switch npm publish to Trusted Publishing (OIDC) for secure CI/CD",
+        "de": "npm-Veröffentlichung auf Trusted Publishing (OIDC) umgestellt",
+        "ru": "Переход на Trusted Publishing (OIDC) для безопасного CI/CD",
+        "pt": "Publicação npm migrada para Trusted Publishing (OIDC)",
+        "nl": "npm publish omgezet naar Trusted Publishing (OIDC)",
+        "fr": "Publication npm migrée vers Trusted Publishing (OIDC)",
+        "it": "Pubblicazione npm migrata a Trusted Publishing (OIDC)",
+        "es": "Publicación npm migrada a Trusted Publishing (OIDC)",
+        "pl": "Publikacja npm przeniesiona na Trusted Publishing (OIDC)",
+        "uk": "Публікацію npm переведено на Trusted Publishing (OIDC)",
+        "zh-cn": "npm 发布切换至 Trusted Publishing (OIDC)"
+      },
       "0.3.78": {
         "en": "Version bump for npm publish",
         "de": "Versions-Bump für npm-Veröffentlichung",

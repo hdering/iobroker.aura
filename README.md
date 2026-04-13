@@ -89,6 +89,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.3.79 (2026-04-13)
+- Switch npm publish to Trusted Publishing (OIDC) for secure CI/CD
+
 ### 0.3.78 (2026-04-13)
 - Version bump for npm publish
 
