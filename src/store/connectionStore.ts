@@ -3,11 +3,27 @@ import { persist } from 'zustand/middleware';
 import { invalidateDatapointCache } from '../hooks/useDatapointList';
 import { reconnectSocket } from '../hooks/useIoBroker';
 
+// Stable fingerprint-based client ID derived from browser/device properties.
+// Deterministic: same device + browser always produces the same ID, even after
+// localStorage is cleared (which causes duplicates with random IDs on mobile).
 function generateClientId(): string {
-  // crypto.randomUUID() requires HTTPS – use getRandomValues() which works on HTTP too
-  const bytes = new Uint8Array(16);
-  crypto.getRandomValues(bytes);
-  return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('');
+  const fp = [
+    navigator.userAgent,
+    screen.width,
+    screen.height,
+    screen.colorDepth,
+    Intl.DateTimeFormat().resolvedOptions().timeZone,
+    navigator.language,
+    navigator.hardwareConcurrency ?? 0,
+  ].join('|');
+  // Two independent djb2 hashes → 16 hex chars
+  let h1 = 5381, h2 = 52711;
+  for (let i = 0; i < fp.length; i++) {
+    const c = fp.charCodeAt(i);
+    h1 = Math.imul((h1 << 5) + h1, 1) ^ c;
+    h2 = Math.imul((h2 << 5) + h2, 1) ^ c;
+  }
+  return `${(h1 >>> 0).toString(16).padStart(8, '0')}${(h2 >>> 0).toString(16).padStart(8, '0')}`;
 }
 
 interface ConnectionState {
@@ -37,6 +53,11 @@ export const useConnectionStore = create<ConnectionState>()(
       },
       setClientName: (name) => set({ clientName: name }),
     }),
-    { name: 'aura-connection' }, // uses localStorage directly – not managed storage
+    {
+      name: 'aura-connection',
+      // clientId is intentionally excluded: it is recomputed from a device fingerprint
+      // on every load, so it stays stable even when localStorage is cleared (mobile).
+      partialize: (state) => ({ ioBrokerUrl: state.ioBrokerUrl, clientName: state.clientName }),
+    },
   ),
 );
