@@ -89,6 +89,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.3.80 (2026-04-13)
+- Remove unpublished versions from news section; ioBroker repository compliance fixes
+
 ### 0.3.79 (2026-04-13)
 - Switch npm publish to Trusted Publishing (OIDC) for secure CI/CD
 

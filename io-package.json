@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.3.79",
+    "version": "0.3.80",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -59,15 +59,32 @@
     "noIntro": true,
     "singleton": true,
     "platform": "Javascript/Node.js",
-    "adminUI": { "config": "none" },
+    "adminUI": {
+      "config": "none"
+    },
     "localLinks": {
       "Dashboard": "%protocol%://%ip%:8082/aura/",
       "Admin": "%protocol%://%ip%:8082/aura/#/admin"
     },
     "dependencies": [
-      { "js-controller": ">=6.0.11" }
+      {
+        "js-controller": ">=6.0.11"
+      }
     ],
     "news": {
+      "0.3.80": {
+        "en": "Remove unpublished versions from news section; ioBroker repository compliance fixes",
+        "de": "Nicht veröffentlichte Versionen aus News entfernt; ioBroker-Repository-Konformität",
+        "ru": "Удалены неопубликованные версии из раздела news; исправления соответствия репозиторию",
+        "pt": "Versões não publicadas removidas do news; correções de conformidade do repositório",
+        "nl": "Niet-gepubliceerde versies verwijderd uit news; ioBroker repository compliance fixes",
+        "fr": "Versions non publiées supprimées du news; corrections de conformité dépôt ioBroker",
+        "it": "Versioni non pubblicate rimosse dal news; correzioni conformità repository ioBroker",
+        "es": "Versiones no publicadas eliminadas del news; correcciones de conformidad del repositorio",
+        "pl": "Usunięto nieopublikowane wersje z sekcji news; poprawki zgodności repozytorium ioBroker",
+        "uk": "Видалено неопубліковані версії з розділу news; виправлення відповідності репозиторію",
+        "zh-cn": "从 news 部分删除未发布版本；ioBroker 仓库合规性修复"
+      },
       "0.3.79": {
         "en": "Switch npm publish to Trusted Publishing (OIDC) for secure CI/CD",
         "de": "npm-Veröffentlichung auf Trusted Publishing (OIDC) umgestellt",
@@ -80,71 +97,6 @@
         "pl": "Publikacja npm przeniesiona na Trusted Publishing (OIDC)",
         "uk": "Публікацію npm переведено на Trusted Publishing (OIDC)",
         "zh-cn": "npm 发布切换至 Trusted Publishing (OIDC)"
-      },
-      "0.3.78": {
-        "en": "Version bump for npm publish",
-        "de": "Versions-Bump für npm-Veröffentlichung",
-        "ru": "Обновление версии для публикации npm",
-        "pt": "Incremento de versão para publicação npm",
-        "nl": "Versieverhoging voor npm-publicatie",
-        "fr": "Incrément de version pour publication npm",
-        "it": "Aggiornamento versione per pubblicazione npm",
-        "es": "Incremento de versión para publicación npm",
-        "pl": "Inkrementacja wersji dla publikacji npm",
-        "uk": "Оновлення версії для публікації npm",
-        "zh-cn": "版本更新用于 npm 发布"
-      },
-      "0.3.77": {
-        "en": "CI/CD pipeline fully operational: npm publish via automation token",
-        "de": "CI/CD-Pipeline voll funktionsfähig: npm-Veröffentlichung via Automation-Token",
-        "ru": "CI/CD-пайплайн полностью работает: публикация npm через токен автоматизации",
-        "pt": "Pipeline CI/CD totalmente operacional: publicação npm via token de automação",
-        "nl": "CI/CD-pipeline volledig operationeel: npm publish via automation token",
-        "fr": "Pipeline CI/CD pleinement opérationnel: publication npm via token d'automatisation",
-        "it": "Pipeline CI/CD completamente operativa: pubblicazione npm tramite token di automazione",
-        "es": "Pipeline CI/CD totalmente operativo: publicación npm via token de automatización",
-        "pl": "Pipeline CI/CD w pełni operacyjny: publikacja npm przez token automatyzacji",
-        "uk": "CI/CD-пайплайн повністю працює: публікація npm через токен автоматизації",
-        "zh-cn": "CI/CD 流水线完全运行：通过自动化令牌发布 npm"
-      },
-      "0.3.76": {
-        "en": "Fix lint: disable no-var-requires for CommonJS adapter entry point",
-        "de": "Lint-Fehler behoben: no-var-requires für CommonJS-Adapter-Einstiegspunkt deaktiviert",
-        "ru": "Исправлен lint: отключён no-var-requires для CommonJS-точки входа адаптера",
-        "pt": "Corrigido lint: no-var-requires desativado para ponto de entrada CommonJS",
-        "nl": "Lint gerepareerd: no-var-requires uitgeschakeld voor CommonJS adapter entry point",
-        "fr": "Lint corrigé: no-var-requires désactivé pour le point d'entrée CommonJS",
-        "it": "Lint corretto: no-var-requires disabilitato per il punto d'ingresso CommonJS",
-        "es": "Lint corregido: no-var-requires desactivado para el punto de entrada CommonJS",
-        "pl": "Naprawiono lint: no-var-requires wyłączony dla punktu wejścia CommonJS",
-        "uk": "Виправлено lint: вимкнено no-var-requires для точки входу CommonJS",
-        "zh-cn": "修复 lint：为 CommonJS 适配器入口点禁用 no-var-requires"
-      },
-      "0.3.75": {
-        "en": "Fix npm publish: use automation token for 2FA-protected CI publishing",
-        "de": "npm-Veröffentlichung korrigiert: Automation-Token für 2FA-geschütztes CI-Publishing",
-        "ru": "Исправлена публикация npm: использование токена автоматизации для CI с 2FA",
-        "pt": "Corrigida publicação npm: usar token de automação para CI com 2FA",
-        "nl": "npm-publicatie gerepareerd: automation token voor CI met 2FA",
-        "fr": "Correction publication npm: token d'automatisation pour CI protégé par 2FA",
-        "it": "Corretta pubblicazione npm: token di automazione per CI con 2FA",
-        "es": "Corrección publicación npm: token de automatización para CI con 2FA",
-        "pl": "Naprawiono publikację npm: token automatyzacji dla CI z 2FA",
-        "uk": "Виправлено публікацію npm: токен автоматизації для CI з 2FA",
-        "zh-cn": "修复 npm 发布：使用自动化令牌用于受 2FA 保护的 CI 发布"
-      },
-      "0.3.74": {
-        "en": "ioBroker repository compliance: PNG icon, platform field, updated dependencies and workflow",
-        "de": "ioBroker-Repository-Konformität: PNG-Icon, platform-Feld, aktualisierte Abhängigkeiten und Workflow",
-        "ru": "Соответствие репозиторию ioBroker: PNG-иконка, поле platform, обновлённые зависимости и workflow",
-        "pt": "Conformidade com repositório ioBroker: ícone PNG, campo platform, dependências e workflow atualizados",
-        "nl": "ioBroker repository-conformiteit: PNG-icoon, platform-veld, bijgewerkte afhankelijkheden en workflow",
-        "fr": "Conformité dépôt ioBroker: icône PNG, champ platform, dépendances et workflow mis à jour",
-        "it": "Conformità repository ioBroker: icona PNG, campo platform, dipendenze e workflow aggiornati",
-        "es": "Conformidad con repositorio ioBroker: icono PNG, campo platform, dependencias y workflow actualizados",
-        "pl": "Zgodność z repozytorium ioBroker: ikona PNG, pole platform, zaktualizowane zależności i workflow",
-        "uk": "Відповідність репозиторію ioBroker: PNG-іконка, поле platform, оновлені залежності та workflow",
-        "zh-cn": "ioBroker 仓库合规性：PNG 图标、platform 字段、更新的依赖项和工作流"
       },
       "0.3.73": {
         "en": "Stable fingerprint-based client ID – no more duplicate devices on mobile",
@@ -206,7 +158,9 @@
     {
       "_id": "info",
       "type": "channel",
-      "common": { "name": "Information" },
+      "common": {
+        "name": "Information"
+      },
       "native": {}
     },
     {
@@ -225,7 +179,9 @@
     {
       "_id": "config",
       "type": "channel",
-      "common": { "name": "Configuration" },
+      "common": {
+        "name": "Configuration"
+      },
       "native": {}
     },
     {
@@ -244,7 +200,9 @@
     {
       "_id": "navigate",
       "type": "channel",
-      "common": { "name": "Navigation" },
+      "common": {
+        "name": "Navigation"
+      },
       "native": {}
     },
     {
@@ -263,7 +221,9 @@
     {
       "_id": "calendar",
       "type": "channel",
-      "common": { "name": "Calendar fetch relay" },
+      "common": {
+        "name": "Calendar fetch relay"
+      },
       "native": {}
     },
     {
