@@ -50,9 +50,9 @@ function TankVertical({
 
       {/* Tank background */}
       <rect x={bx} y={by} width={bw} height={bh} rx={br}
-        fill="var(--app-bg)" stroke="var(--app-border)" strokeWidth={1.5} />
+        fill="var(--widget-bg)" stroke="var(--app-border)" strokeWidth={1.5} />
 
-      {/* Zone bands (translucent background) */}
+      {/* Zone bands – entire tank at 45% (vivid context) */}
       {colorZones && zones.map((zone, i) => {
         const prev = i === 0 ? min : zones[i - 1].max;
         const s = max > min ? Math.max(0, Math.min(1, (prev     - min) / (max - min))) : 0;
@@ -60,15 +60,32 @@ function TankVertical({
         const zH = (e - s) * bh;
         const zY = by + bh - e * bh;
         return zH > 0 ? (
-          <rect key={i} x={bx} y={zY} width={bw} height={zH}
-            fill={zone.color} opacity={0.18} clipPath={`url(#${clipId})`} />
+          <rect key={`bg-${i}`} x={bx} y={zY} width={bw} height={zH}
+            fill={zone.color} clipPath={`url(#${clipId})`} />
         ) : null;
       })}
 
-      {/* Fill */}
-      {fillH > 0 && (
+      {/* Fill – zone-colored segments at 100% up to fill level */}
+      {colorZones && fillH > 0 && zones.map((zone, i) => {
+        const prev = i === 0 ? min : zones[i - 1].max;
+        const sRaw = max > min ? Math.max(0, Math.min(1, (prev     - min) / (max - min))) : 0;
+        const eRaw = max > min ? Math.max(0, Math.min(1, (zone.max - min) / (max - min))) : 0;
+        const fp = pct / 100;
+        const s = Math.min(sRaw, fp);
+        const e = Math.min(eRaw, fp);
+        if (e <= s) return null;
+        const segH = (e - s) * bh;
+        const segY = by + bh - e * bh;
+        return (
+          <rect key={`fill-${i}`} x={bx} y={segY} width={bw} height={segH}
+            fill={zone.color} clipPath={`url(#${clipId})`} />
+        );
+      })}
+
+      {/* Fill – single color (no zones) */}
+      {!colorZones && fillH > 0 && (
         <rect x={bx} y={fillY} width={bw} height={fillH}
-          fill={fillColor} opacity={0.88} clipPath={`url(#${clipId})`} />
+          fill={fillColor} clipPath={`url(#${clipId})`} />
       )}
 
       {/* Tank border on top */}
@@ -135,9 +152,9 @@ function TankHorizontal({
 
       {/* Tank background */}
       <rect x={bx} y={by} width={bw} height={bh} rx={br}
-        fill="var(--app-bg)" stroke="var(--app-border)" strokeWidth={1.5} />
+        fill="var(--widget-bg)" stroke="var(--app-border)" strokeWidth={1.5} />
 
-      {/* Zone bands */}
+      {/* Zone bands – entire tank at 45% */}
       {colorZones && zones.map((zone, i) => {
         const prev = i === 0 ? min : zones[i - 1].max;
         const s = max > min ? Math.max(0, Math.min(1, (prev     - min) / (max - min))) : 0;
@@ -145,15 +162,32 @@ function TankHorizontal({
         const zW = (e - s) * bw;
         const zX = bx + s * bw;
         return zW > 0 ? (
-          <rect key={i} x={zX} y={by} width={zW} height={bh}
-            fill={zone.color} opacity={0.18} clipPath={`url(#${clipId})`} />
+          <rect key={`bg-${i}`} x={zX} y={by} width={zW} height={bh}
+            fill={zone.color} clipPath={`url(#${clipId})`} />
         ) : null;
       })}
 
-      {/* Fill */}
-      {fillW > 0 && (
+      {/* Fill – zone-colored segments at 100% up to fill level */}
+      {colorZones && fillW > 0 && zones.map((zone, i) => {
+        const prev = i === 0 ? min : zones[i - 1].max;
+        const sRaw = max > min ? Math.max(0, Math.min(1, (prev     - min) / (max - min))) : 0;
+        const eRaw = max > min ? Math.max(0, Math.min(1, (zone.max - min) / (max - min))) : 0;
+        const fp = pct / 100;
+        const s = Math.min(sRaw, fp);
+        const e = Math.min(eRaw, fp);
+        if (e <= s) return null;
+        const segW = (e - s) * bw;
+        const segX = bx + s * bw;
+        return (
+          <rect key={`fill-${i}`} x={segX} y={by} width={segW} height={bh}
+            fill={zone.color} clipPath={`url(#${clipId})`} />
+        );
+      })}
+
+      {/* Fill – single color (no zones) */}
+      {!colorZones && fillW > 0 && (
         <rect x={bx} y={by} width={fillW} height={bh}
-          fill={fillColor} opacity={0.88} clipPath={`url(#${clipId})`} />
+          fill={fillColor} clipPath={`url(#${clipId})`} />
       )}
 
       {/* Tank border on top */}

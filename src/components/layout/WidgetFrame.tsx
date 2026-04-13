@@ -769,10 +769,12 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
     <div
       style={isHeader || isTransparent ? {
         background: 'transparent',
-        borderRadius: 0,
+        borderRadius: isTransparent && editMode ? 'var(--widget-radius)' : 0,
         boxShadow: 'none',
         backdropFilter: 'none',
-        borderWidth: 0,
+        borderWidth: isTransparent && editMode ? 1 : 0,
+        borderStyle: 'dashed',
+        borderColor: isTransparent && editMode ? 'var(--app-border)' : 'transparent',
         ...cssOverride,
         // non-reflow hide: keep space but invisible
         ...(!editMode && conditionResult.hidden && !conditionResult.reflow
