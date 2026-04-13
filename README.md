@@ -1,6 +1,121 @@
-# Aura – Modernes Dashboard für ioBroker
+# ioBroker.aura
 
-Aura ist ein modernes Visualisierungs-Dashboard für [ioBroker](https://www.iobroker.net/). Die Entwicklung erfolgt KI-gestützt mit [Claude](https://claude.ai/) von Anthropic.
+**Aura** is a modern visualization dashboard for [ioBroker](https://www.iobroker.net/).
+
+> **Beta** – The project is under active development. Bugs and breaking changes are possible.
+
+---
+
+## Features
+
+- **Flexible grid layout** with drag & drop
+- **Multiple tabs / pages** per dashboard
+- **Themes:** Dark, Light, Catppuccin (Latte, Frappé, Macchiato, Mocha), Apple Liquid Glass and more
+- **Full admin interface** – no YAML, no JSON editing required
+- **Responsive** – works on tablet, smartphone and desktop
+
+### Widgets
+
+| Widget | Description |
+|--------|-------------|
+| Switch | On/Off toggle |
+| Dimmer | Brightness slider |
+| Thermostat | Target / actual temperature |
+| Gauge | Round gauge with color zones |
+| Fill level | Tank / water / gas level – vertical or horizontal |
+| Chart | Line, bar, pie chart (ECharts) |
+| Calendar | iCal / Google Calendar |
+| Weather | Current weather data |
+| Clock | Analog or digital |
+| iFrame / Camera | Embed any URL |
+| EVCC | Wallbox, solar, battery storage |
+| Waste collection | Which bin needs to go out? |
+| Group | Nested widgets |
+
+---
+
+## Installation
+
+Aura is **not yet** in the official ioBroker repository. Install manually via GitHub URL.
+
+### Step 1 – Install adapter
+
+1. Open ioBroker Admin
+2. **Adapters** → click the **GitHub icon** (Install from URL) in the top right
+3. Enter the following URL and install:
+
+```
+https://github.com/hdering/iobroker.aura
+```
+
+### Step 2 – Create instance
+
+After installation, create a new **Aura** instance (if not done automatically).
+
+### Step 3 – Open dashboard
+
+The dashboard is available at:
+
+```
+http://<iobroker-ip>:8082/aura/
+```
+
+The admin interface at:
+
+```
+http://<iobroker-ip>:8082/aura/#/admin
+```
+
+---
+
+## Updates
+
+Since Aura is installed from an external URL, updates are **not applied automatically**.
+
+Connect to the ioBroker server via SSH, navigate to the ioBroker directory (usually `/opt/iobroker`) and run:
+
+```bash
+npm install iobroker.aura@latest --force && iobroker upload aura && iobroker restart aura
+```
+
+Current version and changelog: [Releases](https://github.com/hdering/iobroker.aura/releases)
+
+---
+
+## Bugs & Feature Requests
+
+Please report directly as a GitHub issue:
+
+👉 **[github.com/hdering/iobroker.aura/issues](https://github.com/hdering/iobroker.aura/issues)**
+
+---
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start dev server (connects to ioBroker via proxy)
+npm run dev
+
+# Production build
+npm run build:adapter
+```
+
+---
+
+## License
+
+MIT
+
+---
+
+---
+
+# ioBroker.aura (Deutsch)
+
+**Aura** ist ein modernes Visualisierungs-Dashboard für [ioBroker](https://www.iobroker.net/).
 
 > **Beta** – Das Projekt ist noch in aktiver Entwicklung. Bugs und Breaking Changes sind möglich.
 
@@ -79,23 +194,6 @@ npm install iobroker.aura@latest --force && iobroker upload aura && iobroker res
 ```
 
 Den aktuellen Versionsstand und alle Änderungen gibt es unter [Releases](https://github.com/hdering/iobroker.aura/releases).
-
----
-
-## Entwicklung (lokale Testinstanz)
-
-```bash
-# Abhängigkeiten installieren
-npm install
-
-# Dev-Server starten (verbindet sich mit ioBroker per Proxy)
-npm run dev
-
-# Produktions-Build erstellen
-npm run build:adapter
-```
-
-Der Dev-Server erwartet eine laufende ioBroker-Instanz. Die Ziel-URL kann in der Admin-Oberfläche unter Einstellungen konfiguriert werden.
 
 ---
 

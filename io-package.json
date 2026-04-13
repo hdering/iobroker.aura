@@ -1,16 +1,31 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.3.17",
-    "title": "Aura Visualisierung",
+    "version": "0.3.73",
+    "title": "Aura",
     "titleLang": {
-      "en": "Aura Visualisation",
-      "de": "Aura Visualisierung"
+      "en": "Aura",
+      "de": "Aura"
     },
     "desc": {
       "en": "Modern visualization dashboard for ioBroker",
       "de": "Modernes Visualisierungs-Dashboard für ioBroker"
     },
+    "authors": [
+      "Hermann Dering <BITTE_EMAIL_EINTRAGEN>"
+    ],
+    "keywords": [
+      "visualization",
+      "dashboard",
+      "vis",
+      "tablet",
+      "smart home",
+      "ical",
+      "calendar",
+      "evcc",
+      "gauge",
+      "chart"
+    ],
     "type": "visualization",
     "license": "MIT",
     "mode": "daemon",
@@ -19,13 +34,40 @@
     "noIntro": true,
     "singleton": true,
     "adminUI": { "config": "none" },
-    "localLink": "",
     "localLinks": {
-      "🖥️ Frontend (Dashboard)": "%protocol%://%ip%:8082/aura/",
-      "⚙️ Backend (Admin)": "%protocol%://%ip%:8082/aura/#/admin"
+      "Dashboard": "%protocol%://%ip%:8082/aura/",
+      "Admin": "%protocol%://%ip%:8082/aura/#/admin"
     },
-    "authors": ["Aura"],
-    "keywords": ["visualization", "dashboard"]
+    "news": {
+      "0.3.73": {
+        "en": "Stable fingerprint-based client ID – no more duplicate devices on mobile",
+        "de": "Stabile fingerprint-basierte Client-ID – kein Duplizieren von Geräten auf Mobilgeräten"
+      },
+      "0.3.72": {
+        "en": "Calendar widget: fetch via state relay instead of sendTo for reliable operation",
+        "de": "Kalender-Widget: Fetch via State-Relay statt sendTo für zuverlässigen Betrieb"
+      },
+      "0.3.69": {
+        "en": "Calendar fetch timeout, transparent widget border in edit mode, solid fill colors",
+        "de": "Kalender-Fetch Timeout, gestrichelter Rahmen für transparente Widgets im Editiermodus, kräftige Füllfarben"
+      },
+      "0.3.64": {
+        "en": "New widget: waste collection (Müllabfuhr) with configurable bins and icons",
+        "de": "Neues Widget: Müllabfuhr mit konfigurierbaren Tonnen und Icons"
+      },
+      "0.3.63": {
+        "en": "New widget: fill level indicator (tank, water, gas) – vertical and horizontal",
+        "de": "Neues Widget: Füllstandsanzeige (Tank, Wasser, Gas) – vertikal und horizontal"
+      },
+      "0.3.38": {
+        "en": "Add Catppuccin themes (Latte, Frappé, Macchiato, Mocha)",
+        "de": "Catppuccin Themes hinzugefügt (Latte, Frappé, Macchiato, Mocha)"
+      },
+      "0.1.0": {
+        "en": "Initial release",
+        "de": "Erstveröffentlichung"
+      }
+    }
   },
   "native": {},
   "objects": [],
@@ -40,6 +82,58 @@
         "read": true,
         "write": false,
         "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "config.dashboard",
+      "type": "state",
+      "common": {
+        "name": "Dashboard configuration",
+        "type": "string",
+        "role": "json",
+        "read": true,
+        "write": true,
+        "def": "{\"widgets\":[]}"
+      },
+      "native": {}
+    },
+    {
+      "_id": "navigate.url",
+      "type": "state",
+      "common": {
+        "name": "Navigate to URL or tab slug",
+        "type": "string",
+        "role": "url",
+        "read": true,
+        "write": true,
+        "def": ""
+      },
+      "native": {}
+    },
+    {
+      "_id": "calendar.request",
+      "type": "state",
+      "common": {
+        "name": "Calendar fetch request (JSON: {id, url})",
+        "type": "string",
+        "role": "json",
+        "read": true,
+        "write": true,
+        "def": ""
+      },
+      "native": {}
+    },
+    {
+      "_id": "calendar.response",
+      "type": "state",
+      "common": {
+        "name": "Calendar fetch response (JSON: {id, content|error})",
+        "type": "string",
+        "role": "json",
+        "read": true,
+        "write": true,
+        "def": ""
       },
       "native": {}
     }
