@@ -33,7 +33,8 @@ export type WidgetType =
   | 'autolist'
   | 'image'
   | 'iframe'
-  | 'fill';
+  | 'fill'
+  | 'trash';
 
 export type WidgetLayout = 'default' | 'card' | 'compact' | 'minimal' | 'agenda' | 'flow' | 'battery' | 'production' | 'consumption' | 'loadpoints';
 

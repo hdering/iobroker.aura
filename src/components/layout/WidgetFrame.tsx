@@ -37,6 +37,7 @@ import { CameraWidget } from '../widgets/CameraWidget';
 import { ImageWidget } from '../widgets/ImageWidget';
 import { IframeWidget } from '../widgets/IframeWidget';
 import { FillWidget } from '../widgets/FillWidget';
+import { TrashWidget, TrashConfig } from '../widgets/TrashWidget';
 import { AutoListWidget } from '../widgets/AutoListWidget';
 
 // Stable empty array – avoids creating a new reference on every render when no conditions are set
@@ -64,6 +65,7 @@ function getWidgetMap() {
     image:      ImageWidget,
     iframe:     IframeWidget,
     fill:       FillWidget,
+    trash:      TrashWidget,
   } as const;
 }
 
@@ -1056,7 +1058,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
       {openPanel === 'edit' && (
         <CenteredModal
           title={t('wf.edit.title')}
-          wide={config.type === 'echart' || config.type === 'autolist'}
+          wide={config.type === 'echart' || config.type === 'autolist' || config.type === 'trash'}
           onClose={() => openPanelFor(null)}
         >
           {/* ─── 1. Name / Titel ──────────────────────────────────────────── */}
@@ -1384,7 +1386,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                 <CalendarEditPanel config={config} onConfigChange={onConfigChange} />
               )}
 
-              {config.type !== 'list' && config.type !== 'clock' && config.type !== 'calendar' && config.type !== 'header' && config.type !== 'group' && config.type !== 'evcc' && config.type !== 'echart' && config.type !== 'weather' && config.type !== 'camera' && config.type !== 'autolist' && config.type !== 'image' && config.type !== 'iframe' && (
+              {config.type !== 'list' && config.type !== 'clock' && config.type !== 'calendar' && config.type !== 'header' && config.type !== 'group' && config.type !== 'evcc' && config.type !== 'echart' && config.type !== 'weather' && config.type !== 'camera' && config.type !== 'autolist' && config.type !== 'image' && config.type !== 'iframe' && config.type !== 'trash' && (
                 <div>
                   <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('wf.edit.datapointId')}</label>
                   <div className="flex gap-1">
@@ -1956,6 +1958,11 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                   </>
                 );
               })()}
+
+              {/* ── Trash / Müllabfuhr config ── */}
+              {config.type === 'trash' && (
+                <TrashConfig config={config} onConfigChange={onConfigChange} />
+              )}
 
               {config.type === 'thermostat' && (() => {
                 const o = config.options ?? {};

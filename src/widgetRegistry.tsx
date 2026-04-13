@@ -12,7 +12,7 @@
 
 import {
   Zap, TrendingUp, SlidersHorizontal, Thermometer, BarChart2, List,
-  Clock, CalendarDays, Heading2, Layers2, Cloud, Gauge, Camera, ImageIcon, MonitorDot, Droplets,
+  Clock, CalendarDays, Heading2, Layers2, Cloud, Gauge, Camera, ImageIcon, MonitorDot, Droplets, Truck,
   type LucideIcon,
 } from 'lucide-react';
 import type { WidgetType } from './types';
@@ -175,6 +175,14 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 3,            defaultH: 3,
     addMode: 'free',        widgetGroup: 'special',
     mock: { t: 'Bild', v: '' },
+  },
+  {
+    type: 'trash',
+    label: 'Müllabfuhr',      shortLabel: 'Müll',
+    Icon: Truck,              iconName: 'Truck',       color: '#6b7280',
+    defaultW: 4,              defaultH: 3,
+    addMode: 'free',          widgetGroup: 'special',
+    mock: { t: 'Müllabfuhr', v: '' },
   },
   {
     type: 'fill',
