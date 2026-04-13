@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.3.83",
+    "version": "0.3.84",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -72,6 +72,19 @@
       }
     ],
     "news": {
+      "0.3.84": {
+        "en": "CI/CD pipeline fully operational",
+        "de": "CI/CD-Pipeline voll funktionsfähig",
+        "ru": "CI/CD-пайплайн полностью работает",
+        "pt": "Pipeline CI/CD totalmente operacional",
+        "nl": "CI/CD-pipeline volledig operationeel",
+        "fr": "Pipeline CI/CD pleinement opérationnel",
+        "it": "Pipeline CI/CD completamente operativa",
+        "es": "Pipeline CI/CD totalmente operativo",
+        "pl": "Pipeline CI/CD w pełni operacyjny",
+        "uk": "CI/CD-пайплайн повністю працює",
+        "zh-cn": "CI/CD 流水线完全运行"
+      },
       "0.3.83": {
         "en": "Fix CI publish: use granular npm access token",
         "de": "CI-Publish korrigiert: granulares npm Access Token",

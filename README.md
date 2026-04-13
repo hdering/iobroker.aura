@@ -89,6 +89,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.3.84 (2026-04-13)
+- CI/CD pipeline fully operational
+
 ### 0.3.83 (2026-04-13)
 - Fix CI publish: use granular npm access token
 
