@@ -42,10 +42,8 @@
       "gauge",
       "chart"
     ],
-    "icon": "admin/aura.svg",
     "extIcon": "https://raw.githubusercontent.com/hdering/ioBroker.aura/main/admin/aura.svg",
     "type": "visualization",
-    "license": "MIT",
     "licenseInformation": {
       "license": "MIT",
       "type": "free"
@@ -65,39 +63,61 @@
       "Admin": "%protocol%://%ip%:8082/aura/#/admin"
     },
     "dependencies": [
-      { "iobroker.admin": ">=6.0.0" }
-    ],
-    "globalDependencies": [
-      { "js-controller": ">=5.0.19" }
+      { "js-controller": ">=5.0.19" },
+      { "admin": ">=6.0.0" }
     ],
     "news": {
       "0.3.73": {
         "en": "Stable fingerprint-based client ID – no more duplicate devices on mobile",
-        "de": "Stabile fingerprint-basierte Client-ID – kein Duplizieren von Geräten auf Mobilgeräten"
+        "de": "Stabile fingerprint-basierte Client-ID – kein Duplizieren von Geräten auf Mobilgeräten",
+        "ru": "Стабильный ID клиента на основе отпечатка – больше нет дублирующихся устройств на мобильных",
+        "pt": "ID de cliente estável baseado em impressão digital – sem mais dispositivos duplicados no celular",
+        "nl": "Stabiele fingerprint-gebaseerde client-ID – geen dubbele apparaten meer op mobiel",
+        "fr": "ID client stable basé sur empreinte – plus de doublons sur mobile",
+        "it": "ID client stabile basato su fingerprint – niente più dispositivi duplicati su mobile",
+        "es": "ID de cliente estable basado en huella digital – no más dispositivos duplicados en móvil",
+        "pl": "Stabilne ID klienta oparte na odcisku – koniec z duplikatami urządzeń na telefonie",
+        "uk": "Стабільний ID клієнта на основі відбитку – більше немає дублікатів пристроїв на мобільних",
+        "zh-cn": "基于指纹的稳定客户端 ID – 移动设备不再出现重复条目"
       },
       "0.3.72": {
         "en": "Calendar widget: fetch via state relay instead of sendTo for reliable operation",
-        "de": "Kalender-Widget: Fetch via State-Relay statt sendTo für zuverlässigen Betrieb"
-      },
-      "0.3.69": {
-        "en": "Calendar fetch timeout, transparent widget border in edit mode, solid fill colors",
-        "de": "Kalender-Fetch Timeout, gestrichelter Rahmen für transparente Widgets im Editiermodus"
-      },
-      "0.3.64": {
-        "en": "New widget: waste collection with configurable bins and icons",
-        "de": "Neues Widget: Müllabfuhr mit konfigurierbaren Tonnen und Icons"
+        "de": "Kalender-Widget: Fetch via State-Relay statt sendTo für zuverlässigen Betrieb",
+        "ru": "Виджет календаря: получение через state relay вместо sendTo",
+        "pt": "Widget de calendário: busca via state relay em vez de sendTo",
+        "nl": "Kalender widget: ophalen via state relay in plaats van sendTo",
+        "fr": "Widget calendrier: récupération via state relay au lieu de sendTo",
+        "it": "Widget calendario: recupero tramite state relay invece di sendTo",
+        "es": "Widget de calendario: obtención a través de state relay en lugar de sendTo",
+        "pl": "Widget kalendarza: pobieranie przez state relay zamiast sendTo",
+        "uk": "Віджет календаря: отримання через state relay замість sendTo",
+        "zh-cn": "日历小部件：通过 state relay 而非 sendTo 获取数据"
       },
       "0.3.63": {
-        "en": "New widget: fill level indicator (tank, water, gas) – vertical and horizontal",
-        "de": "Neues Widget: Füllstandsanzeige (Tank, Wasser, Gas) – vertikal und horizontal"
-      },
-      "0.3.38": {
-        "en": "Add Catppuccin themes (Latte, Frappé, Macchiato, Mocha)",
-        "de": "Catppuccin Themes hinzugefügt (Latte, Frappé, Macchiato, Mocha)"
+        "en": "New widgets: fill level indicator and waste collection",
+        "de": "Neue Widgets: Füllstandsanzeige und Müllabfuhr",
+        "ru": "Новые виджеты: индикатор уровня заполнения и вывоз мусора",
+        "pt": "Novos widgets: indicador de nível e coleta de lixo",
+        "nl": "Nieuwe widgets: niveaumeter en afvalinzameling",
+        "fr": "Nouveaux widgets: indicateur de niveau et collecte des déchets",
+        "it": "Nuovi widget: indicatore di livello e raccolta rifiuti",
+        "es": "Nuevos widgets: indicador de nivel y recogida de basura",
+        "pl": "Nowe widżety: wskaźnik poziomu i wywóz śmieci",
+        "uk": "Нові віджети: індикатор рівня та вивіз сміття",
+        "zh-cn": "新增小部件：液位指示器和垃圾收集"
       },
       "0.1.0": {
         "en": "Initial release",
-        "de": "Erstveröffentlichung"
+        "de": "Erstveröffentlichung",
+        "ru": "Первый выпуск",
+        "pt": "Lançamento inicial",
+        "nl": "Eerste release",
+        "fr": "Première version",
+        "it": "Prima versione",
+        "es": "Lanzamiento inicial",
+        "pl": "Pierwsze wydanie",
+        "uk": "Перший випуск",
+        "zh-cn": "初始版本"
       }
     }
   },

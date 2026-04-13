@@ -15,6 +15,7 @@
     "io-package.json"
   ],
   "keywords": [
+    "ioBroker",
     "visualization",
     "dashboard",
     "tablet",
