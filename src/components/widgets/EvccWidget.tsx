@@ -632,13 +632,27 @@ export function EvccWidget({ config }: WidgetProps) {
 
   const { site: rawSite, loadpoints } = useEvccData(prefix, loadpointCount);
 
-  // Merge override values into site
+  // If the SoC datapoint returns a JSON object (e.g. evcc.0.status.battery
+  // → {"soc":10.5,"power":0,...}), extract both values automatically.
+  const batteryJson = (() => {
+    if (!batterySocDp || extSoc == null) return null;
+    const str = String(extSoc).trim();
+    if (!str.startsWith('{')) return null;
+    try { return JSON.parse(str) as { soc?: number; power?: number }; } catch { return null; }
+  })();
+
   const site: SiteState = {
     ...rawSite,
-    ...(batterySocDp && extSoc !== undefined && extSoc !== null
-      ? { batterySoc: parseFloat(String(extSoc)) } : {}),
-    ...(batteryPowerDp && extPower !== undefined && extPower !== null
-      ? { batteryPower: parseFloat(String(extPower)) } : {}),
+    ...(batteryJson
+      ? {
+          ...(batteryJson.soc   != null ? { batterySoc:   batteryJson.soc }   : {}),
+          ...(batteryJson.power != null ? { batteryPower: batteryJson.power }  : {}),
+        }
+      : {
+          ...(batterySocDp   && extSoc   != null ? { batterySoc:   parseFloat(String(extSoc))   } : {}),
+          ...(batteryPowerDp && extPower != null ? { batteryPower: parseFloat(String(extPower)) } : {}),
+        }
+    ),
   };
 
   if (!connected) {
@@ -822,7 +836,7 @@ export function EvccConfig({
             <input type="text"
               value={(o.batterySocDatapoint as string) ?? ''}
               onChange={(e) => set({ batterySocDatapoint: e.target.value || undefined })}
-              placeholder="z.B. sma.0.battery.soc"
+              placeholder="z.B. evcc.0.status.battery oder sma.0.battery.soc"
               className={inputCls + ' font-mono'} style={inputSty} />
           </div>
           <div>
