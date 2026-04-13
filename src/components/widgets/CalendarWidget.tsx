@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { RefreshCw, CalendarDays, MapPin, AlertCircle } from 'lucide-react';
 import type { WidgetProps } from '../../types';
-import { getSocket } from '../../hooks/useIoBroker';
+import { getSocket, subscribeStateDirect } from '../../hooks/useIoBroker';
 import { useT } from '../../i18n';
 
 // ── CalendarSource ─────────────────────────────────────────────────────────
@@ -100,35 +100,41 @@ function parseIcal(text: string): CalEvent[] {
 
 // ── fetch ──────────────────────────────────────────────────────────────────
 
+// Fetch iCal via the adapter's state-based relay:
+//   frontend writes {id, url} → aura.0.calendar.request
+//   adapter fetches URL, writes {id, content|error} → aura.0.calendar.response
+//   frontend subscriber matches by id and resolves/rejects
 async function fetchIcalText(url: string): Promise<string> {
   if (import.meta.env.DEV) {
     const res = await fetch(`/proxy/ical?url=${encodeURIComponent(url)}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.text();
   }
+  const id = Math.random().toString(36).slice(2) + Date.now().toString(36);
   return new Promise((resolve, reject) => {
     let settled = false;
-    const socket = getSocket();
-    console.log('[CalendarWidget] socket connected:', (socket as unknown as { connected?: boolean }).connected);
-    console.log('[CalendarWidget] emitting sendTo aura.0 fetchUrl for:', url);
     const timer = setTimeout(() => {
       if (!settled) {
         settled = true;
-        console.error('[CalendarWidget] TIMEOUT: sendTo callback never fired after 20s');
-        reject(new Error('Adapter antwortet nicht (Timeout 20s)'));
+        unsubscribe();
+        reject(new Error('Kalender-Fetch Timeout (20s) – Adapter läuft nicht oder erreichbar?'));
       }
     }, 20000);
-    socket.emit(
-      'sendTo', 'aura.0', 'fetchUrl', { url },
-      (result: { content?: string; error?: string } | undefined) => {
+    const unsubscribe = subscribeStateDirect('aura.0.calendar.response', (state) => {
+      if (!state?.val) return;
+      try {
+        const resp = JSON.parse(String(state.val)) as { id?: string; content?: string; error?: string };
+        if (resp.id !== id) return;
         if (settled) return;
         settled = true;
         clearTimeout(timer);
-        console.log('[CalendarWidget] sendTo callback received:', result ? `content=${result.content?.length ?? 0}b, error=${result.error}` : 'undefined');
-        if (result?.content) resolve(result.content);
-        else reject(new Error(result?.error ?? 'Adapter-Fetch fehlgeschlagen'));
-      },
-    );
+        unsubscribe();
+        if (resp.content) resolve(resp.content);
+        else reject(new Error(resp.error ?? 'Adapter-Fetch fehlgeschlagen'));
+      } catch { /* ignore parse errors from unrelated state changes */ }
+    });
+    // Write request – triggers adapter onStateChange
+    getSocket().emit('setState', 'aura.0.calendar.request', { val: JSON.stringify({ id, url }), ack: false });
   });
 }
 
@@ -230,10 +236,13 @@ export function CalendarWidget({ config }: WidgetProps) {
     setLoading(true);
     setErrors([]);
     try {
-      const results = await Promise.allSettled(
-        srcs.map(async (src) => {
+      // Sequential fetches to avoid state race conditions on aura.0.calendar.response
+      const all: CalEventTagged[] = [];
+      const errs: string[] = [];
+      for (const src of srcs) {
+        try {
           const text = await fetchIcalText(src.url);
-          return parseIcal(text).map((ev): CalEventTagged => ({
+          const parsed = parseIcal(text).map((ev): CalEventTagged => ({
             ...ev,
             uid: `${src.id}:${ev.uid}`,
             sourceId: src.id,
@@ -241,15 +250,11 @@ export function CalendarWidget({ config }: WidgetProps) {
             sourceColor: src.color,
             showSourceName: src.showName,
           }));
-        }),
-      );
-
-      const all: CalEventTagged[] = [];
-      const errs: string[] = [];
-      results.forEach((r) => {
-        if (r.status === 'fulfilled') all.push(...r.value);
-        else errs.push(r.reason?.message ?? String(r.reason));
-      });
+          all.push(...parsed);
+        } catch (err) {
+          errs.push(err instanceof Error ? err.message : String(err));
+        }
+      }
 
       const upcoming = all
         .filter((e) => isUpcoming(e, dA))
