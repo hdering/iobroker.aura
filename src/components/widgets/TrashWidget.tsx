@@ -57,6 +57,8 @@ function BinDisplay({ bin, size }: { bin: TrashBin; size: number }) {
   const Icon    = ICON_MAP[bin.icon] ?? Trash2;
   const opacity = bin.hideWhen === 'never' && !active ? 0.22 : 1;
   const lblSize = size <= 44 ? 9 : size <= 56 ? 10 : 11;
+  // Icon size must be an integer – fractional SVG dimensions cause blurriness
+  const iconPx  = Math.round(size / 2);
 
   return (
     <div className="flex flex-col items-center gap-1.5" style={{ opacity }}>
@@ -66,10 +68,10 @@ function BinDisplay({ bin, size }: { bin: TrashBin; size: number }) {
           width:      size,
           height:     size,
           background: `${bin.color}22`,
-          border:     `2.5px solid ${bin.color}88`,
+          border:     `2px solid ${bin.color}88`,
         }}
       >
-        <Icon size={size * 0.48} color={bin.color} strokeWidth={1.5} />
+        <Icon size={iconPx} color={bin.color} strokeWidth={2} />
       </div>
       {bin.name && (
         <span
