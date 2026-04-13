@@ -45,7 +45,7 @@ Aura is **not yet** in the official ioBroker repository. Install manually via Gi
 3. Enter the following URL and install:
 
 ```
-https://github.com/hdering/iobroker.aura
+https://github.com/hdering/ioBroker.aura
 ```
 
 ### Step 2 – Create instance
@@ -78,7 +78,7 @@ Connect to the ioBroker server via SSH, navigate to the ioBroker directory (usua
 npm install iobroker.aura@latest --force && iobroker upload aura && iobroker restart aura
 ```
 
-Current version and changelog: [Releases](https://github.com/hdering/iobroker.aura/releases)
+Current version and changelog: [Releases](https://github.com/hdering/ioBroker.aura/releases)
 
 ---
 
@@ -86,7 +86,7 @@ Current version and changelog: [Releases](https://github.com/hdering/iobroker.au
 
 Please report directly as a GitHub issue:
 
-👉 **[github.com/hdering/iobroker.aura/issues](https://github.com/hdering/iobroker.aura/issues)**
+👉 **[github.com/hdering/ioBroker.aura/issues](https://github.com/hdering/ioBroker.aura/issues)**
 
 ---
 
@@ -160,7 +160,7 @@ Aura ist noch **nicht** im offiziellen ioBroker-Repository. Die Installation erf
 3. Folgende URL eingeben und installieren:
 
 ```
-https://github.com/hdering/iobroker.aura
+https://github.com/hdering/ioBroker.aura
 ```
 
 ### Schritt 2 – Instanz anlegen
@@ -193,7 +193,7 @@ Per SSH auf den ioBroker-Server verbinden, ins ioBroker-Verzeichnis wechseln (me
 npm install iobroker.aura@latest --force && iobroker upload aura && iobroker restart aura
 ```
 
-Den aktuellen Versionsstand und alle Änderungen gibt es unter [Releases](https://github.com/hdering/iobroker.aura/releases).
+Den aktuellen Versionsstand und alle Änderungen gibt es unter [Releases](https://github.com/hdering/ioBroker.aura/releases).
 
 ---
 
@@ -201,7 +201,7 @@ Den aktuellen Versionsstand und alle Änderungen gibt es unter [Releases](https:
 
 Bitte direkt als GitHub Issue melden:
 
-👉 **[github.com/hdering/iobroker.aura/issues](https://github.com/hdering/iobroker.aura/issues)**
+👉 **[github.com/hdering/ioBroker.aura/issues](https://github.com/hdering/ioBroker.aura/issues)**
 
 ---
 

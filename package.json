@@ -27,10 +27,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hdering/iobroker.aura.git"
+    "url": "git+https://github.com/hdering/ioBroker.aura.git"
   },
   "bugs": {
-    "url": "https://github.com/hdering/iobroker.aura/issues"
+    "url": "https://github.com/hdering/ioBroker.aura/issues"
   },
   "scripts": {
     "dev": "vite",
