@@ -108,15 +108,23 @@ async function fetchIcalText(url: string): Promise<string> {
   }
   return new Promise((resolve, reject) => {
     let settled = false;
+    const socket = getSocket();
+    console.log('[CalendarWidget] socket connected:', (socket as unknown as { connected?: boolean }).connected);
+    console.log('[CalendarWidget] emitting sendTo aura.0 fetchUrl for:', url);
     const timer = setTimeout(() => {
-      if (!settled) { settled = true; reject(new Error('Adapter antwortet nicht (Timeout 20s)')); }
+      if (!settled) {
+        settled = true;
+        console.error('[CalendarWidget] TIMEOUT: sendTo callback never fired after 20s');
+        reject(new Error('Adapter antwortet nicht (Timeout 20s)'));
+      }
     }, 20000);
-    getSocket().emit(
+    socket.emit(
       'sendTo', 'aura.0', 'fetchUrl', { url },
       (result: { content?: string; error?: string } | undefined) => {
         if (settled) return;
         settled = true;
         clearTimeout(timer);
+        console.log('[CalendarWidget] sendTo callback received:', result ? `content=${result.content?.length ?? 0}b, error=${result.error}` : 'undefined');
         if (result?.content) resolve(result.content);
         else reject(new Error(result?.error ?? 'Adapter-Fetch fehlgeschlagen'));
       },
