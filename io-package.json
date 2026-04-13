@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.3.86",
+    "version": "0.3.87",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -72,6 +72,19 @@
       }
     ],
     "news": {
+      "0.3.87": {
+        "en": "Version bump",
+        "de": "Versions-Bump",
+        "ru": "Обновление версии",
+        "pt": "Incremento de versão",
+        "nl": "Versieverhoging",
+        "fr": "Incrément de version",
+        "it": "Aggiornamento versione",
+        "es": "Incremento de versión",
+        "pl": "Inkrementacja wersji",
+        "uk": "Оновлення версії",
+        "zh-cn": "版本更新"
+      },
       "0.3.86": {
         "en": "Fix extIcon URL: use master branch ref as required by ioBroker checker",
         "de": "extIcon-URL korrigiert: master-Branch-Ref wie vom ioBroker-Checker verlangt",

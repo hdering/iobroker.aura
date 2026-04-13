@@ -89,6 +89,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.3.87 (2026-04-13)
+- Version bump
+
 ### 0.3.86 (2026-04-13)
 - Fix extIcon URL: use master branch ref as required by ioBroker checker
 
