@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.3.80",
+    "version": "0.3.81",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -72,6 +72,19 @@
       }
     ],
     "news": {
+      "0.3.81": {
+        "en": "Fix CI publish: remove registry-url to allow npm Trusted Publishing OIDC auth",
+        "de": "CI-Publish korrigiert: registry-url entfernt für korrekte npm Trusted Publishing OIDC-Auth",
+        "ru": "Исправлен CI publish: удалён registry-url для корректной OIDC-аутентификации",
+        "pt": "Corrigido CI publish: removido registry-url para autenticação OIDC do Trusted Publishing",
+        "nl": "CI publish gecorrigeerd: registry-url verwijderd voor juiste OIDC-auth",
+        "fr": "CI publish corrigé: registry-url supprimé pour authentification OIDC Trusted Publishing",
+        "it": "CI publish corretto: rimosso registry-url per autenticazione OIDC Trusted Publishing",
+        "es": "CI publish corregido: eliminado registry-url para autenticación OIDC",
+        "pl": "Naprawiono CI publish: usunięto registry-url dla poprawnej autentykacji OIDC",
+        "uk": "Виправлено CI publish: видалено registry-url для коректної OIDC-автентифікації",
+        "zh-cn": "修复 CI 发布：删除 registry-url 以允许 npm Trusted Publishing OIDC 认证"
+      },
       "0.3.80": {
         "en": "Remove unpublished versions from news section; ioBroker repository compliance fixes",
         "de": "Nicht veröffentlichte Versionen aus News entfernt; ioBroker-Repository-Konformität",

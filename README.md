@@ -89,6 +89,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.3.81 (2026-04-13)
+- Fix CI publish: remove registry-url to allow npm Trusted Publishing OIDC auth
+
 ### 0.3.80 (2026-04-13)
 - Remove unpublished versions from news section; ioBroker repository compliance fixes
 
