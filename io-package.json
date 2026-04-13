@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.3.73",
+    "version": "0.3.74",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -68,6 +68,19 @@
       { "js-controller": ">=6.0.11" }
     ],
     "news": {
+      "0.3.74": {
+        "en": "ioBroker repository compliance: PNG icon, platform field, updated dependencies and workflow",
+        "de": "ioBroker-Repository-Konformität: PNG-Icon, platform-Feld, aktualisierte Abhängigkeiten und Workflow",
+        "ru": "Соответствие репозиторию ioBroker: PNG-иконка, поле platform, обновлённые зависимости и workflow",
+        "pt": "Conformidade com repositório ioBroker: ícone PNG, campo platform, dependências e workflow atualizados",
+        "nl": "ioBroker repository-conformiteit: PNG-icoon, platform-veld, bijgewerkte afhankelijkheden en workflow",
+        "fr": "Conformité dépôt ioBroker: icône PNG, champ platform, dépendances et workflow mis à jour",
+        "it": "Conformità repository ioBroker: icona PNG, campo platform, dipendenze e workflow aggiornati",
+        "es": "Conformidad con repositorio ioBroker: icono PNG, campo platform, dependencias y workflow actualizados",
+        "pl": "Zgodność z repozytorium ioBroker: ikona PNG, pole platform, zaktualizowane zależności i workflow",
+        "uk": "Відповідність репозиторію ioBroker: PNG-іконка, поле platform, оновлені залежності та workflow",
+        "zh-cn": "ioBroker 仓库合规性：PNG 图标、platform 字段、更新的依赖项和工作流"
+      },
       "0.3.73": {
         "en": "Stable fingerprint-based client ID – no more duplicate devices on mobile",
         "de": "Stabile fingerprint-basierte Client-ID – kein Duplizieren von Geräten auf Mobilgeräten",

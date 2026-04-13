@@ -89,6 +89,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.3.74 (2026-04-13)
+- ioBroker repository compliance: PNG icon, platform field, updated dependencies and workflow
+
 ### 0.3.73 (2026-04-13)
 - Stable fingerprint-based client ID – no more duplicate devices on mobile
 
