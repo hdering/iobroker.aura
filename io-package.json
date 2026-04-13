@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.3.85",
+    "version": "0.3.86",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -43,7 +43,7 @@
       "chart"
     ],
     "icon": "admin/aura.png",
-    "extIcon": "https://raw.githubusercontent.com/hdering/ioBroker.aura/HEAD/admin/aura.png",
+    "extIcon": "https://raw.githubusercontent.com/hdering/ioBroker.aura/master/admin/aura.png",
     "type": "visualization",
     "licenseInformation": {
       "license": "MIT",
@@ -72,6 +72,19 @@
       }
     ],
     "news": {
+      "0.3.86": {
+        "en": "Fix extIcon URL: use master branch ref as required by ioBroker checker",
+        "de": "extIcon-URL korrigiert: master-Branch-Ref wie vom ioBroker-Checker verlangt",
+        "ru": "Исправлен extIcon URL: используется master branch как требует checker",
+        "pt": "URL extIcon corrigida: uso do branch master conforme exigido pelo checker",
+        "nl": "extIcon URL gecorrigeerd: master branch ref zoals vereist door ioBroker checker",
+        "fr": "URL extIcon corrigée: utilisation de master branch comme requis par le checker",
+        "it": "URL extIcon corretta: uso del branch master come richiesto dal checker",
+        "es": "URL extIcon corregida: uso del branch master según lo requerido por el checker",
+        "pl": "Poprawiono URL extIcon: użycie gałęzi master wymaganej przez checker",
+        "uk": "Виправлено URL extIcon: використання гілки master як вимагає checker",
+        "zh-cn": "修复 extIcon URL：使用 master 分支引用（checker 要求）"
+      },
       "0.3.85": {
         "en": "Fix news section: remove unpublished versions; fix extIcon URL",
         "de": "News-Bereich bereinigt: nicht veröffentlichte Versionen entfernt; extIcon-URL korrigiert",
