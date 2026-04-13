@@ -2,14 +2,31 @@
   "common": {
     "name": "aura",
     "version": "0.3.73",
-    "title": "Aura",
     "titleLang": {
       "en": "Aura",
-      "de": "Aura"
+      "de": "Aura",
+      "ru": "Aura",
+      "pt": "Aura",
+      "nl": "Aura",
+      "fr": "Aura",
+      "it": "Aura",
+      "es": "Aura",
+      "pl": "Aura",
+      "uk": "Aura",
+      "zh-cn": "Aura"
     },
     "desc": {
       "en": "Modern visualization dashboard for ioBroker",
-      "de": "Modernes Visualisierungs-Dashboard für ioBroker"
+      "de": "Modernes Visualisierungs-Dashboard für ioBroker",
+      "ru": "Современная панель визуализации для ioBroker",
+      "pt": "Painel de visualização moderno para ioBroker",
+      "nl": "Modern visualisatiedashboard voor ioBroker",
+      "fr": "Tableau de bord de visualisation moderne pour ioBroker",
+      "it": "Dashboard di visualizzazione moderna per ioBroker",
+      "es": "Panel de visualización moderno para ioBroker",
+      "pl": "Nowoczesny panel wizualizacji dla ioBroker",
+      "uk": "Сучасна панель візуалізації для ioBroker",
+      "zh-cn": "ioBroker 的现代可视化仪表板"
     },
     "authors": [
       "Hermann Dering <aura@dering-online.de>"
@@ -19,17 +36,26 @@
       "dashboard",
       "vis",
       "tablet",
-      "smart home",
       "ical",
       "calendar",
       "evcc",
       "gauge",
       "chart"
     ],
+    "icon": "admin/aura.svg",
+    "extIcon": "https://raw.githubusercontent.com/hdering/ioBroker.aura/main/admin/aura.svg",
     "type": "visualization",
     "license": "MIT",
+    "licenseInformation": {
+      "license": "MIT",
+      "type": "free"
+    },
     "mode": "daemon",
     "allowInit": true,
+    "compact": false,
+    "tier": 3,
+    "connectionType": "local",
+    "dataSource": "push",
     "webExtension": "www/",
     "noIntro": true,
     "singleton": true,
@@ -38,6 +64,12 @@
       "Dashboard": "%protocol%://%ip%:8082/aura/",
       "Admin": "%protocol%://%ip%:8082/aura/#/admin"
     },
+    "dependencies": [
+      { "iobroker.admin": ">=6.0.0" }
+    ],
+    "globalDependencies": [
+      { "js-controller": ">=5.0.19" }
+    ],
     "news": {
       "0.3.73": {
         "en": "Stable fingerprint-based client ID – no more duplicate devices on mobile",
@@ -49,10 +81,10 @@
       },
       "0.3.69": {
         "en": "Calendar fetch timeout, transparent widget border in edit mode, solid fill colors",
-        "de": "Kalender-Fetch Timeout, gestrichelter Rahmen für transparente Widgets im Editiermodus, kräftige Füllfarben"
+        "de": "Kalender-Fetch Timeout, gestrichelter Rahmen für transparente Widgets im Editiermodus"
       },
       "0.3.64": {
-        "en": "New widget: waste collection (Müllabfuhr) with configurable bins and icons",
+        "en": "New widget: waste collection with configurable bins and icons",
         "de": "Neues Widget: Müllabfuhr mit konfigurierbaren Tonnen und Icons"
       },
       "0.3.63": {
