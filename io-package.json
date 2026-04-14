@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.3.97",
+    "version": "0.3.98",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -102,6 +102,19 @@
       }
     ],
     "news": {
+      "0.3.98": {
+        "en": "Replace hardcoded personal domain in settings placeholder with generic example",
+        "de": "Persönliche Domain im Einstellungs-Platzhalter durch generisches Beispiel ersetzt",
+        "ru": "Личный домен в подсказке настроек заменён на общий пример",
+        "pt": "Domínio pessoal no placeholder das configurações substituído por exemplo genérico",
+        "nl": "Persoonlijk domein in instellingen-placeholder vervangen door generiek voorbeeld",
+        "fr": "Domaine personnel dans le placeholder des paramètres remplacé par un exemple générique",
+        "it": "Dominio personale nel placeholder delle impostazioni sostituito con esempio generico",
+        "es": "Dominio personal en el placeholder de configuración reemplazado por ejemplo genérico",
+        "pl": "Osobista domena w placeholder ustawień zastąpiona ogólnym przykładem",
+        "uk": "Особистий домен у підказці налаштувань замінено на загальний приклад",
+        "zh-cn": "将设置占位符中的个人域名替换为通用示例"
+      },
       "0.3.97": {
         "en": "Fix overview tile titles: use localLinks name field instead of key",
         "de": "Kacheltitel in der Übersicht korrigiert: name-Feld in localLinks statt Key verwenden",

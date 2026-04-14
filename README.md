@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.3.98 (2026-04-14)
+- Replace hardcoded personal domain in settings placeholder with generic example
+
 ### 0.3.97 (2026-04-14)
 - Fix overview tile titles: use localLinks `name` field (ioBroker uses name, not key, as the visible title)
 
