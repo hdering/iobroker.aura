@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.10 (2026-04-14)
+- Add `src-vis/i18n/` to `package.json` files to include translations in npm package
+
 ### 0.4.9 (2026-04-14)
 - Rename frontend source directory from `src/` to `src-vis/` per ioBroker adapter convention
 

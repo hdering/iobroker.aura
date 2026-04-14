@@ -1,6 +1,6 @@
 {
   "name": "iobroker.aura",
-  "version": "0.4.9",
+  "version": "0.4.10",
   "description": "Modern visualization dashboard for ioBroker",
   "author": "Hermann Dering <aura@dering-online.de>",
   "main": "lib/main.js",
@@ -12,6 +12,7 @@
     "admin/",
     "lib/",
     "www/",
+    "src-vis/i18n/",
     "io-package.json"
   ],
   "keywords": [
