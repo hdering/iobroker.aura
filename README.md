@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.3.95 (2026-04-14)
+- Fix restart loop when custom URL is set (only write localLinks when value actually changed)
+
 ### 0.3.94 (2026-04-14)
 - Add configurable custom base URL for ioBroker overview and instance links (useful for reverse proxy setups)
 

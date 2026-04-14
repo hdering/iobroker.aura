@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.3.94",
+    "version": "0.3.95",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -72,6 +72,19 @@
       }
     ],
     "news": {
+      "0.3.95": {
+        "en": "Fix restart loop when custom URL is set: only update localLinks when value changed",
+        "de": "Neustart-Schleife bei gesetzter Custom-URL behoben: localLinks nur schreiben wenn sich der Wert geändert hat",
+        "ru": "Исправлен цикл перезапуска при установленном custom URL: localLinks обновляются только при изменении значения",
+        "pt": "Corrigido loop de reinício com URL personalizada: localLinks só são atualizados quando o valor muda",
+        "nl": "Herstart-loop bij ingestelde custom URL opgelost: localLinks alleen bijwerken als de waarde verandert",
+        "fr": "Correction de la boucle de redémarrage avec URL personnalisée: localLinks mis à jour seulement si la valeur change",
+        "it": "Corretto loop di riavvio con URL personalizzato: localLinks aggiornati solo quando il valore cambia",
+        "es": "Corregido bucle de reinicio con URL personalizada: localLinks solo se actualizan cuando el valor cambia",
+        "pl": "Naprawiono pętlę restartu przy ustawionym custom URL: localLinks aktualizowane tylko gdy wartość się zmienia",
+        "uk": "Виправлено цикл перезапуску при встановленому custom URL: localLinks оновлюються лише при зміні значення",
+        "zh-cn": "修复设置自定义 URL 时的重启循环：仅在值发生变化时更新 localLinks"
+      },
       "0.3.94": {
         "en": "Add configurable custom URL for ioBroker overview links",
         "de": "Konfigurierbare benutzerdefinierte URL für ioBroker-Übersichts-Links hinzugefügt",
