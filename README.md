@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.3.96 (2026-04-14)
+- Fix overview tile names: use full replacement instead of deep-merge so old keys ("Dashboard"/"Admin") are removed
+
 ### 0.3.95 (2026-04-14)
 - Fix restart loop when custom URL is set (only write localLinks when value actually changed)
 

@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.3.95",
+    "version": "0.3.96",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -72,6 +72,19 @@
       }
     ],
     "news": {
+      "0.3.96": {
+        "en": "Fix overview tile names: replace localLinks instead of merging to remove stale keys",
+        "de": "Kachelnamen in der Übersicht korrigiert: localLinks werden ersetzt statt zusammengeführt, um veraltete Einträge zu entfernen",
+        "ru": "Исправлены названия плиток обзора: localLinks заменяются вместо слияния",
+        "pt": "Nomes dos tiles da visão geral corrigidos: localLinks substituídos em vez de mesclados",
+        "nl": "Kachelnamen in overzicht gecorrigeerd: localLinks worden vervangen in plaats van samengevoegd",
+        "fr": "Correction des noms des tuiles de vue d'ensemble: localLinks remplacés au lieu de fusionnés",
+        "it": "Nomi tile panoramica corretti: localLinks sostituiti invece di uniti",
+        "es": "Nombres de tiles de vista general corregidos: localLinks reemplazados en lugar de fusionados",
+        "pl": "Poprawiono nazwy kafelków przeglądu: localLinks zastępowane zamiast scalane",
+        "uk": "Виправлено назви плиток огляду: localLinks замінюються замість злиття",
+        "zh-cn": "修复概览磁贴名称：替换 localLinks 而不是合并，以删除旧条目"
+      },
       "0.3.95": {
         "en": "Fix restart loop when custom URL is set: only update localLinks when value changed",
         "de": "Neustart-Schleife bei gesetzter Custom-URL behoben: localLinks nur schreiben wenn sich der Wert geändert hat",
