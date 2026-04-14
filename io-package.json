@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.3.89",
+    "version": "0.3.90",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -72,6 +72,19 @@
       }
     ],
     "news": {
+      "0.3.90": {
+        "en": "Fix HTTPS connection; fix WebSocket proxy in dev server; remove PIN from expert settings",
+        "de": "HTTPS-Verbindung korrigiert; WebSocket-Proxy im Dev-Server repariert; PIN aus Experteneinstellungen entfernt",
+        "ru": "Исправлено HTTPS-соединение; исправлен WebSocket-прокси в dev-сервере; удалён PIN из экспертных настроек",
+        "pt": "Conexão HTTPS corrigida; proxy WebSocket no servidor dev corrigido; PIN removido das configurações avançadas",
+        "nl": "HTTPS verbinding gecorrigeerd; WebSocket proxy in dev server gerepareerd; PIN verwijderd uit expert-instellingen",
+        "fr": "Connexion HTTPS corrigée; proxy WebSocket dans le serveur dev réparé; PIN supprimé des paramètres experts",
+        "it": "Connessione HTTPS corretta; proxy WebSocket nel server dev corretto; PIN rimosso dalle impostazioni avanzate",
+        "es": "Conexión HTTPS corregida; proxy WebSocket en servidor dev reparado; PIN eliminado de configuración experta",
+        "pl": "Naprawiono połączenie HTTPS; poprawiono proxy WebSocket w serwerze dev; usunięto PIN z ustawień eksperta",
+        "uk": "Виправлено HTTPS-з'єднання; виправлено WebSocket-проксі в dev-сервері; видалено PIN з налаштувань експерта",
+        "zh-cn": "修复 HTTPS 连接；修复开发服务器中的 WebSocket 代理；从专家设置中移除 PIN"
+      },
       "0.3.89": {
         "en": "Version bump",
         "de": "Versions-Bump",

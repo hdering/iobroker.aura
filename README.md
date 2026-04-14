@@ -89,6 +89,11 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.3.90 (2026-04-14)
+- Fix HTTPS connection: use same origin for socket.io to avoid mixed-content errors
+- Fix WebSocket proxy in Vite dev server for local development
+- Remove PIN protection from expert settings – ioBroker URL is always visible
+
 ### 0.3.89 (2026-04-13)
 - Version bump
 

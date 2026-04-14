@@ -23,43 +23,6 @@ function ioBrokerDevPlugin(): Plugin {
   return {
     name: 'iobroker-dev-proxy',
     configureServer(server) {
-      // Dynamic proxy for /socket.io – reads proxyTarget on every request
-      server.middlewares.use('/socket.io', (req, res) => {
-        const target = new URL(proxyTarget);
-        const isHttps = target.protocol === 'https:';
-        const lib = isHttps ? https : http;
-        const port = target.port
-          ? parseInt(target.port)
-          : isHttps ? 443 : 80;
-
-        const options: http.RequestOptions = {
-          hostname: target.hostname,
-          port,
-          path: `/socket.io${req.url ?? ''}`,
-          method: req.method,
-          headers: {
-            ...req.headers,
-            host: target.host,
-          },
-        };
-
-        const proxyReq = lib.request(options, (proxyRes) => {
-          const headers = { ...proxyRes.headers };
-          // Allow cross-origin in dev
-          headers['access-control-allow-origin'] = '*';
-          res.writeHead(proxyRes.statusCode ?? 200, headers);
-          proxyRes.pipe(res, { end: true });
-        });
-
-        proxyReq.on('error', (err) => {
-          if (!res.headersSent) {
-            res.writeHead(502);
-            res.end(`Proxy error: ${err.message}`);
-          }
-        });
-
-        req.pipe(proxyReq, { end: true });
-      });
 
       // Server-side iCal proxy – avoids CORS restrictions in the browser
       server.middlewares.use('/proxy/ical', (req, res) => {
@@ -137,7 +100,14 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5173,
-    // No proxy config needed – handled by the plugin middleware above
+    proxy: {
+      // Proxy socket.io (HTTP polling + WebSocket) to ioBroker
+      '/socket.io': {
+        target: proxyTarget,
+        ws: true,
+        changeOrigin: true,
+      },
+    },
   },
   build: {
     outDir: 'www',

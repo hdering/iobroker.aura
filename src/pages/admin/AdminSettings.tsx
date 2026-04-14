@@ -1,16 +1,11 @@
 import { useState } from 'react';
-import { useAuthStore, setupPin } from '../../store/authStore';
+import { setupPin } from '../../store/authStore';
 import { useActiveLayout } from '../../store/dashboardStore';
 import { useConnectionStore } from '../../store/connectionStore';
 import { useConfigStore } from '../../store/configStore';
 import { reconnectSocket } from '../../hooks/useIoBroker';
-import { Eye, EyeOff, AlertTriangle, Lock, Unlock, RefreshCw, Tablet } from 'lucide-react';
+import { Eye, EyeOff, AlertTriangle, RefreshCw, Tablet } from 'lucide-react';
 import { useT } from '../../i18n';
-
-async function sha256(text: string): Promise<string> {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
-}
 
 // ── Shared primitives ──────────────────────────────────────────────────────────
 
@@ -135,20 +130,9 @@ function ClientSettings() {
 
 function ExpertSettings() {
   const t = useT();
-  const { pinHash } = useAuthStore();
   const { ioBrokerUrl, setIoBrokerUrl } = useConnectionStore();
-  const [unlocked, setUnlocked] = useState(false);
-  const [pin, setPin] = useState('');
-  const [pinError, setPinError] = useState('');
   const [urlInput, setUrlInput] = useState(ioBrokerUrl);
   const [saved, setSaved] = useState(false);
-
-  const unlock = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const hash = await sha256(pin);
-    if (hash === pinHash) { setUnlocked(true); setPinError(''); setPin(''); }
-    else setPinError(t('settings.pin.wrong'));
-  };
 
   const saveUrl = async () => {
     const trimmed = urlInput.trim();
@@ -161,52 +145,24 @@ function ExpertSettings() {
 
   return (
     <Card title={t('settings.expert.title')}>
-      <div className="flex items-center gap-2">
-        {unlocked
-          ? <Unlock size={14} style={{ color: 'var(--accent-yellow)' }} />
-          : <Lock size={14} style={{ color: 'var(--text-secondary)' }} />}
-        <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-          {unlocked ? t('settings.expert.unlocked') : t('settings.expert.locked')}
+      <div>
+        <p className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>
+          {t('settings.expert.url')}
         </p>
-      </div>
-
-      {!unlocked ? (
-        <form onSubmit={unlock} className="flex gap-2">
-          <input type="password" value={pin}
-            onChange={(e) => { setPin(e.target.value); setPinError(''); }}
-            placeholder={t('login.pin')}
-            className="flex-1 rounded-lg px-3 py-2 text-sm focus:outline-none"
-            style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: `1px solid ${pinError ? 'var(--accent-red)' : 'var(--app-border)'}` }} />
-          <button type="submit"
-            className="px-3 py-2 rounded-lg text-sm font-medium text-white hover:opacity-80"
-            style={{ background: 'var(--accent)' }}>
-            {t('settings.expert.unlock')}
+        <div className="flex gap-2">
+          <input type="text" value={urlInput}
+            onChange={(e) => { setUrlInput(e.target.value); setSaved(false); }}
+            className="flex-1 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none min-w-0"
+            style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }} />
+          <button onClick={saveUrl}
+            disabled={urlInput.trim() === ioBrokerUrl && !saved}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white hover:opacity-80 disabled:opacity-40 shrink-0"
+            style={{ background: saved ? 'var(--accent-green)' : 'var(--accent)' }}>
+            <RefreshCw size={12} />
+            {saved ? t('common.ok') : t('settings.expert.connect')}
           </button>
-        </form>
-      ) : (
-        <div className="space-y-3">
-          <div>
-            <p className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>
-              {t('settings.expert.url')}
-            </p>
-            <div className="flex gap-2">
-              <input type="text" value={urlInput}
-                onChange={(e) => { setUrlInput(e.target.value); setSaved(false); }}
-                className="flex-1 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none min-w-0"
-                style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }} />
-              <button onClick={saveUrl}
-                disabled={urlInput.trim() === ioBrokerUrl && !saved}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white hover:opacity-80 disabled:opacity-40 shrink-0"
-                style={{ background: saved ? 'var(--accent-green)' : 'var(--accent)' }}>
-                <RefreshCw size={12} />
-                {saved ? t('common.ok') : t('settings.expert.connect')}
-              </button>
-            </div>
-          </div>
-          <button onClick={() => setUnlocked(false)} className="text-xs hover:opacity-70"
-            style={{ color: 'var(--text-secondary)' }}>{t('settings.expert.lock')}</button>
         </div>
-      )}
+      </div>
     </Card>
   );
 }

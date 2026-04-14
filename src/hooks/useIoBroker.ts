@@ -29,8 +29,9 @@ function getInitialUrl(): string {
       if (parsed.state?.ioBrokerUrl) return parsed.state.ioBrokerUrl;
     }
   } catch { /* ignore */ }
-  // Default: same host, socketio port
-  return `${window.location.protocol}//${window.location.hostname}:8084`;
+  // Default: same origin as the page (web adapter serves socket.io on same port,
+  // works for both HTTP and HTTPS without mixed-content issues)
+  return window.location.origin;
 }
 
 let currentUrl = getInitialUrl();
