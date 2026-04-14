@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Pencil, Copy, Trash2, Check, X, ExternalLink, LayoutDashboard } from 'lucide-react';
+import { Plus, Pencil, Copy, Trash2, Check, X, ExternalLink, LayoutDashboard, Star } from 'lucide-react';
 import { useDashboardStore } from '../../store/dashboardStore';
 import type { DashboardLayout } from '../../store/dashboardStore';
 import { useT } from '../../i18n';
@@ -24,7 +24,7 @@ function LayoutRow({
   isFirst: boolean;
 }) {
   const t = useT();
-  const { renameLayout, setLayoutSlug, duplicateLayout, removeLayout, setActiveLayout } = useDashboardStore();
+  const { renameLayout, setLayoutSlug, duplicateLayout, removeLayout, setActiveLayout, setDefaultTab } = useDashboardStore();
   const navigate = useNavigate();
 
   const [editingName, setEditingName] = useState(false);
@@ -208,13 +208,27 @@ function LayoutRow({
       )}
 
       {/* Tab list */}
-      <div className="px-4 py-2 flex flex-wrap gap-1.5" style={{ borderTop: '1px solid var(--app-border)' }}>
-        {layout.tabs.map((tab) => (
-          <span key={tab.id} className="text-[10px] px-2 py-0.5 rounded-full font-mono"
-            style={{ background: 'var(--app-surface)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
-            {tab.name}
-          </span>
-        ))}
+      <div className="px-4 py-2 flex flex-wrap gap-1.5 items-center" style={{ borderTop: '1px solid var(--app-border)' }}>
+        <span className="text-[10px] shrink-0 mr-1" style={{ color: 'var(--text-secondary)' }}>{t('layouts.defaultTab')}:</span>
+        {layout.tabs.map((tab) => {
+          const isDefault = (layout.defaultTabId ?? layout.tabs[0]?.id) === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setDefaultTab(layout.id, tab.id)}
+              title={t('layouts.setDefaultTab')}
+              className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-mono transition-colors"
+              style={{
+                background: isDefault ? 'var(--accent)22' : 'var(--app-surface)',
+                color: isDefault ? 'var(--accent)' : 'var(--text-secondary)',
+                border: `1px solid ${isDefault ? 'var(--accent)' : 'var(--app-border)'}`,
+              }}
+            >
+              {isDefault && <Star size={9} fill="currentColor" />}
+              {tab.name}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

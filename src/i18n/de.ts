@@ -136,6 +136,8 @@ export const de = {
   'layouts.open':          'Im Frontend öffnen',
   'layouts.edit':          'Bearbeiten',
   'layouts.delete':        'Layout löschen',
+  'layouts.defaultTab':    'Standard-Tab',
+  'layouts.setDefaultTab': 'Als Standard-Tab setzen (wird geöffnet wenn kein Tab in der URL angegeben ist)',
 
   // ── Endpoints ─────────────────────────────────────────────────────────────────
   'endpoints.title':    'Endpunkte & Gruppen',

@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.3.98",
+    "version": "0.3.99",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -102,6 +102,19 @@
       }
     ],
     "news": {
+      "0.3.99": {
+        "en": "Add configurable default tab per layout – set which tab opens when the dashboard URL has no tab slug",
+        "de": "Konfigurierbarer Standard-Tab pro Layout – bestimmt welcher Tab geöffnet wird wenn die Dashboard-URL keinen Tab-Slug enthält",
+        "ru": "Настраиваемая вкладка по умолчанию для каждого макета – определяет, какая вкладка открывается при отсутствии slug в URL",
+        "pt": "Aba padrão configurável por layout – define qual aba abre quando a URL do dashboard não contém slug de aba",
+        "nl": "Configureerbaar standaard-tabblad per layout – bepaalt welk tabblad opent als de dashboard-URL geen tab-slug bevat",
+        "fr": "Onglet par défaut configurable par layout – définit quel onglet s'ouvre quand l'URL du dashboard n'a pas de slug d'onglet",
+        "it": "Tab predefinita configurabile per layout – determina quale tab si apre quando l'URL del dashboard non contiene uno slug di tab",
+        "es": "Pestaña predeterminada configurable por layout – determina qué pestaña se abre cuando la URL del dashboard no contiene slug de pestaña",
+        "pl": "Konfigurowalna domyślna zakładka dla każdego układu – określa, która zakładka otwiera się gdy URL dashboardu nie zawiera sluga zakładki",
+        "uk": "Налаштований початковий таб для кожного макету – визначає який таб відкривається коли URL дашборду не містить slug табу",
+        "zh-cn": "每个布局可配置默认标签页 – 设置当仪表板URL不含标签页slug时打开哪个标签页"
+      },
       "0.3.98": {
         "en": "Replace hardcoded personal domain in settings placeholder with generic example",
         "de": "Persönliche Domain im Einstellungs-Platzhalter durch generisches Beispiel ersetzt",

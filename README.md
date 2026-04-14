@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.3.99 (2026-04-14)
+- Add configurable default tab per layout – set which tab opens when the dashboard URL has no tab slug
+
 ### 0.3.98 (2026-04-14)
 - Replace hardcoded personal domain in settings placeholder with generic example
 

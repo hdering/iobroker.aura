@@ -138,6 +138,8 @@ export const en: Record<TranslationKey, string> = {
   'layouts.open':          'Open in Frontend',
   'layouts.edit':          'Edit',
   'layouts.delete':        'Delete Layout',
+  'layouts.defaultTab':    'Default tab',
+  'layouts.setDefaultTab': 'Set as default tab (opened when no tab is specified in URL)',
 
   // ── Endpoints ─────────────────────────────────────────────────────────────────
   'endpoints.title':    'Endpoints & Groups',
