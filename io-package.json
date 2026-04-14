@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.4",
+    "version": "0.4.5",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.5": {
+        "en": "Beta release for testing: adapter checker compliance and CI pipeline fully green",
+        "de": "Beta-Release zum Testen: Adapter-Checker-Konformität und CI-Pipeline vollständig grün",
+        "ru": "Бета-релиз для тестирования: соответствие adapter checker и CI-конвейер полностью зелёный",
+        "pt": "Lançamento beta para testes: conformidade adapter checker e pipeline CI totalmente verde",
+        "nl": "Beta-release voor testen: adapter checker compliance en CI-pipeline volledig groen",
+        "fr": "Version bêta pour tests: conformité adapter checker et pipeline CI entièrement vert",
+        "it": "Versione beta per il test: conformità adapter checker e pipeline CI completamente verde",
+        "es": "Versión beta para pruebas: conformidad adapter checker y pipeline CI completamente verde",
+        "pl": "Wydanie beta do testów: zgodność adapter checker i pipeline CI w pełni zielone",
+        "uk": "Бета-реліз для тестування: відповідність adapter checker та CI-конвеєр повністю зелений",
+        "zh-cn": "测试版发布：适配器检查器合规，CI 流水线完全绿色"
+      },
       "0.4.4": {
         "en": "Fix CI: upgrade @typescript-eslint to v8, add no-require-imports override, fix ternary-as-statement lint errors",
         "de": "CI-Fix: @typescript-eslint auf v8 aktualisiert, no-require-imports Override ergänzt, Ternary-als-Statement Lint-Fehler behoben",
@@ -183,19 +196,6 @@
         "pl": "Osobista domena w placeholder ustawień zastąpiona ogólnym przykładem",
         "uk": "Особистий домен у підказці налаштувань замінено на загальний приклад",
         "zh-cn": "将设置占位符中的个人域名替换为通用示例"
-      },
-      "0.3.97": {
-        "en": "Fix overview tile titles: use localLinks name field instead of key",
-        "de": "Kacheltitel in der Übersicht korrigiert: name-Feld in localLinks statt Key verwenden",
-        "ru": "Исправлены заголовки плиток обзора: используется поле name в localLinks",
-        "pt": "Títulos dos tiles da visão geral corrigidos: usar campo name em localLinks",
-        "nl": "Kacheltitels in overzicht gecorrigeerd: name-veld in localLinks gebruiken",
-        "fr": "Titres des tuiles de vue d'ensemble corrigés: utiliser le champ name dans localLinks",
-        "it": "Titoli tile panoramica corretti: usare il campo name in localLinks",
-        "es": "Títulos de tiles de vista general corregidos: usar campo name en localLinks",
-        "pl": "Poprawiono tytuły kafelków przeglądu: użycie pola name w localLinks",
-        "uk": "Виправлено заголовки плиток огляду: використовується поле name у localLinks",
-        "zh-cn": "修复概览磁贴标题：在 localLinks 中使用 name 字段而非 key"
       },
     }
   },

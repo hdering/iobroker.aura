@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.5 (2026-04-14)
+- Beta release for testing: adapter checker compliance and CI pipeline fully green
+
 ### 0.4.4 (2026-04-14)
 - Fix CI: upgrade @typescript-eslint to v8, add no-require-imports override for CommonJS, fix ternary-as-statement lint errors
 
