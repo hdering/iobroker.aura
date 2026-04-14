@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.13",
+    "version": "0.4.14",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.14": {
+        "en": "Fix invalid JSON in io-package.json (trailing comma after last news entry)",
+        "de": "Ungültiges JSON in io-package.json behoben (Komma nach letztem News-Eintrag)",
+        "ru": "Исправлен невалидный JSON в io-package.json (лишняя запятая после последнего элемента news)",
+        "pt": "JSON inválido em io-package.json corrigido (vírgula após última entrada de news)",
+        "nl": "Ongeldig JSON in io-package.json opgelost (komma na laatste news-entry)",
+        "fr": "JSON invalide dans io-package.json corrigé (virgule après la dernière entrée news)",
+        "it": "JSON non valido in io-package.json corretto (virgola dopo l'ultima voce news)",
+        "es": "JSON inválido en io-package.json corregido (coma tras la última entrada de news)",
+        "pl": "Nieprawidłowy JSON w io-package.json naprawiony (przecinek po ostatnim wpisie news)",
+        "uk": "Виправлено невалідний JSON в io-package.json (зайва кома після останнього запису news)",
+        "zh-cn": "修复 io-package.json 中的无效 JSON（最后一个 news 条目后的多余逗号）"
+      },
       "0.4.13": {
         "en": "Stable release: adapter checker compliance, src-vis convention, release script, i18n in npm package",
         "de": "Stable Release: Adapter-Checker-Konformität, src-vis-Konvention, Release-Script, i18n im npm-Paket",
@@ -183,20 +196,7 @@
         "pl": "Naprawa adapter checker: sekcja news poprawiona (usunięto nieopublikowane wersje, przywrócono wpis npm latest), poprawiono URL schematu VSCode, dodano .releaseconfig.json",
         "uk": "Виправлення adapter checker: виправлено секцію news (видалено неопубліковані версії, відновлено запис npm latest), виправлено URL схеми VSCode, додано .releaseconfig.json",
         "zh-cn": "适配器检查器修复：更正 news 部分（删除未发布版本，恢复 npm latest 条目），修正 VSCode 架构 URL，添加 .releaseconfig.json"
-      },
-      "0.4.7": {
-        "en": "Fix invalid JSON in io-package.json (trailing comma after last news entry)",
-        "de": "Ungültiges JSON in io-package.json behoben (fehlendes Komma nach letztem News-Eintrag)",
-        "ru": "Исправлен невалидный JSON в io-package.json (лишняя запятая после последнего элемента news)",
-        "pt": "JSON inválido em io-package.json corrigido (vírgula após última entrada de news)",
-        "nl": "Ongeldig JSON in io-package.json opgelost (komma na laatste news-entry)",
-        "fr": "JSON invalide dans io-package.json corrigé (virgule après la dernière entrée news)",
-        "it": "JSON non valido in io-package.json corretto (virgola dopo l'ultima voce news)",
-        "es": "JSON inválido en io-package.json corregido (coma tras la última entrada de news)",
-        "pl": "Nieprawidłowy JSON w io-package.json naprawiony (przecinek po ostatnim wpisie news)",
-        "uk": "Виправлено невалідний JSON в io-package.json (зайва кома після останнього запису news)",
-        "zh-cn": "修复 io-package.json 中的无效 JSON（最后一个 news 条目后的多余逗号）"
-      },
+      }
     }
   },
   "native": {

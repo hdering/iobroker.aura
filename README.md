@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.14 (2026-04-14)
+- Fix invalid JSON in io-package.json (trailing comma after last news entry)
+
 ### 0.4.13 (2026-04-14)
 - Stable release: adapter checker compliance, src-vis convention, release script, i18n in npm package
 
