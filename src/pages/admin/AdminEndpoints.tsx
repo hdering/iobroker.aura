@@ -21,7 +21,7 @@ function DatapointPicker({ onAdd, onClose }: { onAdd: (dps: GroupDatapoint[]) =>
   }), [devices, search, adapter]);
 
   const toggle = (stateId: string) =>
-    setSelected((prev) => { const next = new Set(prev); next.has(stateId) ? next.delete(stateId) : next.add(stateId); return next; });
+    setSelected((prev) => { const next = new Set(prev); if (next.has(stateId)) { next.delete(stateId); } else { next.add(stateId); } return next; });
 
   const toggleDevice = (deviceId: string) => {
     const device = devices.find((d) => d.id === deviceId);

@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.3",
+    "version": "0.4.4",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.4": {
+        "en": "Fix CI: upgrade @typescript-eslint to v8, add no-require-imports override, fix ternary-as-statement lint errors",
+        "de": "CI-Fix: @typescript-eslint auf v8 aktualisiert, no-require-imports Override ergänzt, Ternary-als-Statement Lint-Fehler behoben",
+        "ru": "Исправление CI: обновление @typescript-eslint до v8, добавлен override no-require-imports, исправлены ошибки lint ternary-as-statement",
+        "pt": "Correção CI: atualização @typescript-eslint para v8, override no-require-imports adicionado, erros lint ternary-as-statement corrigidos",
+        "nl": "CI-fix: @typescript-eslint geüpgraded naar v8, no-require-imports override toegevoegd, ternary-als-statement lint-fouten opgelost",
+        "fr": "Correction CI: mise à jour @typescript-eslint vers v8, override no-require-imports ajouté, erreurs lint ternary-as-statement corrigées",
+        "it": "Correzione CI: aggiornamento @typescript-eslint a v8, override no-require-imports aggiunto, errori lint ternary-as-statement corretti",
+        "es": "Corrección CI: actualización @typescript-eslint a v8, override no-require-imports añadido, errores lint ternary-as-statement corregidos",
+        "pl": "Naprawa CI: aktualizacja @typescript-eslint do v8, dodany override no-require-imports, naprawione błędy lint ternary-as-statement",
+        "uk": "Виправлення CI: оновлення @typescript-eslint до v8, додано override no-require-imports, виправлено помилки lint ternary-as-statement",
+        "zh-cn": "CI 修复：将 @typescript-eslint 升级到 v8，添加 no-require-imports 覆盖，修复 ternary-as-statement lint 错误"
+      },
       "0.4.3": {
         "en": "Adapter checker compliance: i18n for jsonConfig, node: prefix for built-ins, workflow deploy job, dependabot, react-resizable dependency",
         "de": "Adapter-Checker-Konformität: i18n für jsonConfig, node:-Präfix für Built-ins, Workflow deploy-Job, dependabot, react-resizable Abhängigkeit",
@@ -183,19 +196,6 @@
         "pl": "Poprawiono tytuły kafelków przeglądu: użycie pola name w localLinks",
         "uk": "Виправлено заголовки плиток огляду: використовується поле name у localLinks",
         "zh-cn": "修复概览磁贴标题：在 localLinks 中使用 name 字段而非 key"
-      },
-      "0.3.96": {
-        "en": "Fix overview tile names: replace localLinks instead of merging to remove stale keys",
-        "de": "Kachelnamen in der Übersicht korrigiert: localLinks werden ersetzt statt zusammengeführt, um veraltete Einträge zu entfernen",
-        "ru": "Исправлены названия плиток обзора: localLinks заменяются вместо слияния",
-        "pt": "Nomes dos tiles da visão geral corrigidos: localLinks substituídos em vez de mesclados",
-        "nl": "Kachelnamen in overzicht gecorrigeerd: localLinks worden vervangen in plaats van samengevoegd",
-        "fr": "Correction des noms des tuiles de vue d'ensemble: localLinks remplacés au lieu de fusionnés",
-        "it": "Nomi tile panoramica corretti: localLinks sostituiti invece di uniti",
-        "es": "Nombres de tiles de vista general corregidos: localLinks reemplazados en lugar de fusionados",
-        "pl": "Poprawiono nazwy kafelków przeglądu: localLinks zastępowane zamiast scalane",
-        "uk": "Виправлено назви плиток огляду: localLinks замінюються замість злиття",
-        "zh-cn": "修复概览磁贴名称：替换 localLinks 而不是合并，以删除旧条目"
       },
     }
   },

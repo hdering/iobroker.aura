@@ -280,7 +280,7 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
   };
 
   const toggle = (id: string) =>
-    setSelected(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
+    setSelected(prev => { const s = new Set(prev); if (s.has(id)) { s.delete(id); } else { s.add(id); } return s; });
 
   const removeEntry = (id: string) =>
     setOpts({ entries: (opts.entries ?? []).filter(e => e.id !== id) });
