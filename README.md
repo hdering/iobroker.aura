@@ -48,7 +48,19 @@ Install Aura via ioBroker Admin:
 
 After installation, create a new **Aura** instance (if not done automatically).
 
-### Step 3 – Open dashboard
+### Step 3 – Configure web adapter
+
+Open ioBroker Admin → Instances → **web.0** → Settings and set:
+
+| Setting | Value |
+|---------|-------|
+| **socket.io** | **integrated** |
+
+> **Important:** The default value "socket.io" uses the separate `iobroker.socketio` adapter on port 8084.
+> Aura requires socket.io on the **same port** as the web adapter (integrated mode) so that both
+> plain HTTP access and HTTPS via reverse proxy work with a single connection endpoint.
+
+### Step 4 – Open dashboard
 
 The dashboard is available at:
 
@@ -61,6 +73,32 @@ The admin interface at:
 ```
 http://<iobroker-ip>:8082/aura/#/admin
 ```
+
+---
+
+## HTTPS / Reverse Proxy
+
+Aura works behind a reverse proxy (e.g. **nginx**, **Nginx Proxy Manager**, **Caddy**) with a
+valid TLS certificate (e.g. Let's Encrypt). The web adapter socket.io must be set to **integrated**
+(see Step 3) so that `/socket.io/` and `/aura/` are served from the same port.
+
+### Nginx Proxy Manager – example configuration
+
+| Field | Value |
+|-------|-------|
+| Forward Scheme | `http` |
+| Forward Hostname / IP | `<iobroker-ip>` |
+| Forward Port | `8082` |
+| Websockets Support | enabled |
+
+No additional custom nginx directives are needed when socket.io is set to **integrated**.
+
+### Why not use the ioBroker web adapter's built-in HTTPS?
+
+When the web adapter itself terminates TLS (self-signed certificate), browsers block programmatic
+WebSocket connections (`wss://`) from JavaScript even after the user accepted the HTTPS warning in
+the browser. A reverse proxy with a CA-signed certificate (e.g. Let's Encrypt) avoids this
+restriction entirely.
 
 ---
 
