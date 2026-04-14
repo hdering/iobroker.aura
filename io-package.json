@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.3.93",
+    "version": "0.3.94",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -60,7 +60,7 @@
     "singleton": true,
     "platform": "Javascript/Node.js",
     "adminUI": {
-      "config": "none"
+      "config": "json"
     },
     "localLinks": {
       "Aura Frontend": "%protocol%://%ip%:8082/aura/",
@@ -72,6 +72,19 @@
       }
     ],
     "news": {
+      "0.3.94": {
+        "en": "Add configurable custom URL for ioBroker overview links",
+        "de": "Konfigurierbare benutzerdefinierte URL für ioBroker-Übersichts-Links hinzugefügt",
+        "ru": "Добавлена настраиваемая пользовательская URL для ссылок обзора ioBroker",
+        "pt": "Adicionada URL personalizada configurável para links de visão geral do ioBroker",
+        "nl": "Configureerbare aangepaste URL toegevoegd voor ioBroker overzichtslinks",
+        "fr": "Ajout d'une URL personnalisée configurable pour les liens de vue d'ensemble ioBroker",
+        "it": "Aggiunta URL personalizzata configurabile per i link panoramica ioBroker",
+        "es": "Añadida URL personalizada configurable para los enlaces de vista general de ioBroker",
+        "pl": "Dodano konfigurowalny niestandardowy URL dla linków przeglądu ioBroker",
+        "uk": "Додано налаштовуваний власний URL для посилань огляду ioBroker",
+        "zh-cn": "为 ioBroker 概览链接添加可配置的自定义 URL"
+      },
       "0.3.93": {
         "en": "Rename overview tiles to 'Aura Frontend' and 'Aura Backend'",
         "de": "Kacheln in der Übersicht umbenannt: 'Aura Frontend' und 'Aura Backend'",
@@ -282,7 +295,9 @@
       }
     }
   },
-  "native": {},
+  "native": {
+  "customUrl": ""
+},
   "objects": [],
   "instanceObjects": [
     {

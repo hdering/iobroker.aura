@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.3.94 (2026-04-14)
+- Add configurable custom base URL for ioBroker overview and instance links (useful for reverse proxy setups)
+
 ### 0.3.93 (2026-04-14)
 - Rename overview tiles to "Aura Frontend" and "Aura Backend"
 
