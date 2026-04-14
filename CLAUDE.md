@@ -5,7 +5,7 @@
 **iobroker.aura** is a visualization dashboard adapter for ioBroker built with React 18 + TypeScript + Vite + Tailwind CSS + Zustand. The adapter serves a frontend from `www/` via ioBroker's web adapter.
 
 - Frontend: `src-vis/` (React/TypeScript, built to `www/`)
-- Adapter backend: `lib/main.js` (Node.js, ioBroker adapter-core)
+- Adapter backend: `main.js` (Node.js, ioBroker adapter-core)
 - Build: `npm run build:adapter` (always use this, not `npm run build`)
 
 ## ioBroker Adapter Rules
@@ -67,6 +67,10 @@ These rules come from the [ioBroker AI Developer Guide](https://github.com/Jey-C
 - Use `getSocket()` from `src-vis/hooks/useIoBroker.ts` for all socket operations
 - **Do NOT use `sendTo` with acknowledgement callbacks** — the ioBroker web adapter does not reliably forward them
 - Use **state-based relay** for request/response patterns (see `calendar.request` / `calendar.response`)
+
+### Modifying system.adapter objects
+
+The adapter currently calls `setForeignObjectAsync('system.adapter.aura.X', ...)` to update `localLinks` when a custom URL is configured. **This is under review by the ioBroker core team.** Do not expand this pattern until the review result from @Apollon77 is known. If it turns out to be disallowed, the custom URL feature must be implemented differently (e.g. via the web adapter's `pathPrefix` config or a dedicated ioBroker feature).
 
 ### Datapoints
 - State subscriptions via `useDatapoint(id)` hook

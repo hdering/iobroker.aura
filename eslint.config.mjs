@@ -8,7 +8,7 @@ export default [
         ignores: ['www/**', 'node_modules/**', 'dist/**'],
     },
     {
-        files: ['src-vis/**/*.{ts,tsx}', 'lib/**/*.{js,ts}'],
+        files: ['src-vis/**/*.{ts,tsx}', 'main.js'],
         plugins: {
             '@typescript-eslint': tsPlugin,
             react: reactPlugin,
@@ -36,7 +36,7 @@ export default [
         },
     },
     {
-        files: ['lib/**/*.js'],
+        files: ['main.js'],
         rules: {
             '@typescript-eslint/no-require-imports': 'off',
             '@typescript-eslint/no-var-requires': 'off',

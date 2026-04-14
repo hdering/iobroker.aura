@@ -1,16 +1,16 @@
 {
   "name": "iobroker.aura",
-  "version": "0.4.16",
+  "version": "0.4.17",
   "description": "Modern visualization dashboard for ioBroker",
   "author": "Hermann Dering <aura@dering-online.de>",
-  "main": "lib/main.js",
+  "main": "main.js",
   "license": "MIT",
   "engines": {
     "node": ">=20"
   },
   "files": [
     "admin/",
-    "lib/",
+    "main.js",
     "www/",
     "src-vis/i18n/",
     "io-package.json"
@@ -39,7 +39,7 @@
     "build": "tsc && vite build",
     "build:adapter": "tsc && cross-env VITE_BASE=/aura/ vite build",
     "preview": "vite preview",
-    "lint": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint src-vis lib",
+    "lint": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint src-vis main.js",
     "test": "node test/adapter.test.js",
     "test:package": "node test/adapter.test.js",
     "test:integration": "node test/adapter.test.js",

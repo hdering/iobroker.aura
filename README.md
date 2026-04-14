@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.17 (2026-04-14)
+- Move `main.js` to root directory per ioBroker adapter convention
+
 ### 0.4.16 (2026-04-14)
 - Adapter checker fixes: use `testing-action-deploy@v1`, ESLint flat config, `admin/i18n/`, jsonConfig schema URL, dependabot cooldown
 

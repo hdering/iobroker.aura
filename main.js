@@ -145,11 +145,10 @@ class Aura extends utils.Adapter {
     });
     this.subscribeStates('calendar.request');
 
-    // Ensure localLinks are always correct and up-to-date.
-    // Uses setForeignObjectAsync (full replace, not deep-merge) so old keys like
-    // "Dashboard"/"Admin" from previous versions are removed.
-    // Reads first and only writes when the value changed – every write to
-    // system.adapter.* triggers an adapter restart, so we must avoid no-op writes.
+    // NOTE: The block below modifies system.adapter.aura.X via setForeignObjectAsync
+    // to keep localLinks (overview tile URLs) up-to-date when a custom URL is configured.
+    // This is under review by the ioBroker core team – see developer feedback.
+    // Only writes when the value actually changed to avoid restart loops.
     {
       const base = this.config.customUrl ? this.config.customUrl.replace(/\/+$/, '') : null;
       const frontendLink = base ? `${base}/aura/` : '%protocol%://%ip%:8082/aura/';

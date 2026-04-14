@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.16",
+    "version": "0.4.17",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.17": {
+        "en": "Move main.js to root directory per ioBroker adapter convention",
+        "de": "main.js gemäß ioBroker-Adapter-Konvention ins Root-Verzeichnis verschoben",
+        "ru": "main.js перемещён в корневую директорию согласно конвенции адаптеров ioBroker",
+        "pt": "main.js movido para o diretório raiz conforme convenção de adaptadores ioBroker",
+        "nl": "main.js verplaatst naar de rootmap volgens ioBroker-adapterconventie",
+        "fr": "main.js déplacé dans le répertoire racine selon la convention des adaptateurs ioBroker",
+        "it": "main.js spostato nella directory radice secondo la convenzione degli adapter ioBroker",
+        "es": "main.js movido al directorio raíz según la convención de adaptadores ioBroker",
+        "pl": "main.js przeniesiony do katalogu głównego zgodnie z konwencją adapterów ioBroker",
+        "uk": "main.js переміщено до кореневої директорії згідно з конвенцією адаптерів ioBroker",
+        "zh-cn": "按 ioBroker 适配器约定将 main.js 移至根目录"
+      },
       "0.4.16": {
         "en": "Adapter checker fixes: testing-action-deploy@v1, eslint flat config, admin/i18n, jsonConfig schema URL, dependabot cooldown",
         "de": "Adapter-Checker-Fixes: testing-action-deploy@v1, ESLint Flat Config, admin/i18n, jsonConfig-Schema-URL, Dependabot Cooldown",
@@ -183,19 +196,6 @@
         "pl": "Dodano src-vis/i18n/ do files w package.json, aby dołączyć tłumaczenia do pakietu npm",
         "uk": "Додано src-vis/i18n/ до files у package.json для включення перекладів у npm-пакет",
         "zh-cn": "将 src-vis/i18n/ 添加到 package.json 的 files 中，以在 npm 包中包含翻译文件"
-      },
-      "0.4.9": {
-        "en": "Rename frontend source directory from src/ to src-vis/ per ioBroker adapter convention",
-        "de": "Frontend-Quellverzeichnis von src/ nach src-vis/ umbenannt gemäß ioBroker-Adapter-Konvention",
-        "ru": "Переименование директории исходного кода фронтенда из src/ в src-vis/ согласно соглашению адаптеров ioBroker",
-        "pt": "Renomear diretório de código-fonte do frontend de src/ para src-vis/ conforme convenção de adaptadores ioBroker",
-        "nl": "Frontend bronmap hernoemd van src/ naar src-vis/ volgens ioBroker-adapterconventie",
-        "fr": "Renommer le répertoire source du frontend de src/ en src-vis/ selon la convention des adaptateurs ioBroker",
-        "it": "Rinominare la directory del codice sorgente del frontend da src/ a src-vis/ secondo la convenzione degli adapter ioBroker",
-        "es": "Renombrar el directorio de código fuente del frontend de src/ a src-vis/ según la convención de adaptadores ioBroker",
-        "pl": "Zmiana nazwy katalogu źródłowego frontendu z src/ na src-vis/ zgodnie z konwencją adapterów ioBroker",
-        "uk": "Перейменування директорії вихідного коду фронтенду з src/ на src-vis/ згідно з конвенцією адаптерів ioBroker",
-        "zh-cn": "按 ioBroker 适配器约定将前端源目录从 src/ 重命名为 src-vis/"
       }
     }
   },
