@@ -38,19 +38,7 @@
         "uk": "Базова URL",
         "zh-cn": "基础 URL"
       },
-      "placeholder": {
-        "en": "https://your-domain.com",
-        "de": "https://ihre-domain.de",
-        "ru": "https://ваш-домен.com",
-        "pt": "https://seu-dominio.com",
-        "nl": "https://uw-domein.nl",
-        "fr": "https://votre-domaine.fr",
-        "it": "https://il-tuo-dominio.it",
-        "es": "https://su-dominio.com",
-        "pl": "https://twoja-domena.pl",
-        "uk": "https://ваш-домен.com",
-        "zh-cn": "https://your-domain.com"
-      },
+      "placeholder": "https://your-domain.com",
       "help": {
         "en": "Override the links shown in ioBroker overview and instances. Leave empty to use the default (http://<ip>:8082).",
         "de": "Überschreibt die Links in der ioBroker-Übersicht und Instanzen. Leer lassen für den Standard (http://<ip>:8082).",

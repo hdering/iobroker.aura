@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.15",
+    "version": "0.4.16",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.16": {
+        "en": "Adapter checker fixes: testing-action-deploy@v1, eslint flat config, admin/i18n, jsonConfig schema URL, dependabot cooldown",
+        "de": "Adapter-Checker-Fixes: testing-action-deploy@v1, ESLint Flat Config, admin/i18n, jsonConfig-Schema-URL, Dependabot Cooldown",
+        "ru": "Исправления adapter checker: testing-action-deploy@v1, ESLint flat config, admin/i18n, URL схемы jsonConfig, cooldown dependabot",
+        "pt": "Correções adapter checker: testing-action-deploy@v1, ESLint flat config, admin/i18n, URL do esquema jsonConfig, cooldown do dependabot",
+        "nl": "Adapter checker fixes: testing-action-deploy@v1, ESLint flat config, admin/i18n, jsonConfig schema-URL, dependabot cooldown",
+        "fr": "Corrections adapter checker: testing-action-deploy@v1, ESLint flat config, admin/i18n, URL schéma jsonConfig, cooldown dependabot",
+        "it": "Correzioni adapter checker: testing-action-deploy@v1, ESLint flat config, admin/i18n, URL schema jsonConfig, cooldown dependabot",
+        "es": "Correcciones adapter checker: testing-action-deploy@v1, ESLint flat config, admin/i18n, URL de esquema jsonConfig, cooldown de dependabot",
+        "pl": "Poprawki adapter checker: testing-action-deploy@v1, ESLint flat config, admin/i18n, URL schematu jsonConfig, cooldown dependabot",
+        "uk": "Виправлення adapter checker: testing-action-deploy@v1, ESLint flat config, admin/i18n, URL схеми jsonConfig, cooldown dependabot",
+        "zh-cn": "适配器检查器修复：testing-action-deploy@v1、ESLint flat config、admin/i18n、jsonConfig 架构 URL、dependabot cooldown"
+      },
       "0.4.15": {
         "en": "Fix E2004: remove 0.4.13 from news (never published to npm due to CI failure)",
         "de": "E2004 behoben: 0.4.13 aus News entfernt (wegen CI-Fehler nie auf npm veröffentlicht)",
@@ -183,19 +196,6 @@
         "pl": "Zmiana nazwy katalogu źródłowego frontendu z src/ na src-vis/ zgodnie z konwencją adapterów ioBroker",
         "uk": "Перейменування директорії вихідного коду фронтенду з src/ на src-vis/ згідно з конвенцією адаптерів ioBroker",
         "zh-cn": "按 ioBroker 适配器约定将前端源目录从 src/ 重命名为 src-vis/"
-      },
-      "0.4.8": {
-        "en": "Fix adapter checker: correct news section (remove unpublished versions, restore npm latest entry), fix vscode schema URL, add .releaseconfig.json",
-        "de": "Adapter-Checker-Fix: News-Sektion korrigiert (nicht veröffentlichte Versionen entfernt, npm-latest-Eintrag wiederhergestellt), VSCode-Schema-URL korrigiert, .releaseconfig.json hinzugefügt",
-        "ru": "Исправление adapter checker: исправлена секция news (удалены неопубликованные версии, восстановлена запись npm latest), исправлен URL схемы VSCode, добавлен .releaseconfig.json",
-        "pt": "Correção adapter checker: seção news corrigida (remoção de versões não publicadas, restauração da entrada npm latest), URL de esquema VSCode corrigida, .releaseconfig.json adicionado",
-        "nl": "Adapter checker fix: news-sectie gecorrigeerd (ongepubliceerde versies verwijderd, npm latest-entry hersteld), VSCode schema-URL gecorrigeerd, .releaseconfig.json toegevoegd",
-        "fr": "Correction adapter checker: section news corrigée (versions non publiées supprimées, entrée npm latest restaurée), URL de schéma VSCode corrigée, .releaseconfig.json ajouté",
-        "it": "Correzione adapter checker: sezione news corretta (versioni non pubblicate rimosse, voce npm latest ripristinata), URL schema VSCode corretto, .releaseconfig.json aggiunto",
-        "es": "Corrección adapter checker: sección news corregida (versiones no publicadas eliminadas, entrada npm latest restaurada), URL de esquema VSCode corregida, .releaseconfig.json añadido",
-        "pl": "Naprawa adapter checker: sekcja news poprawiona (usunięto nieopublikowane wersje, przywrócono wpis npm latest), poprawiono URL schematu VSCode, dodano .releaseconfig.json",
-        "uk": "Виправлення adapter checker: виправлено секцію news (видалено неопубліковані версії, відновлено запис npm latest), виправлено URL схеми VSCode, додано .releaseconfig.json",
-        "zh-cn": "适配器检查器修复：更正 news 部分（删除未发布版本，恢复 npm latest 条目），修正 VSCode 架构 URL，添加 .releaseconfig.json"
       }
     }
   },

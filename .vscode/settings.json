@@ -6,7 +6,7 @@
     },
     {
       "fileMatch": ["admin/jsonConfig.json"],
-      "url": "https://json.schemastore.org/iobroker-adapter-config"
+      "url": "https://raw.githubusercontent.com/ioBroker/ioBroker.admin/master/packages/jsonConfig/schemas/jsonConfig.json"
     }
   ]
 }

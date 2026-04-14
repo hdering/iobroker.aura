@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.16 (2026-04-14)
+- Adapter checker fixes: use `testing-action-deploy@v1`, ESLint flat config, `admin/i18n/`, jsonConfig schema URL, dependabot cooldown
+
 ### 0.4.15 (2026-04-14)
 - Fix E2004: remove 0.4.13 from news (never published to npm due to CI failure)
 
