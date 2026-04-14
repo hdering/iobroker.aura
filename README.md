@@ -127,6 +127,14 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.19 (2026-04-14)
+- Fix W3009: concurrency group set to `${{ github.ref }}`
+- Fix W3019: switch deploy to npm trusted publishing (remove npm-token)
+- Fix W4042: extend jsonConfig `fileMatch` in `.vscode/settings.json`
+
+### 0.4.18 (2026-04-14)
+- Fix W4042: extend jsonConfig `fileMatch` in `.vscode/settings.json` to include all jsonConfig variants
+
 ### 0.4.17 (2026-04-14)
 - Move `main.js` to root directory per ioBroker adapter convention
 

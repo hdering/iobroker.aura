@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.17",
+    "version": "0.4.19",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,32 @@
       }
     ],
     "news": {
+      "0.4.19": {
+        "en": "Fix W3009/W3019: fix concurrency group, switch deploy to npm trusted publishing (remove npm-token), fix W4042 jsonConfig fileMatch",
+        "de": "W3009/W3019 behoben: Concurrency-Group korrigiert, Deploy auf npm Trusted Publishing umgestellt (npm-token entfernt), W4042 jsonConfig fileMatch korrigiert",
+        "ru": "Исправления W3009/W3019: исправлена группа concurrency, деплой переведён на npm trusted publishing (удалён npm-token), исправлен fileMatch jsonConfig (W4042)",
+        "pt": "Correções W3009/W3019: grupo de concurrency corrigido, deploy migrado para npm trusted publishing (npm-token removido), fileMatch jsonConfig corrigido (W4042)",
+        "nl": "W3009/W3019 opgelost: concurrency group gecorrigeerd, deploy omgezet naar npm trusted publishing (npm-token verwijderd), jsonConfig fileMatch gecorrigeerd (W4042)",
+        "fr": "Corrections W3009/W3019: groupe de concurrence corrigé, déploiement migré vers npm trusted publishing (npm-token supprimé), fileMatch jsonConfig corrigé (W4042)",
+        "it": "Correzioni W3009/W3019: gruppo concurrency corretto, deploy migrato a npm trusted publishing (npm-token rimosso), fileMatch jsonConfig corretto (W4042)",
+        "es": "Correcciones W3009/W3019: grupo de concurrencia corregido, deploy migrado a npm trusted publishing (npm-token eliminado), fileMatch jsonConfig corregido (W4042)",
+        "pl": "Naprawa W3009/W3019: poprawiono grupę concurrency, deploy przeniesiony na npm trusted publishing (usunięto npm-token), poprawiono fileMatch jsonConfig (W4042)",
+        "uk": "Виправлення W3009/W3019: виправлено групу concurrency, деплой переведено на npm trusted publishing (видалено npm-token), виправлено fileMatch jsonConfig (W4042)",
+        "zh-cn": "修复 W3009/W3019：修正 concurrency group，将部署切换为 npm trusted publishing（移除 npm-token），修正 jsonConfig fileMatch（W4042）"
+      },
+      "0.4.18": {
+        "en": "Fix W4042: extend jsonConfig fileMatch in .vscode/settings.json to include all jsonConfig variants",
+        "de": "W4042 behoben: jsonConfig fileMatch in .vscode/settings.json auf alle jsonConfig-Varianten erweitert",
+        "ru": "Исправление W4042: расширен fileMatch jsonConfig в .vscode/settings.json для всех вариантов jsonConfig",
+        "pt": "Correção W4042: fileMatch jsonConfig em .vscode/settings.json estendido para incluir todas as variantes jsonConfig",
+        "nl": "W4042 opgelost: jsonConfig fileMatch in .vscode/settings.json uitgebreid met alle jsonConfig-varianten",
+        "fr": "Correction W4042: fileMatch jsonConfig dans .vscode/settings.json étendu à toutes les variantes jsonConfig",
+        "it": "Correzione W4042: fileMatch jsonConfig in .vscode/settings.json esteso a tutte le varianti jsonConfig",
+        "es": "Corrección W4042: fileMatch jsonConfig en .vscode/settings.json ampliado a todas las variantes jsonConfig",
+        "pl": "Naprawa W4042: rozszerzono fileMatch jsonConfig w .vscode/settings.json o wszystkie warianty jsonConfig",
+        "uk": "Виправлення W4042: розширено fileMatch jsonConfig у .vscode/settings.json для всіх варіантів jsonConfig",
+        "zh-cn": "修复 W4042：将 .vscode/settings.json 中的 jsonConfig fileMatch 扩展到包含所有 jsonConfig 变体"
+      },
       "0.4.17": {
         "en": "Move main.js to root directory per ioBroker adapter convention",
         "de": "main.js gemäß ioBroker-Adapter-Konvention ins Root-Verzeichnis verschoben",
@@ -170,32 +196,6 @@
         "pl": "Naprawa E2005: przywrócono wpis 0.3.98 (npm latest) w sekcji news, zachowano maksimum 7 wpisów",
         "uk": "Виправлення E2005: відновлено запис 0.3.98 (npm latest) у секції news, дотримано ліміт 7 записів",
         "zh-cn": "修复 E2005：在 news 部分恢复 0.3.98（npm latest）条目，保持最多 7 条记录"
-      },
-      "0.4.11": {
-        "en": "Add release script entry to package.json for iobroker.dev release management",
-        "de": "Release-Script-Eintrag in package.json für iobroker.dev-Releaseverwaltung hinzugefügt",
-        "ru": "Добавлена запись release script в package.json для управления релизами на iobroker.dev",
-        "pt": "Adicionada entrada release script no package.json para gestão de releases no iobroker.dev",
-        "nl": "Release script-vermelding toegevoegd aan package.json voor releasebeheer op iobroker.dev",
-        "fr": "Entrée release script ajoutée dans package.json pour la gestion des versions sur iobroker.dev",
-        "it": "Aggiunta voce release script in package.json per la gestione dei rilasci su iobroker.dev",
-        "es": "Añadida entrada release script en package.json para gestión de releases en iobroker.dev",
-        "pl": "Dodano wpis release script do package.json dla zarządzania wydaniami na iobroker.dev",
-        "uk": "Додано запис release script до package.json для керування релізами на iobroker.dev",
-        "zh-cn": "在 package.json 中添加 release script 条目，用于 iobroker.dev 发布管理"
-      },
-      "0.4.10": {
-        "en": "Add src-vis/i18n/ to package.json files to include translations in npm package",
-        "de": "src-vis/i18n/ zu package.json files hinzugefügt, um Übersetzungen im npm-Paket einzuschließen",
-        "ru": "Добавлено src-vis/i18n/ в files в package.json для включения переводов в npm-пакет",
-        "pt": "Adicionado src-vis/i18n/ ao files do package.json para incluir traduções no pacote npm",
-        "nl": "src-vis/i18n/ toegevoegd aan package.json files zodat vertalingen in het npm-pakket worden opgenomen",
-        "fr": "Ajout de src-vis/i18n/ dans les files de package.json pour inclure les traductions dans le paquet npm",
-        "it": "Aggiunto src-vis/i18n/ ai files di package.json per includere le traduzioni nel pacchetto npm",
-        "es": "Añadido src-vis/i18n/ a files en package.json para incluir las traducciones en el paquete npm",
-        "pl": "Dodano src-vis/i18n/ do files w package.json, aby dołączyć tłumaczenia do pakietu npm",
-        "uk": "Додано src-vis/i18n/ до files у package.json для включення перекладів у npm-пакет",
-        "zh-cn": "将 src-vis/i18n/ 添加到 package.json 的 files 中，以在 npm 包中包含翻译文件"
       }
     }
   },
