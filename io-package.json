@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.2",
+    "version": "0.4.3",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -102,17 +102,48 @@
     ],
     "globalDependencies": [
       {
-        "admin": ">=7.6.17"
+        "admin": ">=7.6.20"
       }
     ],
     "news": {
+      "0.4.3": {
+        "en": "Adapter checker compliance: i18n for jsonConfig, node: prefix for built-ins, workflow deploy job, dependabot, react-resizable dependency",
+        "de": "Adapter-Checker-Konformität: i18n für jsonConfig, node:-Präfix für Built-ins, Workflow deploy-Job, dependabot, react-resizable Abhängigkeit",
+        "ru": "Соответствие adapter checker: i18n для jsonConfig, префикс node: для встроенных модулей, задание deploy в workflow, dependabot, зависимость react-resizable",
+        "pt": "Conformidade adapter checker: i18n para jsonConfig, prefixo node: para módulos integrados, job deploy no workflow, dependabot, dependência react-resizable",
+        "nl": "Adapter checker compliance: i18n voor jsonConfig, node: prefix voor ingebouwde modules, workflow deploy job, dependabot, react-resizable afhankelijkheid",
+        "fr": "Conformité adapter checker: i18n pour jsonConfig, préfixe node: pour les modules intégrés, job deploy dans le workflow, dependabot, dépendance react-resizable",
+        "it": "Conformità adapter checker: i18n per jsonConfig, prefisso node: per moduli integrati, job deploy nel workflow, dependabot, dipendenza react-resizable",
+        "es": "Cumplimiento adapter checker: i18n para jsonConfig, prefijo node: para módulos integrados, job deploy en workflow, dependabot, dependencia react-resizable",
+        "pl": "Zgodność adapter checker: i18n dla jsonConfig, prefiks node: dla wbudowanych modułów, job deploy w workflow, dependabot, zależność react-resizable",
+        "uk": "Відповідність adapter checker: i18n для jsonConfig, префікс node: для вбудованих модулів, завдання deploy у workflow, dependabot, залежність react-resizable",
+        "zh-cn": "适配器检查器合规：jsonConfig 的 i18n、内置模块的 node: 前缀、workflow 的 deploy job、dependabot、react-resizable 依赖"
+      },
       "0.4.2": {
         "en": "Adapter checker fixes: globalDependencies admin, remove unpublished news entry, jsonConfig sizes, workflow tag trigger",
-        "de": "Adapter-Checker-Fixes: globalDependencies admin, nicht veröffentlichten News-Eintrag entfernt, jsonConfig-Größen, Workflow-Tag-Trigger"
+        "de": "Adapter-Checker-Fixes: globalDependencies admin, nicht veröffentlichten News-Eintrag entfernt, jsonConfig-Größen, Workflow-Tag-Trigger",
+        "ru": "Исправления adapter checker: globalDependencies admin, удалён неопубликованный элемент news, размеры jsonConfig, триггер тегов workflow",
+        "pt": "Correções do adapter checker: globalDependencies admin, remoção de entrada news não publicada, tamanhos jsonConfig, trigger de tags no workflow",
+        "nl": "Adapter checker fixes: globalDependencies admin, niet-gepubliceerde news-entry verwijderd, jsonConfig-maten, workflow tag trigger",
+        "fr": "Corrections de l'adapter checker: globalDependencies admin, suppression de l'entrée news non publiée, tailles jsonConfig, déclencheur de tags workflow",
+        "it": "Correzioni adapter checker: globalDependencies admin, rimozione entry news non pubblicata, dimensioni jsonConfig, trigger tag workflow",
+        "es": "Correcciones del comprobador de adaptador: globalDependencies admin, eliminación de entrada news no publicada, tamaños jsonConfig, trigger de tags en workflow",
+        "pl": "Poprawki adapter checker: globalDependencies admin, usunięcie nieopublikowanego wpisu news, rozmiary jsonConfig, trigger tagów w workflow",
+        "uk": "Виправлення adapter checker: globalDependencies admin, видалення неопублікованого запису news, розміри jsonConfig, тригер тегів workflow",
+        "zh-cn": "适配器检查器修复：globalDependencies admin、删除未发布的 news 条目、jsonConfig 尺寸、workflow 标签触发器"
       },
       "0.4.1": {
         "en": "Fix CI pipeline: add test:package and test:integration scripts, resolve all ESLint warnings",
-        "de": "CI-Pipeline repariert: test:package und test:integration ergänzt, alle ESLint-Warnungen behoben"
+        "de": "CI-Pipeline repariert: test:package und test:integration ergänzt, alle ESLint-Warnungen behoben",
+        "ru": "Исправление CI-конвейера: добавлены скрипты test:package и test:integration, устранены все предупреждения ESLint",
+        "pt": "Correção do pipeline CI: adicionar scripts test:package e test:integration, resolver todos os avisos ESLint",
+        "nl": "CI-pipeline gerepareerd: test:package en test:integration scripts toegevoegd, alle ESLint-waarschuwingen opgelost",
+        "fr": "Correction du pipeline CI: ajout des scripts test:package et test:integration, résolution de tous les avertissements ESLint",
+        "it": "Correzione pipeline CI: aggiunti script test:package e test:integration, risolti tutti gli avvisi ESLint",
+        "es": "Corrección del pipeline CI: agregar scripts test:package y test:integration, resolver todas las advertencias ESLint",
+        "pl": "Naprawa pipeline CI: dodano skrypty test:package i test:integration, usunięto wszystkie ostrzeżenia ESLint",
+        "uk": "Виправлення CI-конвеєра: додано скрипти test:package та test:integration, усунено всі попередження ESLint",
+        "zh-cn": "修复 CI 流水线：添加 test:package 和 test:integration 脚本，解决所有 ESLint 警告"
       },
       "0.3.99": {
         "en": "Add configurable default tab per layout – set which tab opens when the dashboard URL has no tab slug",
@@ -166,58 +197,6 @@
         "uk": "Виправлено назви плиток огляду: localLinks замінюються замість злиття",
         "zh-cn": "修复概览磁贴名称：替换 localLinks 而不是合并，以删除旧条目"
       },
-      "0.3.95": {
-        "en": "Fix restart loop when custom URL is set: only update localLinks when value changed",
-        "de": "Neustart-Schleife bei gesetzter Custom-URL behoben: localLinks nur schreiben wenn sich der Wert geändert hat",
-        "ru": "Исправлен цикл перезапуска при установленном custom URL: localLinks обновляются только при изменении значения",
-        "pt": "Corrigido loop de reinício com URL personalizada: localLinks só são atualizados quando o valor muda",
-        "nl": "Herstart-loop bij ingestelde custom URL opgelost: localLinks alleen bijwerken als de waarde verandert",
-        "fr": "Correction de la boucle de redémarrage avec URL personnalisée: localLinks mis à jour seulement si la valeur change",
-        "it": "Corretto loop di riavvio con URL personalizzato: localLinks aggiornati solo quando il valore cambia",
-        "es": "Corregido bucle de reinicio con URL personalizada: localLinks solo se actualizan cuando el valor cambia",
-        "pl": "Naprawiono pętlę restartu przy ustawionym custom URL: localLinks aktualizowane tylko gdy wartość się zmienia",
-        "uk": "Виправлено цикл перезапуску при встановленому custom URL: localLinks оновлюються лише при зміні значення",
-        "zh-cn": "修复设置自定义 URL 时的重启循环：仅在值发生变化时更新 localLinks"
-      },
-      "0.3.94": {
-        "en": "Add configurable custom URL for ioBroker overview links",
-        "de": "Konfigurierbare benutzerdefinierte URL für ioBroker-Übersichts-Links hinzugefügt",
-        "ru": "Добавлена настраиваемая пользовательская URL для ссылок обзора ioBroker",
-        "pt": "Adicionada URL personalizada configurável para links de visão geral do ioBroker",
-        "nl": "Configureerbare aangepaste URL toegevoegd voor ioBroker overzichtslinks",
-        "fr": "Ajout d'une URL personnalisée configurable pour les liens de vue d'ensemble ioBroker",
-        "it": "Aggiunta URL personalizzata configurabile per i link panoramica ioBroker",
-        "es": "Añadida URL personalizada configurable para los enlaces de vista general de ioBroker",
-        "pl": "Dodano konfigurowalny niestandardowy URL dla linków przeglądu ioBroker",
-        "uk": "Додано налаштовуваний власний URL для посилань огляду ioBroker",
-        "zh-cn": "为 ioBroker 概览链接添加可配置的自定义 URL"
-      },
-      "0.3.93": {
-        "en": "Rename overview tiles to 'Aura Frontend' and 'Aura Backend'",
-        "de": "Kacheln in der Übersicht umbenannt: 'Aura Frontend' und 'Aura Backend'",
-        "ru": "Переименованы плитки обзора: 'Aura Frontend' и 'Aura Backend'",
-        "pt": "Renomear tiles da visão geral para 'Aura Frontend' e 'Aura Backend'",
-        "nl": "Overzichtstegels hernoemd naar 'Aura Frontend' en 'Aura Backend'",
-        "fr": "Renommage des tuiles de vue d'ensemble en 'Aura Frontend' et 'Aura Backend'",
-        "it": "Rinominati i tile della panoramica in 'Aura Frontend' e 'Aura Backend'",
-        "es": "Renombrar tiles de la vista general a 'Aura Frontend' y 'Aura Backend'",
-        "pl": "Zmieniono nazwy kafelków przeglądu na 'Aura Frontend' i 'Aura Backend'",
-        "uk": "Перейменовано плитки огляду на 'Aura Frontend' та 'Aura Backend'",
-        "zh-cn": "将概览磁贴重命名为 'Aura Frontend' 和 'Aura Backend'"
-      },
-      "0.3.73": {
-        "en": "Stable fingerprint-based client ID – no more duplicate devices on mobile",
-        "de": "Stabile fingerprint-basierte Client-ID – kein Duplizieren von Geräten auf Mobilgeräten",
-        "ru": "Стабильный ID клиента на основе отпечатка – больше нет дублирующихся устройств на мобильных",
-        "pt": "ID de cliente estável baseado em impressão digital – sem mais dispositivos duplicados no celular",
-        "nl": "Stabiele fingerprint-gebaseerde client-ID – geen dubbele apparaten meer op mobiel",
-        "fr": "ID client stable basé sur empreinte – plus de doublons sur mobile",
-        "it": "ID client stabile basato su fingerprint – niente più dispositivi duplicati su mobile",
-        "es": "ID de cliente estable basado en huella digital – no más dispositivos duplicados en móvil",
-        "pl": "Stabilne ID klienta oparte na odcisku – koniec z duplikatami urządzeń na telefonie",
-        "uk": "Стабільний ID клієнта на основі відбитку – більше немає дублікатів пристроїв на мобільних",
-        "zh-cn": "基于指纹的稳定客户端 ID – 移动设备不再出现重复条目"
-      }
     }
   },
   "native": {

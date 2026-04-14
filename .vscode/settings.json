@@ -1,0 +1,12 @@
+{
+  "json.schemas": [
+    {
+      "fileMatch": ["io-package.json"],
+      "url": "https://json.schemastore.org/io-package"
+    },
+    {
+      "fileMatch": ["admin/jsonConfig.json"],
+      "url": "https://json.schemastore.org/iobroker-adapter-config"
+    }
+  ]
+}

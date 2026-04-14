@@ -3,13 +3,67 @@
   "items": {
     "_urlHeader": {
       "type": "header",
-      "text": "Custom URL (optional)"
+      "text": {
+        "en": "Custom URL (optional)",
+        "de": "Benutzerdefinierte URL (optional)",
+        "ru": "Пользовательский URL (необязательно)",
+        "pt": "URL personalizado (opcional)",
+        "nl": "Aangepaste URL (optioneel)",
+        "fr": "URL personnalisée (facultatif)",
+        "it": "URL personalizzato (opzionale)",
+        "es": "URL personalizada (opcional)",
+        "pl": "Niestandardowy URL (opcjonalnie)",
+        "uk": "Власний URL (необов'язково)",
+        "zh-cn": "自定义 URL（可选）"
+      },
+      "size": 2,
+      "xs": 12,
+      "sm": 12,
+      "md": 12,
+      "lg": 12,
+      "xl": 12
     },
     "customUrl": {
       "type": "text",
-      "label": "Base URL",
-      "placeholder": "https://your-domain.com",
-      "help": "Override the links shown in ioBroker overview and instances. Leave empty to use the default (http://<ip>:8082). Example: https://your-domain.com",
+      "label": {
+        "en": "Base URL",
+        "de": "Basis-URL",
+        "ru": "Базовый URL",
+        "pt": "URL base",
+        "nl": "Basis-URL",
+        "fr": "URL de base",
+        "it": "URL base",
+        "es": "URL base",
+        "pl": "Bazowy URL",
+        "uk": "Базова URL",
+        "zh-cn": "基础 URL"
+      },
+      "placeholder": {
+        "en": "https://your-domain.com",
+        "de": "https://ihre-domain.de",
+        "ru": "https://ваш-домен.com",
+        "pt": "https://seu-dominio.com",
+        "nl": "https://uw-domein.nl",
+        "fr": "https://votre-domaine.fr",
+        "it": "https://il-tuo-dominio.it",
+        "es": "https://su-dominio.com",
+        "pl": "https://twoja-domena.pl",
+        "uk": "https://ваш-домен.com",
+        "zh-cn": "https://your-domain.com"
+      },
+      "help": {
+        "en": "Override the links shown in ioBroker overview and instances. Leave empty to use the default (http://<ip>:8082).",
+        "de": "Überschreibt die Links in der ioBroker-Übersicht und Instanzen. Leer lassen für den Standard (http://<ip>:8082).",
+        "ru": "Переопределяет ссылки в обзоре ioBroker. Оставьте пустым для стандартного значения (http://<ip>:8082).",
+        "pt": "Substitui os links mostrados na visão geral do ioBroker. Deixe vazio para usar o padrão (http://<ip>:8082).",
+        "nl": "Overschrijft de links in het ioBroker-overzicht. Leeg laten voor de standaard (http://<ip>:8082).",
+        "fr": "Remplace les liens affichés dans la vue d'ensemble ioBroker. Laisser vide pour utiliser la valeur par défaut (http://<ip>:8082).",
+        "it": "Sostituisce i link mostrati nella panoramica ioBroker. Lasciare vuoto per usare il valore predefinito (http://<ip>:8082).",
+        "es": "Reemplaza los enlaces mostrados en la vista general de ioBroker. Dejar vacío para usar el valor predeterminado (http://<ip>:8082).",
+        "pl": "Zastępuje linki wyświetlane w przeglądzie ioBroker. Pozostaw puste, aby użyć wartości domyślnej (http://<ip>:8082).",
+        "uk": "Замінює посилання в огляді ioBroker. Залиште порожнім для стандартного значення (http://<ip>:8082).",
+        "zh-cn": "覆盖 ioBroker 概览中显示的链接。留空则使用默认值 (http://<ip>:8082)。"
+      },
       "xs": 12,
       "sm": 12,
       "md": 6,

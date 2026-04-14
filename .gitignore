@@ -14,3 +14,6 @@ compose.yml
 # OS
 .DS_Store
 Thumbs.db
+
+# Release script
+.commitinfo

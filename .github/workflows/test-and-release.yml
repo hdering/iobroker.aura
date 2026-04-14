@@ -28,6 +28,7 @@ jobs:
           lint: true
 
   adapter-tests:
+    needs: check-and-lint
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -41,7 +42,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           os: ${{ matrix.os }}
 
-  release:
+  deploy:
     needs: [check-and-lint, adapter-tests]
     runs-on: ubuntu-latest
     if: github.event_name == 'release'
