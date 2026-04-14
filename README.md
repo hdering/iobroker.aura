@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.2 (2026-04-14)
+- Adapter checker fixes: add globalDependencies admin >=7.6.17, remove unpublished news entry, add jsonConfig size attributes, add workflow tag trigger
+
 ### 0.4.1 (2026-04-14)
 - Fix CI pipeline: add test:package and test:integration scripts, resolve all ESLint warnings
 

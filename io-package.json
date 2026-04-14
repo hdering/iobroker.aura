@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -100,14 +100,19 @@
         "js-controller": ">=6.0.11"
       }
     ],
+    "globalDependencies": [
+      {
+        "admin": ">=7.6.17"
+      }
+    ],
     "news": {
+      "0.4.2": {
+        "en": "Adapter checker fixes: globalDependencies admin, remove unpublished news entry, jsonConfig sizes, workflow tag trigger",
+        "de": "Adapter-Checker-Fixes: globalDependencies admin, nicht veröffentlichten News-Eintrag entfernt, jsonConfig-Größen, Workflow-Tag-Trigger"
+      },
       "0.4.1": {
         "en": "Fix CI pipeline: add test:package and test:integration scripts, resolve all ESLint warnings",
         "de": "CI-Pipeline repariert: test:package und test:integration ergänzt, alle ESLint-Warnungen behoben"
-      },
-      "0.4.0": {
-        "en": "Adapter checker compliance: node >=20, trim news, remove allowInit, use ioBroker standard workflow actions, fix package dependencies",
-        "de": "Adapter-Checker-Konformität: node >=20, News gekürzt, allowInit entfernt, ioBroker Standard-Workflow-Actions, Paketabhängigkeiten korrigiert"
       },
       "0.3.99": {
         "en": "Add configurable default tab per layout – set which tab opens when the dashboard URL has no tab slug",

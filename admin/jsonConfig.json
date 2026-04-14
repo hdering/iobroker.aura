@@ -9,7 +9,12 @@
       "type": "text",
       "label": "Base URL",
       "placeholder": "https://your-domain.com",
-      "help": "Override the links shown in ioBroker overview and instances. Leave empty to use the default (http://<ip>:8082). Example: https://your-domain.com"
+      "help": "Override the links shown in ioBroker overview and instances. Leave empty to use the default (http://<ip>:8082). Example: https://your-domain.com",
+      "xs": 12,
+      "sm": 12,
+      "md": 6,
+      "lg": 4,
+      "xl": 4
     }
   }
 }
