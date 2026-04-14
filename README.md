@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.13 (2026-04-14)
+- Stable release: adapter checker compliance, src-vis convention, release script, i18n in npm package
+
 ### 0.4.12 (2026-04-14)
 - Fix E2005: restore 0.3.98 (npm latest) in news section
 

@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.12",
+    "version": "0.4.13",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.13": {
+        "en": "Stable release: adapter checker compliance, src-vis convention, release script, i18n in npm package",
+        "de": "Stable Release: Adapter-Checker-Konformität, src-vis-Konvention, Release-Script, i18n im npm-Paket",
+        "ru": "Стабильный релиз: соответствие adapter checker, конвенция src-vis, release script, i18n в npm-пакете",
+        "pt": "Release estável: conformidade adapter checker, convenção src-vis, release script, i18n no pacote npm",
+        "nl": "Stabiele release: adapter checker compliance, src-vis conventie, release script, i18n in npm-pakket",
+        "fr": "Version stable: conformité adapter checker, convention src-vis, release script, i18n dans le paquet npm",
+        "it": "Release stabile: conformità adapter checker, convenzione src-vis, release script, i18n nel pacchetto npm",
+        "es": "Release estable: cumplimiento adapter checker, convención src-vis, release script, i18n en paquete npm",
+        "pl": "Stabilne wydanie: zgodność z adapter checker, konwencja src-vis, release script, i18n w pakiecie npm",
+        "uk": "Стабільний реліз: відповідність adapter checker, конвенція src-vis, release script, i18n у npm-пакеті",
+        "zh-cn": "稳定版本：适配器检查器合规、src-vis 约定、release script、npm 包中包含 i18n"
+      },
       "0.4.12": {
         "en": "Fix E2005: restore 0.3.98 (npm latest) in news section, keep max 7 entries",
         "de": "E2005 behoben: 0.3.98 (npm latest) in der News-Sektion wiederhergestellt, max. 7 Einträge eingehalten",
@@ -184,19 +197,6 @@
         "uk": "Виправлено невалідний JSON в io-package.json (зайва кома після останнього запису news)",
         "zh-cn": "修复 io-package.json 中的无效 JSON（最后一个 news 条目后的多余逗号）"
       },
-      "0.3.98": {
-        "en": "Replace hardcoded personal domain in settings placeholder with generic example",
-        "de": "Persönliche Domain im Einstellungs-Platzhalter durch generisches Beispiel ersetzt",
-        "ru": "Личный домен в подсказке настроек заменён на общий пример",
-        "pt": "Domínio pessoal no placeholder das configurações substituído por exemplo genérico",
-        "nl": "Persoonlijk domein in instellingen-placeholder vervangen door generiek voorbeeld",
-        "fr": "Domaine personnel dans le placeholder des paramètres remplacé par un exemple générique",
-        "it": "Dominio personale nel placeholder delle impostazioni sostituito con esempio generico",
-        "es": "Dominio personal en el placeholder de configuración reemplazado por ejemplo genérico",
-        "pl": "Osobista domena w placeholder ustawień zastąpiona ogólnym przykładem",
-        "uk": "Особистий домен у підказці налаштувань замінено на загальний приклад",
-        "zh-cn": "将设置占位符中的个人域名替换为通用示例"
-      }
     }
   },
   "native": {
