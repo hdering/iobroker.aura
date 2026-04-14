@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.12 (2026-04-14)
+- Fix E2005: restore 0.3.98 (npm latest) in news section
+
 ### 0.4.11 (2026-04-14)
 - Add `release` script to `package.json` for iobroker.dev release management
 
