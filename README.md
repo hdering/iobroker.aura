@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.21 (2026-04-14)
+- Fix W5022: add `translate` script to `package.json` for i18n support
+
 ### 0.4.20 (2026-04-14)
 - Fix W5022: migrate jsonConfig to i18n – use translation keys and `admin/i18n/` for all 11 languages
 

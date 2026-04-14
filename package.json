@@ -1,6 +1,6 @@
 {
   "name": "iobroker.aura",
-  "version": "0.4.20",
+  "version": "0.4.21",
   "description": "Modern visualization dashboard for ioBroker",
   "author": "Hermann Dering <aura@dering-online.de>",
   "main": "main.js",
@@ -43,7 +43,8 @@
     "test": "node test/adapter.test.js",
     "test:package": "node test/adapter.test.js",
     "test:integration": "node test/adapter.test.js",
-    "release": "release-script"
+    "release": "release-script",
+    "translate": "translate-adapter"
   },
   "dependencies": {
     "@iobroker/adapter-core": "^3.3.2",

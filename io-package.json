@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.20",
+    "version": "0.4.21",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.21": {
+        "en": "Fix W5022: add translate script to package.json for i18n support",
+        "de": "W5022 behoben: translate-Script in package.json für i18n-Unterstützung hinzugefügt",
+        "ru": "Исправление W5022: добавлен скрипт translate в package.json для поддержки i18n",
+        "pt": "Correção W5022: script translate adicionado ao package.json para suporte a i18n",
+        "nl": "W5022 opgelost: translate-script toegevoegd aan package.json voor i18n-ondersteuning",
+        "fr": "Correction W5022: script translate ajouté dans package.json pour la prise en charge i18n",
+        "it": "Correzione W5022: aggiunto script translate in package.json per il supporto i18n",
+        "es": "Corrección W5022: script translate añadido a package.json para soporte i18n",
+        "pl": "Naprawa W5022: dodano skrypt translate do package.json dla obsługi i18n",
+        "uk": "Виправлення W5022: додано скрипт translate до package.json для підтримки i18n",
+        "zh-cn": "修复 W5022：在 package.json 中添加 translate 脚本以支持 i18n"
+      },
       "0.4.20": {
         "en": "Fix W5022: migrate jsonConfig to i18n – use translation keys and admin/i18n for all 11 languages",
         "de": "W5022 behoben: jsonConfig auf i18n umgestellt – Übersetzungsschlüssel und admin/i18n für alle 11 Sprachen",
@@ -170,19 +183,6 @@
         "pl": "Naprawa E2004: usunięto 0.4.13 z news (nigdy nie opublikowano na npm z powodu błędu CI)",
         "uk": "Виправлення E2004: видалено 0.4.13 з news (не опублікована на npm через помилку CI)",
         "zh-cn": "修复 E2004：从 news 中删除 0.4.13（因 CI 失败从未发布到 npm）"
-      },
-      "0.4.14": {
-        "en": "Fix invalid JSON in io-package.json (trailing comma after last news entry)",
-        "de": "Ungültiges JSON in io-package.json behoben (Komma nach letztem News-Eintrag)",
-        "ru": "Исправлен невалидный JSON в io-package.json (лишняя запятая после последнего элемента news)",
-        "pt": "JSON inválido em io-package.json corrigido (vírgula após última entrada de news)",
-        "nl": "Ongeldig JSON in io-package.json opgelost (komma na laatste news-entry)",
-        "fr": "JSON invalide dans io-package.json corrigé (virgule après la dernière entrée news)",
-        "it": "JSON non valido in io-package.json corretto (virgola dopo l'ultima voce news)",
-        "es": "JSON inválido en io-package.json corregido (coma tras la última entrada de news)",
-        "pl": "Nieprawidłowy JSON w io-package.json naprawiony (przecinek po ostatnim wpisie news)",
-        "uk": "Виправлено невалідний JSON в io-package.json (зайва кома після останнього запису news)",
-        "zh-cn": "修复 io-package.json 中的无效 JSON（最后一个 news 条目后的多余逗号）"
       }
     }
   },
