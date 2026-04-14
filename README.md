@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.3.97 (2026-04-14)
+- Fix overview tile titles: use localLinks `name` field (ioBroker uses name, not key, as the visible title)
+
 ### 0.3.96 (2026-04-14)
 - Fix overview tile names: use full replacement instead of deep-merge so old keys ("Dashboard"/"Admin") are removed
 

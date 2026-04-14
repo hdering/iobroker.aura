@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.3.96",
+    "version": "0.3.97",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -63,8 +63,38 @@
       "config": "json"
     },
     "localLinks": {
-      "Aura Frontend": "%protocol%://%ip%:8082/aura/",
-      "Aura Backend": "%protocol%://%ip%:8082/aura/#/admin"
+      "frontend": {
+        "link": "%protocol%://%ip%:8082/aura/",
+        "name": {
+          "en": "Aura Frontend",
+          "de": "Aura Frontend",
+          "ru": "Aura Frontend",
+          "pt": "Aura Frontend",
+          "nl": "Aura Frontend",
+          "fr": "Aura Frontend",
+          "it": "Aura Frontend",
+          "es": "Aura Frontend",
+          "pl": "Aura Frontend",
+          "uk": "Aura Frontend",
+          "zh-cn": "Aura Frontend"
+        }
+      },
+      "backend": {
+        "link": "%protocol%://%ip%:8082/aura/#/admin",
+        "name": {
+          "en": "Aura Backend",
+          "de": "Aura Backend",
+          "ru": "Aura Backend",
+          "pt": "Aura Backend",
+          "nl": "Aura Backend",
+          "fr": "Aura Backend",
+          "it": "Aura Backend",
+          "es": "Aura Backend",
+          "pl": "Aura Backend",
+          "uk": "Aura Backend",
+          "zh-cn": "Aura Backend"
+        }
+      }
     },
     "dependencies": [
       {
@@ -72,6 +102,19 @@
       }
     ],
     "news": {
+      "0.3.97": {
+        "en": "Fix overview tile titles: use localLinks name field instead of key",
+        "de": "Kacheltitel in der Übersicht korrigiert: name-Feld in localLinks statt Key verwenden",
+        "ru": "Исправлены заголовки плиток обзора: используется поле name в localLinks",
+        "pt": "Títulos dos tiles da visão geral corrigidos: usar campo name em localLinks",
+        "nl": "Kacheltitels in overzicht gecorrigeerd: name-veld in localLinks gebruiken",
+        "fr": "Titres des tuiles de vue d'ensemble corrigés: utiliser le champ name dans localLinks",
+        "it": "Titoli tile panoramica corretti: usare il campo name in localLinks",
+        "es": "Títulos de tiles de vista general corregidos: usar campo name en localLinks",
+        "pl": "Poprawiono tytuły kafelków przeglądu: użycie pola name w localLinks",
+        "uk": "Виправлено заголовки плиток огляду: використовується поле name у localLinks",
+        "zh-cn": "修复概览磁贴标题：在 localLinks 中使用 name 字段而非 key"
+      },
       "0.3.96": {
         "en": "Fix overview tile names: replace localLinks instead of merging to remove stale keys",
         "de": "Kachelnamen in der Übersicht korrigiert: localLinks werden ersetzt statt zusammengeführt, um veraltete Einträge zu entfernen",
