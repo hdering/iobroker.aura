@@ -28,11 +28,15 @@ function getInitialUrl(): string {
       const parsed = JSON.parse(stored) as { state?: { ioBrokerUrl?: string } };
       const storedUrl = parsed.state?.ioBrokerUrl;
       if (storedUrl) {
-        // Upgrade protocol to match current page to avoid mixed-content errors.
-        // e.g. stored http://host:8082 + page on HTTPS → https://host:8082
         try {
           const u = new URL(storedUrl);
-          u.protocol = window.location.protocol;
+          // Only use stored URL when it won't cause mixed-content errors:
+          // HTTPS page → HTTP socket.io would be blocked by the browser.
+          // Fall back to same-origin so the connection goes through the
+          // same web adapter (or reverse proxy) that served the page.
+          if (window.location.protocol === 'https:' && u.protocol === 'http:') {
+            return window.location.origin;
+          }
           return u.origin;
         } catch {
           return storedUrl;

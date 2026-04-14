@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.3.91",
+    "version": "0.3.92",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -72,6 +72,19 @@
       }
     ],
     "news": {
+      "0.3.92": {
+        "en": "Fix HTTPS: fall back to same-origin when stored URL would cause mixed-content block",
+        "de": "HTTPS-Fix: Fallback auf gleichen Origin wenn gespeicherte URL Mixed-Content verursachen würde",
+        "ru": "Исправление HTTPS: fallback на тот же origin при mixed-content с сохранённым URL",
+        "pt": "Fix HTTPS: fallback para mesmo origin quando URL armazenada causaria mixed-content",
+        "nl": "HTTPS-fix: fallback naar zelfde origin als opgeslagen URL mixed-content zou veroorzaken",
+        "fr": "Fix HTTPS: fallback sur même origin si l'URL stockée causerait un mixed-content",
+        "it": "Fix HTTPS: fallback allo stesso origin se l'URL memorizzata causerebbe mixed-content",
+        "es": "Fix HTTPS: fallback al mismo origin si la URL almacenada causaría mixed-content",
+        "pl": "Naprawiono HTTPS: fallback do tego samego origin gdy zapisany URL spowodowałby mixed-content",
+        "uk": "Виправлення HTTPS: fallback на той самий origin коли збережений URL спричиняє mixed-content",
+        "zh-cn": "修复 HTTPS：当存储的 URL 会导致混合内容时，回退到同源"
+      },
       "0.3.91": {
         "en": "Fix HTTPS: upgrade stored ioBroker URL protocol to match page protocol to avoid mixed-content errors",
         "de": "HTTPS-Fix: gespeicherte ioBroker-URL auf Seitenprotokoll anpassen, um Mixed-Content-Fehler zu vermeiden",

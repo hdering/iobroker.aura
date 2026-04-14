@@ -89,6 +89,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.3.92 (2026-04-14)
+- Fix HTTPS: fall back to same-origin when stored ioBroker URL would cause a mixed-content block (HTTP URL on HTTPS page)
+
 ### 0.3.91 (2026-04-14)
 - Fix HTTPS: upgrade stored ioBroker URL protocol to match page protocol (avoid mixed-content errors)
 
