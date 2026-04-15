@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { RefreshCw, Search, X } from 'lucide-react';
 import { useDatapointList } from '../../hooks/useDatapointList';
@@ -16,11 +16,18 @@ export function DatapointPicker({ currentValue, onSelect, onClose }: DatapointPi
   const t = useT();
   const { datapoints, loading, loaded, load } = useDatapointList();
   const [search, setSearch] = useState('');
-  const [adapter, setAdapter] = useState('');
+  const [adapter, setAdapter] = useState(() => currentValue ? currentValue.split('.')[0] : '');
+  const selectedRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!loaded) load();
   }, [loaded, load]);
+
+  useEffect(() => {
+    if (loaded && selectedRef.current) {
+      selectedRef.current.scrollIntoView({ behavior: 'instant', block: 'center' });
+    }
+  }, [loaded]);
 
   const adapters = useMemo(
     () => Array.from(new Set(datapoints.map((dp) => dp.id.split('.')[0]))).sort(),
@@ -140,6 +147,7 @@ export function DatapointPicker({ currentValue, onSelect, onClose }: DatapointPi
               return (
                 <button
                   key={dp.id}
+                  ref={isSelected ? selectedRef : undefined}
                   onClick={() => { onSelect(dp.id); onClose(); }}
                   className="w-full text-left px-5 py-2.5 flex items-center gap-3 hover:opacity-80 transition-opacity"
                   style={{
