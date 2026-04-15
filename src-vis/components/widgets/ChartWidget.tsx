@@ -5,9 +5,9 @@ import { useConfigStore } from '../../store/configStore';
 import { useChartHistory, type ChartTimeRange, RANGE_LABELS } from '../../hooks/useChartHistory';
 import type { WidgetProps } from '../../types';
 
-function formatTick(ts: number, range: ChartTimeRange): string {
+function formatTick(ts: number, rangeMs: number): string {
   const d = new Date(ts);
-  if (range === '7d' || range === '30d') {
+  if (rangeMs >= 2 * 86_400_000) {
     return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
   }
   return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
@@ -26,6 +26,12 @@ export function ChartWidget({ config }: WidgetProps) {
   const unit            = (config.options?.unit as string | undefined);
   const historyInstance = (config.options?.historyInstance as string | undefined);
   const timeRange       = ((config.options?.historyRange as ChartTimeRange | undefined) ?? '24h');
+  const customVal       = (config.options?.historyRangeCustomValue as number | undefined) ?? 24;
+  const customUnit      = (config.options?.historyRangeCustomUnit as 'h' | 'd' | undefined) ?? 'h';
+  const customRangeMs   = timeRange === 'custom'
+    ? customVal * (customUnit === 'd' ? 86_400_000 : 3_600_000)
+    : undefined;
+  const effectiveRangeMs = customRangeMs ?? ({ '1h': 3_600_000, '6h': 21_600_000, '24h': 86_400_000, '7d': 604_800_000, '30d': 2_592_000_000 } as Record<string, number>)[timeRange] ?? 86_400_000;
   const layout          = config.layout ?? 'default';
 
   const { history, current, loading } = useChartHistory(
@@ -34,6 +40,7 @@ export function ChartWidget({ config }: WidgetProps) {
     timeRange,
     connected,
     subscribe,
+    customRangeMs,
   );
 
   const tooltipStyle = {
@@ -55,7 +62,9 @@ export function ChartWidget({ config }: WidgetProps) {
     </div>
   );
 
-  const rangeLabel = historyInstance ? RANGE_LABELS[timeRange] : null;
+  const rangeLabel = historyInstance
+    ? (timeRange === 'custom' ? `${customVal} ${customUnit === 'd' ? 'Tage' : 'Std'}` : RANGE_LABELS[timeRange])
+    : null;
 
   // ── CARD ─────────────────────────────────────────────────────────────────
   if (layout === 'card') {
@@ -89,7 +98,7 @@ export function ChartWidget({ config }: WidgetProps) {
                 <YAxis domain={['auto', 'auto']} hide />
                 <XAxis dataKey="t" type="number" domain={['dataMin', 'dataMax']} scale="time" hide />
                 <Tooltip contentStyle={tooltipStyle} labelFormatter={formatLabel}
-                  formatter={(v: number) => [`${v.toLocaleString('de-DE')}${unit ? ` ${unit}` : ''}`, '']} />
+                  formatter={(v: number) => `${v.toLocaleString('de-DE')}${unit ? ` ${unit}` : ''}`} />
                 <Area type="monotone" dataKey="v" stroke="var(--accent)" strokeWidth={2}
                   fill="url(#grad)" dot={false} isAnimationActive={false} />
               </AreaChart>
@@ -171,14 +180,14 @@ export function ChartWidget({ config }: WidgetProps) {
                 type="number"
                 domain={['dataMin', 'dataMax']}
                 scale="time"
-                tickFormatter={(ts) => formatTick(ts, timeRange)}
+                tickFormatter={(ts) => formatTick(ts, effectiveRangeMs)}
                 tick={tickStyle}
                 tickLine={false}
                 axisLine={false}
                 minTickGap={40}
               />
               <Tooltip contentStyle={tooltipStyle} labelFormatter={formatLabel}
-                formatter={(v: number) => [`${v.toLocaleString('de-DE')}${unit ? ` ${unit}` : ''}`, '']} />
+                formatter={(v: number) => `${v.toLocaleString('de-DE')}${unit ? ` ${unit}` : ''}`} />
               <Line type="monotone" dataKey="v" stroke="var(--accent)" strokeWidth={2}
                 dot={false} isAnimationActive={false} />
             </LineChart>

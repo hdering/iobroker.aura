@@ -234,7 +234,7 @@ const STYLE_FIELDS: { key: string; labelKey: string; type: 'color' | 'text' }[] 
 ];
 
 // ── ChartHistoryConfig ────────────────────────────────────────────────────────
-const CHART_RANGES: ChartTimeRange[] = ['1h', '6h', '24h', '7d', '30d'];
+const CHART_RANGES: ChartTimeRange[] = ['1h', '6h', '24h', '7d', '30d', 'custom'];
 
 function ChartHistoryConfig({ config, onConfigChange }: { config: WidgetConfig; onConfigChange: (c: WidgetConfig) => void }) {
   const t = useT();
@@ -254,8 +254,10 @@ function ChartHistoryConfig({ config, onConfigChange }: { config: WidgetConfig; 
     }).catch(() => setChecking(false));
   }, [dp]);
 
-  const selectedInstance = o.historyInstance as string | undefined;
-  const selectedRange    = (o.historyRange as ChartTimeRange | undefined) ?? '24h';
+  const selectedInstance  = o.historyInstance as string | undefined;
+  const selectedRange     = (o.historyRange as ChartTimeRange | undefined) ?? '24h';
+  const customVal         = (o.historyRangeCustomValue as number | undefined) ?? 24;
+  const customUnit        = (o.historyRangeCustomUnit as 'h' | 'd' | undefined) ?? 'h';
 
   return (
     <>
@@ -309,6 +311,34 @@ function ChartHistoryConfig({ config, onConfigChange }: { config: WidgetConfig; 
               </button>
             ))}
           </div>
+          {/* Benutzerdefinierter Zeitraum */}
+          {selectedRange === 'custom' && (
+            <div className="flex items-center gap-1.5 mt-1.5">
+              <input
+                type="number"
+                min={1}
+                max={365}
+                value={customVal}
+                onChange={(e) => set({ historyRangeCustomValue: Math.max(1, Number(e.target.value) || 1) })}
+                className="w-16 text-xs rounded-md px-2 py-1 text-center focus:outline-none"
+                style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
+              />
+              {(['h', 'd'] as const).map((u) => (
+                <button
+                  key={u}
+                  onClick={() => set({ historyRangeCustomUnit: u })}
+                  className="text-[11px] px-2 py-1 rounded-md transition-opacity hover:opacity-80"
+                  style={{
+                    background: customUnit === u ? 'var(--accent)' : 'var(--app-bg)',
+                    color:      customUnit === u ? '#fff' : 'var(--text-secondary)',
+                    border:     `1px solid ${customUnit === u ? 'var(--accent)' : 'var(--app-border)'}`,
+                  }}
+                >
+                  {u === 'h' ? 'Std' : 'Tage'}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </>

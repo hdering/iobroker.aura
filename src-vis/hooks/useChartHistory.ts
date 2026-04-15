@@ -2,17 +2,18 @@ import { useState, useEffect, useRef } from 'react';
 import { getObjectDirect, getHistoryDirect, type HistoryEntry } from './useIoBroker';
 import type { ioBrokerState } from '../types';
 
-export type ChartTimeRange = '1h' | '6h' | '24h' | '7d' | '30d';
+export type ChartTimeRange = '1h' | '6h' | '24h' | '7d' | '30d' | 'custom';
 
 export const RANGE_LABELS: Record<ChartTimeRange, string> = {
-  '1h':  '1 Std',
-  '6h':  '6 Std',
-  '24h': '24 Std',
-  '7d':  '7 Tage',
-  '30d': '30 Tage',
+  '1h':     '1 Std',
+  '6h':     '6 Std',
+  '24h':    '24 Std',
+  '7d':     '7 Tage',
+  '30d':    '30 Tage',
+  'custom': 'Eigen',
 };
 
-const RANGE_MS: Record<ChartTimeRange, number> = {
+const RANGE_MS: Record<Exclude<ChartTimeRange, 'custom'>, number> = {
   '1h':  3_600_000,
   '6h':  21_600_000,
   '24h': 86_400_000,
@@ -20,14 +21,14 @@ const RANGE_MS: Record<ChartTimeRange, number> = {
   '30d': 2_592_000_000,
 };
 
-// Aggregations-Intervall je Zeitraum (null = Rohdaten)
-const RANGE_STEP: Record<ChartTimeRange, number | undefined> = {
-  '1h':  undefined,    // Rohdaten
-  '6h':  300_000,      // 5 min
-  '24h': 900_000,      // 15 min
-  '7d':  3_600_000,    // 1 h
-  '30d': 21_600_000,   // 6 h
-};
+/** Aggregations-Intervall basierend auf Zeitraum in ms (undefined = Rohdaten) */
+function getStep(rangeMs: number): number | undefined {
+  if (rangeMs <=  3 * 3_600_000) return undefined;          // ≤3 h  → raw
+  if (rangeMs <= 12 * 3_600_000) return 300_000;            // ≤12 h → 5 min
+  if (rangeMs <= 48 * 3_600_000) return 900_000;            // ≤48 h → 15 min
+  if (rangeMs <= 14 * 86_400_000) return 3_600_000;         // ≤14 d → 1 h
+  return 21_600_000;                                         //  >14 d → 6 h
+}
 
 export interface DetectedAdapter {
   instance: string;  // z.B. 'history.0', 'influxdb.0'
@@ -56,6 +57,7 @@ export function useChartHistory(
   timeRange: ChartTimeRange,             // aus config.options.historyRange
   connected: boolean,
   subscribe: (id: string, cb: (state: ioBrokerState) => void) => () => void,
+  customRangeMs?: number,                // nur wenn timeRange === 'custom'
 ) {
   const [adapters, setAdapters]   = useState<DetectedAdapter[]>([]);
   const [history, setHistory]     = useState<ChartDataPoint[]>([]);
@@ -78,9 +80,12 @@ export function useChartHistory(
   useEffect(() => {
     if (!datapointId || !historyInstance || !connected) return;
     setLoading(true);
+    const rangeMs = timeRange === 'custom'
+      ? (customRangeMs ?? 86_400_000)
+      : RANGE_MS[timeRange];
     const end   = Date.now();
-    const start = end - RANGE_MS[timeRange];
-    const step  = RANGE_STEP[timeRange];
+    const start = end - rangeMs;
+    const step  = getStep(rangeMs);
     getHistoryDirect(datapointId, {
       instance:  historyInstance,
       start,
@@ -100,12 +105,14 @@ export function useChartHistory(
     }).catch(() => {
       if (mountedRef.current) setLoading(false);
     });
-  }, [datapointId, historyInstance, timeRange, connected]);
+  }, [datapointId, historyInstance, timeRange, customRangeMs, connected]);
 
   // ── 3. Live-Updates abonnieren ────────────────────────────────────────────
   useEffect(() => {
     if (!datapointId || !connected) return;
-    const cutoffMs = RANGE_MS[timeRange];
+    const cutoffMs = timeRange === 'custom'
+      ? (customRangeMs ?? 86_400_000)
+      : RANGE_MS[timeRange];
     const unsub = subscribe(datapointId, (state: ioBrokerState) => {
       if (typeof state.val !== 'number') return;
       const val = state.val as number;
@@ -123,7 +130,7 @@ export function useChartHistory(
       }
     });
     return unsub;
-  }, [datapointId, connected, subscribe, historyInstance, timeRange]);
+  }, [datapointId, connected, subscribe, historyInstance, timeRange, customRangeMs]);
 
   return { adapters, history, current, loading };
 }
