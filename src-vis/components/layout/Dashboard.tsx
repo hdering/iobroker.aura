@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import ReactGridLayout from 'react-grid-layout';
 import { useDashboardStore, useActiveLayout } from '../../store/dashboardStore';
 import { useConfigStore } from '../../store/configStore';
@@ -117,86 +117,45 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cols, cellSize]);
 
-  // ── layout array for ReactGridLayout ──────────────────────────────────
-  // Reflow-hidden widgets are excluded from the grid (rendered outside for condition eval)
-  const gridWidgets = widgets.filter((w) => !reflowHiddenIds.has(w.id));
-
-  const layout = gridWidgets.map((w) => ({
-    i: w.id,
-    x: Math.min(w.gridPos.x, cols - 1),
-    y: w.gridPos.y,
-    w: Math.min(w.gridPos.w, cols),
-    h: w.gridPos.h,
-  }));
-
-  // Build updated widget list from a RGL layout snapshot
-  const buildUpdated = useCallback(
-    (newLayout: { i: string; x: number; y: number; w: number; h: number }[]) =>
-      widgets.map((w) => {
-        if (reflowHiddenIds.has(w.id)) return w;
-        const pos = newLayout.find((l) => l.i === w.id);
-        if (!pos) return w;
-        return { ...w, gridPos: { x: pos.x, y: pos.y, w: pos.w, h: pos.h } };
-      }),
-    [widgets, reflowHiddenIds],
-  );
-
-  // onLayoutChange fires on EVERY render (cols change, mount, etc.) — never write
-  // back to the store here, otherwise window-resize clamps widget positions permanently.
-  const handleLayoutChange = useCallback(
-    (newLayout: { i: string; x: number; y: number; w: number; h: number }[]) => {
-      onLayoutChange?.(buildUpdated(newLayout));
-    },
-    [buildUpdated, onLayoutChange],
-  );
-
-  // Only persist positions after an explicit drag or resize by the user.
-  // RGL callback signature: (layout, oldItem, newItem, placeholder, event, element)
-  // → layout is the first argument.
-  const handleInteractionStop = useCallback(
-    (newLayout: { i: string; x: number; y: number; w: number; h: number }[]) => {
-      if (readonly) return;
-      updateLayouts(buildUpdated(newLayout));
-    },
-    [readonly, buildUpdated, updateLayouts],
-  );
-
   // ── mobile: single-column stack ───────────────────────────────────────
   if (containerWidth > 0 && containerWidth < mobileBreakpoint) {
-    const sorted = [...widgets]
-      .filter((w) => !reflowHiddenIds.has(w.id))
-      .sort((a, b) => {
-        const oa = a.mobileOrder ?? (a.gridPos.y * 1000 + a.gridPos.x);
-        const ob = b.mobileOrder ?? (b.gridPos.y * 1000 + b.gridPos.x);
-        return oa - ob;
-      });
-
     return (
       <div ref={containerRef} className="flex-1 min-h-0 overflow-auto p-2">
-        {/* Reflow-hidden widgets rendered off-screen */}
+        {/* Reflow-hidden widgets from all tabs rendered off-screen */}
         <div style={{ position: 'fixed', top: -9999, left: -9999, width: 1, height: 1, overflow: 'hidden', pointerEvents: 'none', opacity: 0 }}>
-          {widgets.filter((w) => reflowHiddenIds.has(w.id)).map((w) => (
-            <WidgetFrame key={w.id} config={w} editMode={false} onRemove={removeWidget} onConfigChange={(cfg) => updateWidget(cfg.id, cfg)} />
-          ))}
+          {tabs.flatMap((tab) =>
+            (tab.widgets ?? []).filter((w) => reflowHiddenIds.has(w.id)).map((w) => (
+              <WidgetFrame key={w.id} config={w} editMode={false} onRemove={removeWidget} onConfigChange={(cfg) => updateWidget(cfg.id, cfg)} />
+            ))
+          )}
         </div>
-        <div className="flex flex-col gap-2.5">
-          {sorted.map((w) => (
-            <div key={w.id} style={{ height: w.gridPos.h * cellSize + (w.gridPos.h - 1) * MARGIN }}>
-              <WidgetFrame config={w} editMode={false} onRemove={removeWidget} onConfigChange={(cfg) => updateWidget(cfg.id, cfg)} />
+        {/* All tabs rendered; inactive ones hidden so keepAlive iframes stay mounted */}
+        {tabs.map((tab) => {
+          const isActive = tab.id === activeTabId;
+          const tabWidgets = (tab.widgets ?? []).filter((w) => !reflowHiddenIds.has(w.id));
+          const sorted = [...tabWidgets].sort((a, b) => {
+            const oa = a.mobileOrder ?? (a.gridPos.y * 1000 + a.gridPos.x);
+            const ob = b.mobileOrder ?? (b.gridPos.y * 1000 + b.gridPos.x);
+            return oa - ob;
+          });
+          return (
+            <div key={tab.id} style={{ display: isActive ? undefined : 'none' }}>
+              {isActive && tabWidgets.length === 0 ? (
+                <div className="flex flex-col items-center justify-center flex-1 h-64 space-y-2" style={{ color: 'var(--text-secondary)' }}>
+                  <p>{readonly ? t('frontend.noWidgets') : t('frontend.addWidgets')}</p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2.5">
+                  {sorted.map((w) => (
+                    <div key={w.id} style={{ height: w.gridPos.h * cellSize + (w.gridPos.h - 1) * MARGIN }}>
+                      <WidgetFrame config={w} editMode={false} onRemove={removeWidget} onConfigChange={(cfg) => updateWidget(cfg.id, cfg)} />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (widgets.length === 0) {
-    return (
-      <div
-        className="flex flex-col items-center justify-center flex-1 h-64 space-y-2"
-        style={{ color: 'var(--text-secondary)' }}
-      >
-        <p>{readonly ? t('frontend.noWidgets') : t('frontend.addWidgets')}</p>
+          );
+        })}
       </div>
     );
   }
@@ -205,45 +164,80 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
     <div ref={containerRef} className="flex-1 min-h-0 overflow-auto p-2 sm:p-4" style={editMode && rglWidth > containerWidth ? { overflowX: 'auto' } : undefined}>
       {rglWidth > 0 && (
         <>
-          {/* Reflow-hidden widgets: rendered off-screen so conditions keep evaluating */}
+          {/* Reflow-hidden widgets from all tabs rendered off-screen so conditions keep evaluating */}
           <div style={{ position: 'fixed', top: -9999, left: -9999, width: 1, height: 1, overflow: 'hidden', pointerEvents: 'none', opacity: 0 }}>
-            {widgets.filter((w) => reflowHiddenIds.has(w.id)).map((w) => (
-              <WidgetFrame
-                key={w.id}
-                config={w}
-                editMode={false}
-                onRemove={removeWidget}
-                onConfigChange={(cfg) => updateWidget(cfg.id, cfg)}
-              />
-            ))}
+            {tabs.flatMap((tab) =>
+              (tab.widgets ?? []).filter((w) => reflowHiddenIds.has(w.id)).map((w) => (
+                <WidgetFrame
+                  key={w.id}
+                  config={w}
+                  editMode={false}
+                  onRemove={removeWidget}
+                  onConfigChange={(cfg) => updateWidget(cfg.id, cfg)}
+                />
+              ))
+            )}
           </div>
 
-          <ReactGridLayout
-          className="layout"
-          layout={layout}
-          cols={cols}
-          rowHeight={cellSize}
-          width={rglWidth}
-          isDraggable={editMode}
-          isResizable={editMode}
-          draggableCancel=".nodrag"
-          onLayoutChange={handleLayoutChange}
-          onDragStop={handleInteractionStop}
-          onResizeStop={handleInteractionStop}
-          margin={[MARGIN, MARGIN]}
-          containerPadding={[0, 0]}
-        >
-          {gridWidgets.map((w) => (
-            <div key={w.id}>
-              <WidgetFrame
-                config={w}
-                editMode={editMode}
-                onRemove={removeWidget}
-                onConfigChange={(cfg) => updateWidget(cfg.id, cfg)}
-              />
-            </div>
-          ))}
-          </ReactGridLayout>
+          {/* All tabs rendered; inactive ones hidden so keepAlive iframes stay mounted */}
+          {tabs.map((tab) => {
+            const isActive = tab.id === activeTabId;
+            const tabWidgets = tab.widgets ?? [];
+            const tabGridWidgets = tabWidgets.filter((w) => !reflowHiddenIds.has(w.id));
+            const tabLayout = tabGridWidgets.map((w) => ({
+              i: w.id,
+              x: Math.min(w.gridPos.x, cols - 1),
+              y: w.gridPos.y,
+              w: Math.min(w.gridPos.w, cols),
+              h: w.gridPos.h,
+            }));
+            const buildTabUpdated = (newLayout: { i: string; x: number; y: number; w: number; h: number }[]) =>
+              tabWidgets.map((w) => {
+                if (reflowHiddenIds.has(w.id)) return w;
+                const pos = newLayout.find((l) => l.i === w.id);
+                if (!pos) return w;
+                return { ...w, gridPos: { x: pos.x, y: pos.y, w: pos.w, h: pos.h } };
+              });
+
+            if (isActive && tabGridWidgets.length === 0) {
+              return (
+                <div key={tab.id} className="flex flex-col items-center justify-center flex-1 h-64 space-y-2" style={{ color: 'var(--text-secondary)' }}>
+                  <p>{readonly ? t('frontend.noWidgets') : t('frontend.addWidgets')}</p>
+                </div>
+              );
+            }
+
+            return (
+              <div key={tab.id} style={{ display: isActive ? undefined : 'none' }}>
+                <ReactGridLayout
+                  className="layout"
+                  layout={tabLayout}
+                  cols={cols}
+                  rowHeight={cellSize}
+                  width={rglWidth}
+                  isDraggable={isActive && editMode}
+                  isResizable={isActive && editMode}
+                  draggableCancel=".nodrag"
+                  onLayoutChange={(nl) => { if (isActive) onLayoutChange?.(buildTabUpdated(nl)); }}
+                  onDragStop={(nl) => { if (isActive && !readonly) updateLayouts(buildTabUpdated(nl)); }}
+                  onResizeStop={(nl) => { if (isActive && !readonly) updateLayouts(buildTabUpdated(nl)); }}
+                  margin={[MARGIN, MARGIN]}
+                  containerPadding={[0, 0]}
+                >
+                  {tabGridWidgets.map((w) => (
+                    <div key={w.id}>
+                      <WidgetFrame
+                        config={w}
+                        editMode={isActive && editMode}
+                        onRemove={removeWidget}
+                        onConfigChange={(cfg) => updateWidget(cfg.id, cfg)}
+                      />
+                    </div>
+                  ))}
+                </ReactGridLayout>
+              </div>
+            );
+          })}
         </>
       )}
     </div>
