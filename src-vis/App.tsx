@@ -127,6 +127,53 @@ function ConnectionBadge() {
   );
 }
 
+// ── ConnectionIndicator ────────────────────────────────────────────────────
+// Always-on minimal dot: green for 2 s on startup, red while disconnected.
+// Renders as a fixed overlay when the full badge is not shown in the header.
+
+function ConnectionIndicator({ inHeader }: { inHeader: boolean }) {
+  const { connected } = useIoBroker();
+  const [startupVisible, setStartupVisible] = useState(true);
+  const wasConnectedRef = useRef(false);
+  const [disconnected, setDisconnected] = useState(false);
+
+  // Hide green dot after 2 s once connected for the first time
+  useEffect(() => {
+    if (!connected) return;
+    if (!wasConnectedRef.current) {
+      wasConnectedRef.current = true;
+      const t = setTimeout(() => setStartupVisible(false), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [connected]);
+
+  // Track disconnections after first connect
+  useEffect(() => {
+    if (!wasConnectedRef.current) return;
+    setDisconnected(!connected);
+  }, [connected]);
+
+  const visible = startupVisible || disconnected;
+  if (!visible) return null;
+
+  const color = connected ? 'var(--accent-green)' : 'var(--accent-red)';
+  const dot = (
+    <span
+      className={`w-2.5 h-2.5 rounded-full ${connected ? 'animate-pulse' : ''}`}
+      style={{ background: color, boxShadow: `0 0 4px ${color}` }}
+    />
+  );
+
+  if (inHeader) return dot;
+
+  // Fixed overlay when header is hidden
+  return (
+    <div className="fixed top-3 right-3 z-50 pointer-events-none">
+      {dot}
+    </div>
+  );
+}
+
 export default function App() {
   const { tabSlug, layoutSlug } = useParams<{ tabSlug?: string; layoutSlug?: string }>();
   const navigate = useNavigate();
@@ -279,8 +326,14 @@ export default function App() {
 
   const layoutUrlBase = layoutSlug ? `/view/${layoutSlug}` : '';
 
+  // Show indicator dot in header only if badge is off; fixed overlay if header is off entirely
+  const showBadgeInHeader = frontend.showHeader && frontend.showConnectionBadge;
+  const showDotInHeader   = frontend.showHeader && !frontend.showConnectionBadge;
+  const showDotFixed      = !frontend.showHeader;
+
   return (
     <div data-aura-app="frontend" className="aura-page h-full flex flex-col overflow-hidden" style={{ background: 'var(--app-bg)', color: 'var(--text-primary)' }}>
+      {showDotFixed && <ConnectionIndicator inHeader={false} />}
       {frontend.showHeader && (
         <header className="flex items-center justify-between px-4 sm:px-6 py-4 shrink-0"
           style={{ background: 'var(--app-surface)', borderBottom: '1px solid var(--app-border)' }}>
@@ -288,7 +341,8 @@ export default function App() {
           <div className="flex items-center gap-3">
             {frontend.headerDatapoint && <HeaderDatapoint id={frontend.headerDatapoint} />}
             {frontend.headerClockEnabled && <HeaderClock f={frontend} />}
-            {frontend.showConnectionBadge && <ConnectionBadge />}
+            {showDotInHeader && <ConnectionIndicator inHeader={true} />}
+            {showBadgeInHeader && <ConnectionBadge />}
             <button
               onClick={() => setTheme(currentTheme.dark ? 'light' : 'dark')}
               className="w-8 h-8 flex items-center justify-center rounded-full hover:opacity-80 transition-opacity"
