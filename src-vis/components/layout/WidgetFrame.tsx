@@ -821,7 +821,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
         ...(!editMode && conditionResult.hidden && !conditionResult.reflow
           ? { visibility: 'hidden', pointerEvents: 'none' } : {}),
       }}
-      className={`relative h-full transition-all overflow-visible ${isHeader ? 'px-2 py-0' : (isGroup || isTransparent || config.type === 'iframe') ? 'p-0' : 'p-4'} ${editMode ? 'ring-2 ring-accent/40 rounded-xl' : ''} ${!editMode && conditionResult.effect === 'pulse' ? 'animate-pulse' : ''} ${!editMode && conditionResult.effect === 'blink' ? 'animate-[blink_1s_step-end_infinite]' : ''}`}
+      className={`aura-widget aura-widget-${config.id} aura-widget-type-${config.type} relative h-full transition-all overflow-visible ${isHeader ? 'px-2 py-0' : (isGroup || isTransparent || config.type === 'iframe') ? 'p-0' : 'p-4'} ${editMode ? 'ring-2 ring-accent/40 rounded-xl' : ''} ${!editMode && conditionResult.effect === 'pulse' ? 'animate-pulse' : ''} ${!editMode && conditionResult.effect === 'blink' ? 'animate-[blink_1s_step-end_infinite]' : ''}`}
     >
       {editMode && conditionResult.hidden && (
         <div className="nodrag absolute inset-0 z-20 rounded-[inherit] flex items-start justify-end pointer-events-none p-1.5">
