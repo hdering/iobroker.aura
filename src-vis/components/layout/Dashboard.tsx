@@ -76,6 +76,25 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
     ? Math.max(2, Math.floor((rglWidth - MARGIN) / (cellSize + MARGIN)))
     : 12;
 
+  // ── in readonly (frontend) mode: prevent widget repositioning ──────────
+  // Keep cols ≥ the maximum column used across all tabs so RGL never clamps
+  // widget positions. If the browser is narrower than the design width, the
+  // grid overflows and the container scrolls horizontally instead.
+  const minCols = useMemo(() => {
+    if (!readonly) return 2;
+    return tabs.reduce((max, tab) =>
+      (tab.widgets ?? []).reduce((m, w) => Math.max(m, w.gridPos.x + w.gridPos.w), max),
+      2,
+    );
+  }, [readonly, tabs]);
+
+  const effectiveCols = readonly ? Math.max(cols, minCols) : cols;
+  // When the effective col count exceeds what fits in the viewport, use the
+  // minimum required width so cell sizes stay consistent with the design.
+  const effectiveRglWidth = (readonly && effectiveCols > cols)
+    ? effectiveCols * (cellSize + MARGIN) + MARGIN
+    : rglWidth;
+
   // ── re-scale widget x/w when cellSize changes ──────────────────────────
   const prevColsRef = useRef<number | null>(null);
   const prevCellSizeRef = useRef(cellSize);
@@ -161,7 +180,7 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
   }
 
   return (
-    <div ref={containerRef} className="flex-1 min-h-0 overflow-auto p-2 sm:p-4" style={editMode && rglWidth > containerWidth ? { overflowX: 'auto' } : undefined}>
+    <div ref={containerRef} className="flex-1 min-h-0 overflow-auto p-2 sm:p-4" style={(editMode && rglWidth > containerWidth) || (readonly && effectiveRglWidth > containerWidth) ? { overflowX: 'auto' } : undefined}>
       {rglWidth > 0 && (
         <>
           {/* Reflow-hidden widgets from all tabs rendered off-screen so conditions keep evaluating */}
@@ -186,9 +205,9 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
             const tabGridWidgets = tabWidgets.filter((w) => !reflowHiddenIds.has(w.id));
             const tabLayout = tabGridWidgets.map((w) => ({
               i: w.id,
-              x: Math.min(w.gridPos.x, cols - 1),
+              x: Math.min(w.gridPos.x, effectiveCols - 1),
               y: w.gridPos.y,
-              w: Math.min(w.gridPos.w, cols),
+              w: Math.min(w.gridPos.w, effectiveCols),
               h: w.gridPos.h,
             }));
             const buildTabUpdated = (newLayout: { i: string; x: number; y: number; w: number; h: number }[]) =>
@@ -212,9 +231,9 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
                 <ReactGridLayout
                   className="layout"
                   layout={tabLayout}
-                  cols={cols}
+                  cols={effectiveCols}
                   rowHeight={cellSize}
-                  width={rglWidth}
+                  width={effectiveRglWidth}
                   isDraggable={isActive && editMode}
                   isResizable={isActive && editMode}
                   draggableCancel=".nodrag"
