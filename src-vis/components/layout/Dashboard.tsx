@@ -110,6 +110,39 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
 
   // Rescaling when snapX changes is handled in AdminSettings via rescaleAllWidgetsX.
 
+  // ── fill-tab: one widget covers the whole tab area ────────────────────
+  const activeTab    = tabs.find((t) => t.id === activeTabId);
+  const fillTabWidget = activeTab?.widgets?.find((w) => (w.options as Record<string, unknown>)?.fillTab);
+
+  if (fillTabWidget) {
+    // Collect all keepAlive iFrame widgets across all tabs (except fillTabWidget itself)
+    // so they stay mounted while the fill-tab view is active.
+    const keepAliveWidgets = tabs
+      .flatMap((t) => t.widgets ?? [])
+      .filter((w) => w.id !== fillTabWidget.id && w.type === 'iframe' && (w.options as Record<string, unknown>)?.keepAlive);
+
+    return (
+      <div className="flex-1 min-h-0 relative">
+        {keepAliveWidgets.length > 0 && (
+          <div style={{ position: 'fixed', top: -9999, left: -9999, width: 1, height: 1, overflow: 'hidden', pointerEvents: 'none', opacity: 0 }}>
+            {keepAliveWidgets.map((w) => (
+              <WidgetFrame key={w.id} config={w} editMode={false} onRemove={removeWidget} onConfigChange={(cfg) => updateWidget(cfg.id, cfg)} />
+            ))}
+          </div>
+        )}
+        <div className="absolute inset-0">
+          <WidgetFrame
+            config={fillTabWidget}
+            editMode={editMode}
+            onRemove={removeWidget}
+            onConfigChange={(cfg) => updateWidget(cfg.id, cfg)}
+          />
+        </div>
+        {iframeFullscreen && <IframeOverlay data={iframeFullscreen} onClose={() => setIframeFullscreen(null)} />}
+      </div>
+    );
+  }
+
   // ── mobile: single-column stack ───────────────────────────────────────
   if (containerWidth > 0 && containerWidth < mobileBreakpoint) {
     return (

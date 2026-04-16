@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.31 (2026-04-16)
+- iFrame widget: "Fill tab" option – widget fills entire tab area permanently; toggle is disabled when other widgets are present in the tab (with hint)
+
 ### 0.4.30 (2026-04-16)
 - iFrame widget: fullscreen button (hover to reveal); click fills viewport, Esc or X to close
 

@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.30",
+    "version": "0.4.31",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.31": {
+        "en": "iFrame widget: 'Fill tab' option – fills entire tab area; only activatable when no other widgets in tab",
+        "de": "iFrame-Widget: Option 'Tab ausfüllen' – füllt den gesamten Tab-Bereich; nur aktivierbar wenn keine anderen Widgets im Tab",
+        "ru": "Виджет iFrame: опция 'Заполнить вкладку' – заполняет всю область вкладки; активируется только при отсутствии других виджетов",
+        "pt": "Widget iFrame: opção 'Preencher tab' – preenche toda a área do separador; só ativável sem outros widgets no tab",
+        "nl": "iFrame-widget: optie 'Tab vullen' – vult het volledige tabblad; alleen activeerbaar zonder andere widgets in het tabblad",
+        "fr": "Widget iFrame: option 'Remplir l\\'onglet' – remplit toute la zone de l'onglet; activable uniquement sans autres widgets",
+        "it": "Widget iFrame: opzione 'Riempi scheda' – riempie l'intera area della scheda; attivabile solo senza altri widget",
+        "es": "Widget iFrame: opción 'Llenar pestaña' – rellena toda el área de la pestaña; solo activable sin otros widgets",
+        "pl": "Widget iFrame: opcja 'Wypełnij kartę' – wypełnia cały obszar karty; aktywowalna tylko bez innych widgetów",
+        "uk": "Віджет iFrame: опція 'Заповнити вкладку' – заповнює всю область вкладки; активується лише за відсутності інших віджетів",
+        "zh-cn": "iFrame 小部件：'填充选项卡'选项 – 填满整个选项卡区域；仅在选项卡中没有其他小部件时可激活"
+      },
       "0.4.30": {
         "en": "iFrame widget: fullscreen button (hover to reveal, Esc or X to close)",
         "de": "iFrame-Widget: Vollbild-Button (erscheint beim Hover, Esc oder X zum Schließen)",
@@ -183,19 +196,6 @@
         "pl": "Fix: nadmiarowy przecinek w sekcji news io-package.json powodował błąd JSON w CI",
         "uk": "Виправлення: зайва кома в секції news io-package.json спричиняла помилку JSON у CI",
         "zh-cn": "修复：io-package.json news 部分的尾随逗号导致 CI JSON 解析错误"
-      },
-      "0.4.24": {
-        "en": "Clock widget custom format: add EE token for abbreviated weekday (e.g. Mon)",
-        "de": "Uhr-Widget Customformat: EE-Token für abgekürzten Wochentag hinzugefügt (z.B. Mo)",
-        "ru": "Виджет часов: добавлен токен EE для краткого названия дня недели (напр. Пн)",
-        "pt": "Widget relógio: token EE para dia da semana abreviado (ex.: Seg)",
-        "nl": "Klokwidget: EE-token toegevoegd voor afgekorte weekdag (bijv. Ma)",
-        "fr": "Widget horloge: jeton EE pour le jour de la semaine abrégé (ex. Lun)",
-        "it": "Widget orologio: token EE per il giorno della settimana abbreviato (es. Lun)",
-        "es": "Widget reloj: token EE para el día de la semana abreviado (ej. Lun)",
-        "pl": "Widget zegara: token EE dla skróconej nazwy dnia tygodnia (np. Pn)",
-        "uk": "Віджет годинника: токен EE для скороченої назви дня тижня (напр. Пн)",
-        "zh-cn": "时钟小部件自定义格式：添加 EE 标记用于缩写星期名称（如 周一）"
       }
     }
   },
