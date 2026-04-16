@@ -130,9 +130,9 @@ export function ChartWidget({ config }: WidgetProps) {
           <TrendingUp size={18} style={{ color: 'var(--accent)' }} />
         </div>
         {rangeSelector && <div className="mb-1.5">{rangeSelector}</div>}
-        <div className="flex-1 min-h-0">
+        <div className="flex-1" style={{ minHeight: 1 }}>
           {history.length > 1 ? (
-            <ResponsiveContainer width="100%" height="100%" minHeight={1}>
+            <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={history}>
                 <defs>
                   <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
@@ -168,9 +168,9 @@ export function ChartWidget({ config }: WidgetProps) {
           )}
           {rangeLabel && <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{rangeLabel}</p>}
         </div>
-        <div className="w-20 h-full">
+        <div className="w-20 h-full" style={{ minHeight: 1 }}>
           {history.length > 1 ? (
-            <ResponsiveContainer width="100%" height="100%" minHeight={1}>
+            <ResponsiveContainer width="100%" height="100%">
               <LineChart data={history}>
                 <Line type="monotone" dataKey="v" stroke="var(--accent)" strokeWidth={1.5}
                   dot={false} isAnimationActive={false} />
@@ -213,9 +213,9 @@ export function ChartWidget({ config }: WidgetProps) {
         )}
       </div>
       {rangeSelector && <div className="mb-1">{rangeSelector}</div>}
-      <div className="flex-1 min-h-0">
+      <div className="flex-1" style={{ minHeight: 1 }}>
         {history.length > 1 ? (
-          <ResponsiveContainer width="100%" height="100%" minHeight={1}>
+          <ResponsiveContainer width="100%" height="100%">
             <LineChart data={history}>
               <YAxis domain={['auto', 'auto']} hide />
               <XAxis
