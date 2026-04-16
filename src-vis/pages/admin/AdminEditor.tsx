@@ -487,7 +487,7 @@ export function AdminEditor() {
 
       {/* Dashboard-Vorschau mit Edit-Modus */}
       <div className="flex-1 flex overflow-hidden" style={{ background: 'var(--app-bg)' }}>
-        <div className="aura-scroll flex-1 overflow-auto">
+        <div className="flex-1 flex flex-col overflow-hidden">
           <Dashboard editMode={true} />
         </div>
         {showMobileOrder && (
