@@ -119,7 +119,7 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
             return oa - ob;
           });
           return (
-            <div key={tab.id} className={`aura-tab aura-tab-${tab.slug}`} style={{ display: isActive ? undefined : 'none' }}>
+            <div key={tab.id} data-tab={tab.slug} className={`aura-tab aura-tab-${tab.slug}`} style={{ display: isActive ? undefined : 'none' }}>
               {isActive && tabWidgets.length === 0 ? (
                 <div className="flex flex-col items-center justify-center flex-1 h-64 space-y-2" style={{ color: 'var(--text-secondary)' }}>
                   <p>{readonly ? t('frontend.noWidgets') : t('frontend.addWidgets')}</p>
@@ -181,14 +181,14 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
 
             if (isActive && tabGridWidgets.length === 0) {
               return (
-                <div key={tab.id} className={`aura-tab aura-tab-${tab.slug} flex flex-col items-center justify-center flex-1 h-64 space-y-2`} style={{ color: 'var(--text-secondary)' }}>
+                <div key={tab.id} data-tab={tab.slug} className={`aura-tab aura-tab-${tab.slug} flex flex-col items-center justify-center flex-1 h-64 space-y-2`} style={{ color: 'var(--text-secondary)' }}>
                   <p>{readonly ? t('frontend.noWidgets') : t('frontend.addWidgets')}</p>
                 </div>
               );
             }
 
             return (
-              <div key={tab.id} className={`aura-tab aura-tab-${tab.slug}`} style={{ display: isActive ? undefined : 'none' }}>
+              <div key={tab.id} data-tab={tab.slug} className={`aura-tab aura-tab-${tab.slug}`} style={{ display: isActive ? undefined : 'none' }}>
                 <ReactGridLayout
                   className="layout"
                   layout={tabLayout}

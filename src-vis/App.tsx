@@ -336,10 +336,10 @@ export default function App() {
   const showBadge = frontend.showHeader && frontend.showConnectionBadge;
 
   return (
-    <div data-aura-app="frontend" className="aura-page h-full flex flex-col overflow-hidden" style={{ background: 'var(--app-bg)', color: 'var(--text-primary)' }}>
+    <div data-aura-app="frontend" className={`aura-page${layout?.slug ? ` aura-page-${layout.slug}` : ''} h-full flex flex-col overflow-hidden`} style={{ background: 'var(--app-bg)', color: 'var(--text-primary)' }}>
       <ConnectionIndicator showBadge={showBadge} />
       {frontend.showHeader && (
-        <header className="flex items-center justify-between px-4 sm:px-6 py-4 shrink-0"
+        <header className="aura-header flex items-center justify-between px-4 sm:px-6 py-4 shrink-0"
           style={{ background: 'var(--app-surface)', borderBottom: '1px solid var(--app-border)' }}>
           <h1 className="text-xl font-bold tracking-tight">{frontend.headerTitle || 'Aura'}</h1>
           <div className="flex items-center gap-3">
