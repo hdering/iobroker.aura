@@ -14,6 +14,7 @@ import type { WidgetConfig, WidgetType, WidgetLayout } from '../../types';
 import { WIDGET_REGISTRY, WIDGET_GROUPS, WIDGET_BY_TYPE, getEffectiveSize } from '../../widgetRegistry';
 import { useConfigStore } from '../../store/configStore';
 import { useT } from '../../i18n';
+import { ensureDatapointCache } from '../../hooks/useDatapointList';
 
 // Layout labels are resolved inside components via t() to support i18n
 const LAYOUT_IDS: WidgetLayout[] = ['default', 'card', 'compact', 'minimal'];
@@ -50,15 +51,31 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
                : addMode === 'wizard-only' ? !!icalUrl.trim()
                : true;
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!canAdd) return;
     const selectedGroup = isList ? groups.find((g) => g.id === groupId) : undefined;
+    const dpId = noDatapointNeeded ? '' : isList ? groupId : datapoint.trim();
+
+    let finalTitle = title.trim();
+    let finalUnit = unit.trim();
+
+    if (dpId && (!finalTitle || ((type === 'value' || type === 'chart') && !finalUnit))) {
+      try {
+        const entries = await ensureDatapointCache();
+        const entry = entries.find((e) => e.id === dpId);
+        if (entry) {
+          if (!finalTitle && entry.name) finalTitle = entry.name;
+          if ((type === 'value' || type === 'chart') && !finalUnit && entry.unit) finalUnit = entry.unit;
+        }
+      } catch { /* ignore */ }
+    }
+
     onAdd({
       id: `${type}-${Date.now()}`,
       type,
       layout,
-      title: title || (isList && selectedGroup ? selectedGroup.name : def.label),
-      datapoint: noDatapointNeeded ? '' : isList ? groupId : datapoint.trim(),
+      title: finalTitle || (isList && selectedGroup ? selectedGroup.name : def.label),
+      datapoint: dpId,
       gridPos: { x: 0, y: 9999, ...getEffectiveSize(type, widgetDefaults) },
       options: {
         icon: def.iconName,
@@ -77,7 +94,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
                   ? { streamUrl: '', refreshInterval: 5, fitMode: 'cover', showTitle: true }
                   : type === 'gauge'
                     ? { minValue: 0, maxValue: 100, unit: '', decimals: 1, showMinMax: true, colorZones: false }
-                    : unit ? { unit } : {}),
+                    : finalUnit ? { unit: finalUnit } : {}),
       },
     });
     onClose();
@@ -215,7 +232,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
         </div>
 
         <div className="flex gap-2 pt-5">
-          <button onClick={handleAdd} disabled={!canAdd}
+          <button onClick={() => void handleAdd()} disabled={!canAdd}
             className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white hover:opacity-80 disabled:opacity-30"
             style={{ background: 'var(--accent)' }}>
             {t('editor.manual.add')}
@@ -231,7 +248,11 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
       {showPicker && (
         <DatapointPicker
           currentValue={datapoint}
-          onSelect={(id) => setDatapoint(id)}
+          onSelect={(id, dpUnit, dpName) => {
+            setDatapoint(id);
+            if (!title.trim() && dpName) setTitle(dpName);
+            if ((type === 'value' || type === 'chart') && !unit.trim() && dpUnit) setUnit(dpUnit);
+          }}
           onClose={() => setShowPicker(false)}
         />
       )}
