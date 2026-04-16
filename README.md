@@ -127,6 +127,13 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.27 (2026-04-16)
+- Chart widget: runtime time range selector buttons (1h/6h/24h/7d/30d) in frontend
+- Gauge widget: min/max labels moved outside the arc, centred at endpoints
+- CSS: add `aura-header`, `aura-tabs`, `aura-page-{slug}` classes and `data-tab` attribute
+- Editor: show widget ID at the bottom of the edit dialog
+- Settings: merge "This Device" and "All Clients" into one card with inline rename; fix name not written to ioBroker DP; create intermediate `.info`/`.navigate` channels
+
 ### 0.4.26 (2026-04-15)
 - Chart widget: configurable custom time range; remove stray colon from tooltip
 - Semantic CSS classes: `aura-page`, `aura-tab-{slug}`, `aura-widget-{id}`, `aura-widget-type-{type}`; clock CSS classes
