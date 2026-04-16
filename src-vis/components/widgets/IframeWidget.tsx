@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import { MonitorDot, Maximize2, X } from 'lucide-react';
+import { MonitorDot, Maximize2 } from 'lucide-react';
+import { useIframeStore } from '../../store/iframeStore';
 import type { WidgetProps } from '../../types';
 
 export function IframeWidget({ config }: WidgetProps) {
@@ -12,9 +12,9 @@ export function IframeWidget({ config }: WidgetProps) {
   const sandboxEnabled   = (opts.sandbox           as boolean) ?? false;
   const fullscreenButton = (opts.fullscreenButton  as boolean) ?? false;
 
-  const [tick, setTick]           = useState(0);
-  const [fullscreen, setFullscreen] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [tick, setTick] = useState(0);
+  const intervalRef     = useRef<ReturnType<typeof setInterval> | null>(null);
+  const setFullscreen   = useIframeStore((s) => s.setFullscreen);
 
   useEffect(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -23,13 +23,8 @@ export function IframeWidget({ config }: WidgetProps) {
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [url, refreshSeconds, keepAlive]);
 
-  // Close fullscreen on Escape
-  useEffect(() => {
-    if (!fullscreen) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setFullscreen(false); };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [fullscreen]);
+  // Clear fullscreen when widget unmounts (e.g. tab switch)
+  useEffect(() => () => { setFullscreen(null); }, [setFullscreen]);
 
   if (!url) {
     return (
@@ -44,7 +39,6 @@ export function IframeWidget({ config }: WidgetProps) {
     );
   }
 
-  // Stable key = never remount (keepAlive); incrementing key = reload on tick
   const iframeKey = keepAlive ? `ka-${url}` : `${url}-${tick}`;
 
   const sandboxAttr = sandboxEnabled
@@ -69,14 +63,19 @@ export function IframeWidget({ config }: WidgetProps) {
           title={config.title || 'iFrame'}
           style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
         />
-        {/* Interaction blocker – pointer-events overlay */}
+        {/* Interaction blocker */}
         {!allowInteraction && (
           <div className="absolute inset-0 z-[1]" style={{ pointerEvents: 'all', cursor: 'default' }} />
         )}
         {/* Fullscreen button – shown on hover */}
         {fullscreenButton && (
           <button
-            onClick={() => setFullscreen(true)}
+            onClick={() => setFullscreen({
+              url,
+              sandboxAttr,
+              iframeKey: `fs-${iframeKey}`,
+              title: config.title || 'iFrame',
+            })}
             className="nodrag absolute top-1.5 right-1.5 z-[2] w-7 h-7 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
             style={{ background: 'rgba(0,0,0,0.55)', color: '#fff', backdropFilter: 'blur(4px)' }}
             title="Vollbild"
@@ -85,32 +84,6 @@ export function IframeWidget({ config }: WidgetProps) {
           </button>
         )}
       </div>
-
-      {/* Fullscreen overlay via portal so it escapes any overflow/transform parent */}
-      {fullscreen && createPortal(
-        <div
-          className="fixed inset-0 flex flex-col"
-          style={{ background: '#000', zIndex: 99999 }}
-        >
-          <iframe
-            key={`fs-${iframeKey}`}
-            src={url}
-            sandbox={sandboxAttr}
-            allow="autoplay; fullscreen; picture-in-picture; web-share"
-            title={config.title || 'iFrame'}
-            style={{ width: '100%', height: '100%', border: 'none', display: 'block', flex: 1 }}
-          />
-          <button
-            onClick={() => setFullscreen(false)}
-            className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center rounded-full"
-            style={{ background: 'rgba(0,0,0,0.6)', color: '#fff', backdropFilter: 'blur(4px)', zIndex: 1 }}
-            title="Vollbild beenden (Esc)"
-          >
-            <X size={18} />
-          </button>
-        </div>,
-        document.body,
-      )}
     </div>
   );
 }

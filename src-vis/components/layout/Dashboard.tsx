@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import ReactGridLayout from 'react-grid-layout';
+import { X } from 'lucide-react';
 import { useDashboardStore, useActiveLayout } from '../../store/dashboardStore';
 import { useConfigStore } from '../../store/configStore';
+import { useIframeStore, type IframeFullscreenData } from '../../store/iframeStore';
 import { WidgetFrame } from './WidgetFrame';
 import { useReflowHiddenIds } from '../../hooks/useConditionStyle';
 import type { WidgetConfig } from '../../types';
@@ -35,6 +37,17 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
   const activeTabId = viewActiveTabId ?? activeLayout.activeTabId;
 
   const reflowHiddenIds = useReflowHiddenIds();
+
+  // ── iFrame fullscreen overlay ──────────────────────────────────────────
+  const iframeFullscreen  = useIframeStore((s) => s.fullscreen);
+  const setIframeFullscreen = useIframeStore((s) => s.setFullscreen);
+
+  useEffect(() => {
+    if (!iframeFullscreen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setIframeFullscreen(null); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [iframeFullscreen, setIframeFullscreen]);
 
   // ── container width measurement ────────────────────────────────────────
   const containerRef = useRef<HTMLDivElement>(null);
@@ -100,48 +113,52 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
   // ── mobile: single-column stack ───────────────────────────────────────
   if (containerWidth > 0 && containerWidth < mobileBreakpoint) {
     return (
-      <div ref={containerRef} className="aura-scroll flex-1 min-h-0 overflow-auto p-2">
-        {/* Reflow-hidden widgets from all tabs rendered off-screen */}
-        <div style={{ position: 'fixed', top: -9999, left: -9999, width: 1, height: 1, overflow: 'hidden', pointerEvents: 'none', opacity: 0 }}>
-          {tabs.flatMap((tab) =>
-            (tab.widgets ?? []).filter((w) => reflowHiddenIds.has(w.id)).map((w) => (
-              <WidgetFrame key={w.id} config={w} editMode={false} onRemove={removeWidget} onConfigChange={(cfg) => updateWidget(cfg.id, cfg)} />
-            ))
-          )}
+      <div className="flex-1 min-h-0 relative">
+        <div ref={containerRef} className="aura-scroll absolute inset-0 overflow-auto p-2">
+          {/* Reflow-hidden widgets from all tabs rendered off-screen */}
+          <div style={{ position: 'fixed', top: -9999, left: -9999, width: 1, height: 1, overflow: 'hidden', pointerEvents: 'none', opacity: 0 }}>
+            {tabs.flatMap((tab) =>
+              (tab.widgets ?? []).filter((w) => reflowHiddenIds.has(w.id)).map((w) => (
+                <WidgetFrame key={w.id} config={w} editMode={false} onRemove={removeWidget} onConfigChange={(cfg) => updateWidget(cfg.id, cfg)} />
+              ))
+            )}
+          </div>
+          {/* All tabs rendered; inactive ones hidden so keepAlive iframes stay mounted */}
+          {tabs.map((tab) => {
+            const isActive = tab.id === activeTabId;
+            const tabWidgets = (tab.widgets ?? []).filter((w) => !reflowHiddenIds.has(w.id));
+            const sorted = [...tabWidgets].sort((a, b) => {
+              const oa = a.mobileOrder ?? (a.gridPos.y * 1000 + a.gridPos.x);
+              const ob = b.mobileOrder ?? (b.gridPos.y * 1000 + b.gridPos.x);
+              return oa - ob;
+            });
+            return (
+              <div key={tab.id} data-tab={tab.slug} className={`aura-tab aura-tab-${tab.slug}`} style={{ display: isActive ? undefined : 'none' }}>
+                {isActive && tabWidgets.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center flex-1 h-64 space-y-2" style={{ color: 'var(--text-secondary)' }}>
+                    <p>{readonly ? t('frontend.noWidgets') : t('frontend.addWidgets')}</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col" style={{ gap: MARGIN }}>
+                    {sorted.map((w) => (
+                      <div key={w.id} style={{ height: w.gridPos.h * cellSize + (w.gridPos.h - 1) * MARGIN }}>
+                        <WidgetFrame config={w} editMode={false} onRemove={removeWidget} onConfigChange={(cfg) => updateWidget(cfg.id, cfg)} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
-        {/* All tabs rendered; inactive ones hidden so keepAlive iframes stay mounted */}
-        {tabs.map((tab) => {
-          const isActive = tab.id === activeTabId;
-          const tabWidgets = (tab.widgets ?? []).filter((w) => !reflowHiddenIds.has(w.id));
-          const sorted = [...tabWidgets].sort((a, b) => {
-            const oa = a.mobileOrder ?? (a.gridPos.y * 1000 + a.gridPos.x);
-            const ob = b.mobileOrder ?? (b.gridPos.y * 1000 + b.gridPos.x);
-            return oa - ob;
-          });
-          return (
-            <div key={tab.id} data-tab={tab.slug} className={`aura-tab aura-tab-${tab.slug}`} style={{ display: isActive ? undefined : 'none' }}>
-              {isActive && tabWidgets.length === 0 ? (
-                <div className="flex flex-col items-center justify-center flex-1 h-64 space-y-2" style={{ color: 'var(--text-secondary)' }}>
-                  <p>{readonly ? t('frontend.noWidgets') : t('frontend.addWidgets')}</p>
-                </div>
-              ) : (
-                <div className="flex flex-col" style={{ gap: MARGIN }}>
-                  {sorted.map((w) => (
-                    <div key={w.id} style={{ height: w.gridPos.h * cellSize + (w.gridPos.h - 1) * MARGIN }}>
-                      <WidgetFrame config={w} editMode={false} onRemove={removeWidget} onConfigChange={(cfg) => updateWidget(cfg.id, cfg)} />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
+        {iframeFullscreen && <IframeOverlay data={iframeFullscreen} onClose={() => setIframeFullscreen(null)} />}
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} className="aura-scroll flex-1 min-h-0 overflow-auto p-2 sm:p-4" style={(editMode && rglWidth > containerWidth) || (readonly && effectiveRglWidth > containerWidth) ? { overflowX: 'auto' } : undefined}>
+    <div className="flex-1 min-h-0 relative">
+    <div ref={containerRef} className="aura-scroll absolute inset-0 overflow-auto p-2 sm:p-4" style={(editMode && rglWidth > containerWidth) || (readonly && effectiveRglWidth > containerWidth) ? { overflowX: 'auto' } : undefined}>
       {rglWidth > 0 && (
         <>
           {/* Reflow-hidden widgets from all tabs rendered off-screen so conditions keep evaluating */}
@@ -220,6 +237,32 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
           })}
         </>
       )}
+    </div>
+    {iframeFullscreen && <IframeOverlay data={iframeFullscreen} onClose={() => setIframeFullscreen(null)} />}
+    </div>
+  );
+}
+
+// ── iFrame fullscreen overlay ─────────────────────────────────────────────
+function IframeOverlay({ data, onClose }: { data: IframeFullscreenData; onClose: () => void }) {
+  return (
+    <div className="absolute inset-0 z-50 flex flex-col" style={{ background: '#000' }}>
+      <iframe
+        key={data.iframeKey}
+        src={data.url}
+        sandbox={data.sandboxAttr}
+        allow="autoplay; fullscreen; picture-in-picture; web-share"
+        title={data.title}
+        style={{ width: '100%', flex: 1, border: 'none', display: 'block', height: '100%' }}
+      />
+      <button
+        onClick={onClose}
+        className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center rounded-full"
+        style={{ background: 'rgba(0,0,0,0.6)', color: '#fff', backdropFilter: 'blur(4px)', zIndex: 1 }}
+        title="Vollbild beenden (Esc)"
+      >
+        <X size={18} />
+      </button>
     </div>
   );
 }
