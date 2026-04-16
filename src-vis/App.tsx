@@ -284,9 +284,20 @@ export default function App() {
     const displayName = clientName || navigator.userAgent.match(/\(([^)]+)\)/)?.[1] || 'Aura Client';
 
     // Ensure objects exist (idempotent)
+    // Intermediate channels must be created before their child states (ioBroker hierarchy rule)
     setObjectDirect(prefix, {
       type: 'channel',
       common: { name: displayName },
+      native: {},
+    });
+    setObjectDirect(`${prefix}.navigate`, {
+      type: 'channel',
+      common: { name: 'Navigation' },
+      native: {},
+    });
+    setObjectDirect(`${prefix}.info`, {
+      type: 'channel',
+      common: { name: 'Info' },
       native: {},
     });
     setObjectDirect(`${prefix}.navigate.url`, {

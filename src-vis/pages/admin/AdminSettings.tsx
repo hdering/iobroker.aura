@@ -4,8 +4,8 @@ import { useActiveLayout, useDashboardStore } from '../../store/dashboardStore';
 import { useConnectionStore } from '../../store/connectionStore';
 import { useConfigStore } from '../../store/configStore';
 import { useAdminPrefsStore } from '../../store/adminPrefsStore';
-import { reconnectSocket, getObjectViewDirect, getStateDirect } from '../../hooks/useIoBroker';
-import { Eye, EyeOff, AlertTriangle, RefreshCw, Tablet } from 'lucide-react';
+import { reconnectSocket, getObjectViewDirect, getStateDirect, setStateDirect } from '../../hooks/useIoBroker';
+import { Eye, EyeOff, AlertTriangle, RefreshCw, Tablet, Edit3, Check, X } from 'lucide-react';
 import { useT } from '../../i18n';
 
 // ── Shared primitives ──────────────────────────────────────────────────────────
@@ -73,61 +73,7 @@ function SliderSetting({
   );
 }
 
-// ── Client / device settings ──────────────────────────────────────────────────
-
-function ClientSettings() {
-  const t = useT();
-  const { clientId, clientName, setClientName } = useConnectionStore();
-  const [nameInput, setNameInput] = useState(clientName);
-  const [saved, setSaved] = useState(false);
-
-  const save = () => {
-    setClientName(nameInput.trim());
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
-  };
-
-  return (
-    <Card title={t('settings.client.title')}>
-      <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{t('settings.client.hint')}</p>
-      <div className="space-y-3">
-        <div>
-          <label className="text-xs font-medium block mb-1" style={{ color: 'var(--text-secondary)' }}>
-            {t('settings.client.name')}
-          </label>
-          <div className="flex gap-2">
-            <input
-              value={nameInput}
-              onChange={(e) => { setNameInput(e.target.value); setSaved(false); }}
-              placeholder={t('settings.client.namePh')}
-              className="flex-1 text-sm rounded-lg px-3 py-2 focus:outline-none"
-              style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
-            />
-            <button
-              onClick={save}
-              disabled={nameInput.trim() === clientName}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-80 disabled:opacity-40"
-              style={{ background: saved ? 'var(--accent-green)' : 'var(--accent)' }}
-            >
-              {saved ? '✓' : t('common.save')}
-            </button>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: 'var(--app-bg)', border: '1px solid var(--app-border)' }}>
-          <Tablet size={13} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
-          <div className="min-w-0">
-            <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{t('settings.client.id')}</p>
-            <p className="text-xs font-mono truncate" style={{ color: 'var(--text-primary)' }}>
-              aura.0.clients.<span style={{ color: 'var(--accent)' }}>{clientId}</span>.navigate.url
-            </p>
-          </div>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-// ── All known clients ──────────────────────────────────────────────────────────
+// ── Clients card (merged: current device + all known clients) ─────────────────
 
 interface ClientInfo {
   channelId: string;
@@ -136,41 +82,67 @@ interface ClientInfo {
   lastSeen: number;
 }
 
-function ConnectedClients() {
+function ClientsCard() {
   const t = useT();
-  const { clientId: myClientId } = useConnectionStore();
+  const { clientId: myClientId, clientName: myClientName, setClientName } = useConnectionStore();
   const [clients, setClients] = useState<ClientInfo[]>([]);
   const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const result = await getObjectViewDirect('channel', 'aura.0.clients.', 'aura.0.clients.\u9999');
-      // Only direct client channels: aura.0.clients.{clientId} → exactly 4 segments
+      // Only direct client channels: aura.0.clients.{clientId} → exactly 4 dot-segments
       const channelRows = result.rows.filter((r) => r.id.split('.').length === 4);
       const data = await Promise.all(
         channelRows.map(async (row) => {
-          const clientId = row.id.split('.')[3];
+          const cId = row.id.split('.')[3];
           const [nameState, lastSeenState] = await Promise.all([
             getStateDirect(`${row.id}.info.name`),
             getStateDirect(`${row.id}.info.lastSeen`),
           ]);
           return {
             channelId: row.id,
-            clientId,
-            name: nameState?.val ? String(nameState.val) : clientId.slice(0, 8),
+            clientId: cId,
+            name: nameState?.val ? String(nameState.val) : cId.slice(0, 8),
             lastSeen: lastSeenState?.val ? Number(lastSeenState.val) : 0,
           };
         }),
       );
-      data.sort((a, b) => b.lastSeen - a.lastSeen);
+      // Sort: current device first, then by lastSeen descending
+      data.sort((a, b) => {
+        if (a.clientId === myClientId) return -1;
+        if (b.clientId === myClientId) return 1;
+        return b.lastSeen - a.lastSeen;
+      });
       setClients(data);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [myClientId]);
 
   useEffect(() => { load(); }, [load]);
+
+  const startEdit = (c: ClientInfo) => {
+    setEditingId(c.clientId);
+    setEditValue(c.clientId === myClientId && myClientName ? myClientName : c.name);
+  };
+
+  const cancelEdit = () => { setEditingId(null); setEditValue(''); };
+
+  const saveName = (c: ClientInfo) => {
+    const trimmed = editValue.trim();
+    if (!trimmed) return;
+    // Write directly to ioBroker DP (works for all clients, not just current device)
+    setStateDirect(`${c.channelId}.info.name`, trimmed);
+    // For the current device, also persist to localStorage (used as fallback)
+    if (c.clientId === myClientId) setClientName(trimmed);
+    // Update local list immediately
+    setClients((prev) => prev.map((x) => x.clientId === c.clientId ? { ...x, name: trimmed } : x));
+    cancelEdit();
+  };
 
   const fmtLastSeen = (ts: number) => {
     if (!ts) return '–';
@@ -180,6 +152,8 @@ function ConnectedClients() {
     if (diff < 86_400_000) return t('settings.clients.hoursAgo', { n: Math.floor(diff / 3_600_000) });
     return t('settings.clients.daysAgo', { n: Math.floor(diff / 86_400_000) });
   };
+
+  const inputStyle = { background: 'var(--app-surface)', color: 'var(--text-primary)', border: '1px solid var(--accent)' };
 
   return (
     <Card title={t('settings.clients.title')}>
@@ -194,36 +168,80 @@ function ConnectedClients() {
           <RefreshCw size={12} className={loading ? 'animate-spin' : ''} />
         </button>
       </div>
+
       {clients.length === 0 ? (
         <p className="text-xs text-center py-3" style={{ color: 'var(--text-secondary)' }}>
           {loading ? '…' : t('settings.clients.none')}
         </p>
       ) : (
-        <div className="space-y-1.5 mt-1">
-          {clients.map((c) => (
-            <div
-              key={c.clientId}
-              className="flex items-center gap-2.5 px-3 py-2 rounded-lg"
-              style={{
-                background: 'var(--app-bg)',
-                border: `1px solid ${c.clientId === myClientId ? 'var(--accent)' : 'var(--app-border)'}`,
-              }}
-            >
-              <Tablet
-                size={13}
-                style={{ color: c.clientId === myClientId ? 'var(--accent)' : 'var(--text-secondary)', flexShrink: 0 }}
-              />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{c.name}</p>
-                <p className="text-[10px] font-mono truncate" style={{ color: 'var(--text-secondary)' }}>
-                  {c.channelId}.navigate.url
-                </p>
+        <div className="space-y-2 mt-1">
+          {clients.map((c) => {
+            const isMine = c.clientId === myClientId;
+            const isEditing = editingId === c.clientId;
+            return (
+              <div
+                key={c.clientId}
+                className="rounded-lg overflow-hidden"
+                style={{ border: `1px solid ${isMine ? 'var(--accent)' : 'var(--app-border)'}` }}
+              >
+                {/* Row */}
+                <div className="flex items-center gap-2.5 px-3 py-2.5" style={{ background: 'var(--app-bg)' }}>
+                  <Tablet size={13} style={{ color: isMine ? 'var(--accent)' : 'var(--text-secondary)', flexShrink: 0 }} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{c.name}</p>
+                      {isMine && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full shrink-0"
+                          style={{ background: 'var(--accent)22', color: 'var(--accent)' }}>
+                          {t('settings.clients.thisDevice')}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[10px] font-mono truncate" style={{ color: 'var(--text-secondary)' }}>
+                      {c.channelId}.navigate.url
+                    </p>
+                  </div>
+                  <span className="text-xs shrink-0" style={{ color: 'var(--text-secondary)' }}>
+                    {fmtLastSeen(c.lastSeen)}
+                  </span>
+                  <button
+                    onClick={() => isEditing ? cancelEdit() : startEdit(c)}
+                    className="hover:opacity-70 shrink-0"
+                    style={{ color: isEditing ? 'var(--accent)' : 'var(--text-secondary)' }}
+                  >
+                    <Edit3 size={13} />
+                  </button>
+                </div>
+
+                {/* Inline edit */}
+                {isEditing && (
+                  <div className="flex items-center gap-2 px-3 py-2.5"
+                    style={{ background: 'var(--app-surface)', borderTop: '1px solid var(--app-border)' }}>
+                    <input
+                      autoFocus
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') saveName(c); if (e.key === 'Escape') cancelEdit(); }}
+                      placeholder={t('settings.client.namePh')}
+                      className="flex-1 text-sm rounded-lg px-3 py-1.5 focus:outline-none"
+                      style={inputStyle}
+                    />
+                    <button
+                      onClick={() => saveName(c)}
+                      disabled={!editValue.trim() || editValue.trim() === c.name}
+                      className="hover:opacity-70 disabled:opacity-30"
+                      style={{ color: 'var(--accent-green)' }}
+                    >
+                      <Check size={15} />
+                    </button>
+                    <button onClick={cancelEdit} className="hover:opacity-70" style={{ color: 'var(--text-secondary)' }}>
+                      <X size={15} />
+                    </button>
+                  </div>
+                )}
               </div>
-              <span className="text-xs shrink-0" style={{ color: 'var(--text-secondary)' }}>
-                {fmtLastSeen(c.lastSeen)}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </Card>
@@ -570,11 +588,8 @@ export function AdminSettings() {
         </Card>
       </div>
 
-      {/* Client / Gerät */}
-      <ClientSettings />
-
-      {/* Alle bekannten Clients */}
-      <ConnectedClients />
+      {/* Geräte / Clients */}
+      <ClientsCard />
 
       {/* Experten */}
       <ExpertSettings />
