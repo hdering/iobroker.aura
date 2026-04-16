@@ -61,6 +61,14 @@ export const de = {
   'settings.client.namePh': 'z.B. Küche Tablet, Wohnzimmer TV…',
   'settings.client.id':     'ioBroker-Datenpunkt',
 
+  'settings.clients.title':    'Alle bekannten Clients',
+  'settings.clients.hint':     'Alle Geräte, die sich je verbunden haben.',
+  'settings.clients.none':     'Noch keine Clients registriert.',
+  'settings.clients.justNow':  'gerade eben',
+  'settings.clients.minsAgo':  'vor {n} min',
+  'settings.clients.hoursAgo': 'vor {n} Std',
+  'settings.clients.daysAgo':  'vor {n} d',
+
   'settings.frontend.title':          'Frontend',
   'settings.frontend.showHeader':     'Header anzeigen',
   'settings.frontend.dashboardTitle': 'Dashboard-Titel',

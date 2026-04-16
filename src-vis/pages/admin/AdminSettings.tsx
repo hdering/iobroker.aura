@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { setupPin } from '../../store/authStore';
 import { useActiveLayout, useDashboardStore } from '../../store/dashboardStore';
 import { useConnectionStore } from '../../store/connectionStore';
 import { useConfigStore } from '../../store/configStore';
 import { useAdminPrefsStore } from '../../store/adminPrefsStore';
-import { reconnectSocket } from '../../hooks/useIoBroker';
+import { reconnectSocket, getObjectViewDirect, getStateDirect } from '../../hooks/useIoBroker';
 import { Eye, EyeOff, AlertTriangle, RefreshCw, Tablet } from 'lucide-react';
 import { useT } from '../../i18n';
 
@@ -123,6 +123,109 @@ function ClientSettings() {
           </div>
         </div>
       </div>
+    </Card>
+  );
+}
+
+// ── All known clients ──────────────────────────────────────────────────────────
+
+interface ClientInfo {
+  channelId: string;
+  clientId: string;
+  name: string;
+  lastSeen: number;
+}
+
+function ConnectedClients() {
+  const t = useT();
+  const { clientId: myClientId } = useConnectionStore();
+  const [clients, setClients] = useState<ClientInfo[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const result = await getObjectViewDirect('channel', 'aura.0.clients.', 'aura.0.clients.\u9999');
+      // Only direct client channels: aura.0.clients.{clientId} → exactly 4 segments
+      const channelRows = result.rows.filter((r) => r.id.split('.').length === 4);
+      const data = await Promise.all(
+        channelRows.map(async (row) => {
+          const clientId = row.id.split('.')[3];
+          const [nameState, lastSeenState] = await Promise.all([
+            getStateDirect(`${row.id}.info.name`),
+            getStateDirect(`${row.id}.info.lastSeen`),
+          ]);
+          return {
+            channelId: row.id,
+            clientId,
+            name: nameState?.val ? String(nameState.val) : clientId.slice(0, 8),
+            lastSeen: lastSeenState?.val ? Number(lastSeenState.val) : 0,
+          };
+        }),
+      );
+      data.sort((a, b) => b.lastSeen - a.lastSeen);
+      setClients(data);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const fmtLastSeen = (ts: number) => {
+    if (!ts) return '–';
+    const diff = Date.now() - ts;
+    if (diff < 60_000) return t('settings.clients.justNow');
+    if (diff < 3_600_000) return t('settings.clients.minsAgo', { n: Math.floor(diff / 60_000) });
+    if (diff < 86_400_000) return t('settings.clients.hoursAgo', { n: Math.floor(diff / 3_600_000) });
+    return t('settings.clients.daysAgo', { n: Math.floor(diff / 86_400_000) });
+  };
+
+  return (
+    <Card title={t('settings.clients.title')}>
+      <div className="flex items-center justify-between">
+        <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{t('settings.clients.hint')}</p>
+        <button
+          onClick={load}
+          disabled={loading}
+          className="flex items-center justify-center w-6 h-6 rounded hover:opacity-80 disabled:opacity-40"
+          style={{ color: 'var(--text-secondary)' }}
+        >
+          <RefreshCw size={12} className={loading ? 'animate-spin' : ''} />
+        </button>
+      </div>
+      {clients.length === 0 ? (
+        <p className="text-xs text-center py-3" style={{ color: 'var(--text-secondary)' }}>
+          {loading ? '…' : t('settings.clients.none')}
+        </p>
+      ) : (
+        <div className="space-y-1.5 mt-1">
+          {clients.map((c) => (
+            <div
+              key={c.clientId}
+              className="flex items-center gap-2.5 px-3 py-2 rounded-lg"
+              style={{
+                background: 'var(--app-bg)',
+                border: `1px solid ${c.clientId === myClientId ? 'var(--accent)' : 'var(--app-border)'}`,
+              }}
+            >
+              <Tablet
+                size={13}
+                style={{ color: c.clientId === myClientId ? 'var(--accent)' : 'var(--text-secondary)', flexShrink: 0 }}
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{c.name}</p>
+                <p className="text-[10px] font-mono truncate" style={{ color: 'var(--text-secondary)' }}>
+                  {c.channelId}.navigate.url
+                </p>
+              </div>
+              <span className="text-xs shrink-0" style={{ color: 'var(--text-secondary)' }}>
+                {fmtLastSeen(c.lastSeen)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
     </Card>
   );
 }
@@ -469,6 +572,9 @@ export function AdminSettings() {
 
       {/* Client / Gerät */}
       <ClientSettings />
+
+      {/* Alle bekannten Clients */}
+      <ConnectedClients />
 
       {/* Experten */}
       <ExpertSettings />
