@@ -59,7 +59,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
       layout,
       title: title || (isList && selectedGroup ? selectedGroup.name : def.label),
       datapoint: noDatapointNeeded ? '' : isList ? groupId : datapoint.trim(),
-      gridPos: { x: 0, y: Infinity, ...getEffectiveSize(type, widgetDefaults) },
+      gridPos: { x: 0, y: 9999, ...getEffectiveSize(type, widgetDefaults) },
       options: {
         icon: def.iconName,
         ...(isCalendar

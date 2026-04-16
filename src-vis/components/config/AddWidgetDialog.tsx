@@ -50,7 +50,7 @@ export function AddWidgetDialog({ onAdd, onClose }: AddWidgetDialogProps) {
         type,
         title: finalTitle || def.label,
         datapoint: id,
-        gridPos: { x: 0, y: Infinity, w: def.defaultW, h: def.defaultH },
+        gridPos: { x: 0, y: 9999, w: def.defaultW, h: def.defaultH },
         options: finalUnit ? { unit: finalUnit } : {},
       });
       onClose();

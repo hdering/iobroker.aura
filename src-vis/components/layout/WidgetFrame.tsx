@@ -978,7 +978,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                   addWidgetToLayoutTab(activeLayoutId, activeTabId, {
                     ...config,
                     id: `${config.type}-${Date.now()}`,
-                    gridPos: { ...config.gridPos, y: Infinity },
+                    gridPos: { ...config.gridPos, y: 9999 },
                   });
                   openPanelFor(null);
                 } else {
@@ -1003,7 +1003,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                     addWidgetToLayoutTab(activeLayoutId, activeTabId, {
                       ...config,
                       id: `${config.type}-${Date.now()}`,
-                      gridPos: { ...config.gridPos, y: Infinity },
+                      gridPos: { ...config.gridPos, y: 9999 },
                     });
                     openPanelFor(null);
                   }}
@@ -1031,7 +1031,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                             addWidgetToLayoutTab(m.layoutId, m.tabId, {
                               ...config,
                               id: `${config.type}-${Date.now()}`,
-                              gridPos: { ...config.gridPos, y: Infinity },
+                              gridPos: { ...config.gridPos, y: 9999 },
                             });
                             openPanelFor(null);
                           }}
@@ -1076,7 +1076,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                             <button
                               key={m.tabId}
                               onClick={() => {
-                                addWidgetToLayoutTab(m.layoutId, m.tabId, { ...config, gridPos: { ...config.gridPos, y: Infinity } });
+                                addWidgetToLayoutTab(m.layoutId, m.tabId, { ...config, gridPos: { ...config.gridPos, y: 9999 } });
                                 removeWidgetFromLayoutTab(activeLayoutId, activeTabId, config.id);
                                 openPanelFor(null);
                               }}

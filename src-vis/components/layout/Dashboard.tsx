@@ -216,10 +216,10 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
             const tabGridWidgets = tabWidgets.filter((w) => !reflowHiddenIds.has(w.id));
             const tabLayout = tabGridWidgets.map((w) => ({
               i: w.id,
-              x: Math.min(w.gridPos.x, effectiveCols - 1),
-              y: w.gridPos.y,
-              w: Math.min(w.gridPos.w, effectiveCols),
-              h: w.gridPos.h,
+              x: Math.min(w.gridPos.x ?? 0, effectiveCols - 1),
+              y: w.gridPos.y ?? 9999,
+              w: Math.min(w.gridPos.w ?? 2, effectiveCols),
+              h: w.gridPos.h ?? 2,
             }));
             const buildTabUpdated = (newLayout: { i: string; x: number; y: number; w: number; h: number }[]) =>
               tabWidgets.map((w) => {

@@ -650,7 +650,7 @@ function NewWidgetDialog({
       layout,
       title: title || (isList && selectedGroup ? selectedGroup.name : def.label),
       datapoint: noDatapoint ? '' : isList ? groupId : datapoint.trim(),
-      gridPos: { x: 0, y: Infinity, ...getEffectiveSize(type, widgetDefaults) },
+      gridPos: { x: 0, y: 9999, ...getEffectiveSize(type, widgetDefaults) },
       options: { icon: def.iconName, ...(unit ? { unit } : {}) },
     });
     onClose();
@@ -1286,7 +1286,7 @@ export function AdminWidgets() {
     addWidgetToLayoutTab(target.layoutId, target.tabId, {
       ...entry.config,
       id: `${entry.config.type}-copy-${Date.now()}`,
-      gridPos: { ...entry.config.gridPos, y: Infinity },
+      gridPos: { ...entry.config.gridPos, y: 9999 },
     });
   };
 
@@ -1294,7 +1294,7 @@ export function AdminWidgets() {
     if (target.tabId === entry.tab.id && target.layoutId === activeLayoutId) return;
     addWidgetToLayoutTab(target.layoutId, target.tabId, {
       ...entry.config,
-      gridPos: { ...entry.config.gridPos, y: Infinity },
+      gridPos: { ...entry.config.gridPos, y: 9999 },
     });
     removeWidgetFromLayoutTab(activeLayoutId, entry.tab.id, entry.config.id);
   };

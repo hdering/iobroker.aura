@@ -59,7 +59,7 @@ export function ImportWidgetDialog({
         ...parsed,
         id: `${parsed.type}-${Date.now()}`,
         datapoint: datapoint.trim(),
-        gridPos: { ...parsed.gridPos, x: 0, y: Infinity },
+        gridPos: { ...parsed.gridPos, x: 0, y: 9999 },
       },
       targetTabId || undefined,
     );
