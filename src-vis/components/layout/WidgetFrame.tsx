@@ -380,6 +380,10 @@ function CenteredModal({
   children: React.ReactNode;
 }) {
   const portalTarget = usePortalTarget();
+  const modalRef = useRef<HTMLDivElement>(null);
+  // null = use CSS centering; once dragged, holds absolute pixel position
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  const dragOrigin = useRef<{ mx: number; my: number; rx: number; ry: number } | null>(null);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -387,22 +391,55 @@ function CenteredModal({
     return () => document.removeEventListener('keydown', handler);
   }, [onClose]);
 
+  const onHeaderMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    const rect = modalRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    dragOrigin.current = { mx: e.clientX, my: e.clientY, rx: rect.left, ry: rect.top };
+
+    const onMove = (ev: MouseEvent) => {
+      if (!dragOrigin.current) return;
+      setPos({
+        x: dragOrigin.current.rx + ev.clientX - dragOrigin.current.mx,
+        y: dragOrigin.current.ry + ev.clientY - dragOrigin.current.my,
+      });
+    };
+    const onUp = () => {
+      dragOrigin.current = null;
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  };
+
+  const posStyle: React.CSSProperties = pos
+    ? { position: 'fixed', left: pos.x, top: pos.y, transform: 'none' }
+    : { position: 'fixed', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' };
+
   return createPortal(
-    <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-6"
-      style={{ background: 'rgba(0,0,0,0.45)' }}
-      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
+    // pointer-events-none wrapper: clicks pass through to the widget below
+    <div className="fixed inset-0 z-[9999] pointer-events-none">
       <div
-        className={`relative flex flex-col rounded-xl shadow-2xl w-[90vw] ${wide ? 'max-w-5xl' : 'max-w-3xl'} max-h-[85vh]`}
-        style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}
+        ref={modalRef}
+        className={`pointer-events-auto flex flex-col rounded-xl shadow-2xl w-[90vw] ${wide ? 'max-w-5xl' : 'max-w-3xl'} max-h-[85vh]`}
+        style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)', boxShadow: '0 8px 40px rgba(0,0,0,0.35)', ...posStyle }}
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-4 py-3 shrink-0"
-          style={{ borderBottom: '1px solid var(--app-border)' }}>
+        {/* Drag handle = title bar */}
+        <div
+          className="flex items-center justify-between px-4 py-3 shrink-0 cursor-move select-none"
+          style={{ borderBottom: '1px solid var(--app-border)' }}
+          onMouseDown={onHeaderMouseDown}
+        >
           <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{title}</p>
-          <button onClick={onClose} className="hover:opacity-70 transition-opacity"
-            style={{ color: 'var(--text-secondary)' }}>
+          <button
+            onClick={onClose}
+            onMouseDown={(e) => e.stopPropagation()}
+            className="hover:opacity-70 transition-opacity cursor-pointer"
+            style={{ color: 'var(--text-secondary)' }}
+          >
             <X size={15} />
           </button>
         </div>
