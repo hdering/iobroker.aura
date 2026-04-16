@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { WidgetConfig, WidgetType } from '../../types';
 import { useT } from '../../i18n';
-import { lookupDatapointEntry, useDatapointList, isCacheStale } from '../../hooks/useDatapointList';
+import { lookupDatapointEntry } from '../../hooks/useDatapointList';
+import { getObjectDirect } from '../../hooks/useIoBroker';
 
 interface AddWidgetDialogProps {
   onAdd: (config: WidgetConfig) => void;
@@ -16,6 +17,16 @@ const WIDGET_TYPE_KEYS: { type: WidgetType; key: string; defaultW: number; defau
   { type: 'chart', key: 'widget.chart', defaultW: 4, defaultH: 3 },
 ];
 
+function resolveObjName(name: unknown, fallback: string): string {
+  if (!name) return fallback;
+  if (typeof name === 'string') return name;
+  if (typeof name === 'object') {
+    const n = name as Record<string, string>;
+    return n.de ?? n.en ?? Object.values(n)[0] ?? fallback;
+  }
+  return fallback;
+}
+
 export function AddWidgetDialog({ onAdd, onClose }: AddWidgetDialogProps) {
   const t = useT();
   const WIDGET_TYPES = WIDGET_TYPE_KEYS.map((w) => ({ ...w, label: t(w.key as never) }));
@@ -23,12 +34,6 @@ export function AddWidgetDialog({ onAdd, onClose }: AddWidgetDialogProps) {
   const [title, setTitle] = useState('');
   const [datapoint, setDatapoint] = useState('');
   const [unit, setUnit] = useState('');
-  const { load } = useDatapointList();
-
-  // Pre-load the cache silently so lookupDatapointEntry works when user types a datapoint ID
-  useEffect(() => {
-    if (isCacheStale()) load();
-  }, [load]);
 
   const handleAdd = () => {
     if (!datapoint.trim()) return;
@@ -42,6 +47,25 @@ export function AddWidgetDialog({ onAdd, onClose }: AddWidgetDialogProps) {
       options: unit ? { unit } : {},
     });
     onClose();
+  };
+
+  const handleDatapointBlur = async (id: string) => {
+    if (!id) return;
+    const supportsUnit = type === 'value' || type === 'chart';
+
+    // Try in-memory cache first (fast path), then fetch directly from ioBroker
+    const cached = lookupDatapointEntry(id);
+    if (cached) {
+      if (!title.trim() && cached.name) setTitle(cached.name);
+      if (supportsUnit && !unit.trim() && cached.unit) setUnit(cached.unit);
+      return;
+    }
+
+    const obj = await getObjectDirect(id);
+    if (!obj?.common) return;
+    const resolvedName = resolveObjName(obj.common.name, id.split('.').pop() ?? id);
+    if (!title.trim() && resolvedName) setTitle(resolvedName);
+    if (supportsUnit && !unit.trim() && obj.common.unit) setUnit(obj.common.unit as string);
   };
 
   return (
@@ -77,15 +101,7 @@ export function AddWidgetDialog({ onAdd, onClose }: AddWidgetDialogProps) {
           <input
             value={datapoint}
             onChange={(e) => setDatapoint(e.target.value)}
-            onBlur={(e) => {
-              const id = e.target.value.trim();
-              if (!id) return;
-              const entry = lookupDatapointEntry(id);
-              if (!entry) return;
-              if (!title.trim() && entry.name) setTitle(entry.name);
-              const supportsUnit = type === 'value' || type === 'chart';
-              if (supportsUnit && !unit.trim() && entry.unit) setUnit(entry.unit);
-            }}
+            onBlur={(e) => void handleDatapointBlur(e.target.value.trim())}
             placeholder="z.B. system.adapter.admin.0.alive"
             className="w-full bg-gray-700 text-white rounded px-3 py-2 text-sm placeholder-gray-500"
           />

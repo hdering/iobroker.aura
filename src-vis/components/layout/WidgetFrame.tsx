@@ -1471,15 +1471,26 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                       onBlur={(e) => {
                         const id = e.target.value.trim();
                         if (!id) return;
-                        const entry = lookupDatapointEntry(id);
-                        if (!entry) return;
                         const supportsUnit = ['value', 'chart', 'gauge', 'fill'].includes(config.type);
-                        let updated: typeof config = { ...config, datapoint: id };
-                        if (!updated.title?.trim() && entry.name) updated = { ...updated, title: entry.name };
-                        if (supportsUnit && !(updated.options?.unit as string | undefined) && entry.unit) {
-                          updated = { ...updated, options: { ...updated.options, unit: entry.unit } };
-                        }
-                        onConfigChange(updated);
+                        const apply = (name: string | undefined, unit: string | undefined) => {
+                          let updated: typeof config = { ...config, datapoint: id };
+                          if (!updated.title?.trim() && name) updated = { ...updated, title: name };
+                          if (supportsUnit && !(updated.options?.unit as string | undefined) && unit) {
+                            updated = { ...updated, options: { ...updated.options, unit } };
+                          }
+                          onConfigChange(updated);
+                        };
+                        // Try synchronous cache first; fall back to direct ioBroker fetch
+                        const cached = lookupDatapointEntry(id);
+                        if (cached) { apply(cached.name, cached.unit); return; }
+                        void getObjectDirect(id).then((obj) => {
+                          if (!obj?.common) return;
+                          const raw = obj.common.name as string | Record<string,string> | undefined;
+                          let name = id.split('.').pop() ?? id;
+                          if (typeof raw === 'string') name = raw;
+                          else if (raw && typeof raw === 'object') name = (raw as Record<string,string>).de ?? (raw as Record<string,string>).en ?? Object.values(raw as Record<string,string>)[0] ?? name;
+                          apply(name, obj.common.unit as string | undefined);
+                        });
                       }}
                       className="flex-1 text-xs rounded-lg px-2.5 py-2 font-mono focus:outline-none min-w-0"
                       style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
