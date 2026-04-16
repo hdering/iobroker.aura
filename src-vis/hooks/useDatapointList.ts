@@ -21,6 +21,24 @@ export function invalidateDatapointCache() {
   cacheTime = 0;
 }
 
+let loadInProgress: Promise<DatapointEntry[]> | null = null;
+
+/** Ensures the cache is populated. Returns the entries (from cache or fresh load). */
+export async function ensureDatapointCache(): Promise<DatapointEntry[]> {
+  if (cache && !isCacheStale()) return cache;
+  if (loadInProgress) return loadInProgress;
+  loadInProgress = loadAll().then((entries) => {
+    cache = entries;
+    cacheTime = Date.now();
+    loadInProgress = null;
+    return entries;
+  }).catch((err) => {
+    loadInProgress = null;
+    throw err;
+  });
+  return loadInProgress;
+}
+
 export function isCacheStale(): boolean {
   return cache === null || Date.now() - cacheTime > CACHE_TTL_MS;
 }
