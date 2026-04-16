@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.29",
+    "version": "0.4.30",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.30": {
+        "en": "iFrame widget: fullscreen button (hover to reveal, Esc or X to close)",
+        "de": "iFrame-Widget: Vollbild-Button (erscheint beim Hover, Esc oder X zum Schließen)",
+        "ru": "Виджет iFrame: кнопка полноэкранного режима (появляется при наведении, Esc или X для выхода)",
+        "pt": "Widget iFrame: botão de ecrã inteiro (aparece ao passar o rato, Esc ou X para fechar)",
+        "nl": "iFrame-widget: volledigschermknop (verschijnt bij hover, Esc of X om te sluiten)",
+        "fr": "Widget iFrame: bouton plein écran (apparaît au survol, Esc ou X pour fermer)",
+        "it": "Widget iFrame: pulsante schermo intero (appare al passaggio del mouse, Esc o X per chiudere)",
+        "es": "Widget iFrame: botón de pantalla completa (aparece al pasar el cursor, Esc o X para cerrar)",
+        "pl": "Widget iFrame: przycisk pełnoekranowy (pojawia się po najechaniu, Esc lub X aby zamknąć)",
+        "uk": "Віджет iFrame: кнопка повного екрану (з'являється при наведенні, Esc або X для закриття)",
+        "zh-cn": "iFrame 小部件：全屏按钮（悬停显示，按 Esc 或 X 关闭）"
+      },
       "0.4.29": {
         "en": "Frontend: optional admin link button in header (configurable in Settings)",
         "de": "Frontend: optionaler Admin-Link-Button im Header (in Einstellungen konfigurierbar)",
@@ -183,19 +196,6 @@
         "pl": "Widget zegara: token EE dla skróconej nazwy dnia tygodnia (np. Pn)",
         "uk": "Віджет годинника: токен EE для скороченої назви дня тижня (напр. Пн)",
         "zh-cn": "时钟小部件自定义格式：添加 EE 标记用于缩写星期名称（如 周一）"
-      },
-      "0.4.23": {
-        "en": "Fix W5039: remove words.js – jsonConfig adapters use admin/i18n directly",
-        "de": "W5039 behoben: words.js entfernt – jsonConfig-Adapter verwenden admin/i18n direkt",
-        "ru": "Исправление W5039: удалён words.js – адаптеры jsonConfig используют admin/i18n напрямую",
-        "pt": "Correção W5039: words.js removido – adaptadores jsonConfig usam admin/i18n diretamente",
-        "nl": "W5039 opgelost: words.js verwijderd – jsonConfig-adapters gebruiken admin/i18n direct",
-        "fr": "Correction W5039: words.js supprimé – les adaptateurs jsonConfig utilisent admin/i18n directement",
-        "it": "Correzione W5039: words.js rimosso – gli adapter jsonConfig usano admin/i18n direttamente",
-        "es": "Corrección W5039: words.js eliminado – los adaptadores jsonConfig usan admin/i18n directamente",
-        "pl": "Naprawa W5039: usunięto words.js – adaptery jsonConfig używają admin/i18n bezpośrednio",
-        "uk": "Виправлення W5039: видалено words.js – адаптери jsonConfig використовують admin/i18n напряму",
-        "zh-cn": "修复 W5039：删除 words.js – jsonConfig 适配器直接使用 admin/i18n"
       }
     }
   },

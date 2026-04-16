@@ -1876,6 +1876,18 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                           style={{ left: (o.sandbox ?? false) ? '18px' : '2px' }} />
                       </button>
                     </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Vollbild-Button anzeigen</label>
+                        <p className="text-[10px]" style={{ color: 'var(--text-secondary)', opacity: 0.6 }}>Button erscheint beim Darüberfahren mit der Maus</p>
+                      </div>
+                      <button onClick={() => set({ fullscreenButton: !(o.fullscreenButton ?? false) })}
+                        className="relative w-9 h-5 rounded-full transition-colors shrink-0"
+                        style={{ background: (o.fullscreenButton ?? false) ? 'var(--accent)' : 'var(--app-border)' }}>
+                        <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                          style={{ left: (o.fullscreenButton ?? false) ? '18px' : '2px' }} />
+                      </button>
+                    </div>
                   </>
                 );
               })()}

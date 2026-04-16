@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.30 (2026-04-16)
+- iFrame widget: fullscreen button (hover to reveal); click fills viewport, Esc or X to close
+
 ### 0.4.29 (2026-04-16)
 - Frontend: optional admin link button in header, configurable in Settings
 
