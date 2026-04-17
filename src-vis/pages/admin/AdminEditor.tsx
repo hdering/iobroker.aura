@@ -646,7 +646,7 @@ export function AdminEditor() {
         <button onClick={() => setShowImport(true)}
           className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium hover:opacity-80"
           style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}>
-          <Upload size={15} /> {t('common.export')}
+          <Upload size={15} /> {t('widgets.import')}
         </button>
         <button onClick={() => setShowWizard(true)}
           className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:opacity-80"

@@ -101,9 +101,22 @@ export const DP_TEMPLATES: DpTemplate[] = [
     widgetType: 'shutter',
     category: 'shading',
     secondaryDps: [
-      { optionKey: 'activityDp',  siblingNames: ['WORKING', 'working', 'moving', 'activity', 'ACTIVITY'] },
-      { optionKey: 'directionDp', siblingNames: ['DIRECTION', 'direction'] },
-      { optionKey: 'stopDp',      siblingNames: ['STOP', 'stop'] },
+      {
+        // HomeMatic: WORKING (classic), ACTIVITY_STATE (HmIP), PROCESS (some models)
+        // Shelly: state  |  zigbee/deconz: moving
+        optionKey: 'activityDp',
+        siblingNames: ['WORKING', 'working', 'ACTIVITY_STATE', 'activity_state', 'PROCESS', 'process', 'state', 'moving', 'activity', 'ACTIVITY'],
+      },
+      {
+        // HomeMatic: DIRECTION  |  (Shelly/zigbee have no dedicated direction DP)
+        optionKey: 'directionDp',
+        siblingNames: ['DIRECTION', 'direction'],
+      },
+      {
+        // HomeMatic: STOP  |  Shelly: Pause
+        optionKey: 'stopDp',
+        siblingNames: ['STOP', 'stop', 'Pause', 'pause'],
+      },
     ],
   },
   {
@@ -113,9 +126,18 @@ export const DP_TEMPLATES: DpTemplate[] = [
     widgetType: 'shutter',
     category: 'shading',
     secondaryDps: [
-      { optionKey: 'activityDp',  siblingNames: ['WORKING', 'working', 'moving', 'activity', 'ACTIVITY'] },
-      { optionKey: 'directionDp', siblingNames: ['DIRECTION', 'direction'] },
-      { optionKey: 'stopDp',      siblingNames: ['STOP', 'stop'] },
+      {
+        optionKey: 'activityDp',
+        siblingNames: ['WORKING', 'working', 'ACTIVITY_STATE', 'activity_state', 'PROCESS', 'process', 'state', 'moving', 'activity', 'ACTIVITY'],
+      },
+      {
+        optionKey: 'directionDp',
+        siblingNames: ['DIRECTION', 'direction'],
+      },
+      {
+        optionKey: 'stopDp',
+        siblingNames: ['STOP', 'stop', 'Pause', 'pause'],
+      },
     ],
   },
 
@@ -128,10 +150,14 @@ export const DP_TEMPLATES: DpTemplate[] = [
     category: 'climate',
     secondaryDps: [
       {
+        // HomeMatic: ACTUAL_TEMPERATURE  |  generic: ACTUAL, TEMPERATURE
+        // Shelly TRV: temperatureC  |  zigbee: local_temperature
         optionKey: 'actualDatapoint',
         siblingNames: [
-          'ACTUAL', 'actual',
           'ACTUAL_TEMPERATURE', 'ACTUAL_TEMP',
+          'ACTUAL', 'actual',
+          'local_temperature', 'localTemperature',
+          'temperatureC', 'temperature_c',
           'TEMPERATURE', 'temperature',
           'TEMP', 'temp',
           'MEASURED_TEMPERATURE',

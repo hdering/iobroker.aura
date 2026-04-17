@@ -2128,9 +2128,9 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                   const sibs = entries.filter((e) => e.id.startsWith(parent + '.'));
                   const find = (...names: string[]) => names.map((n) => sibs.find((e) => e.id === `${parent}.${n}`)?.id).find(Boolean);
                   const patch: Record<string, unknown> = {};
-                  if (!o.activityDp)  { const v = find('WORKING', 'working', 'moving', 'activity'); if (v) patch.activityDp = v; }
+                  if (!o.activityDp)  { const v = find('WORKING', 'working', 'ACTIVITY_STATE', 'activity_state', 'PROCESS', 'process', 'state', 'moving', 'activity', 'ACTIVITY'); if (v) patch.activityDp = v; }
                   if (!o.directionDp) { const v = find('DIRECTION', 'direction'); if (v) patch.directionDp = v; }
-                  if (!o.stopDp)      { const v = find('STOP', 'stop'); if (v) patch.stopDp = v; }
+                  if (!o.stopDp)      { const v = find('STOP', 'stop', 'Pause', 'pause'); if (v) patch.stopDp = v; }
                   if (Object.keys(patch).length) setO(patch);
                 };
                 return (
@@ -2219,7 +2219,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                   const find = (...names: string[]) => names.map((n) => sibs.find((e) => e.id === `${parent}.${n}`)?.id).find(Boolean);
                   const patch: Record<string, unknown> = {};
                   if (!o.actualDatapoint) {
-                    const v = find('ACTUAL', 'actual', 'ACTUAL_TEMPERATURE', 'ACTUAL_TEMP', 'TEMPERATURE', 'temperature', 'TEMP', 'temp', 'MEASURED_TEMPERATURE');
+                    const v = find('ACTUAL_TEMPERATURE', 'ACTUAL_TEMP', 'ACTUAL', 'actual', 'local_temperature', 'localTemperature', 'temperatureC', 'temperature_c', 'TEMPERATURE', 'temperature', 'TEMP', 'temp', 'MEASURED_TEMPERATURE');
                     if (v) patch.actualDatapoint = v;
                   }
                   if (Object.keys(patch).length) setO(patch);
