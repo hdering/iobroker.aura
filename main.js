@@ -62,6 +62,23 @@ class Aura extends utils.Adapter {
       return;
     }
 
+    // Client delete relay: frontend writes clientId → adapter deletes recursively
+    if (id.endsWith('clients.deleteRequest') && state && !state.ack && state.val) {
+      const clientId = String(state.val).trim();
+      if (clientId) {
+        const fullId = `aura.0.clients.${clientId}`;
+        this.log.info(`[clients] deleting client tree: ${fullId}`);
+        try {
+          await this.delForeignObjectAsync(fullId, { recursive: true });
+          this.log.info(`[clients] deleted: ${fullId}`);
+        } catch (e) {
+          this.log.error(`[clients] delete failed for ${fullId}: ${e.message}`);
+        }
+      }
+      await this.setStateAsync('clients.deleteRequest', '', true);
+      return;
+    }
+
     if (!id.endsWith('calendar.request') || !state || state.ack || !state.val) return;
     let req;
     try { req = JSON.parse(String(state.val)); } catch { return; }
@@ -121,6 +138,11 @@ class Aura extends utils.Adapter {
     await this.setObjectNotExistsAsync('calendar', {
       type: 'channel',
       common: { name: 'Calendar fetch relay' },
+      native: {},
+    });
+    await this.setObjectNotExistsAsync('clients', {
+      type: 'channel',
+      common: { name: 'Connected clients' },
       native: {},
     });
 
@@ -201,8 +223,22 @@ class Aura extends utils.Adapter {
       },
       native: {},
     });
+    await this.setObjectNotExistsAsync('clients.deleteRequest', {
+      type: 'state',
+      common: {
+        name: 'Client delete request (write clientId to delete that client tree)',
+        type: 'string',
+        role: 'text',
+        read: true,
+        write: true,
+        def: '',
+      },
+      native: {},
+    });
+
     this.subscribeStates('calendar.request');
     this.subscribeStates('calendar.clientError');
+    this.subscribeStates('clients.deleteRequest');
 
     // NOTE: The block below modifies system.adapter.aura.X via setForeignObjectAsync
     // to keep localLinks (overview tile URLs) up-to-date when a custom URL is configured.

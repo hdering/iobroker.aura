@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.44 (2026-04-17)
+- Settings: delete connected devices via relay state (trash icon with confirmation, own device protected)
+
 ### 0.4.43 (2026-04-17)
 - Icon picker: all 1900+ Lucide icons with category tabs and search, lazy-loaded in a separate chunk; JSON Table: layout picker removed
 

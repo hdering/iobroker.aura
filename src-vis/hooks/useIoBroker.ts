@@ -258,6 +258,13 @@ export function setObjectDirect(id: string, obj: object): void {
   getSocket().emit('setObject', id, obj, () => { /* ignore result */ });
 }
 
+/** Delete an ioBroker object by ID. Returns a promise that resolves when done. */
+export function deleteObjectDirect(id: string): Promise<void> {
+  return new Promise((resolve) => {
+    getSocket().emit('delObject', id, (_err: unknown) => resolve());
+  });
+}
+
 // Standalone-Funktion – kein Hook, kein Reconnect-Seiteneffekt
 export function getObjectViewDirect(
   type: 'state' | 'channel' | 'device' | 'enum',

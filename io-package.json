@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.43",
+    "version": "0.4.44",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.44": {
+        "en": "Settings: delete connected devices (trash icon with confirmation, own device protected)",
+        "de": "Einstellungen: Verbundene Geräte löschen (Papierkorb mit Bestätigung, eigenes Gerät geschützt)",
+        "ru": "Настройки: удаление подключённых устройств (корзина с подтверждением, своё устройство защищено)",
+        "pt": "Definições: eliminar dispositivos ligados (ícone lixo com confirmação, dispositivo próprio protegido)",
+        "nl": "Instellingen: verbonden apparaten verwijderen (prullenbak met bevestiging, eigen apparaat beschermd)",
+        "fr": "Paramètres: supprimer les appareils connectés (icône poubelle avec confirmation, appareil personnel protégé)",
+        "it": "Impostazioni: eliminare dispositivi connessi (icona cestino con conferma, dispositivo proprio protetto)",
+        "es": "Ajustes: eliminar dispositivos conectados (icono papelera con confirmación, dispositivo propio protegido)",
+        "pl": "Ustawienia: usuwanie podłączonych urządzeń (ikona kosza z potwierdzeniem, własne urządzenie chronione)",
+        "uk": "Налаштування: видалення підключених пристроїв (кошик із підтвердженням, власний пристрій захищений)",
+        "zh-cn": "设置：删除已连接设备（带确认的垃圾桶图标，自身设备受保护）"
+      },
       "0.4.43": {
         "en": "Icon picker: all 1900+ Lucide icons with category tabs and search, loaded lazily; JSON Table: remove layout picker",
         "de": "Icon-Auswahl: alle 1900+ Lucide-Icons mit Kategorie-Tabs und Suche, lazily geladen; JSON-Tabelle: Layout-Auswahl entfernt",
@@ -183,19 +196,6 @@
         "pl": "ID widgetów nie zawierają już typu (w-TIMESTAMP zamiast gauge-TIMESTAMP) – ID pozostają stabilne przy zmianie typu",
         "uk": "ID віджетів більше не містять тип (w-TIMESTAMP замість gauge-TIMESTAMP) – ID залишаються стабільними при зміні типу",
         "zh-cn": "小部件 ID 不再包含类型（w-TIMESTAMP 而非 gauge-TIMESTAMP）— 更改类型时 ID 保持稳定"
-      },
-      "0.4.37": {
-        "en": "Frontend: fix active tab resetting to first tab on F5 / after ioBroker config reload",
-        "de": "Frontend: Aktiver Tab springt nach F5 oder ioBroker-Config-Reload nicht mehr auf den ersten Tab zurück",
-        "ru": "Фронтенд: исправлен сброс активной вкладки на первую после F5 или перезагрузки конфигурации ioBroker",
-        "pt": "Frontend: corrigido reset do separador ativo para o primeiro após F5 ou reload da config ioBroker",
-        "nl": "Frontend: actief tabblad springt na F5 of ioBroker config-reload niet meer terug naar het eerste",
-        "fr": "Frontend: correction du reset de l'onglet actif vers le premier onglet après F5 ou rechargement config ioBroker",
-        "it": "Frontend: corretto reset della scheda attiva alla prima scheda dopo F5 o ricaricamento config ioBroker",
-        "es": "Frontend: corregido el reset de la pestaña activa a la primera tras F5 o recarga de config ioBroker",
-        "pl": "Frontend: poprawiono resetowanie aktywnej karty do pierwszej po F5 lub przeładowaniu konfiguracji ioBroker",
-        "uk": "Фронтенд: виправлено скидання активної вкладки до першої після F5 або перезавантаження конфігурації ioBroker",
-        "zh-cn": "前端：修复 F5 刷新或 ioBroker 配置重载后活动选项卡重置为第一个选项卡的问题"
       }
     }
   },

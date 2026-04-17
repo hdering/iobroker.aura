@@ -5,7 +5,7 @@ import { useConnectionStore } from '../../store/connectionStore';
 import { useConfigStore } from '../../store/configStore';
 import { useAdminPrefsStore } from '../../store/adminPrefsStore';
 import { reconnectSocket, getObjectViewDirect, getStateDirect, setStateDirect } from '../../hooks/useIoBroker';
-import { Eye, EyeOff, AlertTriangle, RefreshCw, Tablet, Edit3, Check, X } from 'lucide-react';
+import { Eye, EyeOff, AlertTriangle, RefreshCw, Tablet, Edit3, Check, X, Trash2 } from 'lucide-react';
 import { useT } from '../../i18n';
 
 // ── Shared primitives ──────────────────────────────────────────────────────────
@@ -89,6 +89,7 @@ function ClientsCard() {
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -142,6 +143,14 @@ function ClientsCard() {
     // Update local list immediately
     setClients((prev) => prev.map((x) => x.clientId === c.clientId ? { ...x, name: trimmed } : x));
     cancelEdit();
+  };
+
+  const deleteClient = (c: ClientInfo) => {
+    setConfirmDeleteId(null);
+    // Relay deletion via adapter: write clientId to deleteRequest state.
+    // main.js listens, calls delForeignObjectAsync recursively, then clears the state.
+    setStateDirect('aura.0.clients.deleteRequest', c.clientId);
+    setClients((prev) => prev.filter((x) => x.clientId !== c.clientId));
   };
 
   const fmtLastSeen = (ts: number) => {
@@ -211,6 +220,16 @@ function ClientsCard() {
                   >
                     <Edit3 size={13} />
                   </button>
+                  {!isMine && (
+                    <button
+                      onClick={() => setConfirmDeleteId(confirmDeleteId === c.clientId ? null : c.clientId)}
+                      className="hover:opacity-70 shrink-0"
+                      style={{ color: confirmDeleteId === c.clientId ? 'var(--accent-red, #ef4444)' : 'var(--text-secondary)' }}
+                      title="Gerät löschen"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  )}
                 </div>
 
                 {/* Inline edit */}
@@ -236,6 +255,30 @@ function ClientsCard() {
                     </button>
                     <button onClick={cancelEdit} className="hover:opacity-70" style={{ color: 'var(--text-secondary)' }}>
                       <X size={15} />
+                    </button>
+                  </div>
+                )}
+
+                {/* Delete confirmation */}
+                {confirmDeleteId === c.clientId && (
+                  <div className="flex items-center gap-2 px-3 py-2.5"
+                    style={{ background: 'var(--app-surface)', borderTop: '1px solid var(--app-border)' }}>
+                    <p className="flex-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                      Gerät «{c.name}» wirklich löschen?
+                    </p>
+                    <button
+                      onClick={() => deleteClient(c)}
+                      className="text-xs px-2.5 py-1 rounded-lg hover:opacity-80"
+                      style={{ background: 'var(--accent-red, #ef4444)', color: '#fff' }}
+                    >
+                      Löschen
+                    </button>
+                    <button
+                      onClick={() => setConfirmDeleteId(null)}
+                      className="hover:opacity-70"
+                      style={{ color: 'var(--text-secondary)' }}
+                    >
+                      <X size={14} />
                     </button>
                   </div>
                 )}
