@@ -782,7 +782,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
       setOpenPanel(panel);
     }
   };
-  const [pickerTarget, setPickerTarget] = useState<'datapoint' | 'actualDatapoint' | 'localTempDatapoint' | 'shutter_activityDp' | 'shutter_directionDp' | 'shutter_stopDp' | null>(null);
+  const [pickerTarget, setPickerTarget] = useState<'datapoint' | 'actualDatapoint' | 'localTempDatapoint' | 'shutter_activityDp' | 'shutter_directionDp' | 'shutter_stopDp' | 'gauge_pointer2Dp' | 'gauge_pointer3Dp' | null>(null);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
   const Widget = getWidgetMap()[config.type];
   const currentLayout = config.layout ?? 'default';
@@ -1699,8 +1699,15 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                     {/* Pointer 2 */}
                     <div>
                       <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Zeiger 2 – Datenpunkt</label>
-                      <input type="text" value={(o.pointer2Datapoint as string) ?? ''} onChange={(e) => set({ pointer2Datapoint: e.target.value || undefined })}
-                        placeholder="Datenpunkt-ID (leer = deaktiviert)" className={gCls + ' font-mono'} style={gSty} />
+                      <div className="flex gap-1">
+                        <input type="text" value={(o.pointer2Datapoint as string) ?? ''} onChange={(e) => set({ pointer2Datapoint: e.target.value || undefined })}
+                          placeholder="Datenpunkt-ID (leer = deaktiviert)" className={gCls + ' font-mono flex-1 min-w-0'} style={gSty} />
+                        <button type="button" onClick={() => setPickerTarget('gauge_pointer2Dp')}
+                          className="px-2 rounded-lg hover:opacity-80 shrink-0"
+                          style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+                          <Database size={13} />
+                        </button>
+                      </div>
                     </div>
                     {(o.pointer2Datapoint as string) && (
                       <div className="flex items-center gap-2">
@@ -1717,8 +1724,15 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                     {/* Pointer 3 */}
                     <div>
                       <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Zeiger 3 – Datenpunkt</label>
-                      <input type="text" value={(o.pointer3Datapoint as string) ?? ''} onChange={(e) => set({ pointer3Datapoint: e.target.value || undefined })}
-                        placeholder="Datenpunkt-ID (leer = deaktiviert)" className={gCls + ' font-mono'} style={gSty} />
+                      <div className="flex gap-1">
+                        <input type="text" value={(o.pointer3Datapoint as string) ?? ''} onChange={(e) => set({ pointer3Datapoint: e.target.value || undefined })}
+                          placeholder="Datenpunkt-ID (leer = deaktiviert)" className={gCls + ' font-mono flex-1 min-w-0'} style={gSty} />
+                        <button type="button" onClick={() => setPickerTarget('gauge_pointer3Dp')}
+                          className="px-2 rounded-lg hover:opacity-80 shrink-0"
+                          style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+                          <Database size={13} />
+                        </button>
+                      </div>
                     </div>
                     {(o.pointer3Datapoint as string) && (
                       <div className="flex items-center gap-2">
@@ -2319,6 +2333,8 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
             pickerTarget === 'shutter_activityDp'  ? ((config.options?.activityDp as string) ?? '') :
             pickerTarget === 'shutter_directionDp' ? ((config.options?.directionDp as string) ?? '') :
             pickerTarget === 'shutter_stopDp'      ? ((config.options?.stopDp as string) ?? '') :
+            pickerTarget === 'gauge_pointer2Dp'    ? ((config.options?.pointer2Datapoint as string) ?? '') :
+            pickerTarget === 'gauge_pointer3Dp'    ? ((config.options?.pointer3Datapoint as string) ?? '') :
             ((config.options?.actualDatapoint as string) ?? '')
           }
           onSelect={(id, unit, name) => {
@@ -2336,6 +2352,10 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
               onConfigChange({ ...config, options: { ...config.options, directionDp: id } });
             } else if (pickerTarget === 'shutter_stopDp') {
               onConfigChange({ ...config, options: { ...config.options, stopDp: id } });
+            } else if (pickerTarget === 'gauge_pointer2Dp') {
+              onConfigChange({ ...config, options: { ...config.options, pointer2Datapoint: id } });
+            } else if (pickerTarget === 'gauge_pointer3Dp') {
+              onConfigChange({ ...config, options: { ...config.options, pointer3Datapoint: id } });
             } else {
               onConfigChange({ ...config, options: { ...config.options, actualDatapoint: id } });
             }
