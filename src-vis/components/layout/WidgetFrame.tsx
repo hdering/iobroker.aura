@@ -41,6 +41,7 @@ import { IframeWidget } from '../widgets/IframeWidget';
 import { FillWidget } from '../widgets/FillWidget';
 import { TrashWidget, TrashConfig } from '../widgets/TrashWidget';
 import { AutoListWidget } from '../widgets/AutoListWidget';
+import { ShutterWidget } from '../widgets/ShutterWidget';
 
 // Stable empty array – avoids creating a new reference on every render when no conditions are set
 const NO_CONDITIONS: WidgetCondition[] = [];
@@ -68,6 +69,7 @@ function getWidgetMap() {
     iframe:     IframeWidget,
     fill:       FillWidget,
     trash:      TrashWidget,
+    shutter:    ShutterWidget,
   } as const;
 }
 
@@ -781,7 +783,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
       setOpenPanel(panel);
     }
   };
-  const [pickerTarget, setPickerTarget] = useState<'datapoint' | 'actualDatapoint' | 'localTempDatapoint' | null>(null);
+  const [pickerTarget, setPickerTarget] = useState<'datapoint' | 'actualDatapoint' | 'localTempDatapoint' | 'shutter_activityDp' | 'shutter_directionDp' | null>(null);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
   const Widget = getWidgetMap()[config.type];
   const currentLayout = config.layout ?? 'default';
@@ -2112,6 +2114,76 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                 <TrashConfig config={config} onConfigChange={onConfigChange} />
               )}
 
+              {config.type === 'shutter' && (() => {
+                const o = config.options ?? {};
+                const setO = (patch: Record<string, unknown>) =>
+                  onConfigChange({ ...config, options: { ...o, ...patch } });
+                const sInputCls = 'w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none font-mono';
+                const sInputStyle = { background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' };
+                const autoFill = async () => {
+                  if (!config.datapoint) return;
+                  const parts = config.datapoint.split('.');
+                  const parent = parts.slice(0, -1).join('.');
+                  const entries = await ensureDatapointCache();
+                  const sibs = entries.filter((e) => e.id.startsWith(parent + '.'));
+                  const find = (...names: string[]) => names.map((n) => sibs.find((e) => e.id === `${parent}.${n}`)?.id).find(Boolean);
+                  const patch: Record<string, unknown> = {};
+                  if (!o.activityDp)  { const v = find('WORKING', 'working', 'moving', 'activity'); if (v) patch.activityDp = v; }
+                  if (!o.directionDp) { const v = find('DIRECTION', 'direction'); if (v) patch.directionDp = v; }
+                  if (Object.keys(patch).length) setO(patch);
+                };
+                return (
+                  <>
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Fahrt-Status DP (z.B. WORKING)</label>
+                        <button onClick={() => void autoFill()}
+                          className="text-[10px] px-2 py-0.5 rounded hover:opacity-80"
+                          style={{ background: 'var(--accent)22', color: 'var(--accent)', border: '1px solid var(--accent)44' }}>
+                          Auto-Erkennen
+                        </button>
+                      </div>
+                      <div className="flex gap-1">
+                        <input type="text" value={(o.activityDp as string) ?? ''}
+                          onChange={(e) => setO({ activityDp: e.target.value || undefined })}
+                          placeholder="optional"
+                          className={`flex-1 ${sInputCls} min-w-0`} style={sInputStyle} />
+                        <button onClick={() => setPickerTarget('shutter_activityDp')}
+                          className="px-2 rounded-lg hover:opacity-80 shrink-0"
+                          style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+                          <Database size={13} />
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Richtungs-DP (z.B. DIRECTION)</label>
+                      <div className="flex gap-1">
+                        <input type="text" value={(o.directionDp as string) ?? ''}
+                          onChange={(e) => setO({ directionDp: e.target.value || undefined })}
+                          placeholder="optional"
+                          className={`flex-1 ${sInputCls} min-w-0`} style={sInputStyle} />
+                        <button onClick={() => setPickerTarget('shutter_directionDp')}
+                          className="px-2 rounded-lg hover:opacity-80 shrink-0"
+                          style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+                          <Database size={13} />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Position invertieren (0=offen)</label>
+                      <button
+                        onClick={() => setO({ invertPosition: !(o.invertPosition ?? false) })}
+                        className="relative w-9 h-5 rounded-full transition-colors"
+                        style={{ background: (o.invertPosition ?? false) ? 'var(--accent)' : 'var(--app-border)' }}
+                      >
+                        <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                          style={{ left: (o.invertPosition ?? false) ? '18px' : '2px' }} />
+                      </button>
+                    </div>
+                  </>
+                );
+              })()}
+
               {config.type === 'thermostat' && (() => {
                 const o = config.options ?? {};
                 const setO = (patch: Record<string, unknown>) =>
@@ -2203,8 +2275,10 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
       {pickerTarget && (
         <DatapointPicker
           currentValue={
-            pickerTarget === 'datapoint'         ? config.datapoint :
-            pickerTarget === 'localTempDatapoint' ? ((config.options?.localTempDatapoint as string) ?? '') :
+            pickerTarget === 'datapoint'           ? config.datapoint :
+            pickerTarget === 'localTempDatapoint'  ? ((config.options?.localTempDatapoint as string) ?? '') :
+            pickerTarget === 'shutter_activityDp'  ? ((config.options?.activityDp as string) ?? '') :
+            pickerTarget === 'shutter_directionDp' ? ((config.options?.directionDp as string) ?? '') :
             ((config.options?.actualDatapoint as string) ?? '')
           }
           onSelect={(id, unit, name) => {
@@ -2216,6 +2290,10 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
               onConfigChange({ ...config, ...titlePatch, datapoint: id, options: { ...config.options, ...unitPatch } });
             } else if (pickerTarget === 'localTempDatapoint') {
               onConfigChange({ ...config, options: { ...config.options, localTempDatapoint: id } });
+            } else if (pickerTarget === 'shutter_activityDp') {
+              onConfigChange({ ...config, options: { ...config.options, activityDp: id } });
+            } else if (pickerTarget === 'shutter_directionDp') {
+              onConfigChange({ ...config, options: { ...config.options, directionDp: id } });
             } else {
               onConfigChange({ ...config, options: { ...config.options, actualDatapoint: id } });
             }

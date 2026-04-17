@@ -12,7 +12,7 @@
 
 import {
   Zap, TrendingUp, SlidersHorizontal, Thermometer, BarChart2, List,
-  Clock, CalendarDays, Heading2, Layers2, Cloud, Gauge, Camera, ImageIcon, MonitorDot, Droplets, Truck,
+  Clock, CalendarDays, Heading2, Layers2, Cloud, Gauge, Camera, ImageIcon, MonitorDot, Droplets, Truck, AlignJustify,
   type LucideIcon,
 } from 'lucide-react';
 import type { WidgetType } from './types';
@@ -63,6 +63,14 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 2,            defaultH: 2,
     addMode: 'datapoint',   widgetGroup: 'control',
     mock: { t: 'Wohnzimmer', v: 'AN' },
+  },
+  {
+    type: 'shutter',
+    label: 'Rollladen',      shortLabel: 'Rollladen',
+    Icon: AlignJustify,      iconName: 'AlignJustify', color: '#64748b',
+    defaultW: 2,             defaultH: 3,
+    addMode: 'datapoint',    widgetGroup: 'control',
+    mock: { t: 'Wohnzimmer', v: '45', u: '%' },
   },
   {
     type: 'dimmer',

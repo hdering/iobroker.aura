@@ -25,6 +25,7 @@ function roleToWidget(role?: string, valueType?: string): WidgetType {
   const r = role.toLowerCase();
   if (r === 'switch' || r === 'button' || r.startsWith('switch.') || r === 'indicator') return 'switch';
   if (r.includes('dimmer') || r.includes('brightness') || r === 'level' || r.startsWith('level.')) return 'dimmer';
+  if (r.includes('blind') || r.includes('shutter') || r === 'level.blind' || r === 'blind' || r.includes('cover')) return 'shutter';
   if (r.includes('temperature') && r.includes('level')) return 'thermostat';
   if (r.includes('temperature')) return 'value';
   if (valueType === 'boolean') return 'switch';

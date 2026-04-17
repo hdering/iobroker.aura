@@ -15,6 +15,7 @@ import { WIDGET_REGISTRY, WIDGET_GROUPS, WIDGET_BY_TYPE, getEffectiveSize } from
 import { useConfigStore } from '../../store/configStore';
 import { useT } from '../../i18n';
 import { ensureDatapointCache } from '../../hooks/useDatapointList';
+import { DP_TEMPLATES } from '../../utils/dpTemplates';
 
 // Layout labels are resolved inside components via t() to support i18n
 const LAYOUT_IDS: WidgetLayout[] = ['default', 'card', 'compact', 'minimal'];
@@ -70,6 +71,22 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
       } catch { /* ignore */ }
     }
 
+    // Auto-fill secondary DPs for templates that define sibling patterns
+    const template = DP_TEMPLATES.find((tpl) => tpl.widgetType === type && tpl.secondaryDps.length > 0);
+    const secondaryDpOptions: Record<string, unknown> = {};
+    if (template && dpId) {
+      try {
+        const entries = await ensureDatapointCache();
+        const parts = dpId.split('.');
+        const parent = parts.slice(0, -1).join('.');
+        const sibs = entries.filter((e) => e.id.startsWith(parent + '.'));
+        for (const sdp of template.secondaryDps) {
+          const found = sdp.siblingNames.map((n) => sibs.find((e) => e.id === `${parent}.${n}`)?.id).find(Boolean);
+          if (found) secondaryDpOptions[sdp.optionKey] = found;
+        }
+      } catch { /* ignore */ }
+    }
+
     onAdd({
       id: `w-${Date.now()}`,
       type,
@@ -79,6 +96,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
       gridPos: { x: 0, y: 9999, ...getEffectiveSize(type, widgetDefaults) },
       options: {
         icon: def.iconName,
+        ...secondaryDpOptions,
         ...(isCalendar
           ? {
               calendars: [{ id: Date.now().toString(), url: icalUrl.trim(), name: calName.trim() || 'Kalender', color: calColor, showName: true }],
@@ -110,6 +128,25 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
         <div className="flex gap-5">
           {/* Form */}
           <div className="flex-1 space-y-3.5 min-w-0">
+            {/* Quick-select templates */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{t('editor.manual.template')}</label>
+              <div className="flex flex-wrap gap-1.5">
+                {DP_TEMPLATES.map((tpl) => (
+                  <button key={tpl.id} type="button"
+                    onClick={() => { setType(tpl.widgetType); setGroupId(''); setDatapoint(''); }}
+                    className="px-2.5 py-1 text-xs rounded-lg transition-opacity hover:opacity-80"
+                    style={{
+                      background: type === tpl.widgetType ? 'var(--accent)22' : 'var(--app-bg)',
+                      color: type === tpl.widgetType ? 'var(--accent)' : 'var(--text-secondary)',
+                      border: `1px solid ${type === tpl.widgetType ? 'var(--accent)66' : 'var(--app-border)'}`,
+                    }}>
+                    {tpl.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="space-y-1.5">
               <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{t('editor.manual.type')}</label>
               <select value={type} onChange={(e) => { setType(e.target.value as WidgetType); setGroupId(''); setDatapoint(''); }}

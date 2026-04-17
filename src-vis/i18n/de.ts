@@ -297,6 +297,7 @@ export const de = {
 
   // ── Editor ────────────────────────────────────────────────────────────────────
   'editor.manual.title':          'Widget manuell hinzufügen',
+  'editor.manual.template':       'Schnellauswahl',
   'editor.manual.type':           'Typ',
   'editor.manual.titleField':     'Titel',
   'editor.manual.icalUrl':        'iCal-URL *',

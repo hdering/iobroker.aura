@@ -299,6 +299,7 @@ export const en: Record<TranslationKey, string> = {
 
   // ── Editor ────────────────────────────────────────────────────────────────────
   'editor.manual.title':          'Add Widget Manually',
+  'editor.manual.template':       'Quick Select',
   'editor.manual.type':           'Type',
   'editor.manual.titleField':     'Title',
   'editor.manual.icalUrl':        'iCal URL *',

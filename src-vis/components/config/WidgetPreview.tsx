@@ -163,6 +163,74 @@ function MockContent({ type, layout, title }: { type: WidgetType; layout: Widget
     );
   }
 
+  // Shutter
+  if (type === 'shutter') {
+    const closedFrac = 0.55; // 45% open mock
+    const slatStyle: React.CSSProperties = {
+      backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 6px, color-mix(in srgb, var(--text-secondary) 35%, transparent) 6px, color-mix(in srgb, var(--text-secondary) 35%, transparent) 8px)',
+    };
+    if (layout === 'minimal') {
+      return (
+        <div className="flex flex-col items-center justify-center h-full gap-1">
+          <div style={{ fontSize: 14, color: 'var(--text-secondary)' }}>▲</div>
+          <p className="text-3xl font-black leading-none" style={{ color: 'var(--text-primary)' }}>45%</p>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>■</div>
+          <div style={{ fontSize: 14, color: 'var(--text-secondary)' }}>▼</div>
+        </div>
+      );
+    }
+    if (layout === 'compact') {
+      return (
+        <div className="flex items-center gap-2 h-full">
+          <div style={{ width: 22, height: 22, border: '1px solid var(--app-border)', borderRadius: 3, overflow: 'hidden', flexShrink: 0, position: 'relative', background: 'var(--app-bg)' }}>
+            <div style={{ ...slatStyle, position: 'absolute', top: 0, left: 0, right: 0, height: `${closedFrac * 100}%` }} />
+          </div>
+          <div className="flex-1">
+            <p className="text-[10px] truncate" style={{ color: 'var(--text-secondary)' }}>{t}</p>
+            <p className="text-sm font-bold leading-tight" style={{ color: 'var(--text-primary)' }}>45% geöffnet</p>
+          </div>
+          <div className="flex gap-0.5 shrink-0" style={{ fontSize: 10, color: 'var(--text-secondary)' }}>
+            <span>▲</span><span>■</span><span>▼</span>
+          </div>
+        </div>
+      );
+    }
+    if (layout === 'card') {
+      return (
+        <div className="flex flex-col h-full gap-1.5">
+          <p className="text-[11px] truncate" style={{ color: 'var(--text-secondary)' }}>{t}</p>
+          <div className="flex-1 rounded" style={{ border: '1px solid var(--app-border)', background: 'var(--app-bg)', overflow: 'hidden', position: 'relative' }}>
+            <div style={{ ...slatStyle, position: 'absolute', top: 0, left: 0, right: 0, height: `${closedFrac * 100}%` }} />
+          </div>
+          <div className="flex justify-between items-center">
+            <p className="text-lg font-black" style={{ color: 'var(--text-primary)' }}>45%</p>
+            <div className="flex gap-0.5" style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+              <span>▲</span><span>■</span><span>▼</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    // default
+    return (
+      <div className="flex flex-col h-full gap-1.5">
+        <p className="text-[11px] truncate" style={{ color: 'var(--text-secondary)' }}>{t}</p>
+        <div className="flex gap-1.5 flex-1 min-h-0">
+          <div className="flex-1 rounded" style={{ border: '1px solid var(--app-border)', background: 'var(--app-bg)', overflow: 'hidden', position: 'relative' }}>
+            <div style={{ ...slatStyle, position: 'absolute', top: 0, left: 0, right: 0, height: `${closedFrac * 100}%` }} />
+          </div>
+          <div className="flex flex-col gap-0.5 justify-center text-[11px]" style={{ color: 'var(--text-secondary)' }}>
+            <span>▲</span><span>■</span><span>▼</span>
+          </div>
+        </div>
+        <div className="flex justify-between text-[10px]">
+          <span style={{ color: 'var(--text-secondary)' }}>45% geöffnet</span>
+          <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>45%</span>
+        </div>
+      </div>
+    );
+  }
+
   // Gauge
   if (type === 'gauge') {
     return (

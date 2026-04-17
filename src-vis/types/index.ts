@@ -34,7 +34,8 @@ export type WidgetType =
   | 'image'
   | 'iframe'
   | 'fill'
-  | 'trash';
+  | 'trash'
+  | 'shutter';
 
 export type WidgetLayout = 'default' | 'card' | 'compact' | 'minimal' | 'agenda' | 'flow' | 'battery' | 'production' | 'consumption' | 'loadpoints';
 
