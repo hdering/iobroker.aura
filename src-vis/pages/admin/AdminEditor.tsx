@@ -28,6 +28,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
   const [step, setStep] = useState<1 | 2>(1);
   const [type, setType] = useState<WidgetType>('value');
   const [templateId, setTemplateId] = useState<string>('');
+  const [typePicked, setTypePicked] = useState(false);
   const [layout, setLayout] = useState<WidgetLayout>('default');
   const [title, setTitle] = useState('');
   const [datapoint, setDatapoint] = useState('');
@@ -51,16 +52,18 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
         if (!entry) return;
         if (!title && entry.name) setTitle(entry.name);
         if (!unit && entry.unit) setUnit(entry.unit);
-        const detected = detectWidgetTypeFromRole(entry.role, entry.type);
-        if (detected) {
-          setType(detected);
-          const tpl = findTemplateByRole(entry.role, entry.type);
-          if (tpl) setTemplateId(tpl.id);
+        if (!typePicked) {
+          const detected = detectWidgetTypeFromRole(entry.role, entry.type);
+          if (detected) {
+            setType(detected);
+            const tpl = findTemplateByRole(entry.role, entry.type);
+            if (tpl) setTemplateId(tpl.id);
+          }
         }
       } catch { /* ignore */ }
     })();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [datapoint]);
+  }, [datapoint, typePicked]);
 
   const def = WIDGET_REGISTRY.find((w) => w.type === type)!;
   const addMode = WIDGET_BY_TYPE[type].addMode;
@@ -91,6 +94,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
   const selectTemplate = (tplId: string, widgetType: WidgetType) => {
     setType(widgetType);
     setTemplateId(tplId);
+    setTypePicked(true);
   };
 
   const handleAdd = async () => {
