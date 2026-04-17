@@ -786,7 +786,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
   };
   const [pickerTarget, setPickerTarget] = useState<'datapoint' | 'actualDatapoint' | 'localTempDatapoint' | 'shutter_activityDp' | 'shutter_directionDp' | 'shutter_stopDp' | 'gauge_pointer2Dp' | 'gauge_pointer3Dp' | null>(null);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
-  const Widget = getWidgetMap()[config.type];
+  const Widget = getWidgetMap()[config.type as keyof ReturnType<typeof getWidgetMap>];
   const currentLayout = config.layout ?? 'default';
   const overrides = config.options?.styleOverride as Record<string, string> | undefined;
 
@@ -909,11 +909,20 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
         </div>
       )}
 
-      <Widget
-        config={config.options?.hideTitle ? { ...config, title: '' } : config}
-        editMode={editMode}
-        onConfigChange={onConfigChange}
-      />
+      {Widget ? (
+        <Widget
+          config={config.options?.hideTitle ? { ...config, title: '' } : config}
+          editMode={editMode}
+          onConfigChange={onConfigChange}
+        />
+      ) : (
+        <div className="flex flex-col items-center justify-center h-full gap-1 text-center px-2"
+          style={{ color: 'var(--text-secondary)' }}>
+          <span className="text-lg">⚠️</span>
+          <span className="text-[10px]">Unbekannter Widget-Typ<br /><span className="font-mono opacity-60">{config.type}</span></span>
+          <span className="text-[9px] opacity-50">Bitte Seite neu laden</span>
+        </div>
+      )}
 
       {/* Last-change timestamp overlay */}
       {showLastChange && lastChangedTs > 0 && (() => {
