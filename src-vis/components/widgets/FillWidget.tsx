@@ -210,10 +210,14 @@ function TankHorizontal({
         );
       })}
 
-      {/* Fill-level indicator line */}
+      {/* Fill-level indicator line – white halo + colored line for contrast on any zone color */}
       {showValue && fillW > 0 && (
-        <line x1={bx + fillW} y1={by - 4} x2={bx + fillW} y2={by + bh + 4}
-          stroke={fillColor} strokeWidth={1.5} strokeDasharray="3 2" opacity={0.7} />
+        <g>
+          <line x1={bx + fillW} y1={by - 4} x2={bx + fillW} y2={by + bh + 4}
+            stroke="white" strokeWidth={3} opacity={0.5} />
+          <line x1={bx + fillW} y1={by - 4} x2={bx + fillW} y2={by + bh + 4}
+            stroke={fillColor} strokeWidth={1.5} />
+        </g>
       )}
 
       {/* Value label – right of tank */}
