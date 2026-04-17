@@ -189,6 +189,7 @@ export default function App() {
   const currentTheme = getTheme(themeId);
   const { connected, subscribe } = useIoBroker();
   const { clientId, clientName } = useConnectionStore();
+
   const styleRef = useRef<HTMLStyleElement | null>(null);
 
   // Determine which layout to display based on URL slug
@@ -271,41 +272,57 @@ export default function App() {
   }, [connected]);
 
   // ── React to external changes on aura.0.config.dashboard ─────────────────
-  // Subscribe once on mount (no `connected` gate).  The socket's `connect`
-  // handler (createSocket) automatically re-subscribes and fetches the current
-  // state for all active subscribers on every reconnect, so changes that
-  // happened during a connection drop are picked up as well.
+  // ── React to external changes on aura.0.config.dashboard ─────────────────
+  // Two complementary mechanisms:
+  //   1. stateChange subscription (immediate, works on direct connections)
+  //   2. Polling every CONFIG_POLL_MS (fallback for HTTPS/proxy setups where
+  //      push events may be dropped or not delivered reliably)
   // Own writes are not looped: saveAll() flushes to localStorage before
-  // saveToIoBroker() fires the event, so the comparison below finds no diff.
-  // No isDirty() guard: Zustand merging new default fields (e.g. after an
-  // upgrade) marks the store as dirty immediately on load, which would
-  // permanently block external updates on fresh or HTTPS clients.
+  // saveToIoBroker() fires, so comparison always finds no diff after own save.
+
+  const applyRemoteConfigRaw = useCallback((raw: string) => {
+    try {
+      const remote = JSON.parse(raw) as Record<string, unknown>;
+      let changed = false;
+      SYNC_STORE_KEYS.forEach((key) => {
+        const remoteVal = remote[key];
+        if (!remoteVal) return;
+        const remoteStr = typeof remoteVal === 'string' ? remoteVal : JSON.stringify(remoteVal);
+        if (remoteStr && remoteStr !== localStorage.getItem(key)) {
+          localStorage.setItem(key, remoteStr);
+          changed = true;
+        }
+      });
+      if (changed) {
+        useDashboardStore.persist.rehydrate();
+        useThemeStore.persist.rehydrate();
+        useGroupStore.persist.rehydrate();
+        useConfigStore.persist.rehydrate();
+      }
+    } catch { /* ignore malformed JSON */ }
+  }, []);
+
+  // 1. Subscription (immediate push when stateChange arrives)
   useEffect(() => {
     return subscribeStateDirect(IOBROKER_CONFIG_KEY, (state) => {
       if (!state?.val || !ioBrokerConfigLoaded.current) return;
-      const raw = String(state.val);
-      try {
-        const remote = JSON.parse(raw) as Record<string, unknown>;
-        let changed = false;
-        SYNC_STORE_KEYS.forEach((key) => {
-          const remoteVal = remote[key];
-          if (!remoteVal) return;
-          const remoteStr = typeof remoteVal === 'string' ? remoteVal : JSON.stringify(remoteVal);
-          if (remoteStr && remoteStr !== localStorage.getItem(key)) {
-            localStorage.setItem(key, remoteStr);
-            changed = true;
-          }
-        });
-        if (changed) {
-          useDashboardStore.persist.rehydrate();
-          useThemeStore.persist.rehydrate();
-          useGroupStore.persist.rehydrate();
-          useConfigStore.persist.rehydrate();
-        }
-      } catch { /* ignore malformed JSON */ }
+      applyRemoteConfigRaw(String(state.val));
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // 2. Polling every 10 s – fallback for HTTPS/proxy setups where push events
+  //    may not arrive reliably (e.g. separate socketio adapter on different port)
+  useEffect(() => {
+    if (!connected) return;
+    const id = setInterval(() => {
+      if (!ioBrokerConfigLoaded.current) return;
+      void getStateDirect(IOBROKER_CONFIG_KEY).then((state) => {
+        if (state?.val) applyRemoteConfigRaw(String(state.val));
+      });
+    }, 10_000);
+    return () => clearInterval(id);
+  }, [connected, applyRemoteConfigRaw]);
 
   // Activate tab when URL slug changes
   useEffect(() => {
