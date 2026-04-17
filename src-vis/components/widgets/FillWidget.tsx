@@ -210,6 +210,12 @@ function TankHorizontal({
         );
       })}
 
+      {/* Fill-level indicator line */}
+      {showValue && fillW > 0 && (
+        <line x1={bx + fillW} y1={by - 4} x2={bx + fillW} y2={by + bh + 4}
+          stroke={fillColor} strokeWidth={1.5} strokeDasharray="3 2" opacity={0.7} />
+      )}
+
       {/* Value label – right of tank */}
       {showValue && (
         <text x={bx + bw + 7} y={by + bh / 2 + 4} fontSize={12} fontWeight="bold"

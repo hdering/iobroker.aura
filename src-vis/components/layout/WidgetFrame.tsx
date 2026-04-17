@@ -1292,7 +1292,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
             </div>
 
             {/* Layout-Auswahl mit Live-Vorschau (non-header) */}
-            {config.type !== 'header' && config.type !== 'iframe' && (() => {
+            {config.type !== 'header' && config.type !== 'iframe' && config.type !== 'fill' && (() => {
               const activeLayout = config.layout ?? 'default';
               const layouts: { value: string; label: string }[] = [
                 { value: 'default', label: t('wf.edit.layout.standard') },
