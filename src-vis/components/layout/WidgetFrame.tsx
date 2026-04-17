@@ -42,6 +42,7 @@ import { TrashWidget, TrashConfig } from '../widgets/TrashWidget';
 import { AutoListWidget } from '../widgets/AutoListWidget';
 import { ShutterWidget } from '../widgets/ShutterWidget';
 import { JsonTableWidget } from '../widgets/JsonTableWidget';
+import { JsonTableConfig } from '../config/JsonTableConfig';
 
 // Stable empty array – avoids creating a new reference on every render when no conditions are set
 const NO_CONDITIONS: WidgetCondition[] = [];
@@ -1762,77 +1763,13 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
               })()}
 
               {/* ── JSON Table config ── */}
-              {config.type === 'jsontable' && (() => {
-                const o   = config.options ?? {};
-                const set = (patch: Record<string, unknown>) =>
-                  onConfigChange({ ...config, options: { ...o, ...patch } });
-                const jCls = 'w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none';
-                const jSty = { background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' };
-                const toggle = (key: string, def: boolean) => (
-                  <button onClick={() => set({ [key]: !((o[key] as boolean) ?? def) })}
-                    className="relative w-9 h-5 rounded-full transition-colors shrink-0"
-                    style={{ background: ((o[key] as boolean) ?? def) ? 'var(--accent)' : 'var(--app-border)' }}>
-                    <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
-                      style={{ left: ((o[key] as boolean) ?? def) ? '18px' : '2px' }} />
-                  </button>
-                );
-                const firstColHeader = (o.firstColHeader as boolean) ?? false;
-                return (
-                  <>
-                    {/* Header */}
-                    <div className="flex items-center justify-between">
-                      <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Kopfzeile anzeigen</label>
-                      {toggle('showHeader', true)}
-                    </div>
-                    {(o.showHeader ?? true) && (
-                      <div className="flex items-center gap-2">
-                        <input type="color" value={(o.headerBg as string) ?? '#6366f1'}
-                          onChange={(e) => set({ headerBg: e.target.value })}
-                          className="w-8 h-7 rounded cursor-pointer shrink-0" style={{ border: '1px solid var(--app-border)', padding: '1px' }} />
-                        <div className="flex-1">
-                          <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Header-Hintergrund</label>
-                          <input type="text" value={(o.headerBg as string) ?? 'var(--accent)'}
-                            onChange={(e) => set({ headerBg: e.target.value || undefined })}
-                            placeholder="var(--accent)" className={jCls} style={jSty} />
-                        </div>
-                      </div>
-                    )}
-                    {/* First column as label */}
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <label className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>Erste Spalte als Bezeichnung</label>
-                        <p className="text-[10px]" style={{ color: 'var(--text-secondary)', opacity: 0.7 }}>Hebt die erste Spalte hervor</p>
-                      </div>
-                      {toggle('firstColHeader', false)}
-                    </div>
-                    {firstColHeader && (
-                      <div className="flex items-center gap-2">
-                        <input type="color" value={(o.firstColBg as string) ?? '#1e1e2e'}
-                          onChange={(e) => set({ firstColBg: e.target.value })}
-                          className="w-8 h-7 rounded cursor-pointer shrink-0" style={{ border: '1px solid var(--app-border)', padding: '1px' }} />
-                        <div className="flex-1">
-                          <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Bezeichnungsspalte Hintergrund</label>
-                          <input type="text" value={(o.firstColBg as string) ?? 'var(--app-bg)'}
-                            onChange={(e) => set({ firstColBg: e.target.value || undefined })}
-                            placeholder="var(--app-bg)" className={jCls} style={jSty} />
-                        </div>
-                      </div>
-                    )}
-                    {/* Striped rows */}
-                    <div className="flex items-center justify-between">
-                      <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Zebra-Streifen</label>
-                      {toggle('striped', true)}
-                    </div>
-                    {/* Font size */}
-                    <div>
-                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Schriftgröße (px)</label>
-                      <input type="number" min={8} max={20} value={(o.fontSize as number) ?? 12}
-                        onChange={(e) => set({ fontSize: Number(e.target.value) })}
-                        className={jCls} style={jSty} />
-                    </div>
-                  </>
-                );
-              })()}
+              {config.type === 'jsontable' && (
+                <JsonTableConfig
+                  datapoint={config.datapoint ?? ''}
+                  options={config.options ?? {}}
+                  onChange={(patch) => onConfigChange({ ...config, options: { ...(config.options ?? {}), ...patch } })}
+                />
+              )}
 
               {/* ── Weather config ── */}
               {config.type === 'weather' && (() => {

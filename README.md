@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.42 (2026-04-17)
+- JSON Table widget: column editor – reorder, rename, hide, HTML per column; search bar toggle; header text color; load columns from live datapoint value
+
 ### 0.4.41 (2026-04-17)
 - New widget: JSON Table – display JSON datapoints as scrollable tables with configurable header/label-column colors
 - Dynamic List (formerly Auto List): improved search UX, filter change replaces entries, fixed dropdown close on outside click

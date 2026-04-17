@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.41",
+    "version": "0.4.42",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.42": {
+        "en": "JSON Table widget: column editor (reorder, rename, hide, HTML toggle), search bar, header text color; load columns from live datapoint value",
+        "de": "JSON-Tabelle Widget: Spalten-Editor (Reihenfolge, Umbenennen, Ausblenden, HTML), Suchleiste, Header-Textfarbe; Spalten aus aktuellem Datenpunkt laden",
+        "ru": "Виджет JSON-Таблица: редактор столбцов (порядок, переименование, скрытие, HTML), строка поиска, цвет текста заголовка; загрузка столбцов из текущего значения точки данных",
+        "pt": "Widget Tabela JSON: editor de colunas (reordenar, renomear, ocultar, HTML), barra de pesquisa, cor do texto do cabeçalho; carregar colunas do valor do datapoint",
+        "nl": "JSON-tabel widget: kolomeditor (volgorde, hernoemen, verbergen, HTML), zoekbalk, koptekstkleur; kolommen laden vanuit datapoint-waarde",
+        "fr": "Widget Tableau JSON: éditeur de colonnes (réordonnancement, renommage, masquage, HTML), barre de recherche, couleur texte en-tête; chargement des colonnes depuis la valeur du datapoint",
+        "it": "Widget Tabella JSON: editor colonne (riordina, rinomina, nascondi, HTML), barra di ricerca, colore testo intestazione; carica colonne dal valore del datapoint",
+        "es": "Widget Tabla JSON: editor de columnas (reordenar, renombrar, ocultar, HTML), barra de búsqueda, color texto cabecera; cargar columnas desde el valor del datapoint",
+        "pl": "Widget Tabela JSON: edytor kolumn (zmiana kolejności, zmiana nazwy, ukrycie, HTML), pasek wyszukiwania, kolor tekstu nagłówka; ładowanie kolumn z wartości punktu danych",
+        "uk": "Віджет JSON-Таблиця: редактор стовпців (порядок, перейменування, приховування, HTML), рядок пошуку, колір тексту заголовка; завантаження стовпців з поточного значення точки даних",
+        "zh-cn": "JSON 表格小部件：列编辑器（重新排序、重命名、隐藏、HTML 开关），搜索栏，表头文字颜色；从数据点当前值加载列"
+      },
       "0.4.41": {
         "en": "New widget: JSON Table – display JSON datapoints as scrollable tables with configurable colors; Dynamic List improvements; iFrame load-failure hint; various widget and dialog fixes",
         "de": "Neues Widget: JSON-Tabelle – JSON-Datenpunkte als scrollbare Tabelle mit konfigurierbaren Farben; Dynamische Liste verbessert; iFrame Ladehinweis; diverse Widget- und Dialog-Fixes",
@@ -183,19 +196,6 @@
         "pl": "Autouzupełnianie punktu danych: tytuł i jednostka teraz ustawiane w ręcznym oknie dialogowym; poprawiono ostrzeżenie y:null ReactGridLayout; poprawiono ostrzeżenie ResponsiveContainer 0x0",
         "uk": "Автозаповнення точки даних: заголовок і одиниця тепер визначаються в діалозі ручного віджета; виправлено попередження y:null ReactGridLayout; виправлено попередження ResponsiveContainer 0x0",
         "zh-cn": "数据点自动填充：现在在手动小部件对话框中解析标题和单位；修复 y:null ReactGridLayout 警告；修复 ResponsiveContainer 0x0 警告"
-      },
-      "0.4.35": {
-        "en": "Datapoint auto-fill: title and unit now also resolved when typing ID directly or using the manual wizard",
-        "de": "Datenpunkt-Autofill: Titel und Einheit werden nun auch beim direkten Eingeben der ID oder im manuellen Wizard befüllt",
-        "ru": "Автозаполнение точки данных: заголовок и единица теперь также определяются при прямом вводе ID или в ручном мастере",
-        "pt": "Preenchimento automático de datapoint: título e unidade agora também resolvidos ao digitar ID diretamente ou no wizard manual",
-        "nl": "Datapunt-autofill: titel en eenheid worden nu ook ingevuld bij directe invoer van het ID of via de handmatige wizard",
-        "fr": "Remplissage automatique du point de données: titre et unité maintenant résolus lors de la saisie directe de l'ID ou via l'assistant manuel",
-        "it": "Compilazione automatica datapoint: titolo e unità ora risolti anche digitando l'ID direttamente o tramite procedura guidata manuale",
-        "es": "Autocompletado de datapoint: título y unidad ahora también resueltos al escribir el ID directamente o usando el asistente manual",
-        "pl": "Automatyczne uzupełnianie punktu danych: tytuł i jednostka są teraz ustawiane również przy bezpośrednim wpisaniu ID lub w kreatorze ręcznym",
-        "uk": "Автозаповнення точки даних: заголовок і одиниця тепер також визначаються при прямому введенні ID або в ручному майстрі",
-        "zh-cn": "数据点自动填充：现在直接输入 ID 或使用手动向导时也会自动解析标题和单位"
       }
     }
   },
