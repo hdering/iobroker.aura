@@ -319,6 +319,7 @@ export const en: Record<TranslationKey, string> = {
   'editor.tab.noWidgets': 'No tab selected or tab is empty.',
 
   'editor.layouts.standard': 'Default',
+  'editor.layouts.default':  'Default',
   'editor.layouts.card':     'Card',
   'editor.layouts.compact':  'Compact',
   'editor.layouts.minimal':  'Minimal',
@@ -667,7 +668,8 @@ export const en: Record<TranslationKey, string> = {
   'widget.echart':    'Chart (Advanced (ECharts))',
   'widget.gauge':     'Gauge',
   'widget.list':      'Group List',
-  'widget.autolist':  'Dynamic List',
+  'widget.autolist':   'Dynamic List',
+  'widget.jsontable':  'JSON Table',
   'widget.clock':     'Clock',
   'widget.calendar':  'Calendar',
   'widget.weather':   'Weather',

@@ -12,7 +12,7 @@
 
 import {
   Zap, TrendingUp, SlidersHorizontal, Thermometer, BarChart2, List,
-  Clock, CalendarDays, Heading2, Layers2, Cloud, Gauge, Camera, ImageIcon, MonitorDot, Droplets, Truck, AlignJustify,
+  Clock, CalendarDays, Heading2, Layers2, Cloud, Gauge, Camera, ImageIcon, MonitorDot, Droplets, Truck, AlignJustify, Table2,
   type LucideIcon,
 } from 'lucide-react';
 import type { WidgetType } from './types';
@@ -223,6 +223,14 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 4,            defaultH: 4,
     addMode: 'free',        widgetGroup: 'layout',
     mock: { t: 'Gruppe', v: '' },
+  },
+  {
+    type: 'jsontable',
+    label: 'JSON-Tabelle',  shortLabel: 'JSON',
+    Icon: Table2,           iconName: 'Table2',     color: '#0ea5e9',
+    defaultW: 4,            defaultH: 3,
+    addMode: 'datapoint',   widgetGroup: 'special',
+    mock: { t: 'JSON-Tabelle', v: '' },
   },
 ];
 

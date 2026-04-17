@@ -317,6 +317,7 @@ export const de = {
   'editor.tab.noWidgets':  'Kein Tab ausgewählt oder Tab leer.',
 
   'editor.layouts.standard':  'Standard',
+  'editor.layouts.default':   'Standard',
   'editor.layouts.card':      'Karte',
   'editor.layouts.compact':   'Kompakt',
   'editor.layouts.minimal':   'Minimal',
@@ -665,7 +666,8 @@ export const de = {
   'widget.echart':    'Diagramm (erweitert (echarts))',
   'widget.gauge':     'Gauge',
   'widget.list':      'Gruppenliste',
-  'widget.autolist':  'Dynamische Liste',
+  'widget.autolist':   'Dynamische Liste',
+  'widget.jsontable':  'JSON-Tabelle',
   'widget.clock':     'Uhrzeit',
   'widget.calendar':  'Kalender',
   'widget.weather':   'Wetter',

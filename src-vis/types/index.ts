@@ -35,7 +35,8 @@ export type WidgetType =
   | 'iframe'
   | 'fill'
   | 'trash'
-  | 'shutter';
+  | 'shutter'
+  | 'jsontable';
 
 export type WidgetLayout = 'default' | 'card' | 'compact' | 'minimal' | 'agenda' | 'flow' | 'battery' | 'production' | 'consumption' | 'loadpoints';
 
