@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { RefreshCw, Search, Check, X, Plus, ChevronDown, Settings2, ChevronRight } from 'lucide-react';
+import { RefreshCw, Search, Check, X, ChevronDown, Settings2, ChevronRight } from 'lucide-react';
 import type { WidgetConfig } from '../../types';
 import { discoverDatapoints, loadFilterOptions } from '../widgets/AutoListWidget';
 import type { AutoListOptions, AutoListEntry, DiscoveredDp } from '../widgets/AutoListWidget';
@@ -231,8 +231,6 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
 
-  // Manual add
-  const [manualId, setManualId] = useState('');
 
   const setOpts = (patch: Partial<AutoListOptions>) =>
     onConfigChange({ ...config, options: { ...opts, ...patch } });
@@ -284,14 +282,7 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
   const updateEntry = (id: string, patch: Partial<AutoListEntry>) =>
     setOpts({ entries: (opts.entries ?? []).map(e => e.id === id ? { ...e, ...patch } : e) });
 
-  const addManual = () => {
-    const id = manualId.trim();
-    if (!id || (opts.entries ?? []).some(e => e.id === id)) return;
-    setOpts({ entries: [...(opts.entries ?? []), { id }] });
-    setManualId('');
-  };
-
-  const iSty = { background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' } as React.CSSProperties;
+const iSty = { background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' } as React.CSSProperties;
   const iCls = 'w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none';
   const canSearch = selRoles.length > 0 || selRooms.length > 0 || selFuncs.length > 0 || !!idPat;
 
@@ -416,21 +407,6 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
             ))}
           </div>
         )}
-        <div className="flex gap-1">
-          <input
-            value={manualId}
-            onChange={e => setManualId(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && addManual()}
-            placeholder={t('autolist.manualPh')}
-            className="flex-1 text-[10px] rounded-lg px-2 py-1.5 font-mono focus:outline-none min-w-0"
-            style={iSty}
-          />
-          <button onClick={addManual} disabled={!manualId.trim()}
-            className="shrink-0 px-2 py-1.5 rounded-lg hover:opacity-80 disabled:opacity-40"
-            style={{ background: 'var(--app-bg)', color: 'var(--accent)', border: '1px solid var(--app-border)' }}>
-            <Plus size={12} />
-          </button>
-        </div>
       </div>
 
       {/* ── Settings ── */}
