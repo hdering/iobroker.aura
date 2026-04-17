@@ -116,7 +116,12 @@ Releases are staged — never go straight to stable for significant changes.
   "
   ```
 
-### Steps for every release
+### Workflow: Coding vs. Releasing
+
+**After completing a task:** only commit locally — do NOT push and do NOT create a GitHub release.
+The user will explicitly say "neues release" (or similar) when a release is wanted.
+
+### Steps when the user requests a release
 
 1. Bump version in **both** `package.json` AND `io-package.json` (must match)
 2. Add entry to `news` in `io-package.json` (EN + DE minimum, all 11 languages preferred)
@@ -125,8 +130,9 @@ Releases are staged — never go straight to stable for significant changes.
    - Every version that appears in `io-package.json` news **must** also appear in README.md Changelog
 4. Run the news validation checks above
 5. `npm run build:adapter`
-6. `git add ... && git commit && git push`
-6. Create GitHub release:
+6. `git add -A && git commit` (if there are uncommitted changes)
+7. `git push`
+8. Create GitHub release:
    - **Beta** (new features, not yet fully tested):
      ```
      "/c/Program Files/GitHub CLI/gh.exe" release create vX.Y.Z --title "vX.Y.Z" --notes "..." --prerelease

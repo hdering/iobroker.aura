@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.37",
+    "version": "0.4.40",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,45 @@
       }
     ],
     "news": {
+      "0.4.40": {
+        "en": "Frontend: auto-reload when aura.0.config.dashboard is changed externally (ioBroker admin / script)",
+        "de": "Frontend: automatisches Nachladen wenn aura.0.config.dashboard extern geändert wird (ioBroker Admin / Skript)",
+        "ru": "Фронтенд: автоматическое обновление при внешнем изменении aura.0.config.dashboard (ioBroker Admin / скрипт)",
+        "pt": "Frontend: recarregamento automático quando aura.0.config.dashboard é alterado externamente (Admin / script ioBroker)",
+        "nl": "Frontend: automatisch herladen als aura.0.config.dashboard extern wordt gewijzigd (ioBroker admin / script)",
+        "fr": "Frontend: rechargement automatique lorsque aura.0.config.dashboard est modifié en externe (admin ioBroker / script)",
+        "it": "Frontend: ricaricamento automatico quando aura.0.config.dashboard viene modificato esternamente (admin ioBroker / script)",
+        "es": "Frontend: recarga automática cuando aura.0.config.dashboard se cambia externamente (admin ioBroker / script)",
+        "pl": "Frontend: automatyczne przeładowanie gdy aura.0.config.dashboard zostanie zmienione zewnętrznie (admin ioBroker / skrypt)",
+        "uk": "Фронтенд: автоматичне оновлення при зовнішній зміні aura.0.config.dashboard (адмін ioBroker / скрипт)",
+        "zh-cn": "前端：当 aura.0.config.dashboard 被外部修改时（ioBroker 管理界面/脚本）自动重新加载"
+      },
+      "0.4.39": {
+        "en": "Theme & CSS: toggle to enable/disable custom CSS without deleting it",
+        "de": "Theme & CSS: Schalter zum Aktivieren/Deaktivieren des Custom CSS ohne es zu löschen",
+        "ru": "Тема и CSS: переключатель для включения/отключения пользовательского CSS без удаления",
+        "pt": "Tema & CSS: botão para ativar/desativar o CSS personalizado sem o apagar",
+        "nl": "Thema & CSS: schakelaar om het aangepaste CSS in/uit te schakelen zonder het te verwijderen",
+        "fr": "Thème & CSS: bouton pour activer/désactiver le CSS personnalisé sans le supprimer",
+        "it": "Tema & CSS: interruttore per abilitare/disabilitare il CSS personalizzato senza eliminarlo",
+        "es": "Tema & CSS: interruptor para activar/desactivar el CSS personalizado sin eliminarlo",
+        "pl": "Motyw i CSS: przełącznik do włączania/wyłączania niestandardowego CSS bez jego usuwania",
+        "uk": "Тема та CSS: перемикач для увімкнення/вимкнення користувацького CSS без видалення",
+        "zh-cn": "主题与 CSS：可在不删除自定义 CSS 的情况下启用/禁用它的开关"
+      },
+      "0.4.38": {
+        "en": "Widget IDs no longer include the widget type (w-TIMESTAMP instead of gauge-TIMESTAMP) – IDs stay stable when the type is changed",
+        "de": "Widget-IDs enthalten keinen Typ mehr (w-TIMESTAMP statt gauge-TIMESTAMP) – IDs bleiben stabil wenn der Typ geändert wird",
+        "ru": "ID виджетов больше не содержат тип (w-TIMESTAMP вместо gauge-TIMESTAMP) – ID остаются стабильными при смене типа",
+        "pt": "IDs de widget já não incluem o tipo (w-TIMESTAMP em vez de gauge-TIMESTAMP) – IDs ficam estáveis ao mudar o tipo",
+        "nl": "Widget-IDs bevatten geen type meer (w-TIMESTAMP in plaats van gauge-TIMESTAMP) – IDs blijven stabiel bij typewijziging",
+        "fr": "Les IDs de widget n'incluent plus le type (w-TIMESTAMP au lieu de gauge-TIMESTAMP) – les IDs restent stables lors du changement de type",
+        "it": "Gli ID widget non includono più il tipo (w-TIMESTAMP invece di gauge-TIMESTAMP) – gli ID rimangono stabili quando si cambia tipo",
+        "es": "Los IDs de widget ya no incluyen el tipo (w-TIMESTAMP en lugar de gauge-TIMESTAMP) – los IDs se mantienen estables al cambiar el tipo",
+        "pl": "ID widgetów nie zawierają już typu (w-TIMESTAMP zamiast gauge-TIMESTAMP) – ID pozostają stabilne przy zmianie typu",
+        "uk": "ID віджетів більше не містять тип (w-TIMESTAMP замість gauge-TIMESTAMP) – ID залишаються стабільними при зміні типу",
+        "zh-cn": "小部件 ID 不再包含类型（w-TIMESTAMP 而非 gauge-TIMESTAMP）— 更改类型时 ID 保持稳定"
+      },
       "0.4.37": {
         "en": "Frontend: fix active tab resetting to first tab on F5 / after ioBroker config reload",
         "de": "Frontend: Aktiver Tab springt nach F5 oder ioBroker-Config-Reload nicht mehr auf den ersten Tab zurück",
@@ -183,20 +222,8 @@
         "pl": "Kalendarz: automatyczna ponowna próba przy timeout (pauza 5s); błędy klienta logowane przez aura.0.calendar.clientError",
         "uk": "Календар: автоматична повторна спроба при таймауті (пауза 5с); помилки клієнта логуються через aura.0.calendar.clientError",
         "zh-cn": "日历：fetch 超时时自动重试一次（5秒延迟）；通过 aura.0.calendar.clientError 将客户端错误记录到 ioBroker"
-      },
-      "0.4.31": {
-        "en": "iFrame widget: 'Fill tab' option – fills entire tab area; only activatable when no other widgets in tab",
-        "de": "iFrame-Widget: Option 'Tab ausfüllen' – füllt den gesamten Tab-Bereich; nur aktivierbar wenn keine anderen Widgets im Tab",
-        "ru": "Виджет iFrame: опция 'Заполнить вкладку' – заполняет всю область вкладки; активируется только при отсутствии других виджетов",
-        "pt": "Widget iFrame: opção 'Preencher tab' – preenche toda a área do separador; só ativável sem outros widgets no tab",
-        "nl": "iFrame-widget: optie 'Tab vullen' – vult het volledige tabblad; alleen activeerbaar zonder andere widgets in het tabblad",
-        "fr": "Widget iFrame: option 'Remplir l\\'onglet' – remplit toute la zone de l'onglet; activable uniquement sans autres widgets",
-        "it": "Widget iFrame: opzione 'Riempi scheda' – riempie l'intera area della scheda; attivabile solo senza altri widget",
-        "es": "Widget iFrame: opción 'Llenar pestaña' – rellena toda el área de la pestaña; solo activable sin otros widgets",
-        "pl": "Widget iFrame: opcja 'Wypełnij kartę' – wypełnia cały obszar karty; aktywowalna tylko bez innych widgetów",
-        "uk": "Віджет iFrame: опція 'Заповнити вкладку' – заповнює всю область вкладки; активується лише за відсутності інших віджетів",
-        "zh-cn": "iFrame 小部件：'填充选项卡'选项 – 填满整个选项卡区域；仅在选项卡中没有其他小部件时可激活"
-      }}
+      }
+    }
   },
   "native": {
     "customUrl": ""

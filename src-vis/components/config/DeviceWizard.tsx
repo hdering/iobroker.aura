@@ -66,7 +66,7 @@ export function DeviceWizard({ onAdd, onClose }: DeviceWizardProps) {
 
   const handleAdd = () => {
     onAdd(Array.from(selections.values()).map((sel, i) => ({
-      id: `${sel.widgetType}-${Date.now()}-${i}`,
+      id: `w-${Date.now()}-${i}`,
       type: sel.widgetType,
       title: sel.title,
       datapoint: sel.state.id,

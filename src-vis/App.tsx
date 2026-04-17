@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Sun, Moon, Settings } from 'lucide-react';
 import { useIoBroker, getStateDirect, setStateDirect, setObjectDirect, subscribeStateDirect } from './hooks/useIoBroker';
+import { isDirty } from './store/persistManager';
 import { useConnectionStore } from './store/connectionStore';
 import { useConfigStore } from './store/configStore';
 import { useDashboardStore, useLayoutBySlug } from './store/dashboardStore';
@@ -232,8 +233,8 @@ export default function App() {
       styleRef.current.id = 'aura-custom-css';
       document.head.appendChild(styleRef.current);
     }
-    styleRef.current.textContent = frontend.customCSS;
-  }, [frontend.customCSS]);
+    styleRef.current.textContent = (frontend.customCSSEnabled ?? true) ? frontend.customCSS : '';
+  }, [frontend.customCSS, frontend.customCSSEnabled]);
 
   // ── Load config from ioBroker on first connect ─────────────────────────────
   // localStorage is browser-local; ioBroker holds the authoritative config so
@@ -269,6 +270,41 @@ export default function App() {
       } catch { /* ignore malformed JSON */ }
     });
   }, [connected]);
+
+  // ── React to external changes on aura.0.config.dashboard ─────────────────
+  // Subscribe once on mount (no `connected` gate).  The socket's `connect`
+  // handler (createSocket) automatically re-subscribes and fetches the current
+  // state for all active subscribers on every reconnect, so changes that
+  // happened during a connection drop are picked up as well.
+  // Own writes are not looped: saveAll() flushes to localStorage before
+  // saveToIoBroker() fires the event, so the comparison finds no diff.
+  useEffect(() => {
+    return subscribeStateDirect(IOBROKER_CONFIG_KEY, (state) => {
+      if (!state?.val || !ioBrokerConfigLoaded.current) return;
+      if (isDirty()) return; // unsaved local changes take priority
+      const raw = String(state.val);
+      try {
+        const remote = JSON.parse(raw) as Record<string, unknown>;
+        let changed = false;
+        SYNC_STORE_KEYS.forEach((key) => {
+          const remoteVal = remote[key];
+          if (!remoteVal) return;
+          const remoteStr = typeof remoteVal === 'string' ? remoteVal : JSON.stringify(remoteVal);
+          if (remoteStr && remoteStr !== localStorage.getItem(key)) {
+            localStorage.setItem(key, remoteStr);
+            changed = true;
+          }
+        });
+        if (changed) {
+          useDashboardStore.persist.rehydrate();
+          useThemeStore.persist.rehydrate();
+          useGroupStore.persist.rehydrate();
+          useConfigStore.persist.rehydrate();
+        }
+      } catch { /* ignore malformed JSON */ }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Activate tab when URL slug changes
   useEffect(() => {

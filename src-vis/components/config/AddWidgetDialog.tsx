@@ -46,7 +46,7 @@ export function AddWidgetDialog({ onAdd, onClose }: AddWidgetDialogProps) {
       }
 
       onAdd({
-        id: `${type}-${Date.now()}`,
+        id: `w-${Date.now()}`,
         type,
         title: finalTitle || def.label,
         datapoint: id,

@@ -977,7 +977,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                   // No other tabs – duplicate directly on same tab
                   addWidgetToLayoutTab(activeLayoutId, activeTabId, {
                     ...config,
-                    id: `${config.type}-${Date.now()}`,
+                    id: `w-${Date.now()}`,
                     gridPos: { ...config.gridPos, y: 9999 },
                   });
                   openPanelFor(null);
@@ -1002,7 +1002,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                   onClick={() => {
                     addWidgetToLayoutTab(activeLayoutId, activeTabId, {
                       ...config,
-                      id: `${config.type}-${Date.now()}`,
+                      id: `w-${Date.now()}`,
                       gridPos: { ...config.gridPos, y: 9999 },
                     });
                     openPanelFor(null);
@@ -1030,7 +1030,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                           onClick={() => {
                             addWidgetToLayoutTab(m.layoutId, m.tabId, {
                               ...config,
-                              id: `${config.type}-${Date.now()}`,
+                              id: `w-${Date.now()}`,
                               gridPos: { ...config.gridPos, y: 9999 },
                             });
                             openPanelFor(null);

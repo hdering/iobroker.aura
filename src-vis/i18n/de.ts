@@ -266,6 +266,7 @@ export const de = {
   'theme.css.subtitle': 'Wird direkt auf das Frontend angewendet. CSS-Variablen, Animationen, Font-Overrides etc.',
   'theme.css.lines':    '{count} Zeilen',
   'theme.css.empty':    'Kein Custom CSS',
+  'theme.css.enabled':  'CSS aktiv',
 
   // ── Widgets page ──────────────────────────────────────────────────────────────
   'widgets.fromIoBroker':  'Aus ioBroker wählen',

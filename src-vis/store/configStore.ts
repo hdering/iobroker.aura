@@ -4,6 +4,7 @@ import { managedStorage } from './persistManager';
 
 export interface FrontendSettings {
   customCSS: string;
+  customCSSEnabled: boolean;
   showHeader: boolean;
   headerTitle: string;
   showConnectionBadge: boolean;
@@ -38,6 +39,7 @@ interface ConfigState {
 
 export const DEFAULT_FRONTEND: FrontendSettings = {
   customCSS: '',
+  customCSSEnabled: true,
   showHeader: true,
   headerTitle: 'Aura',
   showConnectionBadge: true,

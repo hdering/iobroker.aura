@@ -645,7 +645,7 @@ function NewWidgetDialog({
     if (!canAdd || !targetTabId) return;
     const selectedGroup = isList ? groups.find((g) => g.id === groupId) : undefined;
     onAdd(targetTabId, {
-      id: `${type}-${Date.now()}`,
+      id: `w-${Date.now()}`,
       type,
       layout,
       title: title || (isList && selectedGroup ? selectedGroup.name : def.label),

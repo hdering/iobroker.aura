@@ -268,6 +268,7 @@ export const en: Record<TranslationKey, string> = {
   'theme.css.subtitle': 'Applied directly to the frontend. CSS variables, animations, font overrides, etc.',
   'theme.css.lines':    '{count} lines',
   'theme.css.empty':    'No Custom CSS',
+  'theme.css.enabled':  'CSS active',
 
   // ── Widgets page ──────────────────────────────────────────────────────────────
   'widgets.fromIoBroker': 'Select from ioBroker',

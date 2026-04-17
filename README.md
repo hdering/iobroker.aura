@@ -127,6 +127,15 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.40 (2026-04-17)
+- Frontend: auto-reload when `aura.0.config.dashboard` is changed externally (ioBroker admin / script)
+
+### 0.4.39 (2026-04-17)
+- Theme & CSS: toggle to enable/disable custom CSS without deleting it
+
+### 0.4.38 (2026-04-17)
+- Widget IDs no longer include the widget type (`w-TIMESTAMP` instead of `gauge-TIMESTAMP`) – IDs stay stable when the type is changed
+
 ### 0.4.37 (2026-04-16)
 - Frontend: fix active tab resetting to first tab on F5 or after ioBroker config reload
 

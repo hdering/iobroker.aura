@@ -265,17 +265,36 @@ export function AdminTheme() {
 
       {/* Custom CSS */}
       <div className="rounded-xl p-6" style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}>
-        <h2 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{t('theme.css.title')}</h2>
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="font-semibold" style={{ color: 'var(--text-primary)' }}>{t('theme.css.title')}</h2>
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{t('theme.css.enabled')}</span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={frontend.customCSSEnabled ?? true}
+              onClick={() => updateFrontend({ customCSSEnabled: !(frontend.customCSSEnabled ?? true) })}
+              className="relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors"
+              style={{ background: (frontend.customCSSEnabled ?? true) ? 'var(--accent)' : 'var(--app-border)' }}
+            >
+              <span
+                className="inline-block h-4 w-4 rounded-full bg-white shadow transition-transform m-0.5"
+                style={{ transform: (frontend.customCSSEnabled ?? true) ? 'translateX(16px)' : 'translateX(0)' }}
+              />
+            </button>
+          </label>
+        </div>
         <p className="text-xs mb-4" style={{ color: 'var(--text-secondary)' }}>
           {t('theme.css.subtitle')}
         </p>
         <textarea
           value={frontend.customCSS}
           onChange={(e) => updateFrontend({ customCSS: e.target.value })}
+          disabled={!(frontend.customCSSEnabled ?? true)}
           rows={12}
           spellCheck={false}
           placeholder={`/* Beispiele */\n:root { --widget-radius: 0.5rem; }\n.widget-card { transition: transform 0.2s; }\n.widget-card:hover { transform: scale(1.02); }\n@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');\nbody { font-family: 'Inter', sans-serif; }`}
-          className="w-full rounded-xl px-4 py-3 text-xs font-mono focus:outline-none resize-none"
+          className="w-full rounded-xl px-4 py-3 text-xs font-mono focus:outline-none resize-none disabled:opacity-40 disabled:cursor-not-allowed"
           style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)', lineHeight: 1.7 }}
         />
         <p className="text-xs mt-2" style={{ color: 'var(--text-secondary)' }}>

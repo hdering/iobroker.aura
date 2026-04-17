@@ -57,7 +57,7 @@ export function ImportWidgetDialog({
     onAdd(
       {
         ...parsed,
-        id: `${parsed.type}-${Date.now()}`,
+        id: `w-${Date.now()}`,
         datapoint: datapoint.trim(),
         gridPos: { ...parsed.gridPos, x: 0, y: 9999 },
       },

@@ -71,7 +71,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
     }
 
     onAdd({
-      id: `${type}-${Date.now()}`,
+      id: `w-${Date.now()}`,
       type,
       layout,
       title: finalTitle || (isList && selectedGroup ? selectedGroup.name : def.label),
