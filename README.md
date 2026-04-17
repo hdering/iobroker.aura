@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.46 (2026-04-17)
+- Fix: iFrame fullscreen overlay now reliably closes when switching tabs (synchronous render-time check replaces async effect)
+
 ### 0.4.45 (2026-04-17)
 - Fix: iFrame fullscreen overlay now closes automatically when switching tabs
 

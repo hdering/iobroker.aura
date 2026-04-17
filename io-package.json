@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.45",
+    "version": "0.4.46",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.46": {
+        "en": "Fix: iFrame fullscreen overlay now reliably closes when switching tabs (synchronous render-time check replaces async effect)",
+        "de": "Fix: iFrame-Vollbild-Overlay schließt sich beim Tab-Wechsel jetzt zuverlässig (synchrone Prüfung statt asynchronem Effect)",
+        "ru": "Исправление: оверлей iFrame теперь надёжно закрывается при смене вкладки (синхронная проверка вместо асинхронного эффекта)",
+        "pt": "Correção: o overlay iFrame fecha-se de forma fiável ao mudar de aba (verificação síncrona substitui efeito assíncrono)",
+        "nl": "Fix: iFrame-overlay sluit nu betrouwbaar bij tab-wissel (synchrone controle vervangt async effect)",
+        "fr": "Correction: l'overlay iFrame se ferme désormais fiablement lors du changement d'onglet (vérification synchrone remplace l'effet asynchrone)",
+        "it": "Fix: l'overlay iFrame si chiude ora in modo affidabile al cambio scheda (controllo sincrono sostituisce l'effetto asincrono)",
+        "es": "Corrección: el overlay iFrame se cierra de forma fiable al cambiar de pestaña (verificación síncrona reemplaza el efecto asíncrono)",
+        "pl": "Poprawka: nakładka iFrame teraz niezawodnie zamyka się przy zmianie zakładki (sprawdzenie synchroniczne zastępuje asynchroniczny efekt)",
+        "uk": "Виправлення: оверлей iFrame тепер надійно закривається при зміні вкладки (синхронна перевірка замість асинхронного ефекту)",
+        "zh-cn": "修复：切换标签时 iFrame 全屏覆盖层现在可靠关闭（同步渲染时检查替代异步 effect）"
+      },
       "0.4.45": {
         "en": "Fix: iFrame fullscreen overlay now closes automatically when switching tabs",
         "de": "Fix: iFrame-Vollbild-Overlay schließt sich automatisch beim Tab-Wechsel",
@@ -183,19 +196,6 @@
         "pl": "Frontend: automatyczne przeładowanie gdy aura.0.config.dashboard zostanie zmienione zewnętrznie (admin ioBroker / skrypt)",
         "uk": "Фронтенд: автоматичне оновлення при зовнішній зміні aura.0.config.dashboard (адмін ioBroker / скрипт)",
         "zh-cn": "前端：当 aura.0.config.dashboard 被外部修改时（ioBroker 管理界面/脚本）自动重新加载"
-      },
-      "0.4.39": {
-        "en": "Theme & CSS: toggle to enable/disable custom CSS without deleting it",
-        "de": "Theme & CSS: Schalter zum Aktivieren/Deaktivieren des Custom CSS ohne es zu löschen",
-        "ru": "Тема и CSS: переключатель для включения/отключения пользовательского CSS без удаления",
-        "pt": "Tema & CSS: botão para ativar/desativar o CSS personalizado sem o apagar",
-        "nl": "Thema & CSS: schakelaar om het aangepaste CSS in/uit te schakelen zonder het te verwijderen",
-        "fr": "Thème & CSS: bouton pour activer/désactiver le CSS personnalisé sans le supprimer",
-        "it": "Tema & CSS: interruttore per abilitare/disabilitare il CSS personalizzato senza eliminarlo",
-        "es": "Tema & CSS: interruptor para activar/desactivar el CSS personalizado sin eliminarlo",
-        "pl": "Motyw i CSS: przełącznik do włączania/wyłączania niestandardowego CSS bez jego usuwania",
-        "uk": "Тема та CSS: перемикач для увімкнення/вимкнення користувацького CSS без видалення",
-        "zh-cn": "主题与 CSS：可在不删除自定义 CSS 的情况下启用/禁用它的开关"
       }
     }
   },

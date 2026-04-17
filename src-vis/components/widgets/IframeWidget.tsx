@@ -93,6 +93,7 @@ export function IframeWidget({ config }: WidgetProps) {
               sandboxAttr,
               iframeKey: `fs-${iframeKey}`,
               title: config.title || 'iFrame',
+              widgetId: config.id,
             })}
             className="nodrag absolute top-1.5 right-1.5 z-[2] w-7 h-7 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
             style={{ background: 'rgba(0,0,0,0.55)', color: '#fff', backdropFilter: 'blur(4px)' }}

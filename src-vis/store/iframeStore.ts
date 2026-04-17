@@ -5,6 +5,8 @@ export interface IframeFullscreenData {
   sandboxAttr?: string;
   iframeKey: string;
   title: string;
+  /** ID of the widget that triggered fullscreen – used to auto-close when switching tabs */
+  widgetId: string;
 }
 
 interface IframeStore {

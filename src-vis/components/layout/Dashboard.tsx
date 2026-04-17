@@ -49,11 +49,13 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
     return () => window.removeEventListener('keydown', handler);
   }, [iframeFullscreen, setIframeFullscreen]);
 
-  // Close fullscreen overlay when the active tab changes
-  useEffect(() => {
-    setIframeFullscreen(null);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTabId]);
+  // Synchronous render-time check: only show fullscreen overlay when the widget
+  // that triggered it is on the currently active tab. This avoids async useEffect
+  // timing issues (all tabs stay mounted, so widget-unmount cleanup never fires).
+  const fullscreenTabId = iframeFullscreen
+    ? tabs.find((t) => (t.widgets ?? []).some((w) => w.id === iframeFullscreen.widgetId))?.id ?? null
+    : null;
+  const showIframeOverlay = iframeFullscreen !== null && fullscreenTabId === activeTabId;
 
   // ── container width measurement ────────────────────────────────────────
   const containerRef = useRef<HTMLDivElement>(null);
@@ -144,7 +146,7 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
             onConfigChange={(cfg) => updateWidget(cfg.id, cfg)}
           />
         </div>
-        {iframeFullscreen && <IframeOverlay data={iframeFullscreen} onClose={() => setIframeFullscreen(null)} />}
+        {showIframeOverlay && <IframeOverlay data={iframeFullscreen!} onClose={() => setIframeFullscreen(null)} />}
       </div>
     );
   }
@@ -190,7 +192,7 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
             );
           })}
         </div>
-        {iframeFullscreen && <IframeOverlay data={iframeFullscreen} onClose={() => setIframeFullscreen(null)} />}
+        {showIframeOverlay && <IframeOverlay data={iframeFullscreen!} onClose={() => setIframeFullscreen(null)} />}
       </div>
     );
   }
@@ -277,7 +279,7 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
         </>
       )}
     </div>
-    {iframeFullscreen && <IframeOverlay data={iframeFullscreen} onClose={() => setIframeFullscreen(null)} />}
+    {showIframeOverlay && <IframeOverlay data={iframeFullscreen!} onClose={() => setIframeFullscreen(null)} />}
     </div>
   );
 }
