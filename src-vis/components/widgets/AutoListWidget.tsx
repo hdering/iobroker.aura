@@ -8,11 +8,11 @@ import { saveAll } from '../../store/persistManager';
 
 export interface AutoListEntry {
   id: string;
-  label?: string;      // human-readable name (stored on discovery or manual edit)
-  rooms?: string[];    // room membership (stored on discovery)
-  unit?: string;       // display unit, e.g. "°C", "%", "W"
-  trueLabel?: string;  // text shown for true / 1, e.g. "AN", "Auf"
-  falseLabel?: string; // text shown for false / 0, e.g. "AUS", "Zu"
+  label?: string;
+  rooms?: string[];
+  unit?: string;
+  trueLabel?: string;
+  falseLabel?: string;
 }
 
 export interface AutoListOptions {
@@ -51,12 +51,10 @@ export async function loadFilterOptions(): Promise<{ roles: string[]; rooms: str
     getObjectViewDirect('state'),
     getObjectViewDirect('enum', 'enum.', 'enum.\u9999'),
   ]);
-
   const rolesSet = new Set<string>();
   for (const { value: obj } of stateResult.rows) {
     if (obj?.common?.role) rolesSet.add(obj.common.role);
   }
-
   const rooms: string[] = [];
   const funcs: string[] = [];
   for (const { value: obj } of enumResult.rows) {
@@ -65,7 +63,6 @@ export async function loadFilterOptions(): Promise<{ roles: string[]; rooms: str
     if (obj._id.startsWith('enum.rooms.')) rooms.push(label);
     else if (obj._id.startsWith('enum.functions.')) funcs.push(label);
   }
-
   return { roles: Array.from(rolesSet).sort(), rooms: rooms.sort(), funcs: funcs.sort() };
 }
 
@@ -76,7 +73,6 @@ export async function discoverDatapoints(
     getObjectViewDirect('state'),
     getObjectViewDirect('enum', 'enum.', 'enum.\u9999'),
   ]);
-
   const roomMap = new Map<string, string[]>();
   for (const { value: obj } of enumResult.rows) {
     if (!obj?.common?.members?.length || !obj._id.startsWith('enum.rooms.')) continue;
@@ -86,7 +82,6 @@ export async function discoverDatapoints(
       roomMap.get(id)!.push(label);
     }
   }
-
   const funcMap = new Map<string, string[]>();
   for (const { value: obj } of enumResult.rows) {
     if (!obj?.common?.members?.length || !obj._id.startsWith('enum.functions.')) continue;
@@ -96,12 +91,10 @@ export async function discoverDatapoints(
       funcMap.get(id)!.push(label);
     }
   }
-
   const rolePatterns = (opts.filterRoles ?? '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
   const idPattern = opts.filterIdPattern?.trim().toLowerCase() ?? '';
   const roomFilter = (opts.filterRooms ?? '').split(',').map(s => s.trim()).filter(Boolean);
   const funcFilter = (opts.filterFuncs ?? '').split(',').map(s => s.trim()).filter(Boolean);
-
   return stateResult.rows
     .filter(({ id, value: obj }) => {
       const role = (obj.common.role ?? '').toLowerCase();
@@ -126,7 +119,7 @@ export async function discoverDatapoints(
     }));
 }
 
-// ── Value display ─────────────────────────────────────────────────────────────
+// ── Value display: row variant ────────────────────────────────────────────────
 
 function EntryValue({ entry, val, setState }: {
   entry: AutoListEntry;
@@ -135,13 +128,11 @@ function EntryValue({ entry, val, setState }: {
 }) {
   const hasLabels = !!(entry.trueLabel || entry.falseLabel);
   const isBool = typeof val === 'boolean';
-  // Treat 0/1 as boolean when labels are configured
   const isBoolLike = isBool || (typeof val === 'number' && (val === 0 || val === 1) && hasLabels);
 
   if (isBoolLike) {
     const on = val === true || val === 1;
     const toggle = () => setState(entry.id, isBool ? !on : on ? 0 : 1);
-
     if (hasLabels) {
       return (
         <button onClick={toggle}
@@ -184,6 +175,54 @@ function EntryValue({ entry, val, setState }: {
   );
 }
 
+// ── Value display: card variant (larger) ──────────────────────────────────────
+
+function CardEntryValue({ entry, val, setState }: {
+  entry: AutoListEntry;
+  val: ioBrokerState['val'];
+  setState: (id: string, v: boolean | number | string) => void;
+}) {
+  const hasLabels = !!(entry.trueLabel || entry.falseLabel);
+  const isBool = typeof val === 'boolean';
+  const isBoolLike = isBool || (typeof val === 'number' && (val === 0 || val === 1) && hasLabels);
+
+  if (isBoolLike) {
+    const on = val === true || val === 1;
+    const toggle = () => setState(entry.id, isBool ? !on : on ? 0 : 1);
+    return (
+      <button onClick={toggle}
+        className="w-full py-1.5 rounded-lg text-xs font-semibold transition-colors"
+        style={{
+          background: on ? 'var(--accent)' : 'var(--app-border)',
+          color: on ? '#fff' : 'var(--text-secondary)',
+        }}>
+        {on ? (entry.trueLabel || 'AN') : (entry.falseLabel || 'AUS')}
+      </button>
+    );
+  }
+
+  if (typeof val === 'number' && isDimmerRole(entry.id)) {
+    return (
+      <div className="w-full flex flex-col items-center gap-1">
+        <span className="text-xl font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>
+          {Math.round(val)}
+          <span className="text-sm ml-0.5 font-normal" style={{ color: 'var(--text-secondary)' }}>{entry.unit ?? '%'}</span>
+        </span>
+        <input type="range" min={0} max={100} value={val}
+          onChange={e => setState(entry.id, Number(e.target.value))}
+          className="w-full h-1.5 rounded-full" style={{ accentColor: 'var(--accent)' }} />
+      </div>
+    );
+  }
+
+  return (
+    <span className="text-2xl font-bold tabular-nums text-center leading-none" style={{ color: 'var(--text-primary)' }}>
+      {val != null ? String(val) : '–'}
+      {entry.unit && <span className="text-sm ml-0.5 font-normal" style={{ color: 'var(--text-secondary)' }}>{entry.unit}</span>}
+    </span>
+  );
+}
+
 // ── Main Widget ───────────────────────────────────────────────────────────────
 
 export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps) {
@@ -197,6 +236,7 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
   const [resolvedNames, setResolvedNames] = useState<Record<string, string>>({});
   const [syncing, setSyncing] = useState(false);
   const syncMs = (opts.syncIntervalMin ?? 5) * 60_000;
+  const layout = config.layout ?? 'default';
 
   const saveOpts = useCallback((patch: Partial<AutoListOptions>) => {
     onConfigChange({ ...config, options: { ...opts, ...patch } });
@@ -232,7 +272,7 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
       const newEntries = found.filter(d => !existingIds.has(d.id)).map(d => ({ id: d.id, label: d.name, rooms: d.rooms }));
       if (newEntries.length > 0) {
         saveOpts({ entries: [...entries, ...newEntries] });
-        saveAll(); // flush to localStorage immediately — auto-sync bypasses the admin save buffer
+        saveAll();
       }
     } finally {
       setSyncing(false);
@@ -246,35 +286,166 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
 
   const removeEntry = (id: string) => saveOpts({ entries: entries.filter(e => e.id !== id) });
 
+  const getLabel = (entry: AutoListEntry) =>
+    entry.label || resolvedNames[entry.id] || entry.id.split('.').pop() || entry.id;
+
+  // ── Shared header ──────────────────────────────────────────────────────────
+  const header = (
+    <div className="shrink-0 px-3 py-1.5 flex items-center justify-between"
+      style={{ borderBottom: '1px solid var(--widget-border)' }}>
+      <span className="text-xs font-semibold truncate" style={{ color: 'var(--text-secondary)' }}>
+        {config.title || 'Auto-Liste'}
+        {entries.length > 0 && <span className="ml-1 opacity-50">({entries.length})</span>}
+      </span>
+      <button onClick={runSync} title="Jetzt synchronisieren"
+        className="hover:opacity-70 transition-opacity p-0.5" style={{ color: 'var(--text-secondary)' }}>
+        <RefreshCw size={11} className={syncing ? 'animate-spin' : ''} />
+      </button>
+    </div>
+  );
+
+  const empty = entries.length === 0 && (
+    <div className="flex-1 flex items-center justify-center p-4">
+      <p className="text-xs text-center" style={{ color: 'var(--text-secondary)' }}>
+        Noch keine Datenpunkte konfiguriert.{editMode ? ' Bearbeiten → Datenpunkte suchen.' : ''}
+      </p>
+    </div>
+  );
+
+  // ── KACHELN (card) ─────────────────────────────────────────────────────────
+  if (layout === 'card') {
+    return (
+      <div className="flex flex-col h-full">
+        {header}
+        {empty}
+        {entries.length > 0 && (
+          <div className="aura-scroll flex-1 overflow-auto min-h-0 p-2"
+            style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 6, alignContent: 'start' }}>
+            {entries.map(entry => {
+              const state = states[entry.id] ?? null;
+              const label = getLabel(entry);
+              return (
+                <div key={entry.id}
+                  className="rounded-xl p-2.5 flex flex-col gap-2 relative"
+                  style={{ background: 'var(--app-bg)', border: '1px solid var(--widget-border)' }}>
+                  {editMode && (
+                    <button onClick={() => removeEntry(entry.id)}
+                      className="absolute top-1 right-1 hover:opacity-70" style={{ color: 'var(--text-secondary)' }}>
+                      <X size={10} />
+                    </button>
+                  )}
+                  <span className="text-[10px] truncate leading-tight pr-2" style={{ color: 'var(--text-secondary)' }}>{label}</span>
+                  <div className="flex items-center justify-center">
+                    <CardEntryValue entry={entry} val={state?.val ?? null} setState={setState} />
+                  </div>
+                  {opts.showRoom && entry.rooms?.length ? (
+                    <span className="text-[9px] truncate opacity-50" style={{ color: 'var(--text-secondary)' }}>
+                      {entry.rooms.join(', ')}
+                    </span>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ── KOMPAKT (compact) — 2-column dense list ────────────────────────────────
+  if (layout === 'compact') {
+    return (
+      <div className="flex flex-col h-full">
+        {header}
+        {empty}
+        {entries.length > 0 && (
+          <div className="aura-scroll flex-1 overflow-auto min-h-0"
+            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', alignContent: 'start' }}>
+            {entries.map((entry, i) => {
+              const state = states[entry.id] ?? null;
+              const label = getLabel(entry);
+              const isRight = i % 2 === 1;
+              return (
+                <div key={entry.id}
+                  className="flex items-center gap-1.5 px-2 py-1.5"
+                  style={{
+                    borderBottom: '1px solid var(--widget-border)',
+                    borderLeft: isRight ? '1px solid var(--widget-border)' : undefined,
+                  }}>
+                  {editMode && (
+                    <button onClick={() => removeEntry(entry.id)} className="shrink-0 hover:opacity-70"
+                      style={{ color: 'var(--text-secondary)' }}>
+                      <X size={10} />
+                    </button>
+                  )}
+                  <span className="flex-1 text-[11px] truncate min-w-0" style={{ color: 'var(--text-primary)' }}>{label}</span>
+                  <EntryValue entry={entry} val={state?.val ?? null} setState={setState} />
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ── BADGES (minimal) — inline pill per entry ───────────────────────────────
+  if (layout === 'minimal') {
+    return (
+      <div className="flex flex-col h-full">
+        {header}
+        {empty}
+        {entries.length > 0 && (
+          <div className="aura-scroll flex-1 overflow-auto min-h-0 p-2 flex flex-wrap gap-1.5 content-start">
+            {entries.map(entry => {
+              const state = states[entry.id] ?? null;
+              const val = state?.val ?? null;
+              const label = getLabel(entry);
+              const hasLabels = !!(entry.trueLabel || entry.falseLabel);
+              const isBool = typeof val === 'boolean';
+              const isBoolLike = isBool || (typeof val === 'number' && (val === 0 || val === 1) && hasLabels);
+              const on = val === true || val === 1;
+              const valueStr = isBoolLike
+                ? (on ? (entry.trueLabel || 'AN') : (entry.falseLabel || 'AUS'))
+                : val != null ? `${String(val)}${entry.unit ? '\u202f' + entry.unit : ''}` : '–';
+
+              return (
+                <button key={entry.id}
+                  onClick={() => {
+                    if (isBool) setState(entry.id, !on);
+                    else if (isBoolLike) setState(entry.id, on ? 0 : 1);
+                  }}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors hover:opacity-80"
+                  style={{
+                    background: isBoolLike && on ? 'var(--accent)1a' : 'var(--app-bg)',
+                    color: isBoolLike && on ? 'var(--accent)' : 'var(--text-secondary)',
+                    border: `1px solid ${isBoolLike && on ? 'var(--accent)55' : 'var(--widget-border)'}`,
+                    cursor: isBoolLike ? 'pointer' : 'default',
+                  }}>
+                  <span className="opacity-70 truncate" style={{ maxWidth: 80 }}>{label}</span>
+                  <span className="font-semibold tabular-nums" style={{ color: isBoolLike ? 'inherit' : 'var(--text-primary)' }}>
+                    {valueStr}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ── STANDARD (default) — full-width rows ───────────────────────────────────
   return (
     <div className="flex flex-col h-full">
-      <div className="shrink-0 px-3 py-1.5 flex items-center justify-between"
-        style={{ borderBottom: '1px solid var(--widget-border)' }}>
-        <span className="text-xs font-semibold truncate" style={{ color: 'var(--text-secondary)' }}>
-          {config.title || 'Auto-Liste'}
-          {entries.length > 0 && <span className="ml-1 opacity-50">({entries.length})</span>}
-        </span>
-        <button onClick={runSync} title="Jetzt synchronisieren"
-          className="hover:opacity-70 transition-opacity p-0.5" style={{ color: 'var(--text-secondary)' }}>
-          <RefreshCw size={11} className={syncing ? 'animate-spin' : ''} />
-        </button>
-      </div>
-
-      {entries.length === 0 && (
-        <div className="flex-1 flex items-center justify-center p-4">
-          <p className="text-xs text-center" style={{ color: 'var(--text-secondary)' }}>
-            Noch keine Datenpunkte konfiguriert.{editMode ? ' Bearbeiten → Datenpunkte suchen.' : ''}
-          </p>
-        </div>
-      )}
-
+      {header}
+      {empty}
       {entries.length > 0 && (
         <div className="aura-scroll flex-1 overflow-auto min-h-0">
           {entries.map(entry => {
             const state = states[entry.id] ?? null;
-            const label = entry.label || resolvedNames[entry.id] || entry.id.split('.').pop() || entry.id;
+            const label = getLabel(entry);
             const roomLabel = entry.rooms?.join(', ');
-
             return (
               <div key={entry.id} className="flex items-center gap-2 px-3 py-2"
                 style={{ borderBottom: '1px solid var(--widget-border)' }}>
