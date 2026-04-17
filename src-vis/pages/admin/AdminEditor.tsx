@@ -102,7 +102,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="rounded-xl w-full max-w-lg shadow-2xl p-6"
+      <div className="rounded-xl w-full max-w-3xl shadow-2xl p-6"
         style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}
         onClick={(e) => e.stopPropagation()}>
         <h2 className="font-bold text-lg mb-5" style={{ color: 'var(--text-primary)' }}>{t('editor.manual.title')}</h2>
