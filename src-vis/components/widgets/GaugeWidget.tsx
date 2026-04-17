@@ -234,13 +234,21 @@ export function GaugeWidget({ config }: WidgetProps) {
   }
 
   if (layout === 'compact') {
+    const displayVal = isNaN(safeVal) ? '–'
+      : decimals === 0 ? String(Math.round(safeVal)) : safeVal.toFixed(decimals);
+    // Accent colour from zone or default
+    let accentColor = 'var(--accent)';
+    if (colorZones && zones.length > 0) {
+      const z = zones.find((zone) => safeVal <= zone.max);
+      if (z) accentColor = z.color;
+    }
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-1">
-        <GaugeSVG {...gaugeProps} scale={0.7} />
-        {config.title && (
-          <p className="text-[11px] truncate text-center" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
-        )}
-        {secondaryBadges.length > 0 && <div className="flex flex-wrap justify-center gap-1">{secondaryBadges}</div>}
+      <div className="flex items-center justify-between h-full gap-2">
+        <span className="text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>
+        <span className="text-xl font-bold shrink-0 tabular-nums" style={{ color: accentColor }}>
+          {displayVal}
+          {unit && <span className="text-sm ml-0.5 font-normal" style={{ color: 'var(--text-secondary)' }}>{unit}</span>}
+        </span>
       </div>
     );
   }

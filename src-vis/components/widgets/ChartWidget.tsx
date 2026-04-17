@@ -75,9 +75,6 @@ export function ChartWidget({ config }: WidgetProps) {
     </div>
   );
 
-  const rangeLabel = historyInstance
-    ? (activeRange === 'custom' ? `${customVal} ${customUnit === 'd' ? 'Tage' : 'Std'}` : RANGE_LABELS[activeRange])
-    : null;
 
   // Range selector shown only when a history adapter is configured
   const rangeSelector = historyInstance ? (
@@ -157,18 +154,16 @@ export function ChartWidget({ config }: WidgetProps) {
   // ── COMPACT ───────────────────────────────────────────────────────────────
   if (layout === 'compact') {
     return (
-      <div className="flex items-center gap-3 h-full">
-        <div className="flex-1 min-w-0">
-          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
-          {current !== null && (
-            <p className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
-              {current.toLocaleString('de-DE')}
-              {unit && <span className="text-sm ml-0.5" style={{ color: 'var(--text-secondary)' }}>{unit}</span>}
-            </p>
-          )}
-          {rangeLabel && <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{rangeLabel}</p>}
-        </div>
-        <div className="w-20 h-full" style={{ minHeight: 1 }}>
+      <div className="flex items-center gap-2.5 h-full">
+        <TrendingUp size={14} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
+        <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>
+        {current !== null && (
+          <span className="text-sm font-bold shrink-0" style={{ color: 'var(--text-primary)' }}>
+            {current.toLocaleString('de-DE')}
+            {unit && <span className="text-xs ml-0.5 font-normal" style={{ color: 'var(--text-secondary)' }}>{unit}</span>}
+          </span>
+        )}
+        <div className="w-14 h-full shrink-0" style={{ minHeight: 1 }}>
           {history.length > 1 ? (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={history}>
@@ -176,11 +171,9 @@ export function ChartWidget({ config }: WidgetProps) {
                   dot={false} isAnimationActive={false} />
               </LineChart>
             </ResponsiveContainer>
-          ) : <div className="flex items-center justify-center h-full">
-            {loading
-              ? <Loader size={14} className="animate-spin" style={{ color: 'var(--text-secondary)' }} />
-              : <BarChart2 size={16} style={{ color: 'var(--text-secondary)' }} />}
-          </div>}
+          ) : loading
+            ? <div className="flex items-center justify-center h-full"><Loader size={12} className="animate-spin" style={{ color: 'var(--text-secondary)' }} /></div>
+            : null}
         </div>
       </div>
     );

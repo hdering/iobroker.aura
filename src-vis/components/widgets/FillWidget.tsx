@@ -268,6 +268,24 @@ export function FillWidget({ config }: WidgetProps) {
     fillColor, zones, colorZones, showTicks, showValue, uid,
   };
 
+  const layout = (config.layout ?? 'default') as string;
+
+  if (layout === 'compact') {
+    const displayVal = decimals === 0 ? String(Math.round(safeVal)) : safeVal.toFixed(decimals);
+    return (
+      <div className="flex items-center justify-between h-full gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <Droplets size={14} style={{ color: fillColor, flexShrink: 0 }} />
+          <span className="text-sm truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>
+        </div>
+        <span className="text-xl font-bold shrink-0 tabular-nums" style={{ color: fillColor }}>
+          {displayVal}
+          <span className="text-sm ml-0.5 font-normal" style={{ color: 'var(--text-secondary)' }}>{unit}</span>
+        </span>
+      </div>
+    );
+  }
+
   if (!config.datapoint) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-2"

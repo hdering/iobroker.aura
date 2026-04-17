@@ -1,14 +1,12 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, Trash2, Edit3, Check, Cpu, PenLine, Database, Wand2, Smartphone, GripVertical, Upload, Settings, X } from 'lucide-react';
+import { Plus, Trash2, Edit3, Check, Database, Wand2, Smartphone, GripVertical, Upload, Settings, X } from 'lucide-react';
 import { ImportWidgetDialog } from '../../components/config/ImportWidgetDialog';
 import { ICON_PICKER_ENTRIES, WIDGET_ICON_MAP } from '../../utils/widgetIconMap';
 import { useDashboardStore } from '../../store/dashboardStore';
 import { useGroupStore } from '../../store/groupStore';
 import { Dashboard } from '../../components/layout/Dashboard';
-import { DeviceWizard } from '../../components/config/DeviceWizard';
 import { TabWizard } from '../../components/config/TabWizard';
-import { WidgetPreview } from '../../components/config/WidgetPreview';
 import { DatapointPicker } from '../../components/config/DatapointPicker';
 import type { WidgetConfig, WidgetType, WidgetLayout } from '../../types';
 import { WIDGET_REGISTRY, WIDGET_BY_TYPE, getEffectiveSize } from '../../widgetRegistry';
@@ -318,7 +316,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
   // ── STEP 2: details ────────────────────────────────────────────────────────
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="rounded-xl w-full max-w-3xl shadow-2xl"
+      <div className="rounded-xl w-full max-w-xl shadow-2xl"
         style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}
         onClick={(e) => e.stopPropagation()}>
 
@@ -421,33 +419,23 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
               </div>
             )}
 
-            {/* Layout selection (radio-style) */}
+            {/* Layout selection */}
             <div className="space-y-1.5">
               <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Layout</label>
-              <div className="grid grid-cols-4 gap-1.5">
+              <div className="flex flex-wrap gap-1.5">
                 {(isCalendar ? CALENDAR_LAYOUTS : LAYOUTS).map((l) => (
                   <button key={l.id} onClick={() => setLayout(l.id)}
-                    className="flex flex-col items-center gap-1.5 p-1.5 rounded-lg transition-opacity hover:opacity-80"
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium transition-opacity hover:opacity-80"
                     style={{
                       background: layout === l.id ? 'var(--accent)22' : 'var(--app-bg)',
-                      border: `1px solid ${layout === l.id ? 'var(--accent)' : 'var(--app-border)'}`,
+                      color: layout === l.id ? 'var(--accent)' : 'var(--text-secondary)',
+                      border: `1px solid ${layout === l.id ? 'var(--accent)66' : 'var(--app-border)'}`,
                     }}>
-                    <WidgetPreview type={type} layout={l.id} />
-                    <span className="text-[10px]"
-                      style={{ color: layout === l.id ? 'var(--accent)' : 'var(--text-secondary)' }}>
-                      {l.label}
-                    </span>
+                    {l.label}
                   </button>
                 ))}
               </div>
             </div>
-          </div>
-
-          {/* Preview */}
-          <div className="flex flex-col items-center justify-center shrink-0 gap-2">
-            <p className="text-[10px] font-semibold uppercase tracking-wider"
-              style={{ color: 'var(--text-secondary)', opacity: 0.5 }}>Vorschau</p>
-            <WidgetPreview type={type} layout={layout} title={title || def.label} />
           </div>
         </div>
 
@@ -592,7 +580,6 @@ export function AdminEditor() {
   const activeLayout = layouts.find((l) => l.id === activeLayoutId) ?? layouts[0];
   const tabs = activeLayout.tabs;
   const activeTabId = activeLayout.activeTabId;
-  const [showWizard, setShowWizard] = useState(false);
   const [showTabWizard, setShowTabWizard] = useState(false);
   const [showManual, setShowManual] = useState(false);
   const [showImport, setShowImport] = useState(false);
@@ -633,25 +620,20 @@ export function AdminEditor() {
           ))}
         </select>
         <div className="flex-1" />
-        <button onClick={() => setShowTabWizard(true)}
+        <button onClick={() => setShowManual(true)}
           className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:opacity-80"
           style={{ background: 'var(--accent)' }}>
-          <Wand2 size={15} /> {t('editor.tab.addTab')}
+          <Plus size={15} /> Neues Widget
         </button>
-        <button onClick={() => setShowManual(true)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium hover:opacity-80"
-          style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}>
-          <PenLine size={15} /> {t('editor.tab.addManual')}
+        <button onClick={() => setShowTabWizard(true)}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:opacity-80"
+          style={{ background: 'var(--accent-purple, #8b5cf6)' }}>
+          <Wand2 size={15} /> {t('editor.tab.addTab')}
         </button>
         <button onClick={() => setShowImport(true)}
           className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium hover:opacity-80"
           style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}>
           <Upload size={15} /> {t('widgets.import')}
-        </button>
-        <button onClick={() => setShowWizard(true)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:opacity-80"
-          style={{ background: 'var(--accent-green)' }}>
-          <Cpu size={15} /> {t('editor.tab.addDevice')}
         </button>
         <button
           onClick={() => setShowMobileOrder(!showMobileOrder)}
@@ -752,9 +734,6 @@ export function AdminEditor() {
           }}
           onClose={() => setShowTabWizard(false)}
         />
-      )}
-      {showWizard && (
-        <DeviceWizard onAdd={(ws: WidgetConfig[]) => ws.forEach(addWidget)} onClose={() => setShowWizard(false)} />
       )}
       {showManual && (
         <ManualWidgetDialog onAdd={addWidget} onClose={() => setShowManual(false)} />

@@ -362,24 +362,17 @@ export function CalendarWidget({ config }: WidgetProps) {
     const meta = next ? eventMeta(next, 0) : null;
     return (
       <div
-        className={`flex items-center gap-2.5 h-full${meta ? ` ${meta.className}` : ''}`}
+        className={`flex items-center gap-2 h-full${meta ? ` ${meta.className}` : ''}`}
         data-calendar-event={meta?.dataAttr}
       >
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-          style={{ background: color + '22' }}>
-          <CalendarDays size={16} style={{ color }} />
-        </div>
-        <div className="flex-1 min-w-0">
-          {loading && !next
-            ? <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{t('calendar.loading')}</p>
-            : next ? (
-              <>
-                <p className="text-[11px] font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{next.summary}</p>
-                <p className="text-[10px]" style={{ color }}>{formatEventDate(next, t)}</p>
-              </>
-            ) : <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{t('calendar.noEvents')}</p>
-          }
-        </div>
+        <CalendarDays size={14} style={{ color, flexShrink: 0 }} />
+        {loading && !next
+          ? <span className="flex-1 text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{t('calendar.loading')}</span>
+          : next
+            ? <span className="flex-1 text-xs font-medium truncate min-w-0" style={{ color: 'var(--text-primary)' }}>{next.summary}</span>
+            : <span className="flex-1 text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{t('calendar.noEvents')}</span>
+        }
+        {next && <span className="text-xs shrink-0" style={{ color }}>{formatEventDate(next, t)}</span>}
         <button onClick={fetchEvents} className="hover:opacity-70 shrink-0"><Spinner loading={loading} /></button>
       </div>
     );

@@ -254,25 +254,23 @@ export function ThermostatWidget({ config, editMode }: WidgetProps) {
   if (layout === 'compact') {
     return (
       <>
-        <div className={`flex items-center gap-3 h-full ${wrapperCls}`} onClick={handleClick}>
-          <Thermometer size={18} style={{ color: accentColor, flexShrink: 0 }} />
-          <div className="flex-1 min-w-0">
-            <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{displayTitle}</p>
-            <p className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
-              {target.toFixed(1)}°
-              {actual !== null && (
-                <span className="text-sm font-normal ml-1.5" style={{ color: 'var(--text-secondary)' }}>
-                  / {actual.toFixed(1)}°
-                </span>
-              )}
-            </p>
-          </div>
+        <div className={`flex items-center gap-2.5 h-full ${wrapperCls}`} onClick={handleClick}>
+          <Thermometer size={16} style={{ color: accentColor, flexShrink: 0 }} />
+          <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{displayTitle}</span>
+          <span className="text-sm font-bold shrink-0" style={{ color: 'var(--text-primary)' }}>
+            {target.toFixed(1)}°
+            {actual !== null && (
+              <span className="font-normal text-xs ml-1" style={{ color: 'var(--text-secondary)' }}>
+                / {actual.toFixed(1)}°
+              </span>
+            )}
+          </span>
           <div className="flex gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setTemp(target - step)}
-              className="w-7 h-7 rounded font-bold text-sm hover:opacity-70 active:scale-95 transition-all"
+              className="w-6 h-6 rounded font-bold text-sm hover:opacity-70 active:scale-95 transition-all"
               style={{ background: 'var(--app-border)', color: 'var(--text-primary)' }}>−</button>
             <button onClick={() => setTemp(target + step)}
-              className="w-7 h-7 rounded font-bold text-sm hover:opacity-70 active:scale-95 transition-all"
+              className="w-6 h-6 rounded font-bold text-sm hover:opacity-70 active:scale-95 transition-all"
               style={{ background: 'var(--app-border)', color: 'var(--text-primary)' }}>+</button>
           </div>
         </div>

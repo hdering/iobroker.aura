@@ -276,26 +276,12 @@ export function WeatherWidget({ config }: WidgetProps) {
   // ── COMPACT ───────────────────────────────────────────────────────────────
   if (layout === 'compact') {
     return (
-      <div className="flex flex-col h-full gap-1.5">
-        <div className="flex items-center gap-2.5 flex-1 min-h-0">
-          <span style={{ fontSize: '1.8rem', lineHeight: 1 }}>{info.emoji}</span>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-2xl font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>{tempStr}</span>
-              <span className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{info.desc}</span>
-            </div>
-            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-              💧 {cur.relative_humidity_2m}% · 💨 {Math.round(cur.wind_speed_10m)} km/h
-              {locationName ? ` · ${locationName}` : ''}
-              {localLabel}
-            </p>
-          </div>
-        </div>
-        {showWarnings && (
-          <div className="shrink-0">
-            <WarningsPanel warnings={warnings} loading={warningsLoading} t={t} />
-          </div>
-        )}
+      <div className="flex items-center gap-2 h-full">
+        <span style={{ fontSize: '1.4rem', lineHeight: 1, flexShrink: 0 }}>{info.emoji}</span>
+        <span className="text-xl font-bold tabular-nums shrink-0" style={{ color: 'var(--text-primary)' }}>{tempStr}</span>
+        <span className="flex-1 text-xs truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>
+          {info.desc}{locationName ? ` · ${locationName}` : ''}
+        </span>
       </div>
     );
   }

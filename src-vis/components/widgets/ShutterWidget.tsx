@@ -149,13 +149,11 @@ export function ShutterWidget({ config }: WidgetProps) {
   // ── COMPACT ───────────────────────────────────────────────────────────────
   if (layout === 'compact') {
     return (
-      <div className="flex items-center gap-2.5 h-full">
+      <div className="flex items-center gap-2 h-full">
         <ShutterViz closedFrac={closedFrac} accentColor={accentColor} isMoving={isMoving}
-          style={{ width: 26, height: 26, flexShrink: 0 }} />
-        <div className="flex-1 min-w-0">
-          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
-          <p className="text-sm font-bold leading-tight" style={{ color: isMoving ? 'var(--accent-yellow)' : 'var(--text-primary)' }}>{statusText}</p>
-        </div>
+          style={{ width: 22, height: 22, flexShrink: 0 }} />
+        <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>
+        <span className="text-sm font-bold shrink-0" style={{ color: isMoving ? 'var(--accent-yellow)' : 'var(--text-primary)' }}>{pos}%</span>
         <BtnRow onUp={openFully} onStop={stop} onDown={closeFully} size="sm" />
       </div>
     );

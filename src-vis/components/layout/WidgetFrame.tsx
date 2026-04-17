@@ -14,7 +14,6 @@ import { getObjectDirect, subscribeStateDirect, getStateDirect } from '../../hoo
 import { lookupDatapointEntry, ensureDatapointCache } from '../../hooks/useDatapointList';
 import { WIDGET_REGISTRY, WIDGET_GROUPS } from '../../widgetRegistry';
 import { AutoListConfig } from '../config/AutoListConfig';
-import { WidgetPreview } from '../config/WidgetPreview';
 import { detectHistoryAdapters, RANGE_LABELS, type ChartTimeRange, type DetectedAdapter } from '../../hooks/useChartHistory';
 import { useConditionStyle, notifyHiddenState, cleanupHiddenState } from '../../hooks/useConditionStyle';
 import { SwitchWidget } from '../widgets/SwitchWidget';
@@ -1293,7 +1292,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
             </div>
 
             {/* Layout-Auswahl mit Live-Vorschau (non-header) */}
-            {config.type !== 'header' && (() => {
+            {config.type !== 'header' && config.type !== 'iframe' && (() => {
               const activeLayout = config.layout ?? 'default';
               const layouts: { value: string; label: string }[] = [
                 { value: 'default', label: t('wf.edit.layout.standard') },
@@ -1331,7 +1330,6 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                       );
                     })}
                   </div>
-                  <WidgetPreview type={config.type} layout={config.layout} title={config.title} scale={1.1} />
                 </div>
               );
             })()}

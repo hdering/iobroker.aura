@@ -37,15 +37,14 @@ export function DimmerWidget({ config }: WidgetProps) {
   // --- COMPACT ---
   if (layout === 'compact') {
     return (
-      <div className="flex items-center gap-3 h-full">
+      <div className="flex items-center gap-2.5 h-full">
         <CompactIcon size={16} style={{ color: level > 0 ? 'var(--accent-yellow)' : 'var(--text-secondary)', flexShrink: 0 }} />
-        <div className="flex-1 space-y-1">
-          <div className="flex justify-between">
-            <span className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>
-            <span className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>{level}%</span>
-          </div>
-          {slider}
-        </div>
+        <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>
+        <input type="range" min={0} max={100} step={1} value={level}
+          onChange={(e) => setState(config.datapoint, Number(e.target.value))}
+          style={{ accentColor: 'var(--accent)', minWidth: 50, width: 70 }}
+          className="h-1.5 rounded-full appearance-none cursor-pointer shrink-0" />
+        <span className="text-sm font-bold shrink-0 w-8 text-right" style={{ color: 'var(--text-primary)' }}>{level}%</span>
       </div>
     );
   }
