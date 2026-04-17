@@ -19,6 +19,7 @@ export const DP_TEMPLATES: DpTemplate[] = [
     secondaryDps: [
       { optionKey: 'activityDp',  siblingNames: ['WORKING', 'working', 'moving', 'activity'] },
       { optionKey: 'directionDp', siblingNames: ['DIRECTION', 'direction'] },
+      { optionKey: 'stopDp',      siblingNames: ['STOP', 'stop'] },
     ],
   },
   {

@@ -1,4 +1,5 @@
 import { ChevronUp, ChevronDown, Square } from 'lucide-react';
+import { useRef } from 'react';
 import { useDatapoint } from '../../hooks/useDatapoint';
 import { useIoBroker } from '../../hooks/useIoBroker';
 import type { WidgetProps } from '../../types';
@@ -83,13 +84,34 @@ export function ShutterWidget({ config }: WidgetProps) {
     directionVal === 1 || directionVal === '1' ? 'up' :
     directionVal === 2 || directionVal === '2' ? 'down' : null;
 
+  // Save the raw position just before a move command so stop can reference it.
+  // This avoids the race where rawPos has already changed to the new target (e.g. 0)
+  // by the time the user clicks stop, which would send 0 again (no-op) or the old
+  // position back (causing the blind to reverse).
+  const preMoveRawRef = useRef(rawPos);
+
   const writePos = (p: number) => {
+    preMoveRawRef.current = rawPos;   // snapshot before command
     const raw = (opts.invertPosition as boolean) ? 100 - p : p;
     setValue(raw);
   };
   const openFully  = () => writePos(100);
   const closeFully = () => writePos(0);
-  const stop = () => setState(config.datapoint, rawPos);  // write same value = stop on most actuators
+  const stop = () => {
+    const stopDp = opts.stopDp as string | undefined;
+    if (stopDp) {
+      // Dedicated stop datapoint (e.g. HomeMatic STOP channel)
+      setState(stopDp, true);
+    } else {
+      // Fallback: write the pre-move position so the actuator targets where the
+      // blind was before the command, effectively cancelling the movement.
+      // If rawPos has already been updated to the actual live position mid-move
+      // (some adapters do this), using rawPos would be more accurate – but
+      // preMoveRawRef is safer against the race condition.
+      const stopTarget = isMoving && rawPos !== preMoveRawRef.current ? rawPos : preMoveRawRef.current;
+      setState(config.datapoint, stopTarget);
+    }
+  };
 
   const accentColor = isMoving ? 'var(--accent-yellow)' : pos > 0 ? 'var(--accent)' : 'var(--text-secondary)';
 

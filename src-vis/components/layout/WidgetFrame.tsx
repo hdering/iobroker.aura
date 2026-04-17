@@ -783,7 +783,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
       setOpenPanel(panel);
     }
   };
-  const [pickerTarget, setPickerTarget] = useState<'datapoint' | 'actualDatapoint' | 'localTempDatapoint' | 'shutter_activityDp' | 'shutter_directionDp' | null>(null);
+  const [pickerTarget, setPickerTarget] = useState<'datapoint' | 'actualDatapoint' | 'localTempDatapoint' | 'shutter_activityDp' | 'shutter_directionDp' | 'shutter_stopDp' | null>(null);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
   const Widget = getWidgetMap()[config.type];
   const currentLayout = config.layout ?? 'default';
@@ -2130,6 +2130,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                   const patch: Record<string, unknown> = {};
                   if (!o.activityDp)  { const v = find('WORKING', 'working', 'moving', 'activity'); if (v) patch.activityDp = v; }
                   if (!o.directionDp) { const v = find('DIRECTION', 'direction'); if (v) patch.directionDp = v; }
+                  if (!o.stopDp)      { const v = find('STOP', 'stop'); if (v) patch.stopDp = v; }
                   if (Object.keys(patch).length) setO(patch);
                 };
                 return (
@@ -2168,6 +2169,25 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                           <Database size={13} />
                         </button>
                       </div>
+                    </div>
+                    <div>
+                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Stop-DP (z.B. STOP) – empfohlen</label>
+                      <div className="flex gap-1">
+                        <input type="text" value={(o.stopDp as string) ?? ''}
+                          onChange={(e) => setO({ stopDp: e.target.value || undefined })}
+                          placeholder="optional"
+                          className={`flex-1 ${sInputCls} min-w-0`} style={sInputStyle} />
+                        <button onClick={() => setPickerTarget('shutter_stopDp')}
+                          className="px-2 rounded-lg hover:opacity-80 shrink-0"
+                          style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+                          <Database size={13} />
+                        </button>
+                      </div>
+                      {!(o.stopDp as string) && (
+                        <p className="text-[10px] mt-1" style={{ color: 'var(--text-secondary)' }}>
+                          Ohne Stop-DP wird die Position vor dem letzten Fahrbefehl als Ziel zurückgesendet.
+                        </p>
+                      )}
                     </div>
                     <div className="flex items-center justify-between">
                       <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Position invertieren (0=offen)</label>
@@ -2279,6 +2299,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
             pickerTarget === 'localTempDatapoint'  ? ((config.options?.localTempDatapoint as string) ?? '') :
             pickerTarget === 'shutter_activityDp'  ? ((config.options?.activityDp as string) ?? '') :
             pickerTarget === 'shutter_directionDp' ? ((config.options?.directionDp as string) ?? '') :
+            pickerTarget === 'shutter_stopDp'      ? ((config.options?.stopDp as string) ?? '') :
             ((config.options?.actualDatapoint as string) ?? '')
           }
           onSelect={(id, unit, name) => {
@@ -2294,6 +2315,8 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
               onConfigChange({ ...config, options: { ...config.options, activityDp: id } });
             } else if (pickerTarget === 'shutter_directionDp') {
               onConfigChange({ ...config, options: { ...config.options, directionDp: id } });
+            } else if (pickerTarget === 'shutter_stopDp') {
+              onConfigChange({ ...config, options: { ...config.options, stopDp: id } });
             } else {
               onConfigChange({ ...config, options: { ...config.options, actualDatapoint: id } });
             }
