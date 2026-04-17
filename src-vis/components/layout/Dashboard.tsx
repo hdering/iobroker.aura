@@ -287,7 +287,7 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
 // ── iFrame fullscreen overlay ─────────────────────────────────────────────
 function IframeOverlay({ data, onClose }: { data: IframeFullscreenData; onClose: () => void }) {
   return (
-    <div className="absolute inset-0 z-50 flex flex-col" style={{ background: '#000' }}>
+    <div className="fixed inset-0 z-[900] flex flex-col" style={{ background: '#000' }}>
       <iframe
         key={data.iframeKey}
         src={data.url}

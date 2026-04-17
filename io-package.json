@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.46",
+    "version": "0.4.47",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.47": {
+        "en": "Fix: iFrame fullscreen overlay now uses position:fixed (covers full viewport) and is always cleared when switching tabs",
+        "de": "Fix: iFrame-Vollbild-Overlay nutzt jetzt position:fixed (deckt gesamten Viewport) und wird beim Tab-Wechsel immer geschlossen",
+        "ru": "Исправление: оверлей iFrame теперь использует position:fixed (покрывает весь экран) и всегда сбрасывается при смене вкладки",
+        "pt": "Correção: o overlay iFrame usa agora position:fixed (cobre todo o viewport) e é sempre fechado ao mudar de aba",
+        "nl": "Fix: iFrame-overlay gebruikt nu position:fixed (dekt volledig viewport) en wordt altijd gesloten bij tab-wissel",
+        "fr": "Correction: l'overlay iFrame utilise désormais position:fixed (couvre tout le viewport) et est toujours fermé lors du changement d'onglet",
+        "it": "Fix: l'overlay iFrame usa ora position:fixed (copre l'intero viewport) ed è sempre chiuso al cambio scheda",
+        "es": "Corrección: el overlay iFrame usa ahora position:fixed (cubre todo el viewport) y siempre se cierra al cambiar de pestaña",
+        "pl": "Poprawka: nakładka iFrame używa teraz position:fixed (pokrywa cały viewport) i jest zawsze zamykana przy zmianie zakładki",
+        "uk": "Виправлення: оверлей iFrame тепер використовує position:fixed (покриває весь екран) і завжди закривається при зміні вкладки",
+        "zh-cn": "修复：iFrame 全屏覆盖层现在使用 position:fixed（覆盖整个视口），切换标签时始终关闭"
+      },
       "0.4.46": {
         "en": "Fix: iFrame fullscreen overlay now reliably closes when switching tabs (synchronous render-time check replaces async effect)",
         "de": "Fix: iFrame-Vollbild-Overlay schließt sich beim Tab-Wechsel jetzt zuverlässig (synchrone Prüfung statt asynchronem Effect)",
@@ -183,19 +196,6 @@
         "pl": "Nowy widget: Tabela JSON – wyświetla punkty danych JSON jako tabelę z konfigurowalnymi kolorami; ulepszona Lista dynamiczna; wskazówka błędu ładowania iFrame; różne poprawki",
         "uk": "Новий віджет: JSON-Таблиця – відображення JSON-точок даних як таблиці з налаштовуваними кольорами; покращено Динамічний список; підказка помилки завантаження iFrame; різні виправлення",
         "zh-cn": "新小部件：JSON 表格 – 将 JSON 数据点显示为可滚动表格，支持颜色配置；动态列表改进；iFrame 加载失败提示；多项部件和对话框修复"
-      },
-      "0.4.40": {
-        "en": "Frontend: auto-reload when aura.0.config.dashboard is changed externally (ioBroker admin / script)",
-        "de": "Frontend: automatisches Nachladen wenn aura.0.config.dashboard extern geändert wird (ioBroker Admin / Skript)",
-        "ru": "Фронтенд: автоматическое обновление при внешнем изменении aura.0.config.dashboard (ioBroker Admin / скрипт)",
-        "pt": "Frontend: recarregamento automático quando aura.0.config.dashboard é alterado externamente (Admin / script ioBroker)",
-        "nl": "Frontend: automatisch herladen als aura.0.config.dashboard extern wordt gewijzigd (ioBroker admin / script)",
-        "fr": "Frontend: rechargement automatique lorsque aura.0.config.dashboard est modifié en externe (admin ioBroker / script)",
-        "it": "Frontend: ricaricamento automatico quando aura.0.config.dashboard viene modificato esternamente (admin ioBroker / script)",
-        "es": "Frontend: recarga automática cuando aura.0.config.dashboard se cambia externamente (admin ioBroker / script)",
-        "pl": "Frontend: automatyczne przeładowanie gdy aura.0.config.dashboard zostanie zmienione zewnętrznie (admin ioBroker / skrypt)",
-        "uk": "Фронтенд: автоматичне оновлення при зовнішній зміні aura.0.config.dashboard (адмін ioBroker / скрипт)",
-        "zh-cn": "前端：当 aura.0.config.dashboard 被外部修改时（ioBroker 管理界面/脚本）自动重新加载"
       }
     }
   },

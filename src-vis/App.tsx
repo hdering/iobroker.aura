@@ -11,6 +11,7 @@ import { getTheme } from './themes';
 import { useGroupStore } from './store/groupStore';
 import { Dashboard } from './components/layout/Dashboard';
 import { TabBar } from './components/layout/TabBar';
+import { useIframeStore } from './store/iframeStore';
 import { useT } from './i18n';
 import type { Tab } from './store/dashboardStore';
 import type { FrontendSettings } from './store/configStore';
@@ -217,6 +218,14 @@ export default function App() {
     setActiveTabId(layout?.defaultTabId ?? layout?.tabs?.[0]?.id ?? '');
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layout?.id]);
+
+  // Clear iFrame fullscreen overlay whenever the active tab changes.
+  // The overlay (position: fixed) covers the full viewport; tab switches must always reset it.
+  const setIframeFullscreen = useIframeStore((s) => s.setFullscreen);
+  useEffect(() => {
+    setIframeFullscreen(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTabId]);
 
   // Sync cross-tab localStorage changes (admin panel → frontend)
   useEffect(() => {

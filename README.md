@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.47 (2026-04-17)
+- Fix: iFrame fullscreen overlay now uses position:fixed (covers full viewport) and is always cleared when switching tabs
+
 ### 0.4.46 (2026-04-17)
 - Fix: iFrame fullscreen overlay now reliably closes when switching tabs (synchronous render-time check replaces async effect)
 
