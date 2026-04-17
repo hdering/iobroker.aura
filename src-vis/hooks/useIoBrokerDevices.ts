@@ -98,8 +98,13 @@ export function useIoBrokerDevices() {
         const funcs = new Set<string>();
         const roles = new Set<string>();
         for (const state of states) {
-          const e = enumMap.get(state.id);
-          if (e) { e.rooms.forEach((r) => rooms.add(r)); e.funcs.forEach((f) => funcs.add(f)); }
+          // Check state ID and all parent paths – enum members can reference
+          // device or channel level, not only individual states.
+          const parts = state.id.split('.');
+          for (let i = parts.length; i >= 2; i--) {
+            const e = enumMap.get(parts.slice(0, i).join('.'));
+            if (e) { e.rooms.forEach((r) => rooms.add(r)); e.funcs.forEach((f) => funcs.add(f)); }
+          }
           if (state.obj.common.role) roles.add(state.obj.common.role);
         }
         return { rooms: [...rooms].sort(), funcs: [...funcs].sort(), roles: [...roles].sort() };

@@ -84,15 +84,23 @@ async function loadAll(): Promise<DatapointEntry[]> {
   }
 
   return stateResult.rows.map((row) => {
-    const e = enumMap.get(row.id) ?? { rooms: [], funcs: [] };
+    // Check state ID and all parent paths (channel, device) – enum members
+    // can reference any level of the object hierarchy, not just states directly.
+    const parts = row.id.split('.');
+    const roomsSet = new Set<string>();
+    const funcsSet = new Set<string>();
+    for (let i = parts.length; i >= 2; i--) {
+      const e = enumMap.get(parts.slice(0, i).join('.'));
+      if (e) { e.rooms.forEach((r) => roomsSet.add(r)); e.funcs.forEach((f) => funcsSet.add(f)); }
+    }
     return {
       id: row.id,
       name: resolveName(row.value.common.name, row.id.split('.').pop() ?? row.id),
       type: row.value.common.type,
       unit: row.value.common.unit,
       role: row.value.common.role,
-      rooms: e.rooms,
-      funcs: e.funcs,
+      rooms: [...roomsSet],
+      funcs: [...funcsSet],
     };
   });
 }
