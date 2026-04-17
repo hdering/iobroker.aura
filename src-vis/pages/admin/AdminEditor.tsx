@@ -39,7 +39,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
   const [icalUrl, setIcalUrl] = useState('');
   const [calName, setCalName] = useState('');
   const [calColor, setCalColor] = useState('#3b82f6');
-  const [showFurtherTypes, setShowFurtherTypes] = useState(false);
+  const [showFurtherTypes, setShowFurtherTypes] = useState(true);
   const { groups } = useGroupStore();
 
   // Auto-detect type / template / title / unit when the datapoint ID changes
@@ -169,8 +169,8 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
   if (step === 1) {
     return (
       <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={onClose}>
-        <div className="rounded-xl w-full max-w-2xl shadow-2xl"
-          style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}
+        <div className="rounded-xl w-full max-w-2xl shadow-2xl overflow-y-auto"
+          style={{ maxHeight: '95vh', background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}
           onClick={(e) => e.stopPropagation()}>
 
           {/* Header */}
@@ -209,7 +209,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
           </div>
 
           {/* Template grid */}
-          <div className="px-6 pb-2 overflow-y-auto" style={{ maxHeight: '52vh' }}>
+          <div className="px-6 pb-2">
             <div className="space-y-3 py-2">
               {DP_TEMPLATE_CATEGORIES.filter((cat) => cat.id !== 'special').map((cat) => {
                 const catTpls = DP_TEMPLATES.filter((tpl) => tpl.category === cat.id);
