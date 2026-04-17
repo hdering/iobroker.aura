@@ -151,7 +151,20 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
           : isEvcc
             ? { evccPrefix: 'evcc.0', loadpointCount: 1, showBattery: true }
             : isEchart
-              ? { echartSeries: [], echartShowLegend: true }
+              ? {
+                  echartSeries: datapoint.trim() ? [{
+                    id: Math.random().toString(36).slice(2, 9),
+                    name: finalTitle || 'Serie 1',
+                    datapointId: datapoint.trim(),
+                    chartType: 'line',
+                    color: '#3b82f6',
+                    historyRange: '24h',
+                    smooth: true,
+                    yAxisIndex: 0,
+                    lineWidth: 2,
+                  }] : [],
+                  echartShowLegend: true,
+                }
               : isWeather
                 ? { latitude: 48.1, longitude: 11.6, locationName: '', refreshMinutes: 30, showForecast: true }
                 : isCamera
