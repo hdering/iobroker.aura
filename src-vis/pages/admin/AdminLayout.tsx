@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useConfigSync } from '../../hooks/useConfigSync';
 import { version as appVersion } from '../../../package.json';
 import { PortalTargetContext } from '../../contexts/PortalTargetContext';
 import { Navigate, Outlet, NavLink } from 'react-router-dom';
@@ -59,11 +60,16 @@ export function AdminLayout() {
   // Ensures other browsers get the current config even if the user never
   // explicitly clicks "Speichern" after an upgrade.
   const autoSyncedRef = useRef(false);
+  const adminConfigLoadedRef = useRef(false);
   useEffect(() => {
     if (!connected || autoSyncedRef.current) return;
     autoSyncedRef.current = true;
+    adminConfigLoadedRef.current = true;
     saveToIoBroker();
   }, [connected]);
+
+  // React to external changes on aura.0.config.dashboard (subscription + polling)
+  useConfigSync(connected, adminConfigLoadedRef);
 
   // ── Ctrl+S / Cmd+S keyboard shortcut ──────────────────────────────────
   useEffect(() => {

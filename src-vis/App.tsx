@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Sun, Moon, Settings } from 'lucide-react';
 import { useIoBroker, getStateDirect, setStateDirect, setObjectDirect, subscribeStateDirect } from './hooks/useIoBroker';
+import { useConfigSync } from './hooks/useConfigSync';
 import { useConnectionStore } from './store/connectionStore';
 import { useConfigStore } from './store/configStore';
 import { useDashboardStore, useLayoutBySlug } from './store/dashboardStore';
@@ -271,58 +272,8 @@ export default function App() {
     });
   }, [connected]);
 
-  // ── React to external changes on aura.0.config.dashboard ─────────────────
-  // ── React to external changes on aura.0.config.dashboard ─────────────────
-  // Two complementary mechanisms:
-  //   1. stateChange subscription (immediate, works on direct connections)
-  //   2. Polling every CONFIG_POLL_MS (fallback for HTTPS/proxy setups where
-  //      push events may be dropped or not delivered reliably)
-  // Own writes are not looped: saveAll() flushes to localStorage before
-  // saveToIoBroker() fires, so comparison always finds no diff after own save.
-
-  const applyRemoteConfigRaw = useCallback((raw: string) => {
-    try {
-      const remote = JSON.parse(raw) as Record<string, unknown>;
-      let changed = false;
-      SYNC_STORE_KEYS.forEach((key) => {
-        const remoteVal = remote[key];
-        if (!remoteVal) return;
-        const remoteStr = typeof remoteVal === 'string' ? remoteVal : JSON.stringify(remoteVal);
-        if (remoteStr && remoteStr !== localStorage.getItem(key)) {
-          localStorage.setItem(key, remoteStr);
-          changed = true;
-        }
-      });
-      if (changed) {
-        useDashboardStore.persist.rehydrate();
-        useThemeStore.persist.rehydrate();
-        useGroupStore.persist.rehydrate();
-        useConfigStore.persist.rehydrate();
-      }
-    } catch { /* ignore malformed JSON */ }
-  }, []);
-
-  // 1. Subscription (immediate push when stateChange arrives)
-  useEffect(() => {
-    return subscribeStateDirect(IOBROKER_CONFIG_KEY, (state) => {
-      if (!state?.val || !ioBrokerConfigLoaded.current) return;
-      applyRemoteConfigRaw(String(state.val));
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // 2. Polling every 10 s – fallback for HTTPS/proxy setups where push events
-  //    may not arrive reliably (e.g. separate socketio adapter on different port)
-  useEffect(() => {
-    if (!connected) return;
-    const id = setInterval(() => {
-      if (!ioBrokerConfigLoaded.current) return;
-      void getStateDirect(IOBROKER_CONFIG_KEY).then((state) => {
-        if (state?.val) applyRemoteConfigRaw(String(state.val));
-      });
-    }, 10_000);
-    return () => clearInterval(id);
-  }, [connected, applyRemoteConfigRaw]);
+  // React to external changes on aura.0.config.dashboard (subscription + polling)
+  useConfigSync(connected, ioBrokerConfigLoaded);
 
   // Activate tab when URL slug changes
   useEffect(() => {
