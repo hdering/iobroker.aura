@@ -49,6 +49,12 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
     return () => window.removeEventListener('keydown', handler);
   }, [iframeFullscreen, setIframeFullscreen]);
 
+  // Close fullscreen overlay when the active tab changes
+  useEffect(() => {
+    setIframeFullscreen(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTabId]);
+
   // ── container width measurement ────────────────────────────────────────
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(() =>

@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.44",
+    "version": "0.4.45",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.45": {
+        "en": "Fix: iFrame fullscreen overlay now closes automatically when switching tabs",
+        "de": "Fix: iFrame-Vollbild-Overlay schließt sich automatisch beim Tab-Wechsel",
+        "ru": "Исправление: оверлей полноэкранного iFrame теперь автоматически закрывается при смене вкладки",
+        "pt": "Correção: o overlay de iFrame em ecrã inteiro fecha automaticamente ao mudar de aba",
+        "nl": "Fix: iFrame-volledig-scherm-overlay sluit nu automatisch bij tab-wissel",
+        "fr": "Correction: l'overlay iFrame plein écran se ferme automatiquement lors du changement d'onglet",
+        "it": "Fix: l'overlay iFrame a schermo intero si chiude automaticamente al cambio scheda",
+        "es": "Corrección: el overlay de iFrame en pantalla completa se cierra automáticamente al cambiar de pestaña",
+        "pl": "Poprawka: nakładka pełnoekranowa iFrame zamyka się automatycznie przy zmianie zakładki",
+        "uk": "Виправлення: оверлей повноекранного iFrame тепер автоматично закривається при зміні вкладки",
+        "zh-cn": "修复：切换标签时 iFrame 全屏覆盖层现在自动关闭"
+      },
       "0.4.44": {
         "en": "Settings: delete connected devices via adapter relay; client objects now created by adapter (fixes missing-object warnings); CSS: per-tab class (aura-{slug}) and aura-titel on header; Dimmer compact: icon+name+value row above slider",
         "de": "Einstellungen: Geräte löschen per Relay-State; Client-Objekte jetzt vom Adapter erstellt (behebt Warnungen); CSS: Tab-Klasse (aura-{slug}) und aura-titel am Header; Dimmer Kompakt: Icon+Name+Wert über Slider",
@@ -183,19 +196,6 @@
         "pl": "Motyw i CSS: przełącznik do włączania/wyłączania niestandardowego CSS bez jego usuwania",
         "uk": "Тема та CSS: перемикач для увімкнення/вимкнення користувацького CSS без видалення",
         "zh-cn": "主题与 CSS：可在不删除自定义 CSS 的情况下启用/禁用它的开关"
-      },
-      "0.4.38": {
-        "en": "Widget IDs no longer include the widget type (w-TIMESTAMP instead of gauge-TIMESTAMP) – IDs stay stable when the type is changed",
-        "de": "Widget-IDs enthalten keinen Typ mehr (w-TIMESTAMP statt gauge-TIMESTAMP) – IDs bleiben stabil wenn der Typ geändert wird",
-        "ru": "ID виджетов больше не содержат тип (w-TIMESTAMP вместо gauge-TIMESTAMP) – ID остаются стабильными при смене типа",
-        "pt": "IDs de widget já não incluem o tipo (w-TIMESTAMP em vez de gauge-TIMESTAMP) – IDs ficam estáveis ao mudar o tipo",
-        "nl": "Widget-IDs bevatten geen type meer (w-TIMESTAMP in plaats van gauge-TIMESTAMP) – IDs blijven stabiel bij typewijziging",
-        "fr": "Les IDs de widget n'incluent plus le type (w-TIMESTAMP au lieu de gauge-TIMESTAMP) – les IDs restent stables lors du changement de type",
-        "it": "Gli ID widget non includono più il tipo (w-TIMESTAMP invece di gauge-TIMESTAMP) – gli ID rimangono stabili quando si cambia tipo",
-        "es": "Los IDs de widget ya no incluyen el tipo (w-TIMESTAMP en lugar de gauge-TIMESTAMP) – los IDs se mantienen estables al cambiar el tipo",
-        "pl": "ID widgetów nie zawierają już typu (w-TIMESTAMP zamiast gauge-TIMESTAMP) – ID pozostają stabilne przy zmianie typu",
-        "uk": "ID віджетів більше не містять тип (w-TIMESTAMP замість gauge-TIMESTAMP) – ID залишаються стабільними при зміні типу",
-        "zh-cn": "小部件 ID 不再包含类型（w-TIMESTAMP 而非 gauge-TIMESTAMP）— 更改类型时 ID 保持稳定"
       }
     }
   },

@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.45 (2026-04-17)
+- Fix: iFrame fullscreen overlay now closes automatically when switching tabs
+
 ### 0.4.44 (2026-04-17)
 - Settings: delete connected devices via adapter relay state (recursive object deletion)
 - Client registration now handled by adapter backend – fixes "State has no existing object" warnings
