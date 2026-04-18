@@ -119,6 +119,7 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
   const [topic, setTopic] = useState('');
   const [tabName, setTabName] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [hidden, setHidden] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState('');
   const [chosenLayout, setChosenLayout] = useState('standard');
 
@@ -143,6 +144,7 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
 
   useEffect(() => {
     const list = mode === 'homepage' ? homeWidgets : topicWidgets;
+    setHidden(new Set());
     setSelected(new Set(
       list
         .filter((w) => isRelevantDp(w.datapoint.role, w.datapoint.type))
@@ -150,13 +152,18 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
     ));
   }, [topicWidgets, homeWidgets, mode]);
 
+  const visibleWidgets = useMemo(
+    () => topicWidgets.filter((w) => !hidden.has(w.datapoint.id)),
+    [topicWidgets, hidden],
+  );
+
   const filteredWidgets = useMemo(() => {
-    if (!search) return topicWidgets;
+    if (!search) return visibleWidgets;
     const s = search.toLowerCase();
-    return topicWidgets.filter(
+    return visibleWidgets.filter(
       (w) => w.datapoint.name.toLowerCase().includes(s) || w.datapoint.id.toLowerCase().includes(s),
     );
-  }, [topicWidgets, search]);
+  }, [visibleWidgets, search]);
 
   const sourceWidgets = mode === 'homepage' ? homeWidgets : topicWidgets;
   const activeWidgets = sourceWidgets.filter((w) => selected.has(w.datapoint.id));
@@ -413,7 +420,16 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                  {t('wizard.tab.foundDp', { count: topicWidgets.length })}
+                  {visibleWidgets.length} {t('wizard.tab.selected').replace(/\d+ /, '')}
+                  {hidden.size > 0 && (
+                    <button
+                      onClick={() => setHidden(new Set())}
+                      className="ml-2 text-[10px] hover:opacity-70"
+                      style={{ color: 'var(--text-secondary)' }}
+                    >
+                      ({hidden.size} ausgeblendet – zurücksetzen)
+                    </button>
+                  )}
                 </p>
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs mr-1" style={{ color: 'var(--text-secondary)' }}>
@@ -421,7 +437,7 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
                   </span>
                   <button
                     onClick={() => setSelected(new Set(
-                      topicWidgets
+                      visibleWidgets
                         .filter((w) => isRelevantDp(w.datapoint.role, w.datapoint.type))
                         .map((w) => w.datapoint.id),
                     ))}
@@ -431,7 +447,7 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
                     Relevante
                   </button>
                   <button
-                    onClick={() => setSelected(new Set(topicWidgets.map((w) => w.datapoint.id)))}
+                    onClick={() => setSelected(new Set(visibleWidgets.map((w) => w.datapoint.id)))}
                     className="text-[11px] px-2 py-0.5 rounded hover:opacity-80"
                     style={{ color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
                   >
@@ -465,36 +481,51 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
                   const on = selected.has(w.datapoint.id);
                   const relevant = isRelevantDp(w.datapoint.role, w.datapoint.type);
                   return (
-                    <button
+                    <div
                       key={w.datapoint.id}
-                      onClick={() => {
-                        const next = new Set(selected);
-                        if (on) next.delete(w.datapoint.id); else next.add(w.datapoint.id);
-                        setSelected(next);
-                      }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left hover:opacity-90"
+                      className="flex items-center gap-1 rounded-lg overflow-hidden"
                       style={{
                         background: on ? 'var(--accent)11' : 'var(--app-bg)',
                         border: `1px solid ${on ? 'var(--accent)33' : 'var(--app-border)'}`,
                         opacity: relevant ? 1 : 0.55,
                       }}
                     >
-                      <div className="w-4 h-4 rounded flex items-center justify-center shrink-0"
-                        style={{ background: on ? 'var(--accent)' : 'var(--app-border)' }}>
-                        {on && <Check size={10} color="#fff" />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>{w.title}</p>
-                        <p className="text-[10px] font-mono truncate" style={{ color: 'var(--text-secondary)' }}>{w.datapoint.id}</p>
-                      </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="text-[9px] px-1.5 py-0.5 rounded"
-                          style={{ background: TYPE_COLOR[w.type] + '22', color: TYPE_COLOR[w.type] }}>
-                          {TYPE_LABEL[w.type]}
-                        </span>
-                        {w.unit && <span className="text-[9px]" style={{ color: 'var(--text-secondary)' }}>{w.unit}</span>}
-                      </div>
-                    </button>
+                      <button
+                        onClick={() => {
+                          const next = new Set(selected);
+                          if (on) next.delete(w.datapoint.id); else next.add(w.datapoint.id);
+                          setSelected(next);
+                        }}
+                        className="flex-1 flex items-center gap-3 px-3 py-2.5 text-left hover:opacity-90 min-w-0"
+                      >
+                        <div className="w-4 h-4 rounded flex items-center justify-center shrink-0"
+                          style={{ background: on ? 'var(--accent)' : 'var(--app-border)' }}>
+                          {on && <Check size={10} color="#fff" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>{w.title}</p>
+                          <p className="text-[10px] font-mono truncate" style={{ color: 'var(--text-secondary)' }}>{w.datapoint.id}</p>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className="text-[9px] px-1.5 py-0.5 rounded"
+                            style={{ background: TYPE_COLOR[w.type] + '22', color: TYPE_COLOR[w.type] }}>
+                            {TYPE_LABEL[w.type]}
+                          </span>
+                          {w.unit && <span className="text-[9px]" style={{ color: 'var(--text-secondary)' }}>{w.unit}</span>}
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setHidden((prev) => new Set([...prev, w.datapoint.id]));
+                          setSelected((prev) => { const next = new Set(prev); next.delete(w.datapoint.id); return next; });
+                        }}
+                        className="px-2 py-2.5 shrink-0 hover:opacity-70"
+                        style={{ color: 'var(--text-secondary)' }}
+                        title="Ausblenden"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
                   );
                 })}
                 {filteredWidgets.length === 0 && (
