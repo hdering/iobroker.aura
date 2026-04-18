@@ -12,38 +12,38 @@ export interface LayoutVariant {
 type SizeMap = Record<string, [number, number]>;
 
 const SIZES: Record<string, SizeMap> = {
-  // Kompakt: erkennbar unterschiedliche Proportionen, kompakter Gesamteindruck
+  // Kompakt: ~50 px je Zelle (bei gridSnapX=10)
   compact: {
-    switch:     [2, 3],   // schmal – viele Schalter nebeneinander
-    value:      [3, 3],   // etwas breiter als Schalter
-    dimmer:     [3, 4],   // höher als value – Slider braucht Platz
-    thermostat: [4, 4],   // quadratisch
-    chart:      [6, 4],   // Querformat
-    list:       [4, 4],
-    clock:      [4, 3],   // Querformat – Uhr wirkt breiter als hoch
-    calendar:   [6, 4],
-  },
-  // Standard: komfortabel lesbar
-  standard: {
-    switch:     [2, 4],   // schmal, aber höher
-    value:      [3, 4],
-    dimmer:     [3, 5],   // spürbar höher (Rolläden, Dimmer)
-    thermostat: [4, 5],
-    chart:      [6, 5],
-    list:       [4, 5],
-    clock:      [5, 4],   // deutlich im Querformat
-    calendar:   [6, 5],
-  },
-  // Großzügig: Wandtablet-Modus
-  wide: {
-    switch:     [3, 5],   // noch immer schlanker als die anderen
-    value:      [4, 5],
-    dimmer:     [4, 6],   // tall – Rolläden/Dimmer
-    thermostat: [5, 6],
+    switch:     [3, 4],
+    value:      [4, 4],
+    dimmer:     [4, 5],
+    thermostat: [5, 5],
     chart:      [8, 5],
-    list:       [5, 6],
-    clock:      [6, 4],   // breites Querformat
-    calendar:   [8, 6],
+    list:       [5, 5],
+    clock:      [4, 3],
+    calendar:   [8, 5],
+  },
+  // Standard: ~100 px je Zelle
+  standard: {
+    switch:     [4, 5],
+    value:      [5, 5],
+    dimmer:     [6, 6],
+    thermostat: [6, 6],
+    chart:      [10, 6],
+    list:       [6, 6],
+    clock:      [6, 5],
+    calendar:   [10, 6],
+  },
+  // Großzügig: ~150 px je Zelle – Wandtablet
+  wide: {
+    switch:     [6, 6],
+    value:      [6, 6],
+    dimmer:     [8, 7],
+    thermostat: [8, 7],
+    chart:      [12, 7],
+    list:       [8, 7],
+    clock:      [8, 5],
+    calendar:   [12, 7],
   },
 };
 
