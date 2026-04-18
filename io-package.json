@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.49",
+    "version": "0.4.50",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.50": {
+        "en": "Fix: Gauge color zones now always cover the full arc; last zone always extends to max; midpoint calculation for new zones corrected",
+        "de": "Fix: Gauge-Farbzonen decken jetzt immer den gesamten Bogen ab; letzte Zone erstreckt sich immer bis max; Mittelpunkt-Berechnung beim Hinzufügen neuer Zonen korrigiert",
+        "ru": "Исправление: цветовые зоны Gauge теперь всегда покрывают полную дугу; последняя зона всегда доходит до max; исправлено вычисление средней точки для новых зон",
+        "pt": "Correção: as zonas de cor do Gauge agora cobrem sempre o arco completo; a última zona estende-se sempre até max; cálculo do ponto médio para novas zonas corrigido",
+        "nl": "Fix: Gauge-kleurzones dekken nu altijd de volledige boog; laatste zone strekt zich altijd uit tot max; middenpuntberekening voor nieuwe zones gecorrigeerd",
+        "fr": "Correction: les zones de couleur du Gauge couvrent maintenant toujours l'arc complet; la dernière zone s'étend toujours jusqu'à max; calcul du point médian pour les nouvelles zones corrigé",
+        "it": "Fix: le zone colore del Gauge ora coprono sempre l'arco completo; l'ultima zona si estende sempre fino a max; calcolo del punto medio per le nuove zone corretto",
+        "es": "Corrección: las zonas de color del Gauge ahora cubren siempre el arco completo; la última zona siempre se extiende hasta max; cálculo del punto medio para nuevas zonas corregido",
+        "pl": "Poprawka: strefy kolorów Gauge teraz zawsze pokrywają pełny łuk; ostatnia strefa zawsze sięga do max; poprawiono obliczanie punktu środkowego dla nowych stref",
+        "uk": "Виправлення: кольорові зони Gauge тепер завжди покривають повну дугу; остання зона завжди доходить до max; виправлено обчислення середньої точки для нових зон",
+        "zh-cn": "修复：仪表颜色区域现在始终覆盖完整弧线；最后一个区域始终延伸到 max；新增区域的中点计算已更正"
+      },
       "0.4.49": {
         "en": "Editor: guidelines overlay – toggle red dashed lines at configurable width/height; optional frontend display; settings in Admin → Settings",
         "de": "Editor: Hilfslinien – rote gestrichelte Linien bei einstellbarer Breite/Höhe; optionale Anzeige im Frontend; Einstellungen in Admin → Einstellungen",
@@ -183,19 +196,6 @@
         "pl": "Ustawienia: usuwanie urządzeń przez relay; obiekty klientów tworzone przez adapter (naprawia ostrzeżenia); CSS: klasa zakładki (aura-{slug}) i aura-titel; Dimmer kompaktowy: ikona+nazwa+wartość nad sliderem",
         "uk": "Налаштування: видалення пристроїв через relay; об'єкти клієнтів створюються адаптером (виправляє попередження); CSS: клас вкладки (aura-{slug}) і aura-titel; Диммер компакт: іконка+назва+значення над повзунком",
         "zh-cn": "设置：通过 relay 状态删除设备；客户端对象由适配器创建（修复缺少对象警告）；CSS：标签类（aura-{slug}）和标题 aura-titel；调光器紧凑布局：图标+名称+值行在滑块上方"
-      },
-      "0.4.43": {
-        "en": "Icon picker: all 1900+ Lucide icons with category tabs and search, loaded lazily; JSON Table: remove layout picker",
-        "de": "Icon-Auswahl: alle 1900+ Lucide-Icons mit Kategorie-Tabs und Suche, lazily geladen; JSON-Tabelle: Layout-Auswahl entfernt",
-        "ru": "Выбор иконок: все 1900+ иконок Lucide с вкладками категорий и поиском, загрузка по требованию; JSON-Таблица: удален выбор макета",
-        "pt": "Seletor de ícones: todos os 1900+ ícones Lucide com abas de categoria e pesquisa, carregados sob demanda; Tabela JSON: seletor de layout removido",
-        "nl": "Icoonkiezer: alle 1900+ Lucide-iconen met categorietabs en zoeken, lazy geladen; JSON-tabel: layout-kiezer verwijderd",
-        "fr": "Sélecteur d'icônes: tous les 1900+ icônes Lucide avec onglets de catégorie et recherche, chargés à la demande; Tableau JSON: sélecteur de mise en page supprimé",
-        "it": "Selettore icone: tutti i 1900+ icone Lucide con schede categoria e ricerca, caricati su richiesta; Tabella JSON: selettore layout rimosso",
-        "es": "Selector de iconos: todos los 1900+ iconos Lucide con pestañas de categoría y búsqueda, cargados de forma diferida; Tabla JSON: selector de diseño eliminado",
-        "pl": "Selektor ikon: wszystkie 1900+ ikon Lucide z zakładkami kategorii i wyszukiwaniem, ładowane leniwie; Tabela JSON: usunięto wybór układu",
-        "uk": "Вибір іконок: всі 1900+ іконок Lucide з вкладками категорій та пошуком, ліниве завантаження; JSON-Таблиця: видалено вибір макету",
-        "zh-cn": "图标选择器：全部 1900+ Lucide 图标，含分类标签与搜索，懒加载；JSON 表格：移除布局选择器"
       }
     }
   },

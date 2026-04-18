@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.50 (2026-04-18)
+- Fix: Gauge color zones now always cover the full arc; last zone always extends to max; midpoint calculation for new zones corrected
+
 ### 0.4.49 (2026-04-18)
 - Editor: guidelines overlay – toggle red dashed lines at configurable width/height to plan layouts for a target device; optional display in frontend; settings in Admin → Settings
 

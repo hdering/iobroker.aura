@@ -77,8 +77,11 @@ function GaugeSVG({
         <>
           {zones.map((zone, i) => {
             const prevMax   = i === 0 ? min : zones[i - 1].max;
+            // The last zone always extends to max so the arc covers the full gauge
+            // regardless of what zone.max was set to in the editor.
+            const zoneMax   = i === zones.length - 1 ? max : zone.max;
             const startAngle = valueToAngle(prevMax, min, max);
-            const endAngle   = valueToAngle(zone.max, min, max);
+            const endAngle   = valueToAngle(zoneMax, min, max);
             if (endAngle <= startAngle) return null;
             return (
               <path key={i}

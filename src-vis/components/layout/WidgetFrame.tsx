@@ -1648,14 +1648,19 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                         { max: (o.zone2Max as number) ?? min + range * 0.66, color: (o.zone2Color as string) ?? '#f59e0b' },
                         { max: max,                                           color: (o.zone3Color as string) ?? '#ef4444' },
                       ];
-                      const setZones = (z: CZ[]) => set({ zones: z, zone1Max: undefined, zone2Max: undefined, zone1Color: undefined, zone2Color: undefined, zone3Color: undefined });
+                      // Normalize: always ensure the last zone's max equals the gauge max.
+                      // This corrects stale stored values after zones are removed/reordered.
+                      const normalizeZones = (z: CZ[]): CZ[] =>
+                        z.map((zone, idx) => idx === z.length - 1 ? { ...zone, max } : zone);
+                      const setZones = (z: CZ[]) => set({ zones: normalizeZones(z), zone1Max: undefined, zone2Max: undefined, zone1Color: undefined, zone2Color: undefined, zone3Color: undefined });
                       const updateZone = (i: number, patch: Partial<CZ>) => setZones(zones.map((z, idx) => idx === i ? { ...z, ...patch } : z));
                       const removeZone = (i: number) => { if (zones.length > 1) setZones(zones.filter((_, idx) => idx !== i)); };
                       const addZone = () => {
                         const insertBefore = zones.length - 1;
                         const prevMax = insertBefore > 0 ? zones[insertBefore - 1].max : min;
-                        const nextMax = zones[insertBefore].max;
-                        const newMax  = Math.round((prevMax + nextMax) / 2);
+                        // The last zone always extends to max visually, so use max (not zone.max)
+                        // as the upper boundary when computing the midpoint for the new zone.
+                        const newMax  = Math.round((prevMax + max) / 2);
                         const newZones = [...zones];
                         newZones.splice(insertBefore, 0, { max: newMax, color: '#6366f1' });
                         setZones(newZones);
@@ -2100,15 +2105,16 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                         { max: min + range * 0.66, color: '#f59e0b' },
                         { max: max,                color: '#22c55e' },
                       ];
-                      const setZones   = (z: CZ[]) => set({ zones: z });
+                      const normalizeZones = (z: CZ[]): CZ[] =>
+                        z.map((zone, idx) => idx === z.length - 1 ? { ...zone, max } : zone);
+                      const setZones   = (z: CZ[]) => set({ zones: normalizeZones(z) });
                       const updateZone = (i: number, patch: Partial<CZ>) => setZones(zones.map((z, idx) => idx === i ? { ...z, ...patch } : z));
                       const removeZone = (i: number) => { if (zones.length > 1) setZones(zones.filter((_, idx) => idx !== i)); };
                       const addZone    = () => {
                         const insertBefore = zones.length - 1;
                         const prevMax  = insertBefore > 0 ? zones[insertBefore - 1].max : min;
-                        const nextMax  = zones[insertBefore].max;
                         const newZones = [...zones];
-                        newZones.splice(insertBefore, 0, { max: Math.round((prevMax + nextMax) / 2), color: '#6366f1' });
+                        newZones.splice(insertBefore, 0, { max: Math.round((prevMax + max) / 2), color: '#6366f1' });
                         setZones(newZones);
                       };
                       return (
