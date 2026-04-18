@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, Trash2, Edit3, Check, Database, Wand2, Smartphone, GripVertical, Upload, Settings, X } from 'lucide-react';
+import { Plus, Trash2, Edit3, Check, Database, Wand2, Smartphone, GripVertical, Upload, Settings, X, Ruler } from 'lucide-react';
 import { ImportWidgetDialog } from '../../components/config/ImportWidgetDialog';
 import { ICON_PICKER_ENTRIES, WIDGET_ICON_MAP } from '../../utils/widgetIconMap';
 import { useDashboardStore } from '../../store/dashboardStore';
@@ -601,6 +601,8 @@ export function AdminEditor() {
   const [showManual, setShowManual] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [showMobileOrder, setShowMobileOrder] = useState(false);
+  const { frontend, updateFrontend } = useConfigStore();
+  const guidelinesEnabled = frontend.guidelinesEnabled ?? false;
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renamingValue, setRenamingValue] = useState('');
   const [settingsTabId, setSettingsTabId] = useState<string | null>(null);
@@ -663,6 +665,18 @@ export function AdminEditor() {
           title={t('editor.mobile.title')}
         >
           <Smartphone size={15} />
+        </button>
+        <button
+          onClick={() => updateFrontend({ guidelinesEnabled: !guidelinesEnabled })}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium hover:opacity-80"
+          style={{
+            background: guidelinesEnabled ? 'rgba(239,68,68,0.12)' : 'var(--app-bg)',
+            color: guidelinesEnabled ? 'rgb(239,68,68)' : 'var(--text-secondary)',
+            border: `1px solid ${guidelinesEnabled ? 'rgb(239,68,68)' : 'var(--app-border)'}`,
+          }}
+          title="Hilfslinien ein-/ausblenden"
+        >
+          <Ruler size={15} />
         </button>
       </div>
 

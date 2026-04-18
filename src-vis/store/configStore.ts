@@ -26,6 +26,11 @@ export interface FrontendSettings {
   fontScale: number;
   mobileBreakpoint: number;
   language: 'de' | 'en';
+  // Guidelines overlay
+  guidelinesEnabled: boolean;
+  guidelinesWidth: number;
+  guidelinesHeight: number;
+  guidelinesShowInFrontend: boolean;
 }
 
 interface ConfigState {
@@ -59,6 +64,10 @@ export const DEFAULT_FRONTEND: FrontendSettings = {
   fontScale: 1,
   mobileBreakpoint: 600,
   language: 'de',
+  guidelinesEnabled: false,
+  guidelinesWidth: 1280,
+  guidelinesHeight: 800,
+  guidelinesShowInFrontend: false,
 };
 
 export const useConfigStore = create<ConfigState>()(

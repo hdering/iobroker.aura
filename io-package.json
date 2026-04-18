@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.48",
+    "version": "0.4.49",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.49": {
+        "en": "Editor: guidelines overlay – toggle red dashed lines at configurable width/height; optional frontend display; settings in Admin → Settings",
+        "de": "Editor: Hilfslinien – rote gestrichelte Linien bei einstellbarer Breite/Höhe; optionale Anzeige im Frontend; Einstellungen in Admin → Einstellungen",
+        "ru": "Редактор: вспомогательные линии – красные пунктирные линии при настраиваемой ширине/высоте; опциональное отображение во фронтенде; настройки в Администрирование → Настройки",
+        "pt": "Editor: linhas guia – linhas vermelhas tracejadas em largura/altura configurável; exibição opcional no frontend; configurações em Admin → Definições",
+        "nl": "Editor: hulplijnen – rode stippellijnen op instelbare breedte/hoogte; optionele weergave in frontend; instellingen in Admin → Instellingen",
+        "fr": "Éditeur: lignes guides – lignes rouges pointillées à largeur/hauteur configurable; affichage optionnel dans le frontend; paramètres dans Admin → Paramètres",
+        "it": "Editor: linee guida – linee rosse tratteggiate a larghezza/altezza configurabile; visualizzazione opzionale nel frontend; impostazioni in Admin → Impostazioni",
+        "es": "Editor: líneas guía – líneas rojas discontinuas en anchura/altura configurable; visualización opcional en el frontend; ajustes en Admin → Configuración",
+        "pl": "Edytor: linie pomocnicze – czerwone przerywane linie przy konfigurowalnej szerokości/wysokości; opcjonalne wyświetlanie we frontendzie; ustawienia w Admin → Ustawienia",
+        "uk": "Редактор: допоміжні лінії – червоні пунктирні лінії при налаштовуваній ширині/висоті; опціональне відображення у фронтенді; налаштування в Адмін → Налаштування",
+        "zh-cn": "编辑器：参考线 – 可配置宽度/高度的红色虚线；可选在前端显示；在管理→设置中配置"
+      },
       "0.4.48": {
         "en": "Fix: tabs no longer go blank after switching away from a fillTab iFrame widget (callback ref prevents ResizeObserver from firing with width=0 on detached element)",
         "de": "Fix: Tabs werden nach dem Wechsel von einem fillTab-iFrame-Widget nicht mehr leer (Callback-Ref verhindert ResizeObserver-Aufruf mit Breite=0 auf entferntem Element)",
@@ -183,19 +196,6 @@
         "pl": "Selektor ikon: wszystkie 1900+ ikon Lucide z zakładkami kategorii i wyszukiwaniem, ładowane leniwie; Tabela JSON: usunięto wybór układu",
         "uk": "Вибір іконок: всі 1900+ іконок Lucide з вкладками категорій та пошуком, ліниве завантаження; JSON-Таблиця: видалено вибір макету",
         "zh-cn": "图标选择器：全部 1900+ Lucide 图标，含分类标签与搜索，懒加载；JSON 表格：移除布局选择器"
-      },
-      "0.4.42": {
-        "en": "JSON Table widget: column editor (reorder, rename, hide, HTML toggle), search bar, header text color; load columns from live datapoint value",
-        "de": "JSON-Tabelle Widget: Spalten-Editor (Reihenfolge, Umbenennen, Ausblenden, HTML), Suchleiste, Header-Textfarbe; Spalten aus aktuellem Datenpunkt laden",
-        "ru": "Виджет JSON-Таблица: редактор столбцов (порядок, переименование, скрытие, HTML), строка поиска, цвет текста заголовка; загрузка столбцов из текущего значения точки данных",
-        "pt": "Widget Tabela JSON: editor de colunas (reordenar, renomear, ocultar, HTML), barra de pesquisa, cor do texto do cabeçalho; carregar colunas do valor do datapoint",
-        "nl": "JSON-tabel widget: kolomeditor (volgorde, hernoemen, verbergen, HTML), zoekbalk, koptekstkleur; kolommen laden vanuit datapoint-waarde",
-        "fr": "Widget Tableau JSON: éditeur de colonnes (réordonnancement, renommage, masquage, HTML), barre de recherche, couleur texte en-tête; chargement des colonnes depuis la valeur du datapoint",
-        "it": "Widget Tabella JSON: editor colonne (riordina, rinomina, nascondi, HTML), barra di ricerca, colore testo intestazione; carica colonne dal valore del datapoint",
-        "es": "Widget Tabla JSON: editor de columnas (reordenar, renombrar, ocultar, HTML), barra de búsqueda, color texto cabecera; cargar columnas desde el valor del datapoint",
-        "pl": "Widget Tabela JSON: edytor kolumn (zmiana kolejności, zmiana nazwy, ukrycie, HTML), pasek wyszukiwania, kolor tekstu nagłówka; ładowanie kolumn z wartości punktu danych",
-        "uk": "Віджет JSON-Таблиця: редактор стовпців (порядок, перейменування, приховування, HTML), рядок пошуку, колір тексту заголовка; завантаження стовпців з поточного значення точки даних",
-        "zh-cn": "JSON 表格小部件：列编辑器（重新排序、重命名、隐藏、HTML 开关），搜索栏，表头文字颜色；从数据点当前值加载列"
       }
     }
   },

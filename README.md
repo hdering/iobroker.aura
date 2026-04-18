@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.49 (2026-04-18)
+- Editor: guidelines overlay – toggle red dashed lines at configurable width/height to plan layouts for a target device; optional display in frontend; settings in Admin → Settings
+
 ### 0.4.48 (2026-04-17)
 - Fix: tabs no longer go blank after switching away from a fillTab iFrame widget (callback ref prevents ResizeObserver from firing with width=0 on detached element)
 

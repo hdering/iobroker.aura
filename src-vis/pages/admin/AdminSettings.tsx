@@ -586,6 +586,47 @@ export function AdminSettings() {
             />
           </div>
         </Card>
+
+        {/* Hilfslinien */}
+        <Card title="Hilfslinien">
+          <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
+            Zeigt rote gestrichelte Linien im Editor (und optional im Frontend) zur Orientierung bei der Layout-Planung für ein Zielgerät.
+          </p>
+          <SliderSetting
+            label="Breite"
+            value={frontend.guidelinesWidth ?? 1280}
+            min={320} max={3840} step={10} unit=" px"
+            onChange={(v) => updateFrontend({ guidelinesWidth: v })}
+            presets={[
+              { label: '768', value: 768 },
+              { label: '1024', value: 1024 },
+              { label: '1280', value: 1280 },
+              { label: '1920', value: 1920 },
+            ]}
+          />
+          <div className="border-t pt-3" style={{ borderColor: 'var(--app-border)' }}>
+            <SliderSetting
+              label="Höhe"
+              value={frontend.guidelinesHeight ?? 800}
+              min={320} max={2160} step={10} unit=" px"
+              onChange={(v) => updateFrontend({ guidelinesHeight: v })}
+              presets={[
+                { label: '600', value: 600 },
+                { label: '768', value: 768 },
+                { label: '800', value: 800 },
+                { label: '1024', value: 1024 },
+                { label: '1080', value: 1080 },
+              ]}
+            />
+          </div>
+          <div className="border-t pt-3" style={{ borderColor: 'var(--app-border)' }}>
+            <ToggleRow
+              label="Im Frontend anzeigen"
+              value={frontend.guidelinesShowInFrontend ?? false}
+              onChange={(v) => updateFrontend({ guidelinesShowInFrontend: v })}
+            />
+          </div>
+        </Card>
       </div>
 
       {/* Row 2: PIN + Backup */}

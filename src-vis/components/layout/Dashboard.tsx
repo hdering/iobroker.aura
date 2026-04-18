@@ -31,6 +31,12 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
   const snapX    = useConfigStore((s) => s.frontend.gridSnapX ?? s.frontend.gridRowHeight ?? 80);
   const MARGIN = useConfigStore((s) => s.frontend.gridGap ?? DEFAULT_MARGIN);
   const mobileBreakpoint = useConfigStore((s) => s.frontend.mobileBreakpoint ?? 600);
+  const guidelinesEnabled      = useConfigStore((s) => s.frontend.guidelinesEnabled ?? false);
+  const guidelinesWidth        = useConfigStore((s) => s.frontend.guidelinesWidth ?? 1280);
+  const guidelinesHeight       = useConfigStore((s) => s.frontend.guidelinesHeight ?? 800);
+  const guidelinesShowInFrontend = useConfigStore((s) => s.frontend.guidelinesShowInFrontend ?? false);
+
+  const showGuidelines = guidelinesEnabled && (editMode || guidelinesShowInFrontend);
 
   // In frontend view, use provided override; otherwise use active editor layout
   const tabs = viewTabs ?? activeLayout.tabs;
@@ -207,6 +213,7 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
   return (
     <div className="flex-1 min-h-0 relative">
     <div ref={containerRefCallback} className="aura-scroll absolute inset-0 overflow-auto p-2 sm:p-4" style={(editMode && rglWidth > containerWidth) || (readonly && effectiveRglWidth > containerWidth) ? { overflowX: 'auto' } : undefined}>
+      {showGuidelines && <GuidelinesOverlay width={guidelinesWidth} height={guidelinesHeight} />}
       {rglWidth > 0 && (
         <>
           {/* Reflow-hidden widgets from all tabs rendered off-screen so conditions keep evaluating */}
@@ -288,6 +295,74 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
     </div>
     {showIframeOverlay && <IframeOverlay data={iframeFullscreen!} onClose={() => setIframeFullscreen(null)} />}
     </div>
+  );
+}
+
+// ── Guidelines overlay ────────────────────────────────────────────────────
+// Renders a vertical line at x=guidelinesWidth and a horizontal line at
+// y=guidelinesHeight. Positioned absolutely inside the scroll container so
+// the lines scroll with the grid content and stay aligned to grid coordinates.
+function GuidelinesOverlay({ width, height }: { width: number; height: number }) {
+  return (
+    <>
+      {/* Vertical line: right edge of the target width */}
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: width,
+          width: 0,
+          bottom: 0,
+          borderLeft: '2px dashed rgba(239,68,68,0.85)',
+          pointerEvents: 'none',
+          zIndex: 40,
+        }}
+      >
+        <span style={{
+          position: 'sticky',
+          top: 4,
+          display: 'block',
+          background: 'rgba(239,68,68,0.85)',
+          color: '#fff',
+          fontSize: 10,
+          fontWeight: 600,
+          padding: '1px 5px',
+          borderRadius: 3,
+          whiteSpace: 'nowrap',
+          transform: 'translateX(4px)',
+          lineHeight: 1.6,
+        }}>{width} px</span>
+      </div>
+      {/* Horizontal line: bottom edge of the target height */}
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: height,
+          right: 0,
+          height: 0,
+          borderTop: '2px dashed rgba(239,68,68,0.85)',
+          pointerEvents: 'none',
+          zIndex: 40,
+        }}
+      >
+        <span style={{
+          position: 'absolute',
+          left: 4,
+          top: 3,
+          background: 'rgba(239,68,68,0.85)',
+          color: '#fff',
+          fontSize: 10,
+          fontWeight: 600,
+          padding: '1px 5px',
+          borderRadius: 3,
+          whiteSpace: 'nowrap',
+          lineHeight: 1.6,
+        }}>{height} px</span>
+      </div>
+    </>
   );
 }
 
