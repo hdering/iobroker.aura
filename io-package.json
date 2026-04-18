@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.56",
+    "version": "0.4.57",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.57": {
+        "en": "Fix: status badge shows correct WiFi icon – Wifi (green) when reachable, WifiOff (red) when unreachable; was always showing WifiOff regardless of state",
+        "de": "Fix: Status-Badge zeigt korrektes WLAN-Symbol – Wifi (grün) wenn erreichbar, WifiOff (rot) wenn nicht erreichbar; wurde zuvor immer als WifiOff angezeigt",
+        "ru": "Исправление: значок статуса показывает правильный значок Wi-Fi – Wifi (зелёный) при доступности, WifiOff (красный) при недоступности; ранее всегда отображался WifiOff",
+        "pt": "Correção: distintivo de estado mostra ícone WiFi correto – Wifi (verde) quando acessível, WifiOff (vermelho) quando inacessível; antes sempre mostrava WifiOff",
+        "nl": "Fix: statusbadge toont correct WiFi-pictogram – Wifi (groen) wanneer bereikbaar, WifiOff (rood) wanneer niet bereikbaar; toonde altijd WifiOff",
+        "fr": "Correction: le badge d'état affiche la bonne icône WiFi – Wifi (vert) si accessible, WifiOff (rouge) si inaccessible; affichait toujours WifiOff avant",
+        "it": "Fix: il badge di stato mostra l'icona WiFi corretta – Wifi (verde) se raggiungibile, WifiOff (rosso) se non raggiungibile; mostrava sempre WifiOff",
+        "es": "Corrección: la insignia de estado muestra el icono WiFi correcto – Wifi (verde) si accesible, WifiOff (rojo) si inaccesible; antes siempre mostraba WifiOff",
+        "pl": "Poprawka: odznaka statusu pokazuje właściwą ikonę WiFi – Wifi (zielony) gdy dostępny, WifiOff (czerwony) gdy niedostępny; wcześniej zawsze wyświetlała WifiOff",
+        "uk": "Виправлення: значок стану показує правильну іконку WiFi – Wifi (зелений) якщо доступний, WifiOff (червоний) якщо недоступний; раніше завжди показував WifiOff",
+        "zh-cn": "修复：状态徽章显示正确的 WiFi 图标 – 可达时显示 Wifi（绿色），不可达时显示 WifiOff（红色）；之前无论状态如何始终显示 WifiOff"
+      },
       "0.4.56": {
         "en": "Widget editor: 'Visible fields' toggles (title, label, value, unit, slider, controls, …) for all widget types; layout selector and field toggles combined into one collapsible section",
         "de": "Widget-Editor: 'Sichtbare Felder'-Schalter (Titel, Bezeichnung, Wert, Einheit, Schieberegler, Steuerelemente, …) für alle Widget-Typen; Layout-Auswahl und Feld-Schalter in einem einklappbaren Bereich zusammengefasst",
@@ -183,19 +196,6 @@
         "pl": "Lista Dynamiczna: poprawiono wyniki filtrowania aby odpowiadały wyborze punktu danych – przeszukiwanie ścieżki nadrzędnej dla przynależności pokoju/funkcji; dokładne dopasowanie roli zamiast podciągu",
         "uk": "Динамічний список: виправлено результати фільтрації відповідно до вибору точки даних – обхід батьківських шляхів для кімнати/функції; точне збігання ролі замість підрядка",
         "zh-cn": "动态列表：修复过滤结果与数据点选择器一致 – 房间/功能成员资格的父路径遍历；精确角色匹配而非子字符串"
-      },
-      "0.4.50": {
-        "en": "Fix: Gauge color zones now always cover the full arc; last zone always extends to max; midpoint calculation for new zones corrected",
-        "de": "Fix: Gauge-Farbzonen decken jetzt immer den gesamten Bogen ab; letzte Zone erstreckt sich immer bis max; Mittelpunkt-Berechnung beim Hinzufügen neuer Zonen korrigiert",
-        "ru": "Исправление: цветовые зоны Gauge теперь всегда покрывают полную дугу; последняя зона всегда доходит до max; исправлено вычисление средней точки для новых зон",
-        "pt": "Correção: as zonas de cor do Gauge agora cobrem sempre o arco completo; a última zona estende-se sempre até max; cálculo do ponto médio para novas zonas corrigido",
-        "nl": "Fix: Gauge-kleurzones dekken nu altijd de volledige boog; laatste zone strekt zich altijd uit tot max; middenpuntberekening voor nieuwe zones gecorrigeerd",
-        "fr": "Correction: les zones de couleur du Gauge couvrent maintenant toujours l'arc complet; la dernière zone s'étend toujours jusqu'à max; calcul du point médian pour les nouvelles zones corrigé",
-        "it": "Fix: le zone colore del Gauge ora coprono sempre l'arco completo; l'ultima zona si estende sempre fino a max; calcolo del punto medio per le nuove zone corretto",
-        "es": "Corrección: las zonas de color del Gauge ahora cubren siempre el arco completo; la última zona siempre se extiende hasta max; cálculo del punto medio para nuevas zonas corregido",
-        "pl": "Poprawka: strefy kolorów Gauge teraz zawsze pokrywają pełny łuk; ostatnia strefa zawsze sięga do max; poprawiono obliczanie punktu środkowego dla nowych stref",
-        "uk": "Виправлення: кольорові зони Gauge тепер завжди покривають повну дугу; остання зона завжди доходить до max; виправлено обчислення середньої точки для нових зон",
-        "zh-cn": "修复：仪表颜色区域现在始终覆盖完整弧线；最后一个区域始终延伸到 max；新增区域的中点计算已更正"
       }
     }
   },

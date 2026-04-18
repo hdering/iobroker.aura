@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.57 (2026-04-18)
+- Fix: status badge shows correct WiFi icon – Wifi (green) when reachable, WifiOff (red) when unreachable
+
 ### 0.4.56 (2026-04-18)
 - Widget editor: "Visible fields" toggles (title, label, value, unit, slider, controls, …) for all widget types and layouts
 - Layout selector and field toggles combined into one collapsible section in the edit panel
