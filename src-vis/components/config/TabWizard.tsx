@@ -269,7 +269,7 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div
-        className="rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col overflow-hidden"
+        className="rounded-2xl w-full max-w-4xl shadow-2xl flex flex-col overflow-hidden"
         style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)', maxHeight: '90vh' }}
         onClick={(e) => e.stopPropagation()}
       >
