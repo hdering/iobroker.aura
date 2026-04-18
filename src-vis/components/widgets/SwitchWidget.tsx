@@ -13,6 +13,9 @@ export function SwitchWidget({ config }: WidgetProps) {
   const layout = config.layout ?? 'default';
   const toggle = () => setState(config.datapoint, !isOn);
   const CompactIcon = getWidgetIcon(config.options?.icon as string | undefined, Power);
+  const o = config.options ?? {};
+  const showTitle = o.showTitle !== false;
+  const showLabel = o.showLabel !== false;
 
   // --- CARD: Vollflächige farbige Karte mit großem Icon ---
   if (layout === 'card') {
@@ -32,8 +35,8 @@ export function SwitchWidget({ config }: WidgetProps) {
           style={{ color: isOn ? '#fff' : 'var(--text-secondary)', filter: isOn ? 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' : 'none' }}
         />
         <div className="text-center">
-          <p className="font-bold text-sm" style={{ color: isOn ? '#fff' : 'var(--text-secondary)' }}>{config.title}</p>
-          <p className="text-xs opacity-70" style={{ color: isOn ? '#fff' : 'var(--text-secondary)' }}>{isOn ? 'AN' : 'AUS'}</p>
+          {showTitle && <p className="font-bold text-sm" style={{ color: isOn ? '#fff' : 'var(--text-secondary)' }}>{config.title}</p>}
+          {showLabel && <p className="text-xs opacity-70" style={{ color: isOn ? '#fff' : 'var(--text-secondary)' }}>{isOn ? 'AN' : 'AUS'}</p>}
         </div>
         <StatusBadges config={config} />
       </button>
@@ -45,7 +48,8 @@ export function SwitchWidget({ config }: WidgetProps) {
     return (
       <div className="flex items-center gap-3 h-full" style={{ position: 'relative' }}>
         <CompactIcon size={18} style={{ color: isOn ? 'var(--accent-green)' : 'var(--text-secondary)', flexShrink: 0 }} />
-        <span className="flex-1 text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{config.title}</span>
+        {showTitle && <span className="flex-1 text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{config.title}</span>}
+        {!showTitle && <span className="flex-1" />}
         <button onClick={toggle}
           className="relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0 focus:outline-none"
           style={{ background: isOn ? 'var(--accent-green)' : 'var(--app-border)' }}>
@@ -71,7 +75,7 @@ export function SwitchWidget({ config }: WidgetProps) {
             }}
           />
         </button>
-        <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>
+        {showTitle && <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
         <StatusBadges config={config} />
       </div>
     );
@@ -85,16 +89,20 @@ export function SwitchWidget({ config }: WidgetProps) {
 
   return (
     <div className={`flex flex-col h-full gap-2 ${posClass}`} style={{ position: 'relative' }}>
-      <div className="flex items-center gap-2" style={titleStyle}>
-        <Power size={14} style={{ color: isOn ? 'var(--accent-green)' : 'var(--text-secondary)', flexShrink: 0 }} />
-        <p className="text-xs" style={{ color: 'var(--text-secondary)', textAlign: titleAlign, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{config.title}</p>
-      </div>
+      {showTitle && (
+        <div className="flex items-center gap-2" style={titleStyle}>
+          <Power size={14} style={{ color: isOn ? 'var(--accent-green)' : 'var(--text-secondary)', flexShrink: 0 }} />
+          <p className="text-xs" style={{ color: 'var(--text-secondary)', textAlign: titleAlign, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{config.title}</p>
+        </div>
+      )}
       <div className="flex items-center justify-between">
-        <span className="text-2xl font-bold" style={{ color: isOn ? 'var(--accent-green)' : 'var(--text-secondary)' }}>
-          {isOn ? 'AN' : 'AUS'}
-        </span>
+        {showLabel && (
+          <span className="text-2xl font-bold" style={{ color: isOn ? 'var(--accent-green)' : 'var(--text-secondary)' }}>
+            {isOn ? 'AN' : 'AUS'}
+          </span>
+        )}
         <button onClick={toggle}
-          className="relative w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none"
+          className={`relative w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none ${!showLabel ? 'ml-auto' : ''}`}
           style={{ background: isOn ? 'var(--accent-green)' : 'var(--app-border)' }}>
           <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${isOn ? 'translate-x-6' : 'translate-x-0'}`} />
         </button>

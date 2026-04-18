@@ -115,6 +115,10 @@ export function ShutterWidget({ config }: WidgetProps) {
   };
 
   const accentColor = isMoving ? 'var(--accent-yellow)' : pos > 0 ? 'var(--accent)' : 'var(--text-secondary)';
+  const showTitle    = opts.showTitle    !== false;
+  const showValue    = opts.showValue    !== false;
+  const showControls = opts.showControls !== false;
+  const showSlider   = opts.showSlider   !== false;
 
   const statusText = isMoving
     ? (movingDir === 'up' ? '▲ Fährt auf' : movingDir === 'down' ? '▼ Fährt zu' : '↕ Fährt...')
@@ -131,18 +135,20 @@ export function ShutterWidget({ config }: WidgetProps) {
   if (layout === 'card') {
     return (
       <div className="flex flex-col h-full gap-2" style={{ position: 'relative' }}>
-        <div className="flex items-center justify-between">
-          <p className="text-xs truncate font-medium" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
-          {isMoving && <span className="text-[10px] animate-pulse" style={{ color: 'var(--accent-yellow)' }}>
-            {movingDir === 'up' ? '▲' : movingDir === 'down' ? '▼' : '↕'}
-          </span>}
-        </div>
+        {showTitle && (
+          <div className="flex items-center justify-between">
+            <p className="text-xs truncate font-medium" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+            {isMoving && <span className="text-[10px] animate-pulse" style={{ color: 'var(--accent-yellow)' }}>
+              {movingDir === 'up' ? '▲' : movingDir === 'down' ? '▼' : '↕'}
+            </span>}
+          </div>
+        )}
         <ShutterViz closedFrac={closedFrac} accentColor={accentColor} isMoving={isMoving} className="flex-1" />
         <div className="flex items-center justify-between">
-          <span className="text-xl font-black" style={{ color: 'var(--text-primary)' }}>{pos}%</span>
-          <BtnRow onUp={openFully} onStop={stop} onDown={closeFully} size="md" />
+          {showValue && <span className="text-xl font-black" style={{ color: 'var(--text-primary)' }}>{pos}%</span>}
+          {showControls && <BtnRow onUp={openFully} onStop={stop} onDown={closeFully} size="md" />}
         </div>
-        {slider}
+        {showSlider && slider}
         <StatusBadges config={config} />
       </div>
     );
@@ -154,9 +160,10 @@ export function ShutterWidget({ config }: WidgetProps) {
       <div className="flex items-center gap-2 h-full" style={{ position: 'relative' }}>
         <ShutterViz closedFrac={closedFrac} accentColor={accentColor} isMoving={isMoving}
           style={{ width: 22, height: 22, flexShrink: 0 }} />
-        <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>
-        <span className="text-sm font-bold shrink-0" style={{ color: isMoving ? 'var(--accent-yellow)' : 'var(--text-primary)' }}>{pos}%</span>
-        <BtnRow onUp={openFully} onStop={stop} onDown={closeFully} size="sm" />
+        {showTitle && <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
+        {!showTitle && <span className="flex-1" />}
+        {showValue && <span className="text-sm font-bold shrink-0" style={{ color: isMoving ? 'var(--accent-yellow)' : 'var(--text-primary)' }}>{pos}%</span>}
+        {showControls && <BtnRow onUp={openFully} onStop={stop} onDown={closeFully} size="sm" />}
         <StatusBadges config={config} />
       </div>
     );
@@ -166,24 +173,32 @@ export function ShutterWidget({ config }: WidgetProps) {
   if (layout === 'minimal') {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-1.5" style={{ position: 'relative' }}>
-        <button onClick={openFully} className="p-2 rounded-xl hover:opacity-80 transition-opacity"
-          style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
-          <ChevronUp size={18} />
-        </button>
-        <div className="text-center">
-          <p className="text-2xl font-black leading-none" style={{ color: 'var(--text-primary)' }}>{pos}%</p>
-          {isMoving && <p className="text-[10px] animate-pulse mt-0.5" style={{ color: 'var(--accent-yellow)' }}>
-            {movingDir === 'up' ? '▲' : '▼'}
-          </p>}
-        </div>
-        <button onClick={stop} className="px-3 py-1 rounded-lg hover:opacity-80 transition-opacity"
-          style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
-          <Square size={12} />
-        </button>
-        <button onClick={closeFully} className="p-2 rounded-xl hover:opacity-80 transition-opacity"
-          style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
-          <ChevronDown size={18} />
-        </button>
+        {showControls && (
+          <button onClick={openFully} className="p-2 rounded-xl hover:opacity-80 transition-opacity"
+            style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+            <ChevronUp size={18} />
+          </button>
+        )}
+        {showValue && (
+          <div className="text-center">
+            <p className="text-2xl font-black leading-none" style={{ color: 'var(--text-primary)' }}>{pos}%</p>
+            {isMoving && <p className="text-[10px] animate-pulse mt-0.5" style={{ color: 'var(--accent-yellow)' }}>
+              {movingDir === 'up' ? '▲' : '▼'}
+            </p>}
+          </div>
+        )}
+        {showControls && (
+          <>
+            <button onClick={stop} className="px-3 py-1 rounded-lg hover:opacity-80 transition-opacity"
+              style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+              <Square size={12} />
+            </button>
+            <button onClick={closeFully} className="p-2 rounded-xl hover:opacity-80 transition-opacity"
+              style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+              <ChevronDown size={18} />
+            </button>
+          </>
+        )}
         <StatusBadges config={config} />
       </div>
     );
@@ -192,23 +207,29 @@ export function ShutterWidget({ config }: WidgetProps) {
   // ── DEFAULT ───────────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col h-full gap-2" style={{ position: 'relative' }}>
-      <div className="flex items-center justify-between">
-        <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
-        {isMoving && <span className="text-[10px] animate-pulse" style={{ color: 'var(--accent-yellow)' }}>
-          {movingDir === 'up' ? '▲' : movingDir === 'down' ? '▼' : '↕'}
-        </span>}
-      </div>
+      {showTitle && (
+        <div className="flex items-center justify-between">
+          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+          {isMoving && <span className="text-[10px] animate-pulse" style={{ color: 'var(--accent-yellow)' }}>
+            {movingDir === 'up' ? '▲' : movingDir === 'down' ? '▼' : '↕'}
+          </span>}
+        </div>
+      )}
       <div className="flex gap-2 flex-1 min-h-0">
         <ShutterViz closedFrac={closedFrac} accentColor={accentColor} isMoving={isMoving} className="flex-1" />
-        <BtnRow onUp={openFully} onStop={stop} onDown={closeFully} size="sm" vertical />
+        {showControls && <BtnRow onUp={openFully} onStop={stop} onDown={closeFully} size="sm" vertical />}
       </div>
-      <div>
-        <div className="flex justify-between items-baseline mb-1">
-          <span className="text-[11px]" style={{ color: isMoving ? 'var(--accent-yellow)' : 'var(--text-secondary)' }}>{statusText}</span>
-          <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{pos}%</span>
+      {(showValue || showSlider) && (
+        <div>
+          {showValue && (
+            <div className="flex justify-between items-baseline mb-1">
+              <span className="text-[11px]" style={{ color: isMoving ? 'var(--accent-yellow)' : 'var(--text-secondary)' }}>{statusText}</span>
+              <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{pos}%</span>
+            </div>
+          )}
+          {showSlider && slider}
         </div>
-        {slider}
-      </div>
+      )}
       <StatusBadges config={config} />
     </div>
   );

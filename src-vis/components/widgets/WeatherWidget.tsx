@@ -308,7 +308,7 @@ export function WeatherWidget({ config }: WidgetProps) {
   // ── DEFAULT / CARD ────────────────────────────────────────────────────────
   return (
     <div className="aura-scroll flex flex-col h-full gap-2 overflow-auto">
-      {config.title && !config.options?.hideTitle && (
+      {config.title && opts.showTitle !== false && (
         <p className="text-xs truncate mb-1" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
       )}
       {/* ── Current weather header ── */}

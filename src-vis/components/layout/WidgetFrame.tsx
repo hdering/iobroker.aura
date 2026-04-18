@@ -91,6 +91,12 @@ const REFRESH_OPTIONS = [
 const inputCls = 'w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none';
 const inputStyle = { background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' };
 
+// ── VisibilityToggles ─────────────────────────────────────────────────────────
+
+type VisField = { key: string; label: string };
+
+// ── CalendarEditPanel ─────────────────────────────────────────────────────────
+
 function CalendarEditPanel({ config, onConfigChange }: { config: WidgetConfig; onConfigChange: (c: WidgetConfig) => void }) {
   const t = useT();
   const o = config.options ?? {};
@@ -234,6 +240,7 @@ function CalendarEditPanel({ config, onConfigChange }: { config: WidgetConfig; o
         <input type="number" min={1} max={20} value={(o.maxEvents as number) ?? 5}
           onChange={(e) => setOpts({ maxEvents: Number(e.target.value) })} className={inputCls} style={inputStyle} />
       </div>
+
     </>
   );
 }
@@ -1311,7 +1318,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
               </select>
             </div>
 
-            {/* Layout-Auswahl mit Live-Vorschau (non-header) */}
+            {/* ── Layout & Sichtbare Felder (kombiniert, eingeklappt) ── */}
             {config.type !== 'header' && config.type !== 'iframe' && config.type !== 'fill' && config.type !== 'jsontable' && (() => {
               const activeLayout = config.layout ?? 'default';
               const layouts: { value: string; label: string }[] = [
@@ -1328,29 +1335,85 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                   { value: 'loadpoints',  label: 'Nur Ladepunkte' },
                 ] : []),
               ];
+              const o = config.options ?? {};
+              const setO = (patch: Record<string, unknown>) =>
+                onConfigChange({ ...config, options: { ...o, ...patch } });
+              const visFields: VisField[] = (() => {
+                switch (config.type) {
+                  case 'switch':        return [{ key: 'showTitle', label: 'Titel' }, { key: 'showLabel', label: 'Status (AN/AUS)' }];
+                  case 'value':         return [{ key: 'showTitle', label: 'Titel' }, { key: 'showValue', label: 'Wert' }, { key: 'showUnit', label: 'Einheit' }];
+                  case 'dimmer':        return [{ key: 'showTitle', label: 'Titel' }, { key: 'showValue', label: 'Prozentwert' }, { key: 'showSlider', label: 'Schieberegler' }];
+                  case 'thermostat':    return [{ key: 'showTitle', label: 'Titel' }, { key: 'showSetpoint', label: 'Solltemperatur' }, { key: 'showActualTemp', label: 'Isttemperatur' }, { key: 'showControls', label: 'Tasten ±' }];
+                  case 'shutter':       return [{ key: 'showTitle', label: 'Titel' }, { key: 'showValue', label: 'Position %' }, { key: 'showControls', label: 'Steuerknöpfe' }, { key: 'showSlider', label: 'Schieberegler' }];
+                  case 'gauge':         return [{ key: 'showTitle', label: 'Titel' }];
+                  case 'clock':         return [{ key: 'showTitle', label: 'Titel' }];
+                  case 'weather':       return [{ key: 'showTitle', label: 'Titel' }];
+                  case 'windowcontact': return [{ key: 'showTitle', label: 'Titel' }, { key: 'showLabel', label: 'Status-Text' }];
+                  case 'binarysensor':  return [{ key: 'showTitle', label: 'Titel' }, { key: 'showLabel', label: 'Status-Text' }];
+                  case 'chart':         return [{ key: 'showTitle', label: 'Titel' }];
+                  case 'echart':        return [{ key: 'showTitle', label: 'Titel' }];
+                  case 'list':          return [{ key: 'showTitle', label: 'Kopfzeile' }];
+                  case 'autolist':      return [{ key: 'showTitle', label: 'Kopfzeile' }];
+                  case 'calendar':      return [
+                    { key: 'showCalName',  label: 'Kalender-Name' },
+                    { key: 'showSummary',  label: 'Terminname' },
+                    { key: 'showDate',     label: 'Datum / Uhrzeit' },
+                    { key: 'showLocation', label: 'Ort' },
+                    { key: 'showMore',     label: '+ weitere Termine' },
+                  ];
+                  default: return [];
+                }
+              })();
               return (
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-1 flex-wrap">
-                    <label className="text-[11px] shrink-0 mr-0.5" style={{ color: 'var(--text-secondary)' }}>{t('wf.edit.layout')}</label>
-                    {layouts.map(({ value, label }) => {
-                      const active = activeLayout === value;
-                      return (
-                        <button
-                          key={value}
-                          onClick={() => onConfigChange({ ...config, layout: value as WidgetConfig['layout'] })}
-                          className="text-[10px] px-2 py-0.5 rounded-full transition-colors"
-                          style={{
-                            background: active ? 'var(--accent)' : 'var(--app-bg)',
-                            color:      active ? '#fff' : 'var(--text-secondary)',
-                            border:     `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}`,
-                          }}
-                        >
-                          {label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+                <details className="group">
+                  <summary className="flex items-center justify-between cursor-pointer list-none select-none">
+                    {/* Layout buttons in the summary row – always clickable */}
+                    <div className="flex items-center gap-1 flex-wrap" onClick={(e) => e.preventDefault()}>
+                      <span className="text-[11px] shrink-0 mr-0.5" style={{ color: 'var(--text-secondary)' }}>{t('wf.edit.layout')}</span>
+                      {layouts.map(({ value, label }) => {
+                        const active = activeLayout === value;
+                        return (
+                          <button
+                            key={value}
+                            onClick={() => onConfigChange({ ...config, layout: value as WidgetConfig['layout'] })}
+                            className="text-[10px] px-2 py-0.5 rounded-full transition-colors"
+                            style={{
+                              background: active ? 'var(--accent)' : 'var(--app-bg)',
+                              color:      active ? '#fff' : 'var(--text-secondary)',
+                              border:     `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}`,
+                            }}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {visFields.length > 0 && (
+                      <ChevronDown size={13} className="transition-transform group-open:rotate-180 shrink-0 ml-1" style={{ color: 'var(--text-secondary)' }} />
+                    )}
+                  </summary>
+                  {visFields.length > 0 && (
+                    <div className="mt-2 space-y-1.5">
+                      <p className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>Sichtbare Felder</p>
+                      {visFields.map(({ key, label }) => {
+                        const val = o[key] !== false;
+                        return (
+                          <div key={key} className="flex items-center justify-between">
+                            <span className="text-[11px]" style={{ color: 'var(--text-primary)' }}>{label}</span>
+                            <button
+                              onClick={() => setO({ [key]: !val })}
+                              className="relative w-7 h-4 rounded-full transition-colors shrink-0"
+                              style={{ background: val ? 'var(--accent)' : 'var(--app-border)' }}
+                            >
+                              <span className="absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform"
+                                style={{ left: val ? '14px' : '2px' }} />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </details>
               );
             })()}
 

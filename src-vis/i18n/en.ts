@@ -89,8 +89,8 @@ export const en: Record<TranslationKey, string> = {
   'settings.frontend.headerDatapointTemplateHint': '{dp} is replaced by the datapoint value · Example: <span style="font-size:1.2em">{dp}</span> kW',
 
   'settings.grid.title':        'Grid & Mobile',
-  'settings.grid.rowHeight':    'Row Height',
-  'settings.grid.snapX':        'Horizontal snap width',
+  'settings.grid.rowHeight':    'Grid size (row)',
+  'settings.grid.snapX':        'Grid size (column)',
   'settings.grid.mobileBreak':  'Mobile Breakpoint',
   'settings.grid.wizardMaxDp':  'Wizard Max Datapoints',
   'settings.grid.mobileOff':    'Off',

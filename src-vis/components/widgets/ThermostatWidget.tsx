@@ -175,6 +175,11 @@ export function ThermostatWidget({ config, editMode }: WidgetProps) {
   const maxTemp = (config.options?.maxTemp as number) ?? 30;
   const step    = (config.options?.step    as number) ?? 0.5;
   const clickable = (config.options?.clickable as boolean) ?? false;
+  const o = config.options ?? {};
+  const showTitle      = o.showTitle      !== false;
+  const showSetpoint   = o.showSetpoint   !== false;
+  const showActualTemp = o.showActualTemp !== false;
+  const showControls   = o.showControls   !== false;
 
   const target = typeof rawTarget === 'number' ? rawTarget : 20;
   const actual = typeof rawActual === 'number' ? rawActual : null;
@@ -218,25 +223,31 @@ export function ThermostatWidget({ config, editMode }: WidgetProps) {
     return (
       <>
         <div className={`flex flex-col h-full justify-between ${wrapperCls}`} style={{ position: 'relative' }} onClick={handleClick}>
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium truncate" style={{ color: 'var(--text-secondary)' }}>{displayTitle}</p>
-            <StatusIcon />
-          </div>
+          {showTitle && (
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium truncate" style={{ color: 'var(--text-secondary)' }}>{displayTitle}</p>
+              <StatusIcon />
+            </div>
+          )}
           <div className="flex items-center justify-between flex-1 py-3">
             <div>
-              <p className="font-black leading-none" style={{ fontSize: 'calc(3.5rem * var(--font-scale, 1))', color: accentColor }}>
-                {target.toFixed(1)}
-              </p>
-              <p className="text-base font-light mt-0.5" style={{ color: 'var(--text-secondary)' }}>{t('thermo.setPoint')}</p>
-              {actual !== null && (
+              {showSetpoint && (
+                <>
+                  <p className="font-black leading-none" style={{ fontSize: 'calc(3.5rem * var(--font-scale, 1))', color: accentColor }}>
+                    {target.toFixed(1)}
+                  </p>
+                  <p className="text-base font-light mt-0.5" style={{ color: 'var(--text-secondary)' }}>{t('thermo.setPoint')}</p>
+                </>
+              )}
+              {showActualTemp && actual !== null && (
                 <p className="text-sm mt-1.5 font-medium" style={{ color: 'var(--text-secondary)' }}>
                   {t('thermo.actual')}: <span style={{ color: 'var(--text-primary)' }}>{actual.toFixed(1)}°C</span>
                 </p>
               )}
             </div>
-            <PlusMinus />
+            {showControls && <PlusMinus />}
           </div>
-          {actual !== null && (
+          {showActualTemp && actual !== null && (
             <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--app-border)' }}>
               <div className="h-full rounded-full transition-all duration-700"
                 style={{
@@ -258,23 +269,28 @@ export function ThermostatWidget({ config, editMode }: WidgetProps) {
       <>
         <div className={`flex items-center gap-2.5 h-full ${wrapperCls}`} style={{ position: 'relative' }} onClick={handleClick}>
           <Thermometer size={16} style={{ color: accentColor, flexShrink: 0 }} />
-          <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{displayTitle}</span>
-          <span className="text-sm font-bold shrink-0" style={{ color: 'var(--text-primary)' }}>
-            {target.toFixed(1)}°
-            {actual !== null && (
-              <span className="font-normal text-xs ml-1" style={{ color: 'var(--text-secondary)' }}>
-                / {actual.toFixed(1)}°
-              </span>
-            )}
-          </span>
-          <div className="flex gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setTemp(target - step)}
-              className="w-6 h-6 rounded font-bold text-sm hover:opacity-70 active:scale-95 transition-all"
-              style={{ background: 'var(--app-border)', color: 'var(--text-primary)' }}>−</button>
-            <button onClick={() => setTemp(target + step)}
-              className="w-6 h-6 rounded font-bold text-sm hover:opacity-70 active:scale-95 transition-all"
-              style={{ background: 'var(--app-border)', color: 'var(--text-primary)' }}>+</button>
-          </div>
+          {showTitle && <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{displayTitle}</span>}
+          {!showTitle && <span className="flex-1" />}
+          {showSetpoint && (
+            <span className="text-sm font-bold shrink-0" style={{ color: 'var(--text-primary)' }}>
+              {target.toFixed(1)}°
+              {showActualTemp && actual !== null && (
+                <span className="font-normal text-xs ml-1" style={{ color: 'var(--text-secondary)' }}>
+                  / {actual.toFixed(1)}°
+                </span>
+              )}
+            </span>
+          )}
+          {showControls && (
+            <div className="flex gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+              <button onClick={() => setTemp(target - step)}
+                className="w-6 h-6 rounded font-bold text-sm hover:opacity-70 active:scale-95 transition-all"
+                style={{ background: 'var(--app-border)', color: 'var(--text-primary)' }}>−</button>
+              <button onClick={() => setTemp(target + step)}
+                className="w-6 h-6 rounded font-bold text-sm hover:opacity-70 active:scale-95 transition-all"
+                style={{ background: 'var(--app-border)', color: 'var(--text-primary)' }}>+</button>
+            </div>
+          )}
           <StatusBadges config={config} />
         </div>
         {showDetail && <ThermostatDetail config={config} onClose={() => setShowDetail(false)} />}
@@ -288,20 +304,24 @@ export function ThermostatWidget({ config, editMode }: WidgetProps) {
       <>
         <div className={`flex flex-col items-center justify-center h-full gap-2 ${wrapperCls}`} style={{ position: 'relative' }} onClick={handleClick}>
           <Thermometer size={22} style={{ color: accentColor }} />
-          <span className="font-black" style={{ fontSize: 'calc(2.5rem * var(--font-scale, 1))', color: 'var(--text-primary)', lineHeight: 1 }}>
-            {target.toFixed(1)}°
-          </span>
-          {actual !== null && (
+          {showSetpoint && (
+            <span className="font-black" style={{ fontSize: 'calc(2.5rem * var(--font-scale, 1))', color: 'var(--text-primary)', lineHeight: 1 }}>
+              {target.toFixed(1)}°
+            </span>
+          )}
+          {showActualTemp && actual !== null && (
             <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{t('thermo.actual')} {actual.toFixed(1)}°</span>
           )}
-          <div className="flex gap-2 mt-1" onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setTemp(target - step)}
-              className="w-8 h-8 rounded-full font-bold hover:opacity-70 active:scale-95 transition-all"
-              style={{ background: 'var(--app-border)', color: 'var(--text-primary)' }}>−</button>
-            <button onClick={() => setTemp(target + step)}
-              className="w-8 h-8 rounded-full font-bold hover:opacity-70 active:scale-95 transition-all"
-              style={{ background: 'var(--app-border)', color: 'var(--text-primary)' }}>+</button>
-          </div>
+          {showControls && (
+            <div className="flex gap-2 mt-1" onClick={(e) => e.stopPropagation()}>
+              <button onClick={() => setTemp(target - step)}
+                className="w-8 h-8 rounded-full font-bold hover:opacity-70 active:scale-95 transition-all"
+                style={{ background: 'var(--app-border)', color: 'var(--text-primary)' }}>−</button>
+              <button onClick={() => setTemp(target + step)}
+                className="w-8 h-8 rounded-full font-bold hover:opacity-70 active:scale-95 transition-all"
+                style={{ background: 'var(--app-border)', color: 'var(--text-primary)' }}>+</button>
+            </div>
+          )}
           <StatusBadges config={config} />
         </div>
         {showDetail && <ThermostatDetail config={config} onClose={() => setShowDetail(false)} />}
@@ -314,34 +334,42 @@ export function ThermostatWidget({ config, editMode }: WidgetProps) {
     <>
       <div className={`flex flex-col h-full gap-2 ${wrapperCls}`} style={{ position: 'relative' }} onClick={handleClick}>
         {/* Title row */}
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <Thermometer size={13} style={{ color: accentColor, flexShrink: 0 }} />
-            <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{displayTitle}</p>
+        {showTitle && (
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Thermometer size={13} style={{ color: accentColor, flexShrink: 0 }} />
+              <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{displayTitle}</p>
+            </div>
+            <StatusIcon />
           </div>
-          <StatusIcon />
-        </div>
+        )}
 
         {/* Temperature */}
         <div className="flex items-center justify-between flex-1">
           <div>
-            <p className="font-black leading-none" style={{ fontSize: 'calc(2.8rem * var(--font-scale, 1))', color: accentColor }}>
-              {target.toFixed(1)}
-            </p>
-            <p className="text-sm font-light" style={{ color: 'var(--text-secondary)' }}>{t('thermo.setPoint')}</p>
-            {actual !== null && (
+            {showSetpoint && (
+              <>
+                <p className="font-black leading-none" style={{ fontSize: 'calc(2.8rem * var(--font-scale, 1))', color: accentColor }}>
+                  {target.toFixed(1)}
+                </p>
+                <p className="text-sm font-light" style={{ color: 'var(--text-secondary)' }}>{t('thermo.setPoint')}</p>
+              </>
+            )}
+            {showActualTemp && actual !== null && (
               <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
                 {t('thermo.actual')}: <span style={{ color: 'var(--text-primary)' }}>{actual.toFixed(1)}°C</span>
               </p>
             )}
           </div>
-          <div onClick={(e) => e.stopPropagation()}>
-            <PlusMinus />
-          </div>
+          {showControls && (
+            <div onClick={(e) => e.stopPropagation()}>
+              <PlusMinus />
+            </div>
+          )}
         </div>
 
         {/* Progress bar */}
-        {actual !== null && (
+        {showActualTemp && actual !== null && (
           <div className="w-full h-1 rounded-full overflow-hidden" style={{ background: 'var(--app-border)' }}>
             <div className="h-full rounded-full transition-all duration-700"
               style={{

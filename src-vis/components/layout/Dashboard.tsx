@@ -27,8 +27,8 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
   const t = useT();
   const activeLayout = useActiveLayout();
   const { updateWidget, updateLayouts, removeWidget } = useDashboardStore();
-  const cellSize = useConfigStore((s) => s.frontend.gridRowHeight ?? 80);
-  const snapX    = useConfigStore((s) => s.frontend.gridSnapX ?? s.frontend.gridRowHeight ?? 80);
+  const cellSize = useConfigStore((s) => s.frontend.gridRowHeight ?? 20);
+  const snapX    = useConfigStore((s) => s.frontend.gridSnapX ?? s.frontend.gridRowHeight ?? 20);
   const MARGIN = useConfigStore((s) => s.frontend.gridGap ?? DEFAULT_MARGIN);
   const mobileBreakpoint = useConfigStore((s) => s.frontend.mobileBreakpoint ?? 600);
   const guidelinesEnabled      = useConfigStore((s) => s.frontend.guidelinesEnabled ?? false);

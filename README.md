@@ -127,6 +127,10 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.56 (2026-04-18)
+- Widget editor: "Visible fields" toggles (title, label, value, unit, slider, controls, …) for all widget types and layouts
+- Layout selector and field toggles combined into one collapsible section in the edit panel
+
 ### 0.4.55 (2026-04-18)
 - Tab-Wizard: only relevant DPs pre-selected by default; "Relevante / Alle / Keine" shortcut buttons; non-relevant DPs dimmed but selectable
 - Tab-Wizard layout: compact variant now correctly sets `layout: 'compact'` on all widgets (was incorrectly `'card'`)

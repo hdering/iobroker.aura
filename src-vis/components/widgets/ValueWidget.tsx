@@ -13,6 +13,11 @@ export function ValueWidget({ config }: WidgetProps) {
   const CompactIcon = getWidgetIcon(config.options?.icon as string | undefined, Hash);
   const DefaultIcon = getWidgetIcon(config.options?.icon as string | undefined, TrendingUp);
 
+  const o = config.options ?? {};
+  const showTitle = o.showTitle !== false;
+  const showValue = o.showValue !== false;
+  const showUnit  = o.showUnit  !== false;
+
   const displayValue = value === null ? '–'
     : typeof value === 'number' ? value.toLocaleString('de-DE')
     : String(value);
@@ -34,14 +39,18 @@ export function ValueWidget({ config }: WidgetProps) {
       <div className="flex h-full gap-3">
         <div className="w-1 rounded-full self-stretch" style={{ background: 'var(--accent)' }} />
         <div className="flex flex-col justify-between flex-1">
-          <div className="flex items-center gap-2">
-            <CardIcon size={14} style={{ color: 'var(--accent)' }} />
-            <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
-          </div>
-          <div>
-            <span className="text-4xl font-black" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>{displayValue}</span>
-            {unit && <span className="text-lg ml-1 font-medium" style={{ color: 'var(--accent)' }}>{unit}</span>}
-          </div>
+          {showTitle && (
+            <div className="flex items-center gap-2">
+              <CardIcon size={14} style={{ color: 'var(--accent)' }} />
+              <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+            </div>
+          )}
+          {showValue && (
+            <div>
+              <span className="text-4xl font-black" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>{displayValue}</span>
+              {showUnit && unit && <span className="text-lg ml-1 font-medium" style={{ color: 'var(--accent)' }}>{unit}</span>}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -51,13 +60,17 @@ export function ValueWidget({ config }: WidgetProps) {
   if (layout === 'compact') {
     return (
       <div className="flex items-center justify-between h-full gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          <CompactIcon size={14} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
-          <span className="text-sm truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>
-        </div>
-        <span className="text-xl font-bold shrink-0" style={{ color: 'var(--text-primary)' }}>
-          {displayValue}{unit && <span className="text-sm ml-0.5" style={{ color: 'var(--text-secondary)' }}>{unit}</span>}
-        </span>
+        {showTitle && (
+          <div className="flex items-center gap-2 min-w-0">
+            <CompactIcon size={14} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
+            <span className="text-sm truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>
+          </div>
+        )}
+        {showValue && (
+          <span className="text-xl font-bold shrink-0" style={{ color: 'var(--text-primary)' }}>
+            {displayValue}{showUnit && unit && <span className="text-sm ml-0.5" style={{ color: 'var(--text-secondary)' }}>{unit}</span>}
+          </span>
+        )}
       </div>
     );
   }
@@ -66,9 +79,9 @@ export function ValueWidget({ config }: WidgetProps) {
   if (layout === 'minimal') {
     return (
       <div className="flex flex-col items-center justify-center h-full">
-        <span className="font-black text-center leading-none" style={{ color: 'var(--accent)', fontSize: 'calc(clamp(2rem, 4vw, 3.5rem) * var(--font-scale, 1))' }}>{displayValue}</span>
-        {unit && <span className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>{unit}</span>}
-        <span className="text-xs mt-2 truncate max-w-full" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>
+        {showValue && <span className="font-black text-center leading-none" style={{ color: 'var(--accent)', fontSize: 'calc(clamp(2rem, 4vw, 3.5rem) * var(--font-scale, 1))' }}>{displayValue}</span>}
+        {showValue && showUnit && unit && <span className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>{unit}</span>}
+        {showTitle && <span className="text-xs mt-2 truncate max-w-full" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
       </div>
     );
   }
@@ -81,14 +94,18 @@ export function ValueWidget({ config }: WidgetProps) {
 
   return (
     <div className={`flex flex-col h-full gap-2 ${posClass}`} style={{ position: 'relative' }}>
-      <div className="flex items-center gap-2" style={titleStyle}>
-        <DefaultIcon size={14} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
-        <p className="text-xs" style={{ color: 'var(--text-secondary)', textAlign: titleAlign, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{config.title}</p>
-      </div>
-      <div className="flex items-end gap-1.5">
-        <span className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>{displayValue}</span>
-        {unit && <span className="text-sm mb-0.5" style={{ color: 'var(--text-secondary)' }}>{unit}</span>}
-      </div>
+      {showTitle && (
+        <div className="flex items-center gap-2" style={titleStyle}>
+          <DefaultIcon size={14} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
+          <p className="text-xs" style={{ color: 'var(--text-secondary)', textAlign: titleAlign, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{config.title}</p>
+        </div>
+      )}
+      {showValue && (
+        <div className="flex items-end gap-1.5">
+          <span className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>{displayValue}</span>
+          {showUnit && unit && <span className="text-sm mb-0.5" style={{ color: 'var(--text-secondary)' }}>{unit}</span>}
+        </div>
+      )}
     </div>
   );
 }

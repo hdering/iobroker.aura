@@ -35,6 +35,7 @@ export function EChartWidget({ config, editMode }: WidgetProps) {
   const { subscribe, connected } = useIoBroker();
 
   const o = config.options ?? {};
+  const showTitle = o.showTitle !== false;
   const echartSeries = (o.echartSeries as EChartSeriesConfig[] | undefined) ?? [];
   const echartShowLegend = (o.echartShowLegend as boolean | undefined) ?? true;
   const echartLeftUnit = (o.echartLeftUnit as string | undefined) ?? '';
@@ -64,7 +65,7 @@ export function EChartWidget({ config, editMode }: WidgetProps) {
       <div className="flex flex-col items-center justify-center h-full gap-2" style={{ color: 'var(--text-secondary)' }}>
         <BarChart2 size={28} strokeWidth={1.5} />
         <span className="text-xs">Keine Daten</span>
-        {editMode && config.title && (
+        {editMode && showTitle && config.title && (
           <span className="absolute top-1 left-2 text-[10px] font-medium" style={{ color: 'var(--text-secondary)' }}>
             {config.title}
           </span>
@@ -117,7 +118,7 @@ export function EChartWidget({ config, editMode }: WidgetProps) {
 
     return (
       <div className="relative w-full h-full">
-        {editMode && config.title && (
+        {editMode && showTitle && config.title && (
           <span className="absolute top-1 left-2 text-[10px] font-medium z-10" style={{ color: 'var(--text-secondary)' }}>
             {config.title}
           </span>

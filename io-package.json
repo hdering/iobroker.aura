@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.55",
+    "version": "0.4.56",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.56": {
+        "en": "Widget editor: 'Visible fields' toggles (title, label, value, unit, slider, controls, …) for all widget types; layout selector and field toggles combined into one collapsible section",
+        "de": "Widget-Editor: 'Sichtbare Felder'-Schalter (Titel, Bezeichnung, Wert, Einheit, Schieberegler, Steuerelemente, …) für alle Widget-Typen; Layout-Auswahl und Feld-Schalter in einem einklappbaren Bereich zusammengefasst",
+        "ru": "Редактор виджетов: переключатели 'Sichtbare Felder' (заголовок, метка, значение, единица, ползунок, элементы управления, …) для всех типов виджетов; выбор макета и переключатели полей объединены в одну сворачиваемую секцию",
+        "pt": "Editor de widgets: alternâncias 'Campos visíveis' (título, rótulo, valor, unidade, controlo deslizante, controlos, …) para todos os tipos de widget; seletor de layout e alternâncias de campo combinados numa secção recolhível",
+        "nl": "Widget-editor: 'Zichtbare velden'-schakelaars (titel, label, waarde, eenheid, schuifregelaar, bedieningselementen, …) voor alle widgettypen; layoutkiezer en veldschakelaars gecombineerd in één inklapbare sectie",
+        "fr": "Éditeur de widgets: bascules 'Champs visibles' (titre, étiquette, valeur, unité, curseur, contrôles, …) pour tous les types de widgets; sélecteur de mise en page et bascules de champs combinés en une section rétractable",
+        "it": "Editor widget: interruttori 'Campi visibili' (titolo, etichetta, valore, unità, cursore, controlli, …) per tutti i tipi di widget; selettore layout e interruttori campo combinati in una sezione comprimibile",
+        "es": "Editor de widgets: conmutadores 'Campos visibles' (título, etiqueta, valor, unidad, deslizador, controles, …) para todos los tipos de widget; selector de diseño y conmutadores de campo combinados en una sección plegable",
+        "pl": "Edytor widgetów: przełączniki 'Widoczne pola' (tytuł, etykieta, wartość, jednostka, suwak, elementy sterujące, …) dla wszystkich typów widgetów; selektor układu i przełączniki pól połączone w jedną sekcję zwijaną",
+        "uk": "Редактор віджетів: перемикачі 'Видимі поля' (заголовок, мітка, значення, одиниця, повзунок, елементи керування, …) для всіх типів віджетів; вибір макету та перемикачі полів об'єднані в одну згортаєму секцію",
+        "zh-cn": "小部件编辑器：所有小部件类型的「可见字段」开关（标题、标签、值、单位、滑块、控件等）；布局选择器和字段开关合并为一个可折叠区域"
+      },
       "0.4.55": {
         "en": "Tab-Wizard: relevance-based DP pre-selection (only relevant DPs checked by default); 'Relevant / All / None' shortcut buttons; non-relevant DPs dimmed; layout variant correctly assigns compact/default/card to widgets",
         "de": "Tab-Wizard: relevanzbasierte DP-Vorauswahl (nur relevante DPs standardmäßig ausgewählt); Schnellschaltflächen 'Relevante / Alle / Keine'; nicht relevante DPs gedimmt; Layout-Variante weist Widgets korrekt compact/default/card zu",
@@ -183,19 +196,6 @@
         "pl": "Poprawka: strefy kolorów Gauge teraz zawsze pokrywają pełny łuk; ostatnia strefa zawsze sięga do max; poprawiono obliczanie punktu środkowego dla nowych stref",
         "uk": "Виправлення: кольорові зони Gauge тепер завжди покривають повну дугу; остання зона завжди доходить до max; виправлено обчислення середньої точки для нових зон",
         "zh-cn": "修复：仪表颜色区域现在始终覆盖完整弧线；最后一个区域始终延伸到 max；新增区域的中点计算已更正"
-      },
-      "0.4.49": {
-        "en": "Editor: guidelines overlay – toggle red dashed lines at configurable width/height; optional frontend display; settings in Admin → Settings",
-        "de": "Editor: Hilfslinien – rote gestrichelte Linien bei einstellbarer Breite/Höhe; optionale Anzeige im Frontend; Einstellungen in Admin → Einstellungen",
-        "ru": "Редактор: вспомогательные линии – красные пунктирные линии при настраиваемой ширине/высоте; опциональное отображение во фронтенде; настройки в Администрирование → Настройки",
-        "pt": "Editor: linhas guia – linhas vermelhas tracejadas em largura/altura configurável; exibição opcional no frontend; configurações em Admin → Definições",
-        "nl": "Editor: hulplijnen – rode stippellijnen op instelbare breedte/hoogte; optionele weergave in frontend; instellingen in Admin → Instellingen",
-        "fr": "Éditeur: lignes guides – lignes rouges pointillées à largeur/hauteur configurable; affichage optionnel dans le frontend; paramètres dans Admin → Paramètres",
-        "it": "Editor: linee guida – linee rosse tratteggiate a larghezza/altezza configurabile; visualizzazione opzionale nel frontend; impostazioni in Admin → Impostazioni",
-        "es": "Editor: líneas guía – líneas rojas discontinuas en anchura/altura configurable; visualización opcional en el frontend; ajustes en Admin → Configuración",
-        "pl": "Edytor: linie pomocnicze – czerwone przerywane linie przy konfigurowalnej szerokości/wysokości; opcjonalne wyświetlanie we frontendzie; ustawienia w Admin → Ustawienia",
-        "uk": "Редактор: допоміжні лінії – червоні пунктирні лінії при налаштовуваній ширині/висоті; опціональне відображення у фронтенді; налаштування в Адмін → Налаштування",
-        "zh-cn": "编辑器：参考线 – 可配置宽度/高度的红色虚线；可选在前端显示；在管理→设置中配置"
       }
     }
   },

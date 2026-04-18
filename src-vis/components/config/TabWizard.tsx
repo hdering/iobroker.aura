@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Wand2, ChevronRight, ChevronLeft, Home, Layers, Search,
   Check, X, Lightbulb, Thermometer, Zap, Wind,
@@ -13,70 +13,16 @@ import { WIDGET_BY_TYPE } from '../../widgetRegistry';
 import { useT } from '../../i18n';
 import { isRelevantDp } from '../../utils/dpRelevance';
 
-// ── mini grid preview ──────────────────────────────────────────────────────
+// ── type colors (used in datapoint list badges) ────────────────────────────
 
-// Derived from central registry
 const TYPE_COLOR = Object.fromEntries(
   Object.entries(WIDGET_BY_TYPE).map(([t, m]) => [t, m.color]),
 ) as Record<WidgetType, string>;
 
-// Distinct group colors for the preview
 const GROUP_COLORS = [
   '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6',
   '#06b6d4', '#ec4899', '#f97316', '#84cc16', '#a78bfa',
 ];
-
-function MiniGridPreview({
-  widgets,
-  cols = 12,
-  groupMapper,
-}: {
-  widgets: WidgetConfig[];
-  cols?: number;
-  groupMapper?: (id: string) => string;
-}) {
-  const W = 240;
-  const CELL = W / cols;
-  const maxRow = widgets.reduce((m, w) => Math.max(m, w.gridPos.y + w.gridPos.h), 2);
-  const H = Math.min(maxRow * CELL, 140);
-
-  // Build group → color index map
-  const groupColorMap = useMemo(() => {
-    if (!groupMapper) return null;
-    const map = new Map<string, string>();
-    let idx = 0;
-    for (const w of widgets) {
-      const g = groupMapper(w.datapoint);
-      if (!map.has(g)) { map.set(g, GROUP_COLORS[idx % GROUP_COLORS.length]); idx++; }
-    }
-    return map;
-  }, [widgets, groupMapper]);
-
-  if (widgets.length === 0) {
-    return <div className="rounded-lg" style={{ width: W, height: 80, background: 'var(--app-bg)' }} />;
-  }
-  return (
-    <div className="rounded-lg overflow-hidden shrink-0" style={{ width: W, height: H, background: 'var(--app-bg)', position: 'relative' }}>
-      {widgets.map((w, i) => {
-        const color = groupColorMap
-          ? (groupColorMap.get(groupMapper!(w.datapoint)) ?? 'var(--accent)')
-          : (TYPE_COLOR[w.type] ?? 'var(--accent)');
-        return (
-          <div key={i} style={{
-            position: 'absolute',
-            left: w.gridPos.x * CELL + 1,
-            top: w.gridPos.y * CELL + 1,
-            width: w.gridPos.w * CELL - 2,
-            height: w.gridPos.h * CELL - 2,
-            background: color,
-            opacity: 0.65,
-            borderRadius: 3,
-          }} />
-        );
-      })}
-    </div>
-  );
-}
 
 // ── topic suggestions ──────────────────────────────────────────────────────
 
@@ -100,7 +46,8 @@ const TYPE_LABEL = Object.fromEntries(
 // ── main wizard ────────────────────────────────────────────────────────────
 
 type Mode = 'topic' | 'homepage';
-type Step = 'mode' | 'topic-input' | 'datapoints' | 'grouping' | 'homepage-review' | 'layout';
+type Step = 'mode' | 'topic-input' | 'datapoints' | 'grouping' | 'homepage-review';
+type GroupStyle = 'header' | 'autolist' | 'list';
 
 interface TabWizardProps {
   onAdd: (name: string, widgets: WidgetConfig[]) => void;
@@ -121,21 +68,40 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState('');
-  const [chosenLayout, setChosenLayout] = useState('standard');
 
-  // Grouping: 'none' | 'room' | 'func'
+  // Grouping: 'none' | 'room' | 'func' + visual style
   const [groupBy, setGroupBy] = useState<'none' | 'room' | 'func'>('none');
+  const [groupStyle, setGroupStyle] = useState<GroupStyle>('header');
 
   const { datapoints, loading: dpLoading, load } = useDatapointList();
   const maxDatapoints = useConfigStore((s) => s.frontend.wizardMaxDatapoints ?? 500);
+
+  // Compute effective grid column count from canvas width + snap setting
+  const snapX            = useConfigStore((s) => s.frontend.gridSnapX ?? s.frontend.gridRowHeight ?? 20);
+  const gridGap          = useConfigStore((s) => s.frontend.gridGap ?? 10);
+  const guidelinesEnabled = useConfigStore((s) => s.frontend.guidelinesEnabled ?? false);
+  const guidelinesWidth   = useConfigStore((s) => s.frontend.guidelinesWidth ?? 1280);
+  const canvasWidth = guidelinesEnabled ? guidelinesWidth : 1200;
+  const effectiveCols = Math.max(2, Math.floor((canvasWidth - gridGap) / (snapX + gridGap)));
+
   useEffect(() => { load(true); }, [load]);
 
-  // ── detected widgets ─────────────────────────────────────────────────────
+  // ── detected widgets (async to avoid blocking the main thread) ───────────
 
-  const topicWidgets = useMemo(
-    () => (topic ? detectWidgets(datapoints, topic, maxDatapoints) : []),
-    [datapoints, topic, maxDatapoints],
-  );
+  const [topicWidgets, setTopicWidgets] = useState<ReturnType<typeof detectWidgets>>([]);
+  const [detecting, setDetecting] = useState(false);
+  const detectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!topic || datapoints.length === 0) { setTopicWidgets([]); return; }
+    setDetecting(true);
+    if (detectTimerRef.current) clearTimeout(detectTimerRef.current);
+    detectTimerRef.current = setTimeout(() => {
+      setTopicWidgets(detectWidgets(datapoints, topic, maxDatapoints));
+      setDetecting(false);
+    }, 0);
+    return () => { if (detectTimerRef.current) clearTimeout(detectTimerRef.current); };
+  }, [datapoints, topic, maxDatapoints]);
 
   const { sections: homeSections, allWidgets: homeWidgets } = useMemo(
     () => (mode === 'homepage' ? detectHomepage(datapoints) : { sections: [], allWidgets: [] }),
@@ -212,13 +178,6 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
     [groupBy, detectedGroups.size, idToGroup, t],
   );
 
-  const layouts = useMemo(
-    () => generateLayouts(activeWidgets, groupMapper),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activeWidgets, groupMapper],
-  );
-  const currentLayout = layouts.find((l) => l.id === chosenLayout) ?? layouts[0];
-
   // ── navigation ────────────────────────────────────────────────────────────
 
   const goNext = () => {
@@ -226,18 +185,13 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
       setStep(mode === 'homepage' ? 'homepage-review' : 'topic-input');
     } else if (step === 'topic-input') {
       setStep('datapoints');
-    } else if (step === 'datapoints') {
-      setStep(canGroup ? 'grouping' : 'layout');
-    } else if (step === 'grouping' || step === 'homepage-review') {
-      setStep('layout');
+    } else if (step === 'datapoints' && canGroup) {
+      setStep('grouping');
     }
   };
 
   const goBack = () => {
-    if (step === 'layout') {
-      if (mode === 'homepage') setStep('homepage-review');
-      else setStep(canGroup ? 'grouping' : 'datapoints');
-    } else if (step === 'grouping') {
+    if (step === 'grouping') {
       setStep('datapoints');
     } else if (step === 'datapoints') {
       setStep('topic-input');
@@ -249,27 +203,35 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
   };
 
   const handleCreate = () => {
-    if (!currentLayout || activeWidgets.length === 0) return;
+    if (activeWidgets.length === 0) return;
     const name = tabName.trim() || (mode === 'homepage' ? t('wizard.tab.homeDefault') : topic);
     const ts = Date.now();
-    const widgets = currentLayout.widgets.map((w, i) => ({ ...w, id: `wiz-${ts}-${i}` }));
+    const layouts = generateLayouts(activeWidgets, groupMapper, {
+      gridCols: effectiveCols,
+      groupStyle: groupBy !== 'none' ? groupStyle : 'header',
+      detectedGroups,
+    });
+    const layout = layouts.find((l) => l.id === 'standard') ?? layouts[0];
+    if (!layout) return;
+    const widgets = layout.widgets.map((w, i) => ({ ...w, id: `wiz-${ts}-${i}` }));
     onAdd(name, widgets);
   };
 
   // ── step progress ─────────────────────────────────────────────────────────
 
   const steps: Step[] = mode === 'homepage'
-    ? ['mode', 'homepage-review', 'layout']
+    ? ['mode', 'homepage-review']
     : canGroup
-      ? ['mode', 'topic-input', 'datapoints', 'grouping', 'layout']
-      : ['mode', 'topic-input', 'datapoints', 'layout'];
+      ? ['mode', 'topic-input', 'datapoints', 'grouping']
+      : ['mode', 'topic-input', 'datapoints'];
   const stepIdx = steps.indexOf(step);
+  const isLastStep = stepIdx === steps.length - 1;
 
   const canNext =
     step === 'mode' ||
-    (step === 'topic-input' && topic.trim().length > 0 && (dpLoading || topicWidgets.length > 0)) ||
-    ((step === 'datapoints' || step === 'grouping' || step === 'homepage-review') && activeWidgets.length > 0);
-  const canCreate = !!currentLayout && activeWidgets.length > 0;
+    (step === 'topic-input' && topic.trim().length > 0 && (dpLoading || detecting || topicWidgets.length > 0)) ||
+    ((step === 'datapoints' || step === 'homepage-review') && activeWidgets.length > 0);
+  const canCreate = activeWidgets.length > 0;
 
   // ── render ────────────────────────────────────────────────────────────────
 
@@ -308,7 +270,7 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
         </div>
 
         {/* Loading bar */}
-        {dpLoading && (
+        {(dpLoading || detecting) && (
           <div className="h-0.5 shrink-0 overflow-hidden" style={{ background: 'var(--app-border)' }}>
             <div
               className="h-full"
@@ -405,7 +367,7 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
               </div>
               {topic && (
                 <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                  {dpLoading
+                  {(dpLoading || detecting)
                     ? t('wizard.tab.loadingDp')
                     : topicWidgets.length > 0
                       ? t('wizard.tab.foundDp', { count: topicWidgets.length })
@@ -570,9 +532,36 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
                 ))}
               </div>
 
+              {/* Group style selector */}
+              {groupBy !== 'none' && (
+                <div>
+                  <p className="text-xs font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Darstellung der Gruppen</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {([
+                      { key: 'header' as GroupStyle, label: 'Einzelwidgets', desc: 'Abschnittstitel + je ein Widget pro Datenpunkt' },
+                      { key: 'list'   as GroupStyle, label: 'Statische Liste', desc: 'Pro Gruppe eine konfigurierte Liste' },
+                      { key: 'autolist' as GroupStyle, label: 'Dynamische Liste', desc: 'Pro Gruppe eine automatische Liste' },
+                    ]).map((opt) => (
+                      <button key={opt.key} onClick={() => setGroupStyle(opt.key)}
+                        className="p-3 rounded-xl text-left transition-all hover:opacity-90"
+                        style={{
+                          background: groupStyle === opt.key ? 'var(--accent)11' : 'var(--app-bg)',
+                          border: `2px solid ${groupStyle === opt.key ? 'var(--accent)' : 'var(--app-border)'}`,
+                        }}>
+                        <p className="text-xs font-semibold mb-0.5"
+                          style={{ color: groupStyle === opt.key ? 'var(--accent)' : 'var(--text-primary)' }}>
+                          {opt.label}
+                        </p>
+                        <p className="text-[10px] leading-tight" style={{ color: 'var(--text-secondary)' }}>{opt.desc}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Preview of groups */}
               {groupBy !== 'none' && detectedGroups.size > 0 && (
-                <div className="aura-scroll space-y-2 max-h-56 overflow-y-auto">
+                <div className="aura-scroll space-y-2 max-h-48 overflow-y-auto">
                   {Array.from(detectedGroups.entries()).map(([label, widgets], gi) => (
                     <div key={label} className="rounded-xl overflow-hidden"
                       style={{ border: '1px solid var(--app-border)' }}>
@@ -653,62 +642,10 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
             </div>
           )}
 
-          {/* ── STEP: layout ── */}
-          {step === 'layout' && (
-            <div className="space-y-5">
-              <div>
-                <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--text-secondary)' }}>{t('wizard.tab.tabName')}</label>
-                <input
-                  autoFocus
-                  value={tabName}
-                  onChange={(e) => setTabName(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' && canCreate) handleCreate(); }}
-                  placeholder={mode === 'homepage' ? t('wizard.tab.homeDefault') : topic}
-                  className="w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none"
-                  style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
-                />
-              </div>
-
-              <div>
-                <p className="text-xs font-medium mb-3" style={{ color: 'var(--text-secondary)' }}>{t('wizard.tab.selectLayout')}</p>
-                <div className="grid grid-cols-3 gap-3">
-                  {layouts.map((variant) => (
-                    <button
-                      key={variant.id}
-                      onClick={() => setChosenLayout(variant.id)}
-                      className="rounded-xl p-3 text-left transition-all hover:opacity-90 flex flex-col gap-2"
-                      style={{
-                        background: chosenLayout === variant.id ? 'var(--accent)11' : 'var(--app-bg)',
-                        border: `2px solid ${chosenLayout === variant.id ? 'var(--accent)' : 'var(--app-border)'}`,
-                      }}
-                    >
-                      <MiniGridPreview
-                        widgets={variant.widgets}
-                        groupMapper={groupMapper ? (id) => groupMapper(id) : undefined}
-                      />
-                      <div>
-                        <p className="text-xs font-semibold" style={{ color: chosenLayout === variant.id ? 'var(--accent)' : 'var(--text-primary)' }}>
-                          {variant.label}
-                        </p>
-                        <p className="text-[10px] mt-0.5 leading-tight" style={{ color: 'var(--text-secondary)' }}>
-                          {variant.description}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                {activeWidgets.length} {t('wizard.tab.widgets')}
-                {groupBy !== 'none' && detectedGroups.size >= 2 && ` · ${detectedGroups.size} ${t('wizard.tab.groups')} (${groupBy === 'room' ? t('wizard.tab.rooms') : t('wizard.tab.functions')})`}
-              </p>
-            </div>
-          )}
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 shrink-0 flex items-center justify-between gap-3"
+        <div className="px-6 py-4 shrink-0 flex items-center gap-3"
           style={{ borderTop: '1px solid var(--app-border)' }}>
           <button
             onClick={step === 'mode' ? onClose : goBack}
@@ -718,11 +655,22 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
             {step === 'mode' ? <><X size={14} /> {t('wizard.tab.cancel')}</> : <><ChevronLeft size={14} /> {t('wizard.tab.back')}</>}
           </button>
 
-          {step !== 'layout' ? (
+          {isLastStep && (
+            <input
+              value={tabName}
+              onChange={(e) => setTabName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter' && canCreate) handleCreate(); }}
+              placeholder={mode === 'homepage' ? t('wizard.tab.homeDefault') : topic}
+              className="flex-1 rounded-xl px-4 py-2.5 text-sm focus:outline-none"
+              style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
+            />
+          )}
+
+          {!isLastStep ? (
             <button
               onClick={goNext}
               disabled={!canNext}
-              className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-semibold text-white hover:opacity-80 disabled:opacity-30"
+              className="ml-auto flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-semibold text-white hover:opacity-80 disabled:opacity-30"
               style={{ background: 'var(--accent)' }}
             >
               {t('wizard.tab.next')} <ChevronRight size={14} />

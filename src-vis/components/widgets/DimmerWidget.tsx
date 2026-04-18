@@ -11,6 +11,10 @@ export function DimmerWidget({ config }: WidgetProps) {
   const level = typeof value === 'number' ? Math.round(value) : 0;
   const layout = config.layout ?? 'default';
   const CompactIcon = getWidgetIcon(config.options?.icon as string | undefined, SunDim);
+  const o = config.options ?? {};
+  const showTitle  = o.showTitle  !== false;
+  const showValue  = o.showValue  !== false;
+  const showSlider = o.showSlider !== false;
 
   const slider = (
     <input type="range" min={0} max={100} value={level}
@@ -24,13 +28,13 @@ export function DimmerWidget({ config }: WidgetProps) {
     const opacity = 0.2 + (level / 100) * 0.8;
     return (
       <div className="flex flex-col h-full justify-between" style={{ position: 'relative' }}>
-        <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+        {showTitle && <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>}
         <div className="flex flex-col items-center gap-3 flex-1 justify-center">
           <Sun size={40} strokeWidth={1.5}
             style={{ color: 'var(--accent-yellow)', opacity, filter: level > 0 ? `drop-shadow(0 0 ${level / 10}px var(--accent-yellow))` : 'none', transition: 'all 0.3s' }} />
-          <span className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{level}%</span>
+          {showValue && <span className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{level}%</span>}
         </div>
-        {slider}
+        {showSlider && slider}
         <StatusBadges config={config} />
       </div>
     );
@@ -42,13 +46,16 @@ export function DimmerWidget({ config }: WidgetProps) {
       <div className="flex flex-col justify-center h-full gap-1.5" style={{ position: 'relative' }}>
         <div className="flex items-center gap-2">
           <CompactIcon size={15} style={{ color: level > 0 ? 'var(--accent-yellow)' : 'var(--text-secondary)', flexShrink: 0 }} />
-          <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>
-          <span className="text-sm font-bold shrink-0" style={{ color: 'var(--text-primary)' }}>{level}%</span>
+          {showTitle && <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
+          {!showTitle && <span className="flex-1" />}
+          {showValue && <span className="text-sm font-bold shrink-0" style={{ color: 'var(--text-primary)' }}>{level}%</span>}
         </div>
-        <input type="range" min={0} max={100} step={1} value={level}
-          onChange={(e) => setState(config.datapoint, Number(e.target.value))}
-          style={{ accentColor: 'var(--accent-yellow)' }}
-          className="w-full h-1.5 rounded-full appearance-none cursor-pointer" />
+        {showSlider && (
+          <input type="range" min={0} max={100} step={1} value={level}
+            onChange={(e) => setState(config.datapoint, Number(e.target.value))}
+            style={{ accentColor: 'var(--accent-yellow)' }}
+            className="w-full h-1.5 rounded-full appearance-none cursor-pointer" />
+        )}
         <StatusBadges config={config} />
       </div>
     );
@@ -58,8 +65,8 @@ export function DimmerWidget({ config }: WidgetProps) {
   if (layout === 'minimal') {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-3" style={{ position: 'relative' }}>
-        <span className="text-3xl font-black" style={{ color: level > 0 ? 'var(--accent-yellow)' : 'var(--text-secondary)' }}>{level}%</span>
-        {slider}
+        {showValue && <span className="text-3xl font-black" style={{ color: level > 0 ? 'var(--accent-yellow)' : 'var(--text-secondary)' }}>{level}%</span>}
+        {showSlider && slider}
         <StatusBadges config={config} />
       </div>
     );
@@ -68,17 +75,21 @@ export function DimmerWidget({ config }: WidgetProps) {
   // --- DEFAULT ---
   return (
     <div className="flex flex-col h-full justify-between" style={{ position: 'relative' }}>
-      <div className="flex items-center gap-2">
-        <SunDim size={14} style={{ color: level > 0 ? 'var(--accent-yellow)' : 'var(--text-secondary)' }} />
-        <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
-      </div>
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <span className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{level}%</span>
-          <div className="w-3 h-3 rounded-full transition-all"
-            style={{ background: level > 0 ? 'var(--accent-yellow)' : 'var(--app-border)', boxShadow: level > 0 ? '0 0 6px var(--accent-yellow)' : 'none' }} />
+      {showTitle && (
+        <div className="flex items-center gap-2">
+          <SunDim size={14} style={{ color: level > 0 ? 'var(--accent-yellow)' : 'var(--text-secondary)' }} />
+          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
         </div>
-        {slider}
+      )}
+      <div className="space-y-2">
+        {showValue && (
+          <div className="flex justify-between items-center">
+            <span className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{level}%</span>
+            <div className="w-3 h-3 rounded-full transition-all"
+              style={{ background: level > 0 ? 'var(--accent-yellow)' : 'var(--app-border)', boxShadow: level > 0 ? '0 0 6px var(--accent-yellow)' : 'none' }} />
+          </div>
+        )}
+        {showSlider && slider}
       </div>
       <StatusBadges config={config} />
     </div>

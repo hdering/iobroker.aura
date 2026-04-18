@@ -548,23 +548,23 @@ export function AdminSettings() {
         <Card title={t('settings.grid.title')}>
           <SliderSetting
             label={t('settings.grid.rowHeight')}
-            value={frontend.gridRowHeight ?? 80}
-            min={30} max={160} step={10} unit=" px"
+            value={frontend.gridRowHeight ?? 20}
+            min={10} max={160} step={10} unit=" px"
             onChange={(v) => updateFrontend({ gridRowHeight: v })}
-            presets={[{ label: 'XS·40', value: 40 }, { label: 'S·60', value: 60 }, { label: 'M·80', value: 80 }, { label: 'L·100', value: 100 }, { label: 'XL·120', value: 120 }]}
+            presets={[{ label: '20', value: 20 }, { label: '40', value: 40 }, { label: '60', value: 60 }, { label: '80', value: 80 }, { label: '120', value: 120 }]}
           />
           <div className="border-t pt-3" style={{ borderColor: 'var(--app-border)' }}>
             <SliderSetting
               label={t('settings.grid.snapX')}
-              value={frontend.gridSnapX ?? frontend.gridRowHeight ?? 80}
-              min={5} max={160} step={5} unit=" px"
+              value={frontend.gridSnapX ?? frontend.gridRowHeight ?? 20}
+              min={10} max={160} step={10} unit=" px"
               onChange={(v) => {
-                const oldSnap = frontend.gridSnapX ?? frontend.gridRowHeight ?? 80;
+                const oldSnap = frontend.gridSnapX ?? frontend.gridRowHeight ?? 20;
                 const factor = (oldSnap + MARGIN) / (v + MARGIN);
                 rescaleAllWidgetsX(factor);
                 updateFrontend({ gridSnapX: v });
               }}
-              presets={[{ label: '10', value: 10 }, { label: '20', value: 20 }, { label: '40', value: 40 }, { label: '80', value: 80 }, { label: '120', value: 120 }]}
+              presets={[{ label: '20', value: 20 }, { label: '40', value: 40 }, { label: '60', value: 60 }, { label: '80', value: 80 }, { label: '120', value: 120 }]}
             />
           </div>
           <div className="border-t pt-3" style={{ borderColor: 'var(--app-border)' }}>

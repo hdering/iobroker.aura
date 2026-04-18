@@ -26,11 +26,13 @@ export function ChartWidget({ config }: WidgetProps) {
   const { subscribe, connected } = useIoBroker();
   const fontScale = useConfigStore((s) => s.frontend.fontScale ?? 1);
 
-  const unit            = (config.options?.unit as string | undefined);
-  const historyInstance = (config.options?.historyInstance as string | undefined);
-  const cfgRange        = ((config.options?.historyRange as ChartTimeRange | undefined) ?? '24h');
-  const customVal       = (config.options?.historyRangeCustomValue as number | undefined) ?? 24;
-  const customUnit      = (config.options?.historyRangeCustomUnit as 'h' | 'd' | undefined) ?? 'h';
+  const o               = config.options ?? {};
+  const showTitle       = o.showTitle !== false;
+  const unit            = (o.unit as string | undefined);
+  const historyInstance = (o.historyInstance as string | undefined);
+  const cfgRange        = ((o.historyRange as ChartTimeRange | undefined) ?? '24h');
+  const customVal       = (o.historyRangeCustomValue as number | undefined) ?? 24;
+  const customUnit      = (o.historyRangeCustomUnit as 'h' | 'd' | undefined) ?? 'h';
   const cfgCustomMs     = cfgRange === 'custom'
     ? customVal * (customUnit === 'd' ? 86_400_000 : 3_600_000)
     : undefined;
@@ -116,7 +118,7 @@ export function ChartWidget({ config }: WidgetProps) {
       <div className="flex flex-col h-full">
         <div className="flex items-start justify-between mb-1">
           <div>
-            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+            {showTitle && <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>}
             {current !== null && (
               <p className="text-3xl font-black leading-tight" style={{ color: 'var(--text-primary)' }}>
                 {current.toLocaleString('de-DE')}
@@ -156,7 +158,8 @@ export function ChartWidget({ config }: WidgetProps) {
     return (
       <div className="flex items-center gap-2.5 h-full">
         <TrendingUp size={14} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
-        <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>
+        {showTitle && <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
+        {!showTitle && <span className="flex-1" />}
         {current !== null && (
           <span className="text-sm font-bold shrink-0" style={{ color: 'var(--text-primary)' }}>
             {current.toLocaleString('de-DE')}
@@ -189,7 +192,7 @@ export function ChartWidget({ config }: WidgetProps) {
               {unit && <span className="text-base ml-1" style={{ color: 'var(--text-secondary)' }}>{unit}</span>}
             </span>
           : <BarChart2 size={24} style={{ color: 'var(--text-secondary)' }} />}
-        <span className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>
+        {showTitle && <span className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
       </div>
     );
   }
@@ -198,7 +201,7 @@ export function ChartWidget({ config }: WidgetProps) {
   return (
     <div className="flex flex-col h-full">
       <div className="flex justify-between items-start mb-1">
-        <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+        {showTitle && <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>}
         {current !== null && (
           <span className="font-bold text-sm shrink-0 ml-2" style={{ color: 'var(--text-primary)' }}>
             {current.toLocaleString('de-DE')}{unit ? ` ${unit}` : ''}

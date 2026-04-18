@@ -279,15 +279,18 @@ export function FillWidget({ config }: WidgetProps) {
   };
 
   const layout = (config.layout ?? 'default') as string;
+  const showTitle = opts.showTitle !== false;
 
   if (layout === 'compact') {
     const displayVal = decimals === 0 ? String(Math.round(safeVal)) : safeVal.toFixed(decimals);
     return (
       <div className="flex items-center justify-between h-full gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          <Droplets size={14} style={{ color: fillColor, flexShrink: 0 }} />
-          <span className="text-sm truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>
-        </div>
+        {showTitle && (
+          <div className="flex items-center gap-2 min-w-0">
+            <Droplets size={14} style={{ color: fillColor, flexShrink: 0 }} />
+            <span className="text-sm truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>
+          </div>
+        )}
         <span className="text-xl font-bold shrink-0 tabular-nums" style={{ color: fillColor }}>
           {displayVal}
           <span className="text-sm ml-0.5 font-normal" style={{ color: 'var(--text-secondary)' }}>{unit}</span>
@@ -312,7 +315,7 @@ export function FillWidget({ config }: WidgetProps) {
 
   return (
     <div className="flex flex-col h-full">
-      {config.title && !config.options?.hideTitle && (
+      {showTitle && config.title && (
         <p className="text-xs mb-1 truncate shrink-0" style={{ color: 'var(--text-secondary)' }}>
           {config.title}
         </p>

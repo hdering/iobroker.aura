@@ -52,6 +52,9 @@ export function WindowContactWidget({ config }: WidgetProps) {
   const stateColor = STATE_COLOR[state];
   const label = STATE_LABEL[state];
   const layout = config.layout ?? 'default';
+  const o = config.options ?? {};
+  const showTitle = o.showTitle !== false;
+  const showLabel = o.showLabel !== false;
 
   // ── CARD ─────────────────────────────────────────────────────────────────
   if (layout === 'card') {
@@ -68,8 +71,8 @@ export function WindowContactWidget({ config }: WidgetProps) {
         }}>
         <StateIcon state={state} size={36} />
         <div className="text-center">
-          <p className="font-bold text-sm" style={{ color: '#fff' }}>{config.title}</p>
-          <p className="text-xs opacity-80" style={{ color: '#fff' }}>{label}</p>
+          {showTitle && <p className="font-bold text-sm" style={{ color: '#fff' }}>{config.title}</p>}
+          {showLabel && <p className="text-xs opacity-80" style={{ color: '#fff' }}>{label}</p>}
         </div>
         <StatusBadges config={config} />
       </div>
@@ -81,13 +84,18 @@ export function WindowContactWidget({ config }: WidgetProps) {
     return (
       <div className="flex items-center gap-3 h-full" style={{ position: 'relative' }}>
         <StateIcon state={state} size={18} />
-        <span className="flex-1 text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
-          {config.title}
-        </span>
-        <span className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0"
-          style={{ background: `${stateColor}22`, color: stateColor, border: `1px solid ${stateColor}55` }}>
-          {label}
-        </span>
+        {showTitle && (
+          <span className="flex-1 text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+            {config.title}
+          </span>
+        )}
+        {!showTitle && <span className="flex-1" />}
+        {showLabel && (
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0"
+            style={{ background: `${stateColor}22`, color: stateColor, border: `1px solid ${stateColor}55` }}>
+            {label}
+          </span>
+        )}
         <StatusBadges config={config} />
       </div>
     );
@@ -98,8 +106,8 @@ export function WindowContactWidget({ config }: WidgetProps) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-1" style={{ position: 'relative' }}>
         <StateIcon state={state} size={36} />
-        <span className="text-xs font-medium" style={{ color: stateColor }}>{label}</span>
-        <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>
+        {showLabel && <span className="text-xs font-medium" style={{ color: stateColor }}>{label}</span>}
+        {showTitle && <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
         <StatusBadges config={config} />
       </div>
     );
@@ -110,11 +118,13 @@ export function WindowContactWidget({ config }: WidgetProps) {
 
   return (
     <div className={`flex flex-col h-full gap-2 ${posClass}`} style={{ position: 'relative' }}>
-      <div className="flex items-center gap-2">
-        <StateIcon state={state} size={14} />
-        <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
-      </div>
-      <span className="text-2xl font-bold" style={{ color: stateColor }}>{label}</span>
+      {showTitle && (
+        <div className="flex items-center gap-2">
+          <StateIcon state={state} size={14} />
+          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+        </div>
+      )}
+      {showLabel && <span className="text-2xl font-bold" style={{ color: stateColor }}>{label}</span>}
       <StatusBadges config={config} />
     </div>
   );

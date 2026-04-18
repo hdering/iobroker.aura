@@ -26,6 +26,7 @@ export interface AutoListOptions {
   showRoom?: boolean;
   /** 'all' = show everything (default), 'active' = only on/> 0, 'inactive' = only off/0 */
   valueFilter?: 'all' | 'active' | 'inactive';
+  showTitle?: boolean;
 }
 
 export interface DiscoveredDp {
@@ -343,8 +344,10 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
     });
   }, [entries, states, valueFilter, editMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const showTitle = opts.showTitle !== false;
+
   // ── Shared header ──────────────────────────────────────────────────────────
-  const header = (
+  const header = showTitle ? (
     <div className="shrink-0 px-3 py-1.5 flex items-center justify-between"
       style={{ borderBottom: '1px solid var(--widget-border)' }}>
       <span className="text-xs font-semibold truncate" style={{ color: 'var(--text-secondary)' }}>
@@ -360,7 +363,7 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
         <RefreshCw size={11} className={syncing ? 'animate-spin' : ''} />
       </button>
     </div>
-  );
+  ) : null;
 
   const empty = (editMode ? entries.length === 0 : visibleEntries.length === 0) && (
     <div className="flex-1 flex items-center justify-center p-4">

@@ -236,6 +236,8 @@ export function GaugeWidget({ config }: WidgetProps) {
     );
   }
 
+  const showTitle = opts.showTitle !== false;
+
   if (layout === 'compact') {
     const displayVal = isNaN(safeVal) ? '–'
       : decimals === 0 ? String(Math.round(safeVal)) : safeVal.toFixed(decimals);
@@ -247,7 +249,7 @@ export function GaugeWidget({ config }: WidgetProps) {
     }
     return (
       <div className="flex items-center justify-between h-full gap-2">
-        <span className="text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>
+        {showTitle && <span className="text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
         <span className="text-xl font-bold shrink-0 tabular-nums" style={{ color: accentColor }}>
           {displayVal}
           {unit && <span className="text-sm ml-0.5 font-normal" style={{ color: 'var(--text-secondary)' }}>{unit}</span>}
@@ -258,7 +260,7 @@ export function GaugeWidget({ config }: WidgetProps) {
 
   return (
     <div className="flex flex-col h-full">
-      {config.title && (
+      {showTitle && config.title && (
         <p className="text-xs mb-1 truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
       )}
       <div className="flex-1 flex items-center justify-center">

@@ -87,8 +87,8 @@ export const de = {
   'settings.frontend.headerDatapointTemplateHint': '{dp} wird durch den Datenpunkt-Wert ersetzt · Beispiel: <span style="font-size:1.2em">{dp}</span> kW',
 
   'settings.grid.title':         'Grid & Mobil',
-  'settings.grid.rowHeight':     'Zeilenhöhe',
-  'settings.grid.snapX':         'Horizontaler Rasterabstand',
+  'settings.grid.rowHeight':     'Rastergröße (Zeile)',
+  'settings.grid.snapX':         'Rastergröße (Spalte)',
   'settings.grid.mobileBreak':   'Mobile-Breakpoint',
   'settings.grid.wizardMaxDp':   'Wizard Max-Datenpunkte',
   'settings.grid.mobileOff':     'Aus',

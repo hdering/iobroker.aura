@@ -48,6 +48,7 @@ export function ClockWidget({ config }: WidgetProps) {
   const opts = config.options ?? {};
   const display = (opts.display as string) ?? 'time';
   const showSeconds = Boolean(opts.showSeconds);
+  const showTitle = opts.showTitle !== false;
   const dateLength = (opts.dateLength as 'short' | 'long') ?? 'short';
   const customFormat = opts.customFormat as string | undefined;
   const layout = config.layout ?? 'default';
@@ -106,7 +107,7 @@ export function ClockWidget({ config }: WidgetProps) {
           <p className="aura-clock-custom font-black tabular-nums text-center" style={{ color: 'var(--accent)', fontSize: 'calc(clamp(2rem, 6vw, 3.5rem) * var(--font-scale, 1))', lineHeight: 1.1 }}>
             {customStr}
           </p>
-          {config.title && <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>}
+          {showTitle && config.title && <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>}
         </div>
       );
     }
@@ -122,7 +123,7 @@ export function ClockWidget({ config }: WidgetProps) {
             <DateText date={now} length={dateLength} t={t} />
           </p>
         )}
-        {config.title && <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>}
+        {showTitle && config.title && <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>}
       </div>
     );
   }
@@ -131,7 +132,7 @@ export function ClockWidget({ config }: WidgetProps) {
   if (customFormat) {
     return (
       <div className="flex flex-col h-full justify-between">
-        {config.title && (
+        {showTitle && config.title && (
           <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
         )}
         <p className="aura-clock-custom text-3xl font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>{customStr}</p>
@@ -141,7 +142,7 @@ export function ClockWidget({ config }: WidgetProps) {
 
   return (
     <div className="flex flex-col h-full justify-between">
-      {config.title && (
+      {showTitle && config.title && (
         <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
       )}
       <div>

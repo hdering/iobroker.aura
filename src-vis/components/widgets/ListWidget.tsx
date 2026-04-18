@@ -20,6 +20,7 @@ export interface StaticListOptions {
   /** 'all' = show everything (default), 'active' = only on/> 0, 'inactive' = only off/0 */
   valueFilter?: 'all' | 'active' | 'inactive';
   showId?: boolean;
+  showTitle?: boolean;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -162,9 +163,12 @@ export function ListWidget({ config, editMode, onConfigChange }: WidgetProps) {
 
   const activeCount = entries.filter(e => isActive(states[e.id]?.val ?? null)).length;
 
+  const showTitle = opts.showTitle !== false;
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
+      {showTitle && (
       <div className="shrink-0 flex items-center justify-between px-3 py-1.5"
         style={{ borderBottom: '1px solid var(--widget-border)' }}>
         <span className="text-xs font-semibold truncate" style={{ color: 'var(--text-secondary)' }}>
@@ -209,6 +213,7 @@ export function ListWidget({ config, editMode, onConfigChange }: WidgetProps) {
           )}
         </div>
       </div>
+      )}
 
       {/* Active summary line */}
       {entries.length > 0 && valueFilter === 'all' && (
