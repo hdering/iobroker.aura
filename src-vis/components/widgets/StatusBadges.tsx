@@ -13,7 +13,7 @@
  *   unreachDp  – ioBroker DP ID (boolean true = unreachable)
  *   showStatusBadges – boolean, default true
  */
-import { BatteryLow, WifiOff } from 'lucide-react';
+import { BatteryLow, Wifi, WifiOff } from 'lucide-react';
 import { useDatapoint } from '../../hooks/useDatapoint';
 import type { WidgetConfig } from '../../types';
 
@@ -72,7 +72,10 @@ export function StatusBadges({ config }: Props) {
             background: `color-mix(in srgb, ${reachColor} 20%, var(--app-surface))`,
             border: `1px solid color-mix(in srgb, ${reachColor} 50%, transparent)`,
           }}>
-          <WifiOff size={10} style={{ color: reachColor }} />
+          {isUnreach
+            ? <WifiOff size={10} style={{ color: reachColor }} />
+            : <Wifi    size={10} style={{ color: reachColor }} />
+          }
         </span>
       )}
     </div>
