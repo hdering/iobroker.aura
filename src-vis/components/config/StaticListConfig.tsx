@@ -178,12 +178,20 @@ export function StaticListConfig({ config, onConfigChange }: Props) {
         </button>
       </div>
 
-      {/* ── DatapointPicker ── */}
+      {/* ── DatapointPicker (multi-select) ── */}
       {showPicker && (
         <DatapointPicker
           currentValue=""
           onSelect={(id, unit, name) => { addEntry(id, name, unit); setShowPicker(false); }}
           onClose={() => setShowPicker(false)}
+          multiSelect
+          onMultiSelect={(picks) => {
+            const newEntries = picks
+              .filter(p => !entries.find(e => e.id === p.id))
+              .map(p => ({ id: p.id, label: p.name || undefined, unit: p.unit || undefined }));
+            if (newEntries.length > 0) setOpts({ entries: [...entries, ...newEntries] });
+            setShowPicker(false);
+          }}
         />
       )}
     </>

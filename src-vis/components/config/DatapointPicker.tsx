@@ -1,18 +1,22 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { RefreshCw, Search, X } from 'lucide-react';
-import { useDatapointList } from '../../hooks/useDatapointList';
+import { RefreshCw, Search, X, Check } from 'lucide-react';
+import { useDatapointList, type DatapointEntry } from '../../hooks/useDatapointList';
 import { useT } from '../../i18n';
+import { isRelevantDp } from '../../utils/dpRelevance';
 
 interface DatapointPickerProps {
   currentValue: string;
   onSelect: (id: string, unit?: string, name?: string) => void;
   onClose: () => void;
+  /** When true: show checkboxes + confirm button instead of immediate single-select */
+  multiSelect?: boolean;
+  onMultiSelect?: (picks: DatapointEntry[]) => void;
 }
 
 const MAX_DISPLAY = 250;
 
-export function DatapointPicker({ currentValue, onSelect, onClose }: DatapointPickerProps) {
+export function DatapointPicker({ currentValue, onSelect, onClose, multiSelect, onMultiSelect }: DatapointPickerProps) {
   const t = useT();
   const { datapoints, loading, loaded, load } = useDatapointList();
   const [search, setSearch] = useState('');
@@ -21,6 +25,7 @@ export function DatapointPicker({ currentValue, onSelect, onClose }: DatapointPi
   const [func, setFunc] = useState('');
   const [role, setRole] = useState('');
   const selectedRef = useRef<HTMLButtonElement>(null);
+  const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!loaded) load();
@@ -57,6 +62,29 @@ export function DatapointPicker({ currentValue, onSelect, onClose }: DatapointPi
   const countLabel = filtered.length > MAX_DISPLAY
     ? t('dp.picker.showing', { max: MAX_DISPLAY, count: filtered.length })
     : t('dp.picker.count', { count: filtered.length });
+
+  const toggleCheck = (dp: DatapointEntry) => {
+    setCheckedIds(prev => {
+      const next = new Set(prev);
+      next.has(dp.id) ? next.delete(dp.id) : next.add(dp.id);
+      return next;
+    });
+  };
+  const selectAllShown = () => setCheckedIds(prev => {
+    const next = new Set(prev);
+    shown.forEach(dp => next.add(dp.id));
+    return next;
+  });
+  const selectRelevantShown = () => setCheckedIds(prev => {
+    const next = new Set(prev);
+    shown.filter(dp => isRelevantDp(dp.role, dp.type)).forEach(dp => next.add(dp.id));
+    return next;
+  });
+  const clearAll = () => setCheckedIds(new Set());
+  const confirmMulti = () => {
+    const picks = datapoints.filter(dp => checkedIds.has(dp.id));
+    onMultiSelect?.(picks);
+  };
 
   return createPortal(
     <div
@@ -159,10 +187,34 @@ export function DatapointPicker({ currentValue, onSelect, onClose }: DatapointPi
           )}
         </div>
 
-        {/* Count */}
+        {/* Count + multi-select controls */}
         {loaded && (
-          <div className="px-5 py-1.5 shrink-0" style={{ borderBottom: '1px solid var(--app-border)' }}>
-            <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{countLabel}</p>
+          <div className="px-5 py-1.5 shrink-0 flex items-center gap-3" style={{ borderBottom: '1px solid var(--app-border)' }}>
+            <p className="text-[11px] flex-1" style={{ color: 'var(--text-secondary)' }}>
+              {countLabel}
+              {multiSelect && checkedIds.size > 0 && (
+                <span className="ml-2 font-medium" style={{ color: 'var(--accent)' }}>
+                  · {checkedIds.size} ausgewählt
+                </span>
+              )}
+            </p>
+            {multiSelect && (
+              <div className="flex gap-2">
+                <button onClick={selectRelevantShown}
+                  className="text-[10px] hover:opacity-70 px-2 py-0.5 rounded"
+                  style={{ background: 'color-mix(in srgb, var(--accent) 12%, transparent)', color: 'var(--accent)' }}>
+                  Relevante
+                </button>
+                <button onClick={selectAllShown}
+                  className="text-[10px] hover:opacity-70" style={{ color: 'var(--text-secondary)' }}>
+                  Alle
+                </button>
+                <button onClick={clearAll}
+                  className="text-[10px] hover:opacity-70" style={{ color: 'var(--text-secondary)' }}>
+                  Keine
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -183,21 +235,31 @@ export function DatapointPicker({ currentValue, onSelect, onClose }: DatapointPi
           ) : (
             shown.map((dp) => {
               const isSelected = dp.id === currentValue;
+              const isChecked  = checkedIds.has(dp.id);
+              const relevant   = isRelevantDp(dp.role, dp.type);
               return (
                 <button
                   key={dp.id}
                   ref={isSelected ? selectedRef : undefined}
-                  onClick={() => { onSelect(dp.id, dp.unit, dp.name); onClose(); }}
+                  onClick={() => multiSelect ? toggleCheck(dp) : (onSelect(dp.id, dp.unit, dp.name), onClose())}
                   className="w-full text-left px-5 py-2.5 flex items-center gap-3 hover:opacity-80 transition-opacity"
                   style={{
-                    background: isSelected ? 'color-mix(in srgb, var(--accent) 12%, transparent)' : 'transparent',
+                    background: (multiSelect ? isChecked : isSelected)
+                      ? 'color-mix(in srgb, var(--accent) 12%, transparent)' : 'transparent',
                     borderBottom: '1px solid var(--app-border)',
+                    opacity: multiSelect && !relevant ? 0.55 : 1,
                   }}
                 >
+                  {multiSelect && (
+                    <div className="w-3.5 h-3.5 rounded shrink-0 flex items-center justify-center"
+                      style={{ background: isChecked ? 'var(--accent)' : 'var(--app-border)', flexShrink: 0 }}>
+                      {isChecked && <Check size={9} color="#fff" />}
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <p
                       className="font-mono text-xs truncate"
-                      style={{ color: isSelected ? 'var(--accent)' : 'var(--text-primary)' }}
+                      style={{ color: (multiSelect ? isChecked : isSelected) ? 'var(--accent)' : 'var(--text-primary)' }}
                     >
                       {dp.id}
                     </p>
@@ -225,6 +287,23 @@ export function DatapointPicker({ currentValue, onSelect, onClose }: DatapointPi
             })
           )}
         </div>
+
+        {/* Multi-select confirm footer */}
+        {multiSelect && (
+          <div className="px-5 py-3 shrink-0 flex gap-2 justify-end"
+            style={{ borderTop: '1px solid var(--app-border)' }}>
+            <button onClick={onClose}
+              className="px-4 py-2 text-sm rounded-lg hover:opacity-80"
+              style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+              Abbrechen
+            </button>
+            <button onClick={confirmMulti} disabled={checkedIds.size === 0}
+              className="px-4 py-2 text-sm font-medium text-white rounded-lg hover:opacity-80 disabled:opacity-30 flex items-center gap-1.5"
+              style={{ background: 'var(--accent-green, #22c55e)' }}>
+              <Check size={14} /> {checkedIds.size} hinzufügen
+            </button>
+          </div>
+        )}
       </div>
     </div>,
     document.body,

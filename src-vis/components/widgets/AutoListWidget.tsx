@@ -3,44 +3,7 @@ import { RefreshCw, X } from 'lucide-react';
 import type { WidgetProps, ioBrokerState } from '../../types';
 import { getObjectViewDirect, getObjectDirect, useIoBroker } from '../../hooks/useIoBroker';
 import { saveAll } from '../../store/persistManager';
-/**
- * Returns true when a DP's role/type indicates it is user-facing and worth
- * showing in a dynamic list by default.
- *
- * Deliberately stricter than detectWidgetTypeFromRole:
- *   - excludes indicator.* (LOWBAT, UNREACH, CONFIG_PENDING, INSTALL_TEST …)
- *   - excludes bare "button" role (PRESS_SHORT, INSTALL_TEST, …)
- *   - excludes generic boolean-with-no-role (system flags)
- * Only explicit, meaningful roles are considered relevant.
- */
-function isRelevantForAutoList(role?: string, _valueType?: string): boolean {
-  const r = (role ?? '').toLowerCase();
-
-  // Level controls (shutter, dimmer, thermostat, volume …)
-  if (r.startsWith('level.') || r === 'level') return true;
-
-  // Sensor readings (temperature, humidity, power, …)
-  if (r.startsWith('value.') || r === 'value') return true;
-
-  // User-facing switches (lights, sockets, …)
-  // Switch is fine; indicator.* is NOT (those are system states)
-  if (r === 'switch' || r.startsWith('switch.')) return true;
-
-  // Physical contact / presence sensors
-  if (r === 'sensor.window' || r === 'window') return true;
-  if (r === 'sensor.door'   || r === 'door')   return true;
-  if (r === 'motion' || r.startsWith('sensor.motion') || r.includes('presence')) return true;
-  if (r.startsWith('sensor.alarm') || r.includes('smoke')) return true;
-
-  // Heating
-  if (r.startsWith('heating')) return true;
-
-  // Media volume is useful; other media.* (play, pause, mute) less so in a list
-  if (r === 'level.volume' || r === 'media.volume') return true;
-
-  // Everything else (indicator.*, button, bare boolean/number, …) → not relevant
-  return false;
-}
+import { isRelevantDp } from '../../utils/dpRelevance';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -182,7 +145,7 @@ export async function discoverDatapoints(
         type,
         unit: (obj.common.unit as string | undefined) || undefined,
         rooms: [...roomsSet],
-        isRelevant: isRelevantForAutoList(role, type),
+        isRelevant: isRelevantDp(role, type),
       };
     });
 }
