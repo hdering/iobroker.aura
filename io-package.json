@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.54",
+    "version": "0.4.55",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.55": {
+        "en": "Tab-Wizard: relevance-based DP pre-selection (only relevant DPs checked by default); 'Relevant / All / None' shortcut buttons; non-relevant DPs dimmed; layout variant correctly assigns compact/default/card to widgets",
+        "de": "Tab-Wizard: relevanzbasierte DP-Vorauswahl (nur relevante DPs standardmäßig ausgewählt); Schnellschaltflächen 'Relevante / Alle / Keine'; nicht relevante DPs gedimmt; Layout-Variante weist Widgets korrekt compact/default/card zu",
+        "ru": "Мастер вкладок: предварительный выбор DP на основе релевантности (только релевантные DP выбраны по умолчанию); кнопки быстрого выбора 'Relevante / Alle / Keine'; нерелевантные DP приглушены; вариант макета корректно назначает compact/default/card виджетам",
+        "pt": "Assistente de separadores: pré-seleção de DP baseada em relevância (apenas DPs relevantes selecionados por padrão); botões de atalho 'Relevante / Alle / Keine'; DPs não relevantes esmaecidos; variante de layout atribui corretamente compact/default/card aos widgets",
+        "nl": "Tab-Wizard: relevantiegebaseerde DP-voorselectie (alleen relevante DPs standaard geselecteerd); snelknoppen 'Relevante / Alle / Keine'; niet-relevante DPs gedempt; layoutvariant wijst widgets correct compact/default/card toe",
+        "fr": "Assistant d'onglets: pré-sélection de DP basée sur la pertinence (seuls les DP pertinents sélectionnés par défaut); boutons de raccourci 'Relevante / Alle / Keine'; DP non pertinents atténués; variante de mise en page attribue correctement compact/default/card aux widgets",
+        "it": "Procedura guidata schede: pre-selezione DP basata sulla rilevanza (solo DP rilevanti selezionati per default); pulsanti di scelta rapida 'Relevante / Alle / Keine'; DP non rilevanti attenuati; variante di layout assegna correttamente compact/default/card ai widget",
+        "es": "Asistente de pestañas: pre-selección de DP basada en relevancia (solo DPs relevantes seleccionados por defecto); botones de acceso rápido 'Relevante / Alle / Keine'; DPs no relevantes atenuados; variante de diseño asigna correctamente compact/default/card a los widgets",
+        "pl": "Kreator kart: wstępny wybór DP oparty na trafności (tylko trafne DP zaznaczone domyślnie); przyciski skrótu 'Relevante / Alle / Keine'; nieistotne DP wygaszone; wariant układu prawidłowo przypisuje compact/default/card do widgetów",
+        "uk": "Майстер вкладок: попередній вибір DP на основі релевантності (лише релевантні DP вибрані за замовчуванням); кнопки швидкого вибору 'Relevante / Alle / Keine'; нерелевантні DP приглушені; варіант макету правильно призначає compact/default/card віджетам",
+        "zh-cn": "标签向导：基于相关性的数据点预选（默认仅勾选相关数据点）；快捷按钮「相关/全部/无」；不相关数据点变暗；布局变体正确为小部件分配 compact/default/card"
+      },
       "0.4.54": {
         "en": "Static List widget replaces group-based list: DPs added directly via object browser with multi-select, relevance filtering (INSTALL_TEST etc. dimmed), value filter (active/inactive); DatapointPicker enhanced with multi-select mode",
         "de": "Statische Liste ersetzt gruppenbasierte Liste: DPs direkt über Objektbrowser mit Mehrfachauswahl hinzufügen, Relevanzfilterung (INSTALL_TEST etc. gedimmt), Werte-Filter (aktiv/inaktiv); Objektbrowser mit Multi-Select-Modus",
@@ -183,19 +196,6 @@
         "pl": "Edytor: linie pomocnicze – czerwone przerywane linie przy konfigurowalnej szerokości/wysokości; opcjonalne wyświetlanie we frontendzie; ustawienia w Admin → Ustawienia",
         "uk": "Редактор: допоміжні лінії – червоні пунктирні лінії при налаштовуваній ширині/висоті; опціональне відображення у фронтенді; налаштування в Адмін → Налаштування",
         "zh-cn": "编辑器：参考线 – 可配置宽度/高度的红色虚线；可选在前端显示；在管理→设置中配置"
-      },
-      "0.4.48": {
-        "en": "Fix: tabs no longer go blank after switching away from a fillTab iFrame widget (callback ref prevents ResizeObserver from firing with width=0 on detached element)",
-        "de": "Fix: Tabs werden nach dem Wechsel von einem fillTab-iFrame-Widget nicht mehr leer (Callback-Ref verhindert ResizeObserver-Aufruf mit Breite=0 auf entferntem Element)",
-        "ru": "Исправление: вкладки больше не становятся пустыми после переключения с виджета iFrame в режиме fillTab (callback-ref предотвращает вызов ResizeObserver с width=0 для отсоединённого элемента)",
-        "pt": "Correção: os separadores já não ficam em branco após mudar de um widget iFrame em modo fillTab (callback ref impede ResizeObserver de disparar com largura=0 em elemento removido)",
-        "nl": "Fix: tabs worden niet meer leeg na het wisselen van een fillTab iFrame-widget (callback ref voorkomt dat ResizeObserver met breedte=0 op een verwijderd element wordt aangeroepen)",
-        "fr": "Correction: les onglets ne deviennent plus vides après avoir quitté un widget iFrame en mode fillTab (le callback ref empêche le ResizeObserver de se déclencher avec width=0 sur un élément détaché)",
-        "it": "Fix: le schede non diventano più vuote dopo aver cambiato da un widget iFrame in modalità fillTab (il callback ref impedisce a ResizeObserver di attivarsi con width=0 su elemento rimosso)",
-        "es": "Corrección: las pestañas ya no quedan en blanco tras cambiar desde un widget iFrame en modo fillTab (el callback ref evita que ResizeObserver se dispare con width=0 en un elemento eliminado)",
-        "pl": "Poprawka: zakładki nie stają się już puste po przełączeniu z widgetu iFrame w trybie fillTab (callback ref zapobiega wywołaniu ResizeObserver z width=0 na odłączonym elemencie)",
-        "uk": "Виправлення: вкладки більше не стають порожніми після переходу від віджета iFrame у режимі fillTab (callback ref запобігає спрацюванню ResizeObserver із width=0 на від'єднаному елементі)",
-        "zh-cn": "修复：从 fillTab iFrame 小部件切换后标签页不再变空（callback ref 防止 ResizeObserver 在已移除元素上以 width=0 触发）"
       }
     }
   },

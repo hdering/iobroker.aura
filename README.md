@@ -127,6 +127,10 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.55 (2026-04-18)
+- Tab-Wizard: only relevant DPs pre-selected by default; "Relevante / Alle / Keine" shortcut buttons; non-relevant DPs dimmed but selectable
+- Tab-Wizard layout: compact variant now correctly sets `layout: 'compact'` on all widgets (was incorrectly `'card'`)
+
 ### 0.4.54 (2026-04-18)
 - Static List widget replaces the group-based list: DPs added directly via object browser with multi-select, relevance filtering (INSTALL_TEST etc. dimmed/deselected by default), value filter (show only active/inactive entries)
 - DatapointPicker enhanced with multi-select mode: checkboxes, "Relevante / Alle / Keine" shortcuts, confirm footer
