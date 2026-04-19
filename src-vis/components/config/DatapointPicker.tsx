@@ -54,15 +54,25 @@ export function DatapointPicker({ currentValue, onSelect, onClose, multiSelect, 
     return list;
   }, [datapoints, search, adapter, room, func, role]);
 
-  // Memoized so the scroll effect only re-runs when the actual list changes,
-  // not on every render (which would create a new array reference each time).
-  const shown = useMemo(() => filtered.slice(0, MAX_DISPLAY), [filtered]);
+  // Always include the selected item even if it would fall beyond MAX_DISPLAY,
+  // so selectedRef gets attached and auto-scroll can find it.
+  const shown = useMemo(() => {
+    const base = filtered.slice(0, MAX_DISPLAY);
+    if (!currentValue || base.some((dp) => dp.id === currentValue)) return base;
+    const selected = filtered.find((dp) => dp.id === currentValue);
+    return selected ? [...base, selected] : base;
+  }, [filtered, currentValue]);
 
   // Scroll to the selected item once after data is available.
-  // Each effect instance gets its own `cancelled` flag so re-renders don't
-  // block the scroll — only the last scheduled rAF will fire with cancelled=false.
+  // Try synchronously first (useEffect fires after DOM commit, so ref is already set);
+  // fall back to rAF if somehow the ref isn't ready yet.
   useEffect(() => {
     if (!loaded || scrolledRef.current) return;
+    if (selectedRef.current) {
+      selectedRef.current.scrollIntoView({ behavior: 'instant', block: 'center' });
+      scrolledRef.current = true;
+      return;
+    }
     let cancelled = false;
     requestAnimationFrame(() => {
       if (!cancelled && selectedRef.current) {
