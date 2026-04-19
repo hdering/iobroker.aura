@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.63 (2026-04-19)
+- Admin Settings: multi-column layout reduces scrolling – Language/Editor/PIN/Backup in one row, Frontend/Grid/Guidelines in another, Clients/Expert side by side
+
 ### 0.4.62 (2026-04-19)
 - Per-layout settings: Guidelines, Grid & Mobile, Theme & CSS are now configurable independently per layout
 - Different layouts (e.g. different tablets) can have different grid sizes, mobile breakpoints, themes, custom CSS and guidelines

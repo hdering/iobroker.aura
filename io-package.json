@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.62",
+    "version": "0.4.63",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.63": {
+        "en": "Admin Settings: multi-column layout reduces scrolling – Language/Editor/PIN/Backup in one row, Frontend/Grid/Guidelines in another, Clients/Expert side by side",
+        "de": "Admin Einstellungen: mehrspaltiges Layout reduziert Scrollen – Sprache/Editor/PIN/Backup in einer Zeile, Frontend/Grid/Hilfslinien nebeneinander, Geräte/Experten Seite an Seite",
+        "ru": "Настройки администратора: многоколоночный макет уменьшает прокрутку – Язык/Редактор/PIN/Резервное копирование в одной строке, Фронтенд/Сетка/Направляющие рядом, Устройства/Эксперт бок о бок",
+        "pt": "Definições de administrador: layout multi-coluna reduz rolagem – Idioma/Editor/PIN/Backup numa linha, Frontend/Grelha/Guias lado a lado, Dispositivos/Especialista lado a lado",
+        "nl": "Admin instellingen: meerkolomsindeling vermindert scrollen – Taal/Editor/PIN/Backup in één rij, Frontend/Raster/Hulplijnen naast elkaar, Apparaten/Expert zij aan zij",
+        "fr": "Paramètres admin: mise en page multi-colonnes réduit le défilement – Langue/Éditeur/PIN/Sauvegarde sur une ligne, Frontend/Grille/Guides côte à côte, Appareils/Expert côte à côte",
+        "it": "Impostazioni admin: layout multi-colonna riduce lo scorrimento – Lingua/Editor/PIN/Backup in una riga, Frontend/Griglia/Guide affiancati, Dispositivi/Esperto affiancati",
+        "es": "Configuración admin: diseño de múltiples columnas reduce el desplazamiento – Idioma/Editor/PIN/Copia de seguridad en una fila, Frontend/Cuadrícula/Guías lado a lado, Dispositivos/Experto lado a lado",
+        "pl": "Ustawienia admina: wielokolumnowy układ zmniejsza przewijanie – Język/Edytor/PIN/Kopia zapasowa w jednym wierszu, Frontend/Siatka/Linie pomocnicze obok siebie, Urządzenia/Ekspert obok siebie",
+        "uk": "Налаштування адміна: багатоколонковий макет зменшує прокрутку – Мова/Редактор/PIN/Резервне копіювання в одному рядку, Фронтенд/Сітка/Допоміжні лінії поруч, Пристрої/Експерт поруч",
+        "zh-cn": "管理员设置：多列布局减少滚动 – 语言/编辑器/PIN/备份在一行，前端/网格/辅助线并排，设备/专家并排"
+      },
       "0.4.62": {
         "en": "Per-layout settings: Guidelines, Grid & Mobile, Theme & CSS can now be configured independently per layout – different tablets get different grid sizes, themes and CSS",
         "de": "Layout-spezifische Einstellungen: Hilfslinien, Grid & Mobil, Theme & CSS sind jetzt je Layout unabhängig konfigurierbar – verschiedene Tablets erhalten unterschiedliche Raster, Themes und CSS",
@@ -196,19 +209,6 @@
         "pl": "Edytor widgetów: przełączniki 'Widoczne pola' (tytuł, etykieta, wartość, jednostka, suwak, elementy sterujące, …) dla wszystkich typów widgetów; selektor układu i przełączniki pól połączone w jedną sekcję zwijaną",
         "uk": "Редактор віджетів: перемикачі 'Видимі поля' (заголовок, мітка, значення, одиниця, повзунок, елементи керування, …) для всіх типів віджетів; вибір макету та перемикачі полів об'єднані в одну згортаєму секцію",
         "zh-cn": "小部件编辑器：所有小部件类型的「可见字段」开关（标题、标签、值、单位、滑块、控件等）；布局选择器和字段开关合并为一个可折叠区域"
-      },
-      "0.4.55": {
-        "en": "Tab-Wizard: relevance-based DP pre-selection (only relevant DPs checked by default); 'Relevant / All / None' shortcut buttons; non-relevant DPs dimmed; layout variant correctly assigns compact/default/card to widgets",
-        "de": "Tab-Wizard: relevanzbasierte DP-Vorauswahl (nur relevante DPs standardmäßig ausgewählt); Schnellschaltflächen 'Relevante / Alle / Keine'; nicht relevante DPs gedimmt; Layout-Variante weist Widgets korrekt compact/default/card zu",
-        "ru": "Мастер вкладок: предварительный выбор DP на основе релевантности (только релевантные DP выбраны по умолчанию); кнопки быстрого выбора 'Relevante / Alle / Keine'; нерелевантные DP приглушены; вариант макета корректно назначает compact/default/card виджетам",
-        "pt": "Assistente de separadores: pré-seleção de DP baseada em relevância (apenas DPs relevantes selecionados por padrão); botões de atalho 'Relevante / Alle / Keine'; DPs não relevantes esmaecidos; variante de layout atribui corretamente compact/default/card aos widgets",
-        "nl": "Tab-Wizard: relevantiegebaseerde DP-voorselectie (alleen relevante DPs standaard geselecteerd); snelknoppen 'Relevante / Alle / Keine'; niet-relevante DPs gedempt; layoutvariant wijst widgets correct compact/default/card toe",
-        "fr": "Assistant d'onglets: pré-sélection de DP basée sur la pertinence (seuls les DP pertinents sélectionnés par défaut); boutons de raccourci 'Relevante / Alle / Keine'; DP non pertinents atténués; variante de mise en page attribue correctement compact/default/card aux widgets",
-        "it": "Procedura guidata schede: pre-selezione DP basata sulla rilevanza (solo DP rilevanti selezionati per default); pulsanti di scelta rapida 'Relevante / Alle / Keine'; DP non rilevanti attenuati; variante di layout assegna correttamente compact/default/card ai widget",
-        "es": "Asistente de pestañas: pre-selección de DP basada en relevancia (solo DPs relevantes seleccionados por defecto); botones de acceso rápido 'Relevante / Alle / Keine'; DPs no relevantes atenuados; variante de diseño asigna correctamente compact/default/card a los widgets",
-        "pl": "Kreator kart: wstępny wybór DP oparty na trafności (tylko trafne DP zaznaczone domyślnie); przyciski skrótu 'Relevante / Alle / Keine'; nieistotne DP wygaszone; wariant układu prawidłowo przypisuje compact/default/card do widgetów",
-        "uk": "Майстер вкладок: попередній вибір DP на основі релевантності (лише релевантні DP вибрані за замовчуванням); кнопки швидкого вибору 'Relevante / Alle / Keine'; нерелевантні DP приглушені; варіант макету правильно призначає compact/default/card віджетам",
-        "zh-cn": "标签向导：基于相关性的数据点预选（默认仅勾选相关数据点）；快捷按钮「相关/全部/无」；不相关数据点变暗；布局变体正确为小部件分配 compact/default/card"
       }
     }
 
