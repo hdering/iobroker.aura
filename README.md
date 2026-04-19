@@ -127,6 +127,11 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.60 (2026-04-19)
+- Custom layout: widget-field dropdown for all widget types (Shutter, Dimmer, Gauge, Chart, Window/Door Contact, Binary Sensor, EVCC, Image, Weather)
+- DatapointPicker: name shown first, technical DP ID on second line, type badge in color; search pre-filled with current DP for quick navigation
+- "Add widget" dialog: category filter tabs and "Recently used" chips for fast access to frequently used templates
+
 ### 0.4.59 (2026-04-19)
 - Custom layout for all widgets: free 3×3 grid, each cell configurable with title/value/unit/free text/datapoint/widget-field
 - Per-cell settings: prefix/suffix for values, font size, bold/italic, color, horizontal and vertical alignment, unique CSS class per cell
