@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.63",
+    "version": "0.4.64",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.64": {
+        "en": "Fix: iframe 'Keep Alive (no reload)' now correctly preserves state across tab switches – fill-tab views no longer cause iframes to reload",
+        "de": "Fix: iFrame 'Aufrechterhalten (kein Reload)' behält den Zustand beim Tab-Wechsel korrekt bei – Tab-füllende Ansichten lösen kein Neuladen mehr aus",
+        "ru": "Исправление: iFrame 'Без перезагрузки' теперь корректно сохраняет состояние при переключении вкладок – полноэкранные виды вкладок больше не вызывают перезагрузку",
+        "pt": "Fix: iFrame 'Manter ativo (sem recarga)' agora preserva corretamente o estado ao trocar de abas – vistas de aba completa já não causam recarregamento",
+        "nl": "Fix: iFrame 'Behouden (geen herlaad)' behoudt nu correct de staat bij het wisselen van tabbladen – tabvullende weergaven veroorzaken geen herlaad meer",
+        "fr": "Fix: iFrame 'Maintenir actif (sans rechargement)' préserve maintenant correctement l'état lors du changement d'onglets – les vues en plein onglet ne déclenchent plus de rechargement",
+        "it": "Fix: iFrame 'Mantieni attivo (senza ricarica)' ora preserva correttamente lo stato al cambio di schede – le viste a scheda piena non causano più ricaricamento",
+        "es": "Fix: iFrame 'Mantener activo (sin recarga)' ahora preserva correctamente el estado al cambiar de pestañas – las vistas de pestaña completa ya no provocan recargas",
+        "pl": "Fix: iFrame 'Zachowaj aktywny (bez przeładowania)' teraz poprawnie zachowuje stan przy przełączaniu kart – widoki wypełniające kartę nie powodują już przeładowania",
+        "uk": "Виправлення: iFrame 'Підтримувати (без перезавантаження)' тепер коректно зберігає стан при перемиканні вкладок – повноекранні вікна вкладок більше не спричиняють перезавантаження",
+        "zh-cn": "修复：iFrame「保持活跃（不重载）」现在在切换标签时正确保留状态 – 填充标签视图不再触发重载"
+      },
       "0.4.63": {
         "en": "Admin Settings: multi-column layout reduces scrolling – Language/Editor/PIN/Backup in one row, Frontend/Grid/Guidelines in another, Clients/Expert side by side",
         "de": "Admin Einstellungen: mehrspaltiges Layout reduziert Scrollen – Sprache/Editor/PIN/Backup in einer Zeile, Frontend/Grid/Hilfslinien nebeneinander, Geräte/Experten Seite an Seite",
@@ -196,21 +209,9 @@
         "pl": "Poprawka: odznaka statusu pokazuje właściwą ikonę WiFi – Wifi (zielony) gdy dostępny, WifiOff (czerwony) gdy niedostępny; wcześniej zawsze wyświetlała WifiOff",
         "uk": "Виправлення: значок стану показує правильну іконку WiFi – Wifi (зелений) якщо доступний, WifiOff (червоний) якщо недоступний; раніше завжди показував WifiOff",
         "zh-cn": "修复：状态徽章显示正确的 WiFi 图标 – 可达时显示 Wifi（绿色），不可达时显示 WifiOff（红色）；之前无论状态如何始终显示 WifiOff"
-      },
-      "0.4.56": {
-        "en": "Widget editor: 'Visible fields' toggles (title, label, value, unit, slider, controls, …) for all widget types; layout selector and field toggles combined into one collapsible section",
-        "de": "Widget-Editor: 'Sichtbare Felder'-Schalter (Titel, Bezeichnung, Wert, Einheit, Schieberegler, Steuerelemente, …) für alle Widget-Typen; Layout-Auswahl und Feld-Schalter in einem einklappbaren Bereich zusammengefasst",
-        "ru": "Редактор виджетов: переключатели 'Sichtbare Felder' (заголовок, метка, значение, единица, ползунок, элементы управления, …) для всех типов виджетов; выбор макета и переключатели полей объединены в одну сворачиваемую секцию",
-        "pt": "Editor de widgets: alternâncias 'Campos visíveis' (título, rótulo, valor, unidade, controlo deslizante, controlos, …) para todos os tipos de widget; seletor de layout e alternâncias de campo combinados numa secção recolhível",
-        "nl": "Widget-editor: 'Zichtbare velden'-schakelaars (titel, label, waarde, eenheid, schuifregelaar, bedieningselementen, …) voor alle widgettypen; layoutkiezer en veldschakelaars gecombineerd in één inklapbare sectie",
-        "fr": "Éditeur de widgets: bascules 'Champs visibles' (titre, étiquette, valeur, unité, curseur, contrôles, …) pour tous les types de widgets; sélecteur de mise en page et bascules de champs combinés en une section rétractable",
-        "it": "Editor widget: interruttori 'Campi visibili' (titolo, etichetta, valore, unità, cursore, controlli, …) per tutti i tipi di widget; selettore layout e interruttori campo combinati in una sezione comprimibile",
-        "es": "Editor de widgets: conmutadores 'Campos visibles' (título, etiqueta, valor, unidad, deslizador, controles, …) para todos los tipos de widget; selector de diseño y conmutadores de campo combinados en una sección plegable",
-        "pl": "Edytor widgetów: przełączniki 'Widoczne pola' (tytuł, etykieta, wartość, jednostka, suwak, elementy sterujące, …) dla wszystkich typów widgetów; selektor układu i przełączniki pól połączone w jedną sekcję zwijaną",
-        "uk": "Редактор віджетів: перемикачі 'Видимі поля' (заголовок, мітка, значення, одиниця, повзунок, елементи керування, …) для всіх типів віджетів; вибір макету та перемикачі полів об'єднані в одну згортаєму секцію",
-        "zh-cn": "小部件编辑器：所有小部件类型的「可见字段」开关（标题、标签、值、单位、滑块、控件等）；布局选择器和字段开关合并为一个可折叠区域"
       }
     }
+
 
   },
   "native": {

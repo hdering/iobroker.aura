@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.64 (2026-04-19)
+- Fix: iframe 'Keep Alive (no reload)' now correctly preserves state across tab switches – fill-tab views no longer cause iframes to reload
+
 ### 0.4.63 (2026-04-19)
 - Admin Settings: multi-column layout reduces scrolling – Language/Editor/PIN/Backup in one row, Frontend/Grid/Guidelines in another, Clients/Expert side by side
 

@@ -74,11 +74,9 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
   // ── container width measurement ────────────────────────────────────────
   // Use a callback ref instead of useRef + useEffect so that the ResizeObserver
   // is correctly connected to whichever DOM element is currently mounted.
-  // The fillTab early-return path omits the container div entirely; switching
-  // back to a normal tab creates a NEW DOM element. A plain useEffect with []
-  // deps would keep watching the OLD (now-detached) element, causing some
-  // browsers (Chrome) to fire with width=0, setting containerWidth=0 and
-  // making the tab appear blank ({rglWidth > 0 && ...} renders nothing).
+  // A plain useEffect with [] deps could keep watching a detached element,
+  // causing some browsers (Chrome) to fire with width=0, setting containerWidth=0
+  // and making the tab appear blank ({rglWidth > 0 && ...} renders nothing).
   const roRef = useRef<ResizeObserver | null>(null);
   const [containerWidth, setContainerWidth] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth : 0,
@@ -140,45 +138,22 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
   // Rescaling when snapX changes is handled in AdminSettings via rescaleAllWidgetsX.
 
   // ── fill-tab: one widget covers the whole tab area ────────────────────
+  // fillTabWidget is rendered as an absolute overlay so the normal tab tree
+  // stays mounted in all cases — keepAlive iframes are never unmounted when
+  // switching between fill-tab and normal tabs.
   const activeTab    = tabs.find((t) => t.id === activeTabId);
   const fillTabWidget = activeTab?.widgets?.find((w) => (w.options as Record<string, unknown>)?.fillTab);
-
-  if (fillTabWidget) {
-    // Collect all keepAlive iFrame widgets across all tabs (except fillTabWidget itself)
-    // so they stay mounted while the fill-tab view is active.
-    const keepAliveWidgets = tabs
-      .flatMap((t) => t.widgets ?? [])
-      .filter((w) => w.id !== fillTabWidget.id && w.type === 'iframe' && (w.options as Record<string, unknown>)?.keepAlive);
-
-    return (
-      <ActiveLayoutContext.Provider value={effectiveLayoutId}>
-        <div className="flex-1 min-h-0 relative">
-          {keepAliveWidgets.length > 0 && (
-            <div style={{ position: 'fixed', top: -9999, left: -9999, width: 1, height: 1, overflow: 'hidden', pointerEvents: 'none', opacity: 0 }}>
-              {keepAliveWidgets.map((w) => (
-                <WidgetFrame key={w.id} config={w} editMode={false} onRemove={removeWidget} onConfigChange={(cfg) => updateWidget(cfg.id, cfg)} />
-              ))}
-            </div>
-          )}
-          <div className="absolute inset-0">
-            <WidgetFrame
-              config={fillTabWidget}
-              editMode={editMode}
-              onRemove={removeWidget}
-              onConfigChange={(cfg) => updateWidget(cfg.id, cfg)}
-            />
-          </div>
-          {showIframeOverlay && <IframeOverlay data={iframeFullscreen!} onClose={() => setIframeFullscreen(null)} />}
-        </div>
-      </ActiveLayoutContext.Provider>
-    );
-  }
 
   // ── mobile: single-column stack ───────────────────────────────────────
   if (containerWidth > 0 && containerWidth < mobileBreakpoint) {
     return (
       <ActiveLayoutContext.Provider value={effectiveLayoutId}>
       <div className="flex-1 min-h-0 relative">
+        {fillTabWidget && (
+          <div className="absolute inset-0" style={{ zIndex: 10 }}>
+            <WidgetFrame config={fillTabWidget} editMode={editMode} onRemove={removeWidget} onConfigChange={(cfg) => updateWidget(cfg.id, cfg)} />
+          </div>
+        )}
         <div ref={containerRefCallback} className="aura-scroll absolute inset-0 overflow-auto p-2">
           {/* Reflow-hidden widgets from all tabs rendered off-screen */}
           <div style={{ position: 'fixed', top: -9999, left: -9999, width: 1, height: 1, overflow: 'hidden', pointerEvents: 'none', opacity: 0 }}>
@@ -191,7 +166,7 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
           {/* All tabs rendered; inactive ones hidden so keepAlive iframes stay mounted */}
           {tabs.map((tab) => {
             const isActive = tab.id === activeTabId;
-            const tabWidgets = (tab.widgets ?? []).filter((w) => !reflowHiddenIds.has(w.id));
+            const tabWidgets = (tab.widgets ?? []).filter((w) => !reflowHiddenIds.has(w.id) && !(fillTabWidget && w.id === fillTabWidget.id));
             const sorted = [...tabWidgets].sort((a, b) => {
               const oa = a.mobileOrder ?? (a.gridPos.y * 1000 + a.gridPos.x);
               const ob = b.mobileOrder ?? (b.gridPos.y * 1000 + b.gridPos.x);
@@ -225,6 +200,11 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
   return (
     <ActiveLayoutContext.Provider value={effectiveLayoutId}>
     <div className="flex-1 min-h-0 relative">
+    {fillTabWidget && (
+      <div className="absolute inset-0" style={{ zIndex: 10 }}>
+        <WidgetFrame config={fillTabWidget} editMode={editMode} onRemove={removeWidget} onConfigChange={(cfg) => updateWidget(cfg.id, cfg)} />
+      </div>
+    )}
     <div ref={containerRefCallback} className="aura-scroll absolute inset-0 overflow-auto p-2 sm:p-4" style={(editMode && rglWidth > containerWidth) || (readonly && effectiveRglWidth > containerWidth) ? { overflowX: 'auto' } : undefined}>
       {showGuidelines && <GuidelinesOverlay width={guidelinesWidth} height={guidelinesHeight} />}
       {rglWidth > 0 && (
@@ -248,7 +228,8 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
           {tabs.map((tab) => {
             const isActive = tab.id === activeTabId;
             const tabWidgets = tab.widgets ?? [];
-            const tabGridWidgets = tabWidgets.filter((w) => !reflowHiddenIds.has(w.id));
+            // Exclude the fillTab widget from the grid — it is rendered as an absolute overlay above
+            const tabGridWidgets = tabWidgets.filter((w) => !reflowHiddenIds.has(w.id) && !(fillTabWidget && w.id === fillTabWidget.id));
             const tabLayout = tabGridWidgets.map((w) => ({
               i: w.id,
               x: Math.min(w.gridPos.x ?? 0, effectiveCols - 1),
