@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { RefreshCw, Search, X, Check } from 'lucide-react';
 import { useDatapointList, type DatapointEntry } from '../../hooks/useDatapointList';
@@ -19,19 +19,18 @@ const MAX_DISPLAY = 250;
 export function DatapointPicker({ currentValue, onSelect, onClose, multiSelect, onMultiSelect }: DatapointPickerProps) {
   const t = useT();
   const { datapoints, loading, loaded, load } = useDatapointList();
-  const [search, setSearch] = useState('');
-  const [adapter, setAdapter] = useState(() => currentValue ? currentValue.split('.')[0] : '');
+  // Pre-fill search with the current value so the DP is immediately visible.
+  // The user can delete characters from the end to broaden the search.
+  const [search, setSearch] = useState(() => currentValue ?? '');
+  const [adapter, setAdapter] = useState('');
   const [room, setRoom] = useState('');
   const [func, setFunc] = useState('');
   const [role, setRole] = useState('');
-  const selectedRef = useRef<HTMLButtonElement>(null);
-  const scrolledRef = useRef(false);
   const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!loaded) load();
   }, [loaded, load]);
-
 
   const adapters = useMemo(
     () => Array.from(new Set(datapoints.map((dp) => dp.id.split('.')[0]))).sort(),
@@ -54,34 +53,7 @@ export function DatapointPicker({ currentValue, onSelect, onClose, multiSelect, 
     return list;
   }, [datapoints, search, adapter, room, func, role]);
 
-  // Always include the selected item even if it would fall beyond MAX_DISPLAY,
-  // so selectedRef gets attached and auto-scroll can find it.
-  const shown = useMemo(() => {
-    const base = filtered.slice(0, MAX_DISPLAY);
-    if (!currentValue || base.some((dp) => dp.id === currentValue)) return base;
-    const selected = filtered.find((dp) => dp.id === currentValue);
-    return selected ? [...base, selected] : base;
-  }, [filtered, currentValue]);
-
-  // Scroll to the selected item once after data is available.
-  // Try synchronously first (useEffect fires after DOM commit, so ref is already set);
-  // fall back to rAF if somehow the ref isn't ready yet.
-  useEffect(() => {
-    if (!loaded || scrolledRef.current) return;
-    if (selectedRef.current) {
-      selectedRef.current.scrollIntoView({ behavior: 'instant', block: 'center' });
-      scrolledRef.current = true;
-      return;
-    }
-    let cancelled = false;
-    requestAnimationFrame(() => {
-      if (!cancelled && selectedRef.current) {
-        selectedRef.current.scrollIntoView({ behavior: 'instant', block: 'center' });
-        scrolledRef.current = true;
-      }
-    });
-    return () => { cancelled = true; };
-  }, [loaded, shown]);
+  const shown = useMemo(() => filtered.slice(0, MAX_DISPLAY), [filtered]);
 
   const countLabel = filtered.length > MAX_DISPLAY
     ? t('dp.picker.showing', { max: MAX_DISPLAY, count: filtered.length })
@@ -266,7 +238,6 @@ export function DatapointPicker({ currentValue, onSelect, onClose, multiSelect, 
               return (
                 <button
                   key={dp.id}
-                  ref={isSelected ? selectedRef : undefined}
                   onClick={() => multiSelect ? toggleCheck(dp) : (onSelect(dp.id, dp.unit, dp.name, dp.role, dp.type), onClose())}
                   className="w-full text-left px-5 py-2.5 flex items-center gap-3 hover:opacity-80 transition-opacity"
                   style={{
