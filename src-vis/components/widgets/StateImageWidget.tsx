@@ -41,6 +41,7 @@ export function StateImageWidget({ config }: WidgetProps) {
 
   const showTitle = opts.showTitle !== false;
   const showLabel = opts.showLabel !== false;
+  const iconSize  = (opts.iconSize as number) || 48;
 
   const trueCfg: StateCfg = {
     type:   (opts.trueType   as 'icon' | 'base64') ?? 'icon',
@@ -64,7 +65,7 @@ export function StateImageWidget({ config }: WidgetProps) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center gap-2 rounded-widget"
         style={{ position: 'relative', background: 'var(--app-bg)', border: `2px solid ${cfg.color}` }}>
-        <StateDisplay cfg={cfg} size={48} />
+        <StateDisplay cfg={cfg} size={iconSize} />
         <div className="text-center">
           {showTitle && (
             <p className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>{config.title}</p>
@@ -82,7 +83,7 @@ export function StateImageWidget({ config }: WidgetProps) {
   if (layout === 'compact') {
     return (
       <div className="flex items-center gap-3 h-full" style={{ position: 'relative' }}>
-        <StateDisplay cfg={cfg} size={18} />
+        <StateDisplay cfg={cfg} size={Math.min(iconSize, 24)} />
         {showTitle && (
           <span className="flex-1 text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
             {config.title}
@@ -104,7 +105,7 @@ export function StateImageWidget({ config }: WidgetProps) {
   if (layout === 'minimal') {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-1" style={{ position: 'relative' }}>
-        <StateDisplay cfg={cfg} size={40} />
+        <StateDisplay cfg={cfg} size={iconSize} />
         {showLabel && (
           <span className="text-xs font-medium" style={{ color: cfg.color }}>{cfg.label}</span>
         )}
@@ -122,7 +123,7 @@ export function StateImageWidget({ config }: WidgetProps) {
     <div className={`flex flex-col h-full gap-2 ${posClass}`} style={{ position: 'relative' }}>
       {showTitle && (
         <div className="flex items-center gap-2">
-          <StateDisplay cfg={cfg} size={14} />
+          <StateDisplay cfg={cfg} size={Math.min(iconSize, 20)} />
           <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
         </div>
       )}

@@ -2552,7 +2552,8 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                       )}
                       {/* Base64 image */}
                       {currentType === 'base64' && (
-                        <div className="space-y-1">
+                        <div className="space-y-1.5">
+                          {/* File upload */}
                           <input type="file" accept="image/*"
                             onChange={(e) => {
                               const file = e.target.files?.[0];
@@ -2563,6 +2564,17 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                             }}
                             className="w-full text-[11px] cursor-pointer"
                             style={{ color: 'var(--text-secondary)' }} />
+                          {/* Paste base64 string */}
+                          <textarea
+                            rows={2}
+                            value={currentBase64 ?? ''}
+                            onChange={(e) => {
+                              const v = e.target.value.trim();
+                              setO({ [`${prefix}Base64`]: v || undefined });
+                            }}
+                            placeholder="oder data:image/… einfügen"
+                            className="w-full text-[10px] rounded-lg px-2.5 py-1.5 focus:outline-none resize-none font-mono"
+                            style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }} />
                           {currentBase64 && (
                             <div className="flex items-center gap-2">
                               <img src={currentBase64}
@@ -2587,8 +2599,22 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                   );
                 };
 
+                const iconSize = (o.iconSize as number) || 48;
+
                 return (
                   <>
+                    {/* Icon size */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Größe</label>
+                        <span className="text-[11px] tabular-nums" style={{ color: 'var(--text-primary)' }}>{iconSize} px</span>
+                      </div>
+                      <input type="range" min={16} max={128} step={4} value={iconSize}
+                        onChange={(e) => setO({ iconSize: Number(e.target.value) })}
+                        className="w-full h-1"
+                        style={{ accentColor: 'var(--accent)' }} />
+                    </div>
+                    <div className="h-px" style={{ background: 'var(--app-border)' }} />
                     {renderStateSection('true', 'Wahr (true)')}
                     <div className="h-px" style={{ background: 'var(--app-border)' }} />
                     {renderStateSection('false', 'Falsch (false)')}
