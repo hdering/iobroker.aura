@@ -2974,7 +2974,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
 
                         {/* Widget field key (for 'field' type) */}
                         {selCell.type === 'field' && (() => {
-                          const FIELD_SUGGESTIONS: Record<string, { key: string; label: string }[]> = {
+                          const FIELD_OPTIONS: Record<string, { key: string; label: string }[]> = {
                             calendar: [
                               { key: 'summary',  label: 'Terminname' },
                               { key: 'date',     label: 'Datum / Zeit' },
@@ -2989,29 +2989,30 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                               { key: 'custom', label: 'Benutzerdefiniert' },
                             ],
                           };
-                          const suggestions = FIELD_SUGGESTIONS[config.type] ?? [];
+                          const options = FIELD_OPTIONS[config.type] ?? [];
                           return (
                             <div>
-                              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Feld-Schlüssel</label>
-                              {suggestions.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mb-1.5">
-                                  {suggestions.map(({ key, label }) => (
-                                    <button key={key}
-                                      onClick={() => setCell(sel, { fieldKey: key })}
-                                      className="text-[10px] px-2 py-0.5 rounded-full"
-                                      style={{ background: selCell.fieldKey === key ? 'var(--accent)' : 'var(--app-bg)', color: selCell.fieldKey === key ? '#fff' : 'var(--text-secondary)', border: `1px solid ${selCell.fieldKey === key ? 'var(--accent)' : 'var(--app-border)'}` }}>
-                                      {label}
-                                    </button>
+                              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Widget-Feld</label>
+                              {options.length > 0 ? (
+                                <select
+                                  value={selCell.fieldKey ?? ''}
+                                  onChange={(e) => setCell(sel, { fieldKey: e.target.value })}
+                                  className={inputCls} style={inputSty}
+                                >
+                                  <option value="">– Feld wählen –</option>
+                                  {options.map(({ key, label }) => (
+                                    <option key={key} value={key}>{label}</option>
                                   ))}
-                                </div>
+                                </select>
+                              ) : (
+                                <input
+                                  type="text"
+                                  value={selCell.fieldKey ?? ''}
+                                  onChange={(e) => setCell(sel, { fieldKey: e.target.value })}
+                                  placeholder="z.B. summary"
+                                  className={inputCls} style={inputSty}
+                                />
                               )}
-                              <input
-                                type="text"
-                                value={selCell.fieldKey ?? ''}
-                                onChange={(e) => setCell(sel, { fieldKey: e.target.value })}
-                                placeholder="z.B. summary"
-                                className={inputCls} style={inputSty}
-                              />
                             </div>
                           );
                         })()}
