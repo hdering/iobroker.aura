@@ -419,7 +419,6 @@ export function CalendarWidget({ config }: WidgetProps) {
   if (layout === 'card') {
     const next = visibleEvents[0];
     const important = next ? imp(next) : false;
-    const color = important ? highlightColor : (next?.sourceColor ?? 'var(--accent)');
     const meta = next ? eventMeta(next, 0) : null;
 
     // Visibility options (all shown by default)
@@ -447,7 +446,7 @@ export function CalendarWidget({ config }: WidgetProps) {
                 </p>
               )}
               {showSummary && (
-                <p className="font-bold leading-tight" style={{ color: important ? highlightColor : 'var(--text-primary)', fontSize: fs(20) }}>
+                <p className="font-bold leading-tight" style={{ color: important ? highlightColor : 'var(--accent)', fontSize: fs(20) }}>
                   {important && <Star size={14} style={{ display: 'inline', marginRight: 4, verticalAlign: 'middle' }} />}
                   {next.summary}
                 </p>
