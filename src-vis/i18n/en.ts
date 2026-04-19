@@ -312,6 +312,7 @@ export const en: Record<TranslationKey, string> = {
   'editor.manual.unit':           'Unit (optional)',
   'editor.manual.add':            'Add',
   'editor.manual.cancel':         'Cancel',
+  'editor.manual.recentlyUsed':   'Recently used',
 
   'editor.tab.addDevice': '+ Devices',
   'editor.tab.addManual': '+ Manual',

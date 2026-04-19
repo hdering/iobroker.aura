@@ -11,7 +11,7 @@ import { useDashboardStore, useActiveLayout, type Tab } from '../../store/dashbo
 import { DatapointPicker } from '../../components/config/DatapointPicker';
 import { WidgetPreview } from '../../components/config/WidgetPreview';
 import type { WidgetConfig, WidgetType, WidgetLayout } from '../../types';
-import { WIDGET_REGISTRY, WIDGET_BY_TYPE, getEffectiveSize } from '../../widgetRegistry';
+import { WIDGET_REGISTRY, WIDGET_BY_TYPE, WIDGET_GROUPS, getEffectiveSize, type WidgetGroup } from '../../widgetRegistry';
 import { useConfigStore } from '../../store/configStore';
 import { exportWidget } from '../../utils/widgetExportImport';
 import { detectType } from '../../utils/widgetDetection';
@@ -592,6 +592,20 @@ function TypeSection({
 
 // ── New Widget Dialog ─────────────────────────────────────────────────────────
 
+const RECENT_TYPES_KEY = 'aura-recent-widget-types';
+const MAX_RECENT = 5;
+
+function getRecentTypes(): WidgetType[] {
+  try { return JSON.parse(localStorage.getItem(RECENT_TYPES_KEY) ?? '[]') as WidgetType[]; }
+  catch { return []; }
+}
+function pushRecentType(type: WidgetType) {
+  const prev = getRecentTypes().filter((t) => t !== type);
+  localStorage.setItem(RECENT_TYPES_KEY, JSON.stringify([type, ...prev].slice(0, MAX_RECENT)));
+}
+
+const ADDABLE_WIDGETS = WIDGET_REGISTRY.filter((w) => w.addMode !== 'wizard-only');
+
 function NewWidgetDialog({
   tabs,
   onAdd,
@@ -604,23 +618,30 @@ function NewWidgetDialog({
   const t = useT();
   const widgetDefaults = useConfigStore((s) => s.widgetDefaults);
   const [type, setType] = useState<WidgetType>('value');
+  const [groupFilter, setGroupFilter] = useState<'all' | WidgetGroup>('all');
   const [layout, setLayout] = useState<WidgetLayout>('default');
   const [title, setTitle] = useState('');
   const [datapoint, setDatapoint] = useState('');
   const [unit, setUnit] = useState('');
   const [targetTabId, setTargetTabId] = useState(tabs[0]?.id ?? '');
   const [showPicker, setShowPicker] = useState(false);
+  const [recentTypes, setRecentTypes] = useState<WidgetType[]>(() => getRecentTypes());
+
+  const filteredWidgets = groupFilter === 'all'
+    ? ADDABLE_WIDGETS
+    : ADDABLE_WIDGETS.filter((w) => w.widgetGroup === groupFilter);
 
   const def = WIDGET_REGISTRY.find((w) => w.type === type)!;
   const addMode = WIDGET_BY_TYPE[type].addMode;
-  const isCalendar = type === 'calendar';
   const noDatapoint = addMode !== 'datapoint';
-  const canAdd = addMode === 'datapoint' ? !!datapoint.trim()
-               : addMode === 'wizard-only' ? false
-               : true;
+  const canAdd = addMode === 'datapoint' ? !!datapoint.trim() : true;
+
+  const selectType = (t: WidgetType) => { setType(t); setDatapoint(''); };
 
   const handleAdd = () => {
     if (!canAdd || !targetTabId) return;
+    pushRecentType(type);
+    setRecentTypes(getRecentTypes());
     onAdd(targetTabId, {
       id: `w-${Date.now()}`,
       type,
@@ -636,10 +657,11 @@ function NewWidgetDialog({
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div
-        className="rounded-xl w-full max-w-md shadow-2xl p-6 space-y-4"
+        className="rounded-xl w-full max-w-xl shadow-2xl p-6 space-y-4"
         style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Header */}
         <div className="flex items-center justify-between">
           <h2 className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>{t('editor.manual.title')}</h2>
           <button onClick={onClose} className="hover:opacity-60" style={{ color: 'var(--text-secondary)' }}>
@@ -647,20 +669,96 @@ function NewWidgetDialog({
           </button>
         </div>
 
+        {/* Recently used */}
+        {recentTypes.length > 0 && (
+          <div>
+            <p className="text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+              {t('editor.manual.recentlyUsed')}
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {recentTypes.map((rt) => {
+                const meta = WIDGET_BY_TYPE[rt];
+                if (!meta) return null;
+                const isSelected = type === rt;
+                return (
+                  <button
+                    key={rt}
+                    onClick={() => selectType(rt)}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium hover:opacity-80 transition-opacity"
+                    style={{
+                      background: isSelected ? meta.color + '22' : 'var(--app-bg)',
+                      color: isSelected ? meta.color : 'var(--text-secondary)',
+                      border: `1px solid ${isSelected ? meta.color : 'var(--app-border)'}`,
+                    }}
+                  >
+                    <meta.Icon size={11} />
+                    {meta.shortLabel}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Category filter + widget tiles */}
         <div>
-          <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('widgets.targetTab')}</label>
-          <select value={targetTabId} onChange={(e) => setTargetTabId(e.target.value)}
-            className={inputCls} style={inputStyle}>
-            {tabs.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-          </select>
+          <div className="flex gap-1 mb-2.5 flex-wrap">
+            <button
+              onClick={() => setGroupFilter('all')}
+              className="px-2.5 py-1 rounded-md text-xs font-medium transition-colors"
+              style={{
+                background: groupFilter === 'all' ? 'var(--accent)' : 'var(--app-bg)',
+                color: groupFilter === 'all' ? 'white' : 'var(--text-secondary)',
+                border: '1px solid var(--app-border)',
+              }}
+            >
+              {t('common.all')}
+            </button>
+            {WIDGET_GROUPS.map((g) => (
+              <button
+                key={g.id}
+                onClick={() => setGroupFilter(g.id)}
+                className="px-2.5 py-1 rounded-md text-xs font-medium transition-colors"
+                style={{
+                  background: groupFilter === g.id ? 'var(--accent)' : 'var(--app-bg)',
+                  color: groupFilter === g.id ? 'white' : 'var(--text-secondary)',
+                  border: '1px solid var(--app-border)',
+                }}
+              >
+                {g.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-5 gap-1.5 max-h-44 overflow-y-auto aura-scroll pr-0.5">
+            {filteredWidgets.map((w) => {
+              const isSelected = type === w.type;
+              return (
+                <button
+                  key={w.type}
+                  onClick={() => selectType(w.type)}
+                  className="flex flex-col items-center gap-1 p-2 rounded-lg hover:opacity-80 transition-all"
+                  style={{
+                    background: isSelected ? w.color + '22' : 'var(--app-bg)',
+                    border: `1px solid ${isSelected ? w.color : 'var(--app-border)'}`,
+                    color: isSelected ? w.color : 'var(--text-secondary)',
+                  }}
+                >
+                  <w.Icon size={15} />
+                  <span style={{ fontSize: '10px', lineHeight: '1.2' }} className="text-center leading-tight">{w.shortLabel}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
+        {/* Tab + Layout */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('editor.manual.type')}</label>
-            <select value={type} onChange={(e) => { setType(e.target.value as WidgetType); setDatapoint(''); }}
+            <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('widgets.targetTab')}</label>
+            <select value={targetTabId} onChange={(e) => setTargetTabId(e.target.value)}
               className={inputCls} style={inputStyle}>
-              {WIDGET_REGISTRY.map((w) => <option key={w.type} value={w.type}>{w.label}</option>)}
+              {tabs.map((tab) => <option key={tab.id} value={tab.id}>{tab.name}</option>)}
             </select>
           </div>
           <div>
@@ -675,6 +773,7 @@ function NewWidgetDialog({
           </div>
         </div>
 
+        {/* Title */}
         <div>
           <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('editor.tabMgmt.name')}</label>
           <input value={title} onChange={(e) => setTitle(e.target.value)}
@@ -682,6 +781,7 @@ function NewWidgetDialog({
             className={inputCls} style={inputStyle} />
         </div>
 
+        {/* Datapoint */}
         {addMode === 'datapoint' && (
           <div>
             <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('editor.manual.datapointId')}</label>
@@ -699,12 +799,7 @@ function NewWidgetDialog({
           </div>
         )}
 
-        {isCalendar && (
-          <p className="text-xs py-2 px-3 rounded-lg" style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
-            {t('widgets.calendarHint')}
-          </p>
-        )}
-
+        {/* Unit */}
         {(type === 'value' || type === 'chart') && (
           <div>
             <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('editor.manual.unit')}</label>
@@ -714,13 +809,14 @@ function NewWidgetDialog({
           </div>
         )}
 
+        {/* Actions */}
         <div className="flex justify-end gap-2 pt-1">
           <button onClick={onClose}
             className="px-4 py-2 text-sm rounded-lg hover:opacity-80"
             style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
             {t('editor.manual.cancel')}
           </button>
-          <button onClick={handleAdd} disabled={!canAdd || isCalendar}
+          <button onClick={handleAdd} disabled={!canAdd}
             className="px-4 py-2 text-sm font-medium text-white rounded-lg hover:opacity-80 disabled:opacity-30"
             style={{ background: 'var(--accent)' }}>
             {t('editor.manual.add')}

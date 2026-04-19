@@ -310,6 +310,7 @@ export const de = {
   'editor.manual.unit':           'Einheit (optional)',
   'editor.manual.add':            'Hinzufügen',
   'editor.manual.cancel':         'Abbruch',
+  'editor.manual.recentlyUsed':   'Zuletzt verwendet',
 
   'editor.tab.addDevice':  '+ Geräte',
   'editor.tab.addManual':  '+ Manuell',
