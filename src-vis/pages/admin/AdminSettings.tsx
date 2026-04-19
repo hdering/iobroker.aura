@@ -657,66 +657,121 @@ export function AdminSettings() {
   const tabCount = tabs.length;
 
   return (
-    <div className="p-5 max-w-3xl space-y-4">
+    <div className="p-5 space-y-4">
       <div>
         <h1 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{t('settings.title')}</h1>
         <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>{t('settings.subtitle')}</p>
       </div>
 
-      {/* Language */}
-      <Card title={t('settings.language.title')}>
-        <div className="flex gap-2">
-          {(['de', 'en'] as const).map((lang) => {
-            const active = (frontend.language ?? 'de') === lang;
-            return (
-              <button key={lang} onClick={() => updateFrontend({ language: lang })}
-                className="flex-1 py-2 rounded-xl text-sm font-medium hover:opacity-80 transition-opacity"
-                style={{
-                  background: active ? 'var(--accent)' : 'var(--app-bg)',
-                  color: active ? '#fff' : 'var(--text-secondary)',
-                  border: `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}`,
-                }}>
-                {lang === 'de' ? `🇩🇪 ${t('settings.language.de')}` : `🇬🇧 ${t('settings.language.en')}`}
-              </button>
-            );
-          })}
-        </div>
-      </Card>
+      {/* Row 0: Language + Editor side by side */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
 
-      {/* Editor */}
-      <Card title={t('settings.editor.title')}>
-        <ToggleRow label={t('settings.editor.autoSave')} value={autoSave} onChange={setAutoSave} />
-        {autoSave && (
-          <div className="pt-1">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{t('settings.editor.delay')}</p>
-              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-md"
-                style={{ background: 'var(--app-bg)', color: 'var(--accent)', border: '1px solid var(--app-border)' }}>
-                {autoSaveDelay}s
-              </span>
-            </div>
-            <div className="flex gap-1.5 flex-wrap">
-              {[10, 30, 60, 120, 300].map((s) => {
-                const active = autoSaveDelay === s;
-                const label = s < 60 ? `${s}s` : `${s / 60} min`;
-                return (
-                  <button key={s} onClick={() => setAutoSaveDelay(s)}
-                    className="px-2.5 py-1 rounded-lg text-xs font-medium hover:opacity-80"
-                    style={{ background: active ? 'var(--accent)' : 'var(--app-bg)', color: active ? '#fff' : 'var(--text-secondary)', border: `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}` }}>
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
+        {/* Language */}
+        <Card title={t('settings.language.title')}>
+          <div className="flex gap-2">
+            {(['de', 'en'] as const).map((lang) => {
+              const active = (frontend.language ?? 'de') === lang;
+              return (
+                <button key={lang} onClick={() => updateFrontend({ language: lang })}
+                  className="flex-1 py-2 rounded-xl text-sm font-medium hover:opacity-80 transition-opacity"
+                  style={{
+                    background: active ? 'var(--accent)' : 'var(--app-bg)',
+                    color: active ? '#fff' : 'var(--text-secondary)',
+                    border: `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}`,
+                  }}>
+                  {lang === 'de' ? `🇩🇪 ${t('settings.language.de')}` : `🇬🇧 ${t('settings.language.en')}`}
+                </button>
+              );
+            })}
           </div>
-        )}
-        <p className="text-xs pt-1" style={{ color: 'var(--text-secondary)', opacity: 0.7 }}>
-          {t('settings.editor.ctrlS')}
-        </p>
-      </Card>
+        </Card>
 
-      {/* Row 1: Frontend + Numerics */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Editor */}
+        <Card title={t('settings.editor.title')}>
+          <ToggleRow label={t('settings.editor.autoSave')} value={autoSave} onChange={setAutoSave} />
+          {autoSave && (
+            <div className="pt-1">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{t('settings.editor.delay')}</p>
+                <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-md"
+                  style={{ background: 'var(--app-bg)', color: 'var(--accent)', border: '1px solid var(--app-border)' }}>
+                  {autoSaveDelay}s
+                </span>
+              </div>
+              <div className="flex gap-1.5 flex-wrap">
+                {[10, 30, 60, 120, 300].map((s) => {
+                  const active = autoSaveDelay === s;
+                  const label = s < 60 ? `${s}s` : `${s / 60} min`;
+                  return (
+                    <button key={s} onClick={() => setAutoSaveDelay(s)}
+                      className="px-2.5 py-1 rounded-lg text-xs font-medium hover:opacity-80"
+                      style={{ background: active ? 'var(--accent)' : 'var(--app-bg)', color: active ? '#fff' : 'var(--text-secondary)', border: `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}` }}>
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          <p className="text-xs pt-1" style={{ color: 'var(--text-secondary)', opacity: 0.7 }}>
+            {t('settings.editor.ctrlS')}
+          </p>
+        </Card>
+
+        {/* Admin-PIN */}
+        <Card title={t('settings.pin.title')}>
+          <form onSubmit={handlePinChange} className="space-y-2">
+            <div className="relative">
+              <input type={show ? 'text' : 'password'} value={newPin}
+                onChange={(e) => setNewPin(e.target.value)}
+                placeholder={t('settings.pin.newPin')}
+                className="w-full rounded-lg px-3 py-2 pr-9 text-sm focus:outline-none"
+                style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }} />
+              <button type="button" onClick={() => setShow((s) => !s)}
+                className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-secondary)' }}>
+                {show ? <EyeOff size={13} /> : <Eye size={13} />}
+              </button>
+            </div>
+            <input type={show ? 'text' : 'password'} value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              placeholder={t('settings.pin.confirm')}
+              className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none"
+              style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }} />
+            {pinMsg && (
+              <p className="text-xs" style={{ color: pinMsg.includes('erfolgreich') || pinMsg.includes('successfully') ? 'var(--accent-green)' : 'var(--accent-red)' }}>
+                {pinMsg}
+              </p>
+            )}
+            <button type="submit"
+              className="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-80"
+              style={{ background: 'var(--accent)' }}>
+              {t('settings.pin.save')}
+            </button>
+          </form>
+        </Card>
+
+        {/* Backup */}
+        <Card title={t('settings.backup.title')}>
+          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+            {t('settings.backup.description', { count: tabCount, s: tabCount !== 1 ? 's' : '' })}
+          </p>
+          <div className="flex flex-col gap-2">
+            <button onClick={exportConfig}
+              className="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-80"
+              style={{ background: 'var(--accent)' }}>
+              {t('settings.backup.download')}
+            </button>
+            <label className="px-4 py-2 rounded-lg text-sm font-medium text-center cursor-pointer hover:opacity-80"
+              style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}>
+              {t('settings.backup.import')}
+              <input type="file" accept=".json" onChange={importConfig} className="hidden" />
+            </label>
+          </div>
+        </Card>
+      </div>
+
+      {/* Row 1: Frontend + Grid + Hilfslinien */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
         {/* Frontend-Vorgaben */}
         <Card title={t('settings.frontend.title')}>
@@ -835,66 +890,11 @@ export function AdminSettings() {
         />
       </div>
 
-      {/* Row 2: PIN + Backup */}
+      {/* Row 2: Clients + Expert side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-        {/* Admin-PIN */}
-        <Card title={t('settings.pin.title')}>
-          <form onSubmit={handlePinChange} className="space-y-2">
-            <div className="relative">
-              <input type={show ? 'text' : 'password'} value={newPin}
-                onChange={(e) => setNewPin(e.target.value)}
-                placeholder={t('settings.pin.newPin')}
-                className="w-full rounded-lg px-3 py-2 pr-9 text-sm focus:outline-none"
-                style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }} />
-              <button type="button" onClick={() => setShow((s) => !s)}
-                className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-secondary)' }}>
-                {show ? <EyeOff size={13} /> : <Eye size={13} />}
-              </button>
-            </div>
-            <input type={show ? 'text' : 'password'} value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              placeholder={t('settings.pin.confirm')}
-              className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none"
-              style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }} />
-            {pinMsg && (
-              <p className="text-xs" style={{ color: pinMsg.includes('erfolgreich') || pinMsg.includes('successfully') ? 'var(--accent-green)' : 'var(--accent-red)' }}>
-                {pinMsg}
-              </p>
-            )}
-            <button type="submit"
-              className="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-80"
-              style={{ background: 'var(--accent)' }}>
-              {t('settings.pin.save')}
-            </button>
-          </form>
-        </Card>
-
-        {/* Backup */}
-        <Card title={t('settings.backup.title')}>
-          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-            {t('settings.backup.description', { count: tabCount, s: tabCount !== 1 ? 's' : '' })}
-          </p>
-          <div className="flex flex-col gap-2">
-            <button onClick={exportConfig}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-80"
-              style={{ background: 'var(--accent)' }}>
-              {t('settings.backup.download')}
-            </button>
-            <label className="px-4 py-2 rounded-lg text-sm font-medium text-center cursor-pointer hover:opacity-80"
-              style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}>
-              {t('settings.backup.import')}
-              <input type="file" accept=".json" onChange={importConfig} className="hidden" />
-            </label>
-          </div>
-        </Card>
+        <ClientsCard />
+        <ExpertSettings />
       </div>
-
-      {/* Geräte / Clients */}
-      <ClientsCard />
-
-      {/* Experten */}
-      <ExpertSettings />
 
       {/* Reset */}
       <div className="rounded-xl p-4" style={{ background: 'var(--app-surface)', border: '1px solid var(--accent-red)44' }}>
