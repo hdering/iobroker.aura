@@ -1713,7 +1713,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
               {/* ── Custom-Grid editor (all widgets except excluded) ── */}
               {!['iframe', 'jsontable', 'trash', 'header', 'fill'].includes(config.type) && (config.layout ?? 'default') === 'custom' && (() => {
                 const CELL_LABELS: Record<string, string> = {
-                  empty: '–', title: 'Titel', value: 'Wert', unit: 'Einheit', text: 'Text', dp: 'DP',
+                  empty: '–', title: 'Titel', value: 'Wert', unit: 'Einheit', text: 'Text', dp: 'DP', field: 'Feld',
                 };
                 const o   = config.options ?? {};
                 const cells: CustomGrid = (o.customGrid as CustomGrid | undefined) ?? DEFAULT_CUSTOM_GRID;
@@ -1776,6 +1776,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                             <option value="unit">Einheit (DP1)</option>
                             <option value="text">Freitext</option>
                             <option value="dp">Weiterer Datenpunkt</option>
+                            <option value="field">Widget-Feld</option>
                           </select>
                         </div>
 
@@ -1791,6 +1792,50 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                             />
                           </div>
                         )}
+
+                        {/* Widget field key (for 'field' type) */}
+                        {selCell.type === 'field' && (() => {
+                          const FIELD_SUGGESTIONS: Record<string, { key: string; label: string }[]> = {
+                            calendar: [
+                              { key: 'summary',  label: 'Terminname' },
+                              { key: 'date',     label: 'Datum / Zeit' },
+                              { key: 'time',     label: 'Uhrzeit' },
+                              { key: 'calname',  label: 'Kalendername' },
+                              { key: 'location', label: 'Ort' },
+                              { key: 'count',    label: 'Anzahl Termine' },
+                            ],
+                            clock: [
+                              { key: 'time',   label: 'Uhrzeit' },
+                              { key: 'date',   label: 'Datum' },
+                              { key: 'custom', label: 'Benutzerdefiniert' },
+                            ],
+                          };
+                          const suggestions = FIELD_SUGGESTIONS[config.type] ?? [];
+                          return (
+                            <div>
+                              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Feld-Schlüssel</label>
+                              {suggestions.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mb-1.5">
+                                  {suggestions.map(({ key, label }) => (
+                                    <button key={key}
+                                      onClick={() => setCell(sel, { fieldKey: key })}
+                                      className="text-[10px] px-2 py-0.5 rounded-full"
+                                      style={{ background: selCell.fieldKey === key ? 'var(--accent)' : 'var(--app-bg)', color: selCell.fieldKey === key ? '#fff' : 'var(--text-secondary)', border: `1px solid ${selCell.fieldKey === key ? 'var(--accent)' : 'var(--app-border)'}` }}>
+                                      {label}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                              <input
+                                type="text"
+                                value={selCell.fieldKey ?? ''}
+                                onChange={(e) => setCell(sel, { fieldKey: e.target.value })}
+                                placeholder="z.B. summary"
+                                className={inputCls} style={inputSty}
+                              />
+                            </div>
+                          );
+                        })()}
 
                         {/* Additional DP selector */}
                         {selCell.type === 'dp' && (

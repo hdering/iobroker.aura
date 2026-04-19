@@ -36,7 +36,6 @@ export function EChartWidget({ config, editMode }: WidgetProps) {
   const { subscribe, connected } = useIoBroker();
 
   const layout = config.layout ?? 'default';
-  if (layout === 'custom') return <CustomGridView config={config} value="" />;
 
   const o = config.options ?? {};
   const showTitle = o.showTitle !== false;
@@ -52,6 +51,8 @@ export function EChartWidget({ config, editMode }: WidgetProps) {
   const isGauge = config.layout === 'gauge' as string;
 
   const seriesDataMap = useMultiSeriesData(echartSeries, connected, subscribe);
+
+  if (layout === 'custom') return <CustomGridView config={config} value="" />;
 
   const allLoading = echartSeries.length > 0 && echartSeries.every((s) => seriesDataMap.get(s.id)?.loading);
   const hasAnyData = echartSeries.some((s) => (seriesDataMap.get(s.id)?.data.length ?? 0) > 0);

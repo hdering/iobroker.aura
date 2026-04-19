@@ -375,7 +375,27 @@ export function CalendarWidget({ config }: WidgetProps) {
     );
   }
 
-  if (layout === 'custom') return <CustomGridView config={config} value="" />;
+  if (layout === 'custom') {
+    const next = visibleEvents[0];
+    const d = next?.start;
+    const timeStr = d ? `${pad(d.getHours())}:${pad(d.getMinutes())}` : '';
+    const dateStr = next ? formatEventDate(next, t) : '';
+    const count = String(visibleEvents.length);
+    return (
+      <CustomGridView
+        config={config}
+        value={next?.summary ?? ''}
+        extraFields={{
+          summary:  next?.summary  ?? '',
+          date:     dateStr,
+          time:     timeStr,
+          calname:  next?.sourceName ?? '',
+          location: next?.location  ?? '',
+          count,
+        }}
+      />
+    );
+  }
 
   // ── MINIMAL ──────────────────────────────────────────────────────────────
   if (layout === 'minimal') {

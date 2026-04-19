@@ -62,16 +62,24 @@ function DpCellView({ cell, index }: { cell: CustomCell; index: number }) {
   );
 }
 
-/** Renders static / widget-derived content (title, main value, unit, free text). */
+/** Renders static / widget-derived content (title, value, unit, free text, extra field). */
 function StaticCellView({
-  cell, index, title, value, unit,
-}: { cell: CustomCell; index: number; title: string; value: string; unit?: string }) {
+  cell, index, title, value, unit, extraFields,
+}: {
+  cell: CustomCell;
+  index: number;
+  title: string;
+  value: string;
+  unit?: string;
+  extraFields?: Record<string, string>;
+}) {
   const content = (() => {
     switch (cell.type) {
       case 'title': return title;
       case 'value': return `${cell.prefix ?? ''}${value}${cell.suffix ?? ''}`;
       case 'unit':  return unit ?? '';
       case 'text':  return cell.text ?? '';
+      case 'field': return extraFields?.[cell.fieldKey ?? ''] ?? '';
       default:      return '';
     }
   })();
@@ -94,9 +102,15 @@ interface CustomGridViewProps {
   value: string;
   /** Optional unit for 'unit' type cells. */
   unit?: string;
+  /**
+   * Optional extra named fields for 'field' type cells.
+   * Keys are widget-specific (e.g. 'summary', 'date', 'time', 'calname' for calendar;
+   * 'time', 'date' for clock).
+   */
+  extraFields?: Record<string, string>;
 }
 
-export function CustomGridView({ config, value, unit }: CustomGridViewProps) {
+export function CustomGridView({ config, value, unit, extraFields }: CustomGridViewProps) {
   const cells: CustomGrid = (config.options?.customGrid as CustomGrid | undefined) ?? DEFAULT_CUSTOM_GRID;
   return (
     <div
@@ -105,8 +119,8 @@ export function CustomGridView({ config, value, unit }: CustomGridViewProps) {
     >
       {cells.map((cell, i) =>
         cell.type === 'dp'
-          ? <DpCellView  key={i} cell={cell} index={i} />
-          : <StaticCellView key={i} cell={cell} index={i} title={config.title} value={value} unit={unit} />
+          ? <DpCellView key={i} cell={cell} index={i} />
+          : <StaticCellView key={i} cell={cell} index={i} title={config.title} value={value} unit={unit} extraFields={extraFields} />
       )}
     </div>
   );

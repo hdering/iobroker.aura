@@ -16,7 +16,6 @@ export function ImageWidget({ config }: WidgetProps) {
   const { value: dpValue } = useDatapoint(datapointId);
 
   const layout = config.layout ?? 'default';
-  if (layout === 'custom') return <CustomGridView config={config} value="" />;
 
   // Incrementing key forces <img> reload on refresh tick
   const [tick, setTick]       = useState(0);
@@ -30,6 +29,8 @@ export function ImageWidget({ config }: WidgetProps) {
     intervalRef.current = setInterval(() => setTick((n) => n + 1), refreshSeconds * 1000);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [imageUrl, refreshSeconds]);
+
+  if (layout === 'custom') return <CustomGridView config={config} value="" />;
 
   // Build src from datapoint value (base64 or URL) or from static URL
   const src = (() => {

@@ -45,7 +45,6 @@ function mobileSort(children: WidgetConfig[]): WidgetConfig[] {
 export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
   const t = useT();
   const configLayout = config.layout ?? 'default';
-  if (configLayout === 'custom') return <CustomGridView config={config} value="" />;
 
   const children = (config.options?.children as WidgetConfig[] | undefined) ?? [];
   const transparent = !!(config.options?.transparent);
@@ -72,6 +71,8 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
+
+  if (configLayout === 'custom') return <CustomGridView config={config} value="" />;
 
   const isMobile = width > 0 && mobileBreakpoint > 0 && width < mobileBreakpoint;
 
