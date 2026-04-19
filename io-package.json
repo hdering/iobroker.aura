@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.60",
+    "version": "0.4.61",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.61": {
+        "en": "Icon picker: switched to Iconify with 9,400+ icons (Lucide + MDI) bundled offline; 7 new MDI categories including garage, heat pump, solar, EV charging, sensors; icon picker dialog taller; full backwards compatibility for existing icon configs",
+        "de": "Icon-Auswahl: Wechsel zu Iconify mit 9.400+ Icons (Lucide + MDI) offline gebündelt; 7 neue MDI-Kategorien inkl. Garage, Wärmepumpe, Solar, E-Laden, Sensoren; Icon-Dialog höher; volle Rückwärtskompatibilität für bestehende Icon-Konfigurationen",
+        "ru": "Выбор иконок: переход на Iconify с 9400+ иконками (Lucide + MDI) в офлайн-бандле; 7 новых категорий MDI включая гараж, тепловой насос, солнечную энергию, зарядку EV, датчики; диалог выбора иконок стал выше; полная обратная совместимость",
+        "pt": "Seletor de ícones: mudança para Iconify com 9.400+ ícones (Lucide + MDI) em bundle offline; 7 novas categorias MDI incluindo garagem, bomba de calor, solar, carregamento EV, sensores; diálogo mais alto; compatibilidade total com configs existentes",
+        "nl": "Icoonselectie: overgestapt naar Iconify met 9.400+ iconen (Lucide + MDI) offline gebundeld; 7 nieuwe MDI-categorieën incl. garage, warmtepomp, zonne-energie, EV-laden, sensoren; dialoog hoger; volledige achterwaartse compatibiliteit",
+        "fr": "Sélecteur d'icônes: passage à Iconify avec 9400+ icônes (Lucide + MDI) en bundle hors ligne; 7 nouvelles catégories MDI dont garage, pompe à chaleur, solaire, charge VE, capteurs; dialogue plus grand; compatibilité totale avec les configs existantes",
+        "it": "Selettore icone: passaggio a Iconify con 9.400+ icone (Lucide + MDI) in bundle offline; 7 nuove categorie MDI incluso garage, pompa di calore, solare, ricarica EV, sensori; dialogo più alto; piena compatibilità con configurazioni esistenti",
+        "es": "Selector de iconos: cambio a Iconify con 9.400+ iconos (Lucide + MDI) en bundle offline; 7 nuevas categorías MDI incluyendo garaje, bomba de calor, solar, carga EV, sensores; diálogo más alto; compatibilidad total con configs existentes",
+        "pl": "Wybór ikon: przejście na Iconify z 9400+ ikonami (Lucide + MDI) w bundle offline; 7 nowych kategorii MDI w tym garaż, pompa ciepła, solar, ładowanie EV, sensory; wyższe okno dialogowe; pełna kompatybilność wsteczna",
+        "uk": "Вибір іконок: перехід на Iconify з 9400+ іконками (Lucide + MDI) у офлайн-бандлі; 7 нових категорій MDI включаючи гараж, тепловий насос, сонячну енергію, зарядку EV, датчики; вище діалогове вікно; повна зворотна сумісність",
+        "zh-cn": "图标选择器：切换到 Iconify，离线捆绑 9400+ 图标（Lucide + MDI）；7 个新 MDI 分类包括车库、热泵、太阳能、电动车充电、传感器；图标对话框更高；完全向后兼容现有图标配置"
+      },
       "0.4.60": {
         "en": "Custom layout: widget-field dropdown for all widget types (Shutter, Dimmer, Gauge, Chart, Window/Door Contact, Binary Sensor, EVCC, Image, Weather); DatapointPicker: name shown first, pre-filled search for quick navigation, type badge in color; 'Add widget' dialog: category filter tabs and 'Recently used' chips",
         "de": "Custom-Layout: Widget-Feld-Dropdown für alle Widget-Typen (Rolladen, Dimmer, Gauge, Diagramm, Fenster-/Türkontakt, Binärsensor, EVCC, Bild, Wetter); Datenpunkt-Auswahl: Name zuerst, vorausgefüllte Suche zur schnellen Navigation, Typ-Badge farbig; 'Widget hinzufügen'-Dialog: Kategorie-Filter-Tabs und 'Zuletzt verwendet'-Chips",
@@ -183,19 +196,6 @@
         "pl": "Kreator kart: wstępny wybór DP oparty na trafności (tylko trafne DP zaznaczone domyślnie); przyciski skrótu 'Relevante / Alle / Keine'; nieistotne DP wygaszone; wariant układu prawidłowo przypisuje compact/default/card do widgetów",
         "uk": "Майстер вкладок: попередній вибір DP на основі релевантності (лише релевантні DP вибрані за замовчуванням); кнопки швидкого вибору 'Relevante / Alle / Keine'; нерелевантні DP приглушені; варіант макету правильно призначає compact/default/card віджетам",
         "zh-cn": "标签向导：基于相关性的数据点预选（默认仅勾选相关数据点）；快捷按钮「相关/全部/无」；不相关数据点变暗；布局变体正确为小部件分配 compact/default/card"
-      },
-      "0.4.54": {
-        "en": "Static List widget replaces group-based list: DPs added directly via object browser with multi-select, relevance filtering (INSTALL_TEST etc. dimmed), value filter (active/inactive); DatapointPicker enhanced with multi-select mode",
-        "de": "Statische Liste ersetzt gruppenbasierte Liste: DPs direkt über Objektbrowser mit Mehrfachauswahl hinzufügen, Relevanzfilterung (INSTALL_TEST etc. gedimmt), Werte-Filter (aktiv/inaktiv); Objektbrowser mit Multi-Select-Modus",
-        "ru": "Статический список заменяет групповой: DP добавляются через браузер объектов с мультивыбором, фильтрация релевантности (INSTALL_TEST и др. приглушены), фильтр значений; браузер объектов с мультивыбором",
-        "pt": "Lista Estática substitui lista de grupos: DPs adicionados via navegador de objetos com seleção múltipla, filtragem de relevância (INSTALL_TEST etc. esmaecidos), filtro de valores; navegador com modo multi-seleção",
-        "nl": "Statische Lijst vervangt groepslijst: DPs via objectbrowser toevoegen met meervoudige selectie, relevantiefiltering (INSTALL_TEST etc. gedempt), waardefilter; objectbrowser met multi-selectmodus",
-        "fr": "Liste Statique remplace la liste de groupes: DPs ajoutés via le navigateur d'objets avec sélection multiple, filtrage de pertinence (INSTALL_TEST etc. estompés), filtre de valeurs; navigateur avec mode multi-sélection",
-        "it": "Lista Statica sostituisce la lista di gruppo: DP aggiunti tramite browser oggetti con selezione multipla, filtraggio rilevanza (INSTALL_TEST ecc. attenuati), filtro valori; browser con modalità multi-selezione",
-        "es": "Lista Estática reemplaza la lista de grupos: DPs añadidos via navegador de objetos con selección múltiple, filtrado de relevancia (INSTALL_TEST etc. atenuados), filtro de valores; navegador con modo multi-selección",
-        "pl": "Lista Statyczna zastępuje listę grupową: DP dodawane przez przeglądarkę obiektów z wielokrotnym wyborem, filtrowanie trafności (INSTALL_TEST itp. wyszarzone), filtr wartości; przeglądarka z trybem wielu zaznaczeń",
-        "uk": "Статичний список замінює груповий: DP додаються через браузер об'єктів з мультивибором, фільтрація релевантності (INSTALL_TEST тощо приглушені), фільтр значень; браузер з мульти-вибором",
-        "zh-cn": "静态列表替代分组列表：通过对象浏览器多选添加数据点，相关性过滤（INSTALL_TEST等变暗），数值过滤器；对象浏览器支持多选模式"
       }
     }
   },

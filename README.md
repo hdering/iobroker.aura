@@ -127,6 +127,12 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.61 (2026-04-19)
+- Icon picker: switched to Iconify with 9,400+ icons (Lucide + MDI) bundled for offline use
+- New MDI icon categories: buildings/rooms, energy/heating, smart home, security, sensors, vehicles, nature/garden
+- Garage icons available: mdi:garage, mdi:garage-open, mdi:garage-variant and more
+- Icon picker dialog height increased; full backwards compatibility for existing icon configs
+
 ### 0.4.60 (2026-04-19)
 - Custom layout: widget-field dropdown for all widget types (Shutter, Dimmer, Gauge, Chart, Window/Door Contact, Binary Sensor, EVCC, Image, Weather)
 - DatapointPicker: name shown first, technical DP ID on second line, type badge in color; search pre-filled with current DP for quick navigation
