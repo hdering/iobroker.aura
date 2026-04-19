@@ -127,6 +127,11 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.58 (2026-04-19)
+- New StateImage widget: boolean DP displays configurable icon/color or base64 image per state (true/false), 4 layouts, adjustable icon size
+- Calendar: per-widget font scale slider (50–300%), important event highlighting by keyword/PRIORITY/description, card title uses accent color
+- ValueWidget minimal layout: value and unit are now inline on the same baseline
+
 ### 0.4.57 (2026-04-18)
 - Fix: status badge shows correct WiFi icon – Wifi (green) when reachable, WifiOff (red) when unreachable
 
