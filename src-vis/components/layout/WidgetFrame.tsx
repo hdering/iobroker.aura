@@ -1565,9 +1565,12 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
           {/* ─── 4. Widget-spezifische Einstellungen ───────────────────────── */}
           <div
             className="space-y-2.5 rounded-lg px-3 py-3"
-            style={{ background: 'color-mix(in srgb, var(--accent) 6%, var(--app-bg))' }}
+            style={{
+              background: 'color-mix(in srgb, var(--accent) 10%, var(--app-bg))',
+              borderLeft: '3px solid var(--accent)',
+            }}
           >
-            <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'var(--accent)', opacity: 0.75 }}>
+            <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--accent)' }}>
               {WIDGET_BY_TYPE[config.type]?.label ?? config.type}
             </p>
               {config.type === 'clock' && (() => {
@@ -1710,291 +1713,6 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                   </p>
                 </div>
               )}
-              {/* ── Custom-Grid editor (all widgets except excluded) ── */}
-              {!['iframe', 'jsontable', 'trash', 'header', 'fill'].includes(config.type) && (config.layout ?? 'default') === 'custom' && (() => {
-                const CELL_LABELS: Record<string, string> = {
-                  empty: '–', title: 'Titel', value: 'Wert', unit: 'Einheit', text: 'Text', dp: 'DP', field: 'Feld',
-                };
-                const o   = config.options ?? {};
-                const cells: CustomGrid = (o.customGrid as CustomGrid | undefined) ?? DEFAULT_CUSTOM_GRID;
-                const setCell = (idx: number, patch: Partial<CustomCell>) => {
-                  const next = cells.map((c, i) => i === idx ? { ...c, ...patch } : c);
-                  onConfigChange({ ...config, options: { ...o, customGrid: next } });
-                };
-                const sel = selectedCustomCell;
-                const selCell = sel !== null ? cells[sel] : null;
-                const inputCls = 'w-full text-xs rounded-lg px-2 py-1.5 focus:outline-none';
-                const inputSty = { background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' };
-                return (
-                  <div className="space-y-2">
-                    <p className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>Raster-Konfiguration (3×3)</p>
-
-                    {/* 3×3 cell picker */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 4 }}>
-                      {cells.map((cell, i) => {
-                        const active = sel === i;
-                        const row = Math.floor(i / 3) + 1;
-                        const col = (i % 3) + 1;
-                        return (
-                          <button
-                            key={i}
-                            onClick={() => setSelectedCustomCell(active ? null : i)}
-                            className="rounded text-[10px] transition-colors"
-                            style={{
-                              background: active ? 'var(--accent)' : 'var(--widget-bg)',
-                              color:      active ? '#fff' : 'var(--text-secondary)',
-                              border:     `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}`,
-                              minHeight: 36,
-                              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1,
-                            }}
-                          >
-                            <span>{CELL_LABELS[cell.type] ?? cell.type}</span>
-                            <span style={{ fontSize: 9, opacity: 0.6 }}>{row}/{col}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* Per-cell editor */}
-                    {sel !== null && selCell && (
-                      <div className="space-y-2 pt-2" style={{ borderTop: '1px solid var(--app-border)' }}>
-                        <p className="text-[10px] font-medium" style={{ color: 'var(--text-secondary)' }}>
-                          Zeile {Math.floor(sel / 3) + 1}, Spalte {(sel % 3) + 1} · CSS: .aura-custom-cell-{sel}
-                        </p>
-
-                        {/* Type */}
-                        <div>
-                          <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Inhalt</label>
-                          <select
-                            value={selCell.type}
-                            onChange={(e) => setCell(sel, { type: e.target.value as CustomCell['type'] })}
-                            className={inputCls} style={inputSty}
-                          >
-                            <option value="empty">– leer –</option>
-                            <option value="title">Titel</option>
-                            <option value="value">Hauptwert (DP1)</option>
-                            <option value="unit">Einheit (DP1)</option>
-                            <option value="text">Freitext</option>
-                            <option value="dp">Weiterer Datenpunkt</option>
-                            <option value="field">Widget-Feld</option>
-                          </select>
-                        </div>
-
-                        {/* Free text content */}
-                        {selCell.type === 'text' && (
-                          <div>
-                            <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Text</label>
-                            <input
-                              type="text"
-                              value={selCell.text ?? ''}
-                              onChange={(e) => setCell(sel, { text: e.target.value })}
-                              className={inputCls} style={inputSty}
-                            />
-                          </div>
-                        )}
-
-                        {/* Widget field key (for 'field' type) */}
-                        {selCell.type === 'field' && (() => {
-                          const FIELD_SUGGESTIONS: Record<string, { key: string; label: string }[]> = {
-                            calendar: [
-                              { key: 'summary',  label: 'Terminname' },
-                              { key: 'date',     label: 'Datum / Zeit' },
-                              { key: 'time',     label: 'Uhrzeit' },
-                              { key: 'calname',  label: 'Kalendername' },
-                              { key: 'location', label: 'Ort' },
-                              { key: 'count',    label: 'Anzahl Termine' },
-                            ],
-                            clock: [
-                              { key: 'time',   label: 'Uhrzeit' },
-                              { key: 'date',   label: 'Datum' },
-                              { key: 'custom', label: 'Benutzerdefiniert' },
-                            ],
-                          };
-                          const suggestions = FIELD_SUGGESTIONS[config.type] ?? [];
-                          return (
-                            <div>
-                              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Feld-Schlüssel</label>
-                              {suggestions.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mb-1.5">
-                                  {suggestions.map(({ key, label }) => (
-                                    <button key={key}
-                                      onClick={() => setCell(sel, { fieldKey: key })}
-                                      className="text-[10px] px-2 py-0.5 rounded-full"
-                                      style={{ background: selCell.fieldKey === key ? 'var(--accent)' : 'var(--app-bg)', color: selCell.fieldKey === key ? '#fff' : 'var(--text-secondary)', border: `1px solid ${selCell.fieldKey === key ? 'var(--accent)' : 'var(--app-border)'}` }}>
-                                      {label}
-                                    </button>
-                                  ))}
-                                </div>
-                              )}
-                              <input
-                                type="text"
-                                value={selCell.fieldKey ?? ''}
-                                onChange={(e) => setCell(sel, { fieldKey: e.target.value })}
-                                placeholder="z.B. summary"
-                                className={inputCls} style={inputSty}
-                              />
-                            </div>
-                          );
-                        })()}
-
-                        {/* Additional DP selector */}
-                        {selCell.type === 'dp' && (
-                          <div>
-                            <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Datenpunkt</label>
-                            <div className="flex gap-1">
-                              <input
-                                type="text"
-                                value={selCell.dpId ?? ''}
-                                onChange={(e) => setCell(sel, { dpId: e.target.value })}
-                                placeholder="z.B. hm-rpc.0.ABC.TEMP"
-                                className="flex-1 text-xs rounded-lg px-2 py-1.5 focus:outline-none"
-                                style={inputSty}
-                              />
-                              <button
-                                onClick={() => setCustomCellPickerOpen(true)}
-                                className="text-xs px-2 py-1.5 rounded-lg shrink-0"
-                                style={{ background: 'var(--accent)', color: '#fff', border: 'none' }}
-                              >
-                                <Database size={12} />
-                              </button>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Prefix / Suffix for value or dp */}
-                        {(selCell.type === 'value' || selCell.type === 'dp') && (
-                          <div className="flex gap-2">
-                            <div className="flex-1">
-                              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Prefix</label>
-                              <input
-                                type="text"
-                                value={selCell.prefix ?? ''}
-                                onChange={(e) => setCell(sel, { prefix: e.target.value || undefined })}
-                                placeholder="z.B. ~"
-                                className="w-full text-xs rounded-lg px-2 py-1.5 focus:outline-none"
-                                style={inputSty}
-                              />
-                            </div>
-                            <div className="flex-1">
-                              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Suffix</label>
-                              <input
-                                type="text"
-                                value={selCell.suffix ?? ''}
-                                onChange={(e) => setCell(sel, { suffix: e.target.value || undefined })}
-                                placeholder="z.B. °C"
-                                className="w-full text-xs rounded-lg px-2 py-1.5 focus:outline-none"
-                                style={inputSty}
-                              />
-                            </div>
-                          </div>
-                        )}
-
-                        {selCell.type !== 'empty' && (
-                          <>
-                            {/* Font size */}
-                            <div className="flex items-center gap-2">
-                              <label className="text-[11px] shrink-0" style={{ color: 'var(--text-secondary)' }}>Schriftgröße</label>
-                              <input
-                                type="number"
-                                min={8} max={96} step={1}
-                                value={selCell.fontSize ?? ''}
-                                onChange={(e) => setCell(sel, { fontSize: e.target.value ? Number(e.target.value) : undefined })}
-                                placeholder="auto"
-                                className="w-16 text-xs rounded-lg px-2 py-1.5 focus:outline-none"
-                                style={inputSty}
-                              />
-                              <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>px</span>
-                            </div>
-
-                            {/* Bold / Italic */}
-                            <div className="flex items-center gap-4">
-                              {([{ key: 'bold', label: 'Fett' }, { key: 'italic', label: 'Kursiv' }] as const).map(({ key, label }) => {
-                                const val = !!(selCell as unknown as Record<string, unknown>)[key];
-                                return (
-                                  <div key={key} className="flex items-center gap-2">
-                                    <span className="text-[11px]" style={{ color: 'var(--text-primary)' }}>{label}</span>
-                                    <button
-                                      onClick={() => setCell(sel, { [key]: !val } as Partial<CustomCell>)}
-                                      className="relative w-7 h-4 rounded-full transition-colors shrink-0"
-                                      style={{ background: val ? 'var(--accent)' : 'var(--app-border)' }}
-                                    >
-                                      <span className="absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform"
-                                        style={{ left: val ? '14px' : '2px' }} />
-                                    </button>
-                                  </div>
-                                );
-                              })}
-                            </div>
-
-                            {/* Color */}
-                            <div className="flex items-center gap-2">
-                              <label className="text-[11px] shrink-0" style={{ color: 'var(--text-secondary)' }}>Farbe</label>
-                              <input
-                                type="color"
-                                value={selCell.color && selCell.color.startsWith('#') ? selCell.color : '#ffffff'}
-                                onChange={(e) => setCell(sel, { color: e.target.value })}
-                                className="w-8 h-7 rounded cursor-pointer border-0 p-0"
-                                style={{ background: 'none' }}
-                              />
-                              <button
-                                onClick={() => setCell(sel, { color: '' })}
-                                className="text-[10px] px-2 py-0.5 rounded"
-                                style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
-                              >
-                                Theme
-                              </button>
-                            </div>
-
-                            {/* Horizontal align */}
-                            <div>
-                              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Ausrichtung</label>
-                              <div className="flex gap-1">
-                                {(['left', 'center', 'right'] as const).map((a) => {
-                                  const active = (selCell.align ?? 'left') === a;
-                                  return (
-                                    <button key={a} onClick={() => setCell(sel, { align: a })}
-                                      className="flex-1 text-[10px] py-1 rounded"
-                                      style={{ background: active ? 'var(--accent)' : 'var(--app-bg)', color: active ? '#fff' : 'var(--text-secondary)', border: `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}` }}>
-                                      {a === 'left' ? 'Links' : a === 'center' ? 'Mitte' : 'Rechts'}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </div>
-
-                            {/* Vertical align */}
-                            <div>
-                              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Vertikale Ausrichtung</label>
-                              <div className="flex gap-1">
-                                {(['top', 'middle', 'bottom'] as const).map((v) => {
-                                  const active = (selCell.valign ?? 'middle') === v;
-                                  return (
-                                    <button key={v} onClick={() => setCell(sel, { valign: v })}
-                                      className="flex-1 text-[10px] py-1 rounded"
-                                      style={{ background: active ? 'var(--accent)' : 'var(--app-bg)', color: active ? '#fff' : 'var(--text-secondary)', border: `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}` }}>
-                                      {v === 'top' ? 'Oben' : v === 'middle' ? 'Mitte' : 'Unten'}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Reset grid */}
-                    <button
-                      onClick={() => { onConfigChange({ ...config, options: { ...o, customGrid: undefined } }); setSelectedCustomCell(null); }}
-                      className="text-[10px] px-2 py-1 rounded"
-                      style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
-                    >
-                      Raster zurücksetzen
-                    </button>
-                  </div>
-                );
-              })()}
-
               {config.type === 'chart' && (
                 <ChartHistoryConfig config={config} onConfigChange={onConfigChange} />
               )}
@@ -3167,6 +2885,291 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                         </div>
                       </div>
                     </div>
+                  </div>
+                );
+              })()}
+
+              {/* ── Custom-Grid editor (all widgets except excluded) ── */}
+              {!['iframe', 'jsontable', 'trash', 'header', 'fill'].includes(config.type) && (config.layout ?? 'default') === 'custom' && (() => {
+                const CELL_LABELS: Record<string, string> = {
+                  empty: '–', title: 'Titel', value: 'Wert', unit: 'Einheit', text: 'Text', dp: 'DP', field: 'Feld',
+                };
+                const o   = config.options ?? {};
+                const cells: CustomGrid = (o.customGrid as CustomGrid | undefined) ?? DEFAULT_CUSTOM_GRID;
+                const setCell = (idx: number, patch: Partial<CustomCell>) => {
+                  const next = cells.map((c, i) => i === idx ? { ...c, ...patch } : c);
+                  onConfigChange({ ...config, options: { ...o, customGrid: next } });
+                };
+                const sel = selectedCustomCell;
+                const selCell = sel !== null ? cells[sel] : null;
+                const inputCls = 'w-full text-xs rounded-lg px-2 py-1.5 focus:outline-none';
+                const inputSty = { background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' };
+                return (
+                  <div className="space-y-2" style={{ borderTop: '1px solid var(--app-border)', paddingTop: 10, marginTop: 4 }}>
+                    <p className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>Raster-Konfiguration (3×3)</p>
+
+                    {/* 3×3 cell picker */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 4 }}>
+                      {cells.map((cell, i) => {
+                        const active = sel === i;
+                        const row = Math.floor(i / 3) + 1;
+                        const col = (i % 3) + 1;
+                        return (
+                          <button
+                            key={i}
+                            onClick={() => setSelectedCustomCell(active ? null : i)}
+                            className="rounded text-[10px] transition-colors"
+                            style={{
+                              background: active ? 'var(--accent)' : 'var(--widget-bg)',
+                              color:      active ? '#fff' : 'var(--text-secondary)',
+                              border:     `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}`,
+                              minHeight: 36,
+                              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1,
+                            }}
+                          >
+                            <span>{CELL_LABELS[cell.type] ?? cell.type}</span>
+                            <span style={{ fontSize: 9, opacity: 0.6 }}>{row}/{col}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Per-cell editor */}
+                    {sel !== null && selCell && (
+                      <div className="space-y-2 pt-2" style={{ borderTop: '1px solid var(--app-border)' }}>
+                        <p className="text-[10px] font-medium" style={{ color: 'var(--text-secondary)' }}>
+                          Zeile {Math.floor(sel / 3) + 1}, Spalte {(sel % 3) + 1} · CSS: .aura-custom-cell-{sel}
+                        </p>
+
+                        {/* Type */}
+                        <div>
+                          <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Inhalt</label>
+                          <select
+                            value={selCell.type}
+                            onChange={(e) => setCell(sel, { type: e.target.value as CustomCell['type'] })}
+                            className={inputCls} style={inputSty}
+                          >
+                            <option value="empty">– leer –</option>
+                            <option value="title">Titel</option>
+                            <option value="value">Hauptwert (DP1)</option>
+                            <option value="unit">Einheit (DP1)</option>
+                            <option value="text">Freitext</option>
+                            <option value="dp">Weiterer Datenpunkt</option>
+                            <option value="field">Widget-Feld</option>
+                          </select>
+                        </div>
+
+                        {/* Free text content */}
+                        {selCell.type === 'text' && (
+                          <div>
+                            <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Text</label>
+                            <input
+                              type="text"
+                              value={selCell.text ?? ''}
+                              onChange={(e) => setCell(sel, { text: e.target.value })}
+                              className={inputCls} style={inputSty}
+                            />
+                          </div>
+                        )}
+
+                        {/* Widget field key (for 'field' type) */}
+                        {selCell.type === 'field' && (() => {
+                          const FIELD_SUGGESTIONS: Record<string, { key: string; label: string }[]> = {
+                            calendar: [
+                              { key: 'summary',  label: 'Terminname' },
+                              { key: 'date',     label: 'Datum / Zeit' },
+                              { key: 'time',     label: 'Uhrzeit' },
+                              { key: 'calname',  label: 'Kalendername' },
+                              { key: 'location', label: 'Ort' },
+                              { key: 'count',    label: 'Anzahl Termine' },
+                            ],
+                            clock: [
+                              { key: 'time',   label: 'Uhrzeit' },
+                              { key: 'date',   label: 'Datum' },
+                              { key: 'custom', label: 'Benutzerdefiniert' },
+                            ],
+                          };
+                          const suggestions = FIELD_SUGGESTIONS[config.type] ?? [];
+                          return (
+                            <div>
+                              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Feld-Schlüssel</label>
+                              {suggestions.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mb-1.5">
+                                  {suggestions.map(({ key, label }) => (
+                                    <button key={key}
+                                      onClick={() => setCell(sel, { fieldKey: key })}
+                                      className="text-[10px] px-2 py-0.5 rounded-full"
+                                      style={{ background: selCell.fieldKey === key ? 'var(--accent)' : 'var(--app-bg)', color: selCell.fieldKey === key ? '#fff' : 'var(--text-secondary)', border: `1px solid ${selCell.fieldKey === key ? 'var(--accent)' : 'var(--app-border)'}` }}>
+                                      {label}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                              <input
+                                type="text"
+                                value={selCell.fieldKey ?? ''}
+                                onChange={(e) => setCell(sel, { fieldKey: e.target.value })}
+                                placeholder="z.B. summary"
+                                className={inputCls} style={inputSty}
+                              />
+                            </div>
+                          );
+                        })()}
+
+                        {/* Additional DP selector */}
+                        {selCell.type === 'dp' && (
+                          <div>
+                            <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Datenpunkt</label>
+                            <div className="flex gap-1">
+                              <input
+                                type="text"
+                                value={selCell.dpId ?? ''}
+                                onChange={(e) => setCell(sel, { dpId: e.target.value })}
+                                placeholder="z.B. hm-rpc.0.ABC.TEMP"
+                                className="flex-1 text-xs rounded-lg px-2 py-1.5 focus:outline-none"
+                                style={inputSty}
+                              />
+                              <button
+                                onClick={() => setCustomCellPickerOpen(true)}
+                                className="text-xs px-2 py-1.5 rounded-lg shrink-0"
+                                style={{ background: 'var(--accent)', color: '#fff', border: 'none' }}
+                              >
+                                <Database size={12} />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Prefix / Suffix for value or dp */}
+                        {(selCell.type === 'value' || selCell.type === 'dp') && (
+                          <div className="flex gap-2">
+                            <div className="flex-1">
+                              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Prefix</label>
+                              <input
+                                type="text"
+                                value={selCell.prefix ?? ''}
+                                onChange={(e) => setCell(sel, { prefix: e.target.value || undefined })}
+                                placeholder="z.B. ~"
+                                className="w-full text-xs rounded-lg px-2 py-1.5 focus:outline-none"
+                                style={inputSty}
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Suffix</label>
+                              <input
+                                type="text"
+                                value={selCell.suffix ?? ''}
+                                onChange={(e) => setCell(sel, { suffix: e.target.value || undefined })}
+                                placeholder="z.B. °C"
+                                className="w-full text-xs rounded-lg px-2 py-1.5 focus:outline-none"
+                                style={inputSty}
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {selCell.type !== 'empty' && (
+                          <>
+                            {/* Font size */}
+                            <div className="flex items-center gap-2">
+                              <label className="text-[11px] shrink-0" style={{ color: 'var(--text-secondary)' }}>Schriftgröße</label>
+                              <input
+                                type="number"
+                                min={8} max={96} step={1}
+                                value={selCell.fontSize ?? ''}
+                                onChange={(e) => setCell(sel, { fontSize: e.target.value ? Number(e.target.value) : undefined })}
+                                placeholder="auto"
+                                className="w-16 text-xs rounded-lg px-2 py-1.5 focus:outline-none"
+                                style={inputSty}
+                              />
+                              <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>px</span>
+                            </div>
+
+                            {/* Bold / Italic */}
+                            <div className="flex items-center gap-4">
+                              {([{ key: 'bold', label: 'Fett' }, { key: 'italic', label: 'Kursiv' }] as const).map(({ key, label }) => {
+                                const val = !!(selCell as unknown as Record<string, unknown>)[key];
+                                return (
+                                  <div key={key} className="flex items-center gap-2">
+                                    <span className="text-[11px]" style={{ color: 'var(--text-primary)' }}>{label}</span>
+                                    <button
+                                      onClick={() => setCell(sel, { [key]: !val } as Partial<CustomCell>)}
+                                      className="relative w-7 h-4 rounded-full transition-colors shrink-0"
+                                      style={{ background: val ? 'var(--accent)' : 'var(--app-border)' }}
+                                    >
+                                      <span className="absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform"
+                                        style={{ left: val ? '14px' : '2px' }} />
+                                    </button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+
+                            {/* Color */}
+                            <div className="flex items-center gap-2">
+                              <label className="text-[11px] shrink-0" style={{ color: 'var(--text-secondary)' }}>Farbe</label>
+                              <input
+                                type="color"
+                                value={selCell.color && selCell.color.startsWith('#') ? selCell.color : '#ffffff'}
+                                onChange={(e) => setCell(sel, { color: e.target.value })}
+                                className="w-8 h-7 rounded cursor-pointer border-0 p-0"
+                                style={{ background: 'none' }}
+                              />
+                              <button
+                                onClick={() => setCell(sel, { color: '' })}
+                                className="text-[10px] px-2 py-0.5 rounded"
+                                style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+                              >
+                                Theme
+                              </button>
+                            </div>
+
+                            {/* Horizontal align */}
+                            <div>
+                              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Ausrichtung</label>
+                              <div className="flex gap-1">
+                                {(['left', 'center', 'right'] as const).map((a) => {
+                                  const active = (selCell.align ?? 'left') === a;
+                                  return (
+                                    <button key={a} onClick={() => setCell(sel, { align: a })}
+                                      className="flex-1 text-[10px] py-1 rounded"
+                                      style={{ background: active ? 'var(--accent)' : 'var(--app-bg)', color: active ? '#fff' : 'var(--text-secondary)', border: `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}` }}>
+                                      {a === 'left' ? 'Links' : a === 'center' ? 'Mitte' : 'Rechts'}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+
+                            {/* Vertical align */}
+                            <div>
+                              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Vertikale Ausrichtung</label>
+                              <div className="flex gap-1">
+                                {(['top', 'middle', 'bottom'] as const).map((v) => {
+                                  const active = (selCell.valign ?? 'middle') === v;
+                                  return (
+                                    <button key={v} onClick={() => setCell(sel, { valign: v })}
+                                      className="flex-1 text-[10px] py-1 rounded"
+                                      style={{ background: active ? 'var(--accent)' : 'var(--app-bg)', color: active ? '#fff' : 'var(--text-secondary)', border: `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}` }}>
+                                      {v === 'top' ? 'Oben' : v === 'middle' ? 'Mitte' : 'Unten'}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Reset grid */}
+                    <button
+                      onClick={() => { onConfigChange({ ...config, options: { ...o, customGrid: undefined } }); setSelectedCustomCell(null); }}
+                      className="text-[10px] px-2 py-1 rounded"
+                      style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+                    >
+                      Raster zurücksetzen
+                    </button>
                   </div>
                 );
               })()}
