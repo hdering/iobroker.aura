@@ -2988,6 +2988,11 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                               { key: 'date',   label: 'Datum' },
                               { key: 'custom', label: 'Benutzerdefiniert' },
                             ],
+                            thermostat: [
+                              { key: 'setpoint', label: 'Solltemperatur' },
+                              { key: 'actual',   label: 'Isttemperatur' },
+                              { key: 'status',   label: 'Heizstatus' },
+                            ],
                           };
                           const options = FIELD_OPTIONS[config.type] ?? [];
                           return (

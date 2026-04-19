@@ -219,7 +219,17 @@ export function ThermostatWidget({ config, editMode }: WidgetProps) {
   const layout = config.layout ?? 'default';
   const wrapperCls = `${clickable && !editMode ? 'cursor-pointer' : ''}`;
 
-  if (layout === 'custom') return <CustomGridView config={config} value={typeof rawTarget === 'number' ? rawTarget.toFixed(1) : '–'} />;
+  if (layout === 'custom') return (
+    <CustomGridView
+      config={config}
+      value={typeof rawTarget === 'number' ? rawTarget.toFixed(1) : '–'}
+      extraFields={{
+        setpoint: typeof rawTarget === 'number' ? rawTarget.toFixed(1) : '–',
+        actual:   actual !== null ? actual.toFixed(1) : '–',
+        status:   isHeating ? 'Heizend' : isCooling ? 'Kühlend' : 'Inaktiv',
+      }}
+    />
+  );
 
   // ── CARD ──────────────────────────────────────────────────────────────────
   if (layout === 'card') {
