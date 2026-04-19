@@ -2,7 +2,8 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Plus, Trash2, Edit3, Check, Database, Wand2, Smartphone, GripVertical, Upload, Settings, X, Ruler } from 'lucide-react';
 import { ImportWidgetDialog } from '../../components/config/ImportWidgetDialog';
-import { ICON_PICKER_ENTRIES, WIDGET_ICON_MAP } from '../../utils/widgetIconMap';
+import { Icon } from '@iconify/react';
+import { CURATED_ICON_IDS, getWidgetIcon } from '../../utils/widgetIconMap';
 import { useDashboardStore } from '../../store/dashboardStore';
 import { useGroupStore } from '../../store/groupStore';
 import { Dashboard } from '../../components/layout/Dashboard';
@@ -820,8 +821,8 @@ export function AdminEditor() {
                   <div className="flex items-center gap-1 rounded-lg px-2 py-1"
                     style={{ background: isActive ? 'var(--accent)22' : 'var(--app-surface)', border: `1px solid ${isActive ? 'var(--accent)' : 'var(--app-border)'}` }}>
                     {/* Tab icon */}
-                    {tab.icon && WIDGET_ICON_MAP[tab.icon] && (() => {
-                      const TabIcon = WIDGET_ICON_MAP[tab.icon!];
+                    {tab.icon && (() => {
+                      const TabIcon = getWidgetIcon(tab.icon, null as never);
                       return <TabIcon size={11} style={{ color: isActive ? 'var(--accent)' : 'var(--text-secondary)', flexShrink: 0 }} />;
                     })()}
                     <button onClick={() => setActiveTab(tab.id)}
@@ -961,18 +962,18 @@ export function AdminEditor() {
                 )}
               </div>
               <div className="flex flex-wrap gap-1">
-                {ICON_PICKER_ENTRIES.map(([name, Icon]) => {
-                  const selected = settingsTab.icon === name;
+                {CURATED_ICON_IDS.map((iconId) => {
+                  const selected = settingsTab.icon === iconId;
                   return (
-                    <button key={name} title={name}
-                      onClick={() => updateTab(settingsTabId, { icon: selected ? undefined : name })}
+                    <button key={iconId} title={iconId}
+                      onClick={() => updateTab(settingsTabId, { icon: selected ? undefined : iconId })}
                       className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
                       style={{
                         background: selected ? 'var(--accent)' : 'var(--app-bg)',
                         color:      selected ? '#fff' : 'var(--text-secondary)',
                         border:     `1px solid ${selected ? 'var(--accent)' : 'var(--app-border)'}`,
                       }}>
-                      <Icon size={13} />
+                      <Icon icon={iconId} width={13} height={13} />
                     </button>
                   );
                 })}

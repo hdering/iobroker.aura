@@ -1,13 +1,17 @@
 /**
- * Lucide icon category definitions for the icon picker.
- * Icon names are PascalCase matching lucide-react's exported component names.
- * Icons that don't exist in the installed version are simply ignored.
+ * Icon category definitions for the icon picker.
+ *
+ * Two formats are supported:
+ *   - PascalCase (legacy Lucide): "ZapOff", "Home" – converted to "lucide:zap-off" etc. at runtime
+ *   - Iconify ID: "mdi:garage", "lucide:zap" – used as-is
+ *
+ * Icons that are not found in the loaded icon sets are silently skipped.
  */
 
 export interface IconCategory {
   id: string;
   label: string;
-  /** PascalCase names – names not found in lucide-react are silently skipped */
+  /** PascalCase Lucide names OR full Iconify IDs (prefix:name) */
   icons: string[];
 }
 
@@ -374,6 +378,140 @@ export const ICON_CATEGORIES: IconCategory[] = [
       'ShoppingBag','ShoppingCart','Sofa','Star','Sword','Tag',
       'Tent','Ticket','Timer','Tool','Torch','Trophy','Tv','Umbrella',
       'Watch','Wrench','Zap',
+    ],
+  },
+
+  // ── MDI (Material Design Icons) ──────────────────────────────────────────────
+  {
+    id: 'mdi-home',
+    label: 'MDI – Gebäude & Räume',
+    icons: [
+      'mdi:home','mdi:home-outline','mdi:home-variant','mdi:home-variant-outline',
+      'mdi:garage','mdi:garage-open','mdi:garage-variant','mdi:garage-open-variant',
+      'mdi:garage-alert','mdi:garage-lock',
+      'mdi:door','mdi:door-open','mdi:door-closed','mdi:door-closed-lock',
+      'mdi:window-closed','mdi:window-open','mdi:window-closed-variant','mdi:window-open-variant',
+      'mdi:gate','mdi:gate-open','mdi:gate-arrow-left','mdi:gate-arrow-right',
+      'mdi:fence','mdi:fence-electric',
+      'mdi:shed','mdi:barn',
+      'mdi:office-building','mdi:office-building-outline',
+      'mdi:apartment','mdi:castle','mdi:warehouse',
+      'mdi:floor-plan','mdi:home-floor-0','mdi:home-floor-1','mdi:home-floor-2','mdi:home-floor-3',
+      'mdi:stairs','mdi:elevator','mdi:elevator-up','mdi:elevator-down',
+      'mdi:pillar','mdi:wall','mdi:fence-outline',
+    ],
+  },
+  {
+    id: 'mdi-energy',
+    label: 'MDI – Energie & Heizung',
+    icons: [
+      'mdi:solar-panel','mdi:solar-panel-large','mdi:solar-power','mdi:solar-power-variant',
+      'mdi:wind-turbine','mdi:transmission-tower','mdi:power-plug','mdi:power-plug-outline',
+      'mdi:power-plug-off','mdi:power-socket','mdi:power-socket-eu','mdi:power-socket-de',
+      'mdi:lightning-bolt','mdi:lightning-bolt-circle',
+      'mdi:meter-electric','mdi:meter-gas','mdi:meter-water',
+      'mdi:radiator','mdi:radiator-off','mdi:radiator-disabled',
+      'mdi:heat-pump','mdi:heat-pump-outline',
+      'mdi:fireplace','mdi:fireplace-off',
+      'mdi:air-conditioner','mdi:hvac','mdi:hvac-off',
+      'mdi:oil-burner','mdi:gas-burner',
+      'mdi:thermometer','mdi:thermometer-high','mdi:thermometer-low','mdi:thermometer-lines',
+      'mdi:water-boiler','mdi:water-boiler-off','mdi:water-heater',
+      'mdi:pipe','mdi:pipe-valve','mdi:pipe-wrench',
+      'mdi:ev-station','mdi:ev-plug-type1','mdi:ev-plug-type2','mdi:ev-plug-ccs1','mdi:ev-plug-ccs2',
+      'mdi:battery','mdi:battery-charging','mdi:battery-high','mdi:battery-medium','mdi:battery-low',
+      'mdi:battery-alert','mdi:home-battery','mdi:home-battery-outline',
+    ],
+  },
+  {
+    id: 'mdi-automation',
+    label: 'MDI – Smart Home',
+    icons: [
+      'mdi:home-automation','mdi:home-assistant',
+      'mdi:robot','mdi:robot-outline',
+      'mdi:vacuum','mdi:vacuum-outline','mdi:robot-vacuum','mdi:robot-vacuum-variant',
+      'mdi:washing-machine','mdi:dishwasher','mdi:tumble-dryer','mdi:fridge','mdi:microwave',
+      'mdi:coffee-maker','mdi:kettle','mdi:toaster-oven',
+      'mdi:air-purifier','mdi:air-humidifier','mdi:air-dehumidifier',
+      'mdi:fan','mdi:fan-off','mdi:fan-speed-1','mdi:fan-speed-2','mdi:fan-speed-3',
+      'mdi:lightbulb','mdi:lightbulb-outline','mdi:lightbulb-off','mdi:lightbulb-off-outline',
+      'mdi:lightbulb-on','mdi:lightbulb-on-outline','mdi:lightbulb-group','mdi:lightbulb-multiple',
+      'mdi:lamp','mdi:floor-lamp','mdi:ceiling-light','mdi:wall-sconce','mdi:string-lights',
+      'mdi:led-strip','mdi:led-strip-variant',
+      'mdi:blinds','mdi:blinds-open','mdi:roller-shade','mdi:roller-shade-closed',
+      'mdi:curtains','mdi:curtains-closed',
+      'mdi:toggle-switch','mdi:toggle-switch-off','mdi:toggle-switch-variant','mdi:toggle-switch-off-outline',
+      'mdi:remote','mdi:remote-tv','mdi:television','mdi:television-box',
+      'mdi:speaker','mdi:speaker-multiple','mdi:speaker-wireless','mdi:volume-high','mdi:volume-off',
+    ],
+  },
+  {
+    id: 'mdi-security',
+    label: 'MDI – Sicherheit',
+    icons: [
+      'mdi:lock','mdi:lock-open','mdi:lock-outline','mdi:lock-open-outline',
+      'mdi:lock-smart','mdi:lock-plus','mdi:lock-reset',
+      'mdi:key','mdi:key-variant','mdi:key-chain','mdi:key-wireless',
+      'mdi:shield','mdi:shield-home','mdi:shield-check','mdi:shield-alert','mdi:shield-lock',
+      'mdi:alarm','mdi:alarm-light','mdi:alarm-bell','mdi:alarm-check',
+      'mdi:bell','mdi:bell-ring','mdi:bell-off','mdi:doorbell','mdi:doorbell-video',
+      'mdi:motion-sensor','mdi:motion-sensor-off',
+      'mdi:smoke-detector','mdi:smoke-detector-variant','mdi:smoke-detector-alert',
+      'mdi:leak','mdi:water-alert','mdi:water-check',
+      'mdi:cctv','mdi:camera','mdi:camera-outline','mdi:camera-wireless','mdi:camera-wireless-outline',
+      'mdi:eye','mdi:eye-off','mdi:eye-outline',
+      'mdi:fingerprint','mdi:face-recognition',
+    ],
+  },
+  {
+    id: 'mdi-sensors',
+    label: 'MDI – Sensoren',
+    icons: [
+      'mdi:thermometer','mdi:thermometer-lines','mdi:thermometer-probe',
+      'mdi:humidity','mdi:water-percent',
+      'mdi:gauge','mdi:gauge-low','mdi:gauge-full','mdi:gauge-empty',
+      'mdi:speedometer','mdi:speedometer-slow','mdi:speedometer-medium',
+      'mdi:weather-windy','mdi:weather-sunny','mdi:weather-cloudy','mdi:weather-rainy',
+      'mdi:weather-snowy','mdi:weather-fog','mdi:weather-lightning','mdi:weather-partly-cloudy',
+      'mdi:brightness-5','mdi:brightness-6','mdi:brightness-7','mdi:brightness-auto',
+      'mdi:co2','mdi:molecule-co2','mdi:air-filter',
+      'mdi:ruler','mdi:ruler-square','mdi:tape-measure',
+      'mdi:weight','mdi:scale','mdi:scale-balance',
+      'mdi:pulse','mdi:heart-pulse','mdi:blood-bag',
+      'mdi:vibrate','mdi:vibration',
+      'mdi:signal','mdi:signal-variant','mdi:wifi','mdi:wifi-off',
+      'mdi:battery-bluetooth','mdi:bluetooth','mdi:bluetooth-off',
+    ],
+  },
+  {
+    id: 'mdi-transport',
+    label: 'MDI – Fahrzeuge & Verkehr',
+    icons: [
+      'mdi:car','mdi:car-outline','mdi:car-side','mdi:car-back','mdi:car-estate',
+      'mdi:car-sports','mdi:car-convertible','mdi:car-limousine','mdi:car-pickup',
+      'mdi:car-electric','mdi:car-electric-outline','mdi:car-wireless',
+      'mdi:car-key','mdi:car-door','mdi:car-door-lock',
+      'mdi:car-battery','mdi:car-tire-alert',
+      'mdi:truck','mdi:truck-outline','mdi:truck-delivery','mdi:van-utility',
+      'mdi:bus','mdi:train','mdi:ferry','mdi:airplane','mdi:helicopter',
+      'mdi:bike','mdi:motorbike','mdi:scooter','mdi:walk','mdi:run',
+      'mdi:parking','mdi:parking-outline','mdi:road','mdi:traffic-light',
+    ],
+  },
+  {
+    id: 'mdi-nature',
+    label: 'MDI – Natur & Garten',
+    icons: [
+      'mdi:tree','mdi:tree-outline','mdi:forest','mdi:pine-tree','mdi:cactus',
+      'mdi:flower','mdi:flower-outline','mdi:flower-tulip','mdi:flower-pollen',
+      'mdi:leaf','mdi:leaf-maple','mdi:sprout','mdi:grass',
+      'mdi:watering-can','mdi:watering-can-outline',
+      'mdi:irrigation','mdi:sprinkler','mdi:sprinkler-variant','mdi:sprinkler-fire',
+      'mdi:shovel','mdi:rake','mdi:lawnmower','mdi:robot-mower',
+      'mdi:sun-thermometer','mdi:sun-snowflake',
+      'mdi:pool','mdi:hot-tub','mdi:sauna',
+      'mdi:bee','mdi:bug','mdi:ladybug',
+      'mdi:cat','mdi:dog','mdi:fish','mdi:rabbit','mdi:cow',
     ],
   },
 ];

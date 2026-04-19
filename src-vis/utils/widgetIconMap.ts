@@ -1,42 +1,64 @@
 /**
- * Curated icon map for widget icon rendering.
+ * Widget icon resolution – handles both legacy PascalCase Lucide names and
+ * full Iconify IDs (e.g. "mdi:garage", "lucide:zap").
  *
- * Icon name strings stored in config.options.icon are resolved here.
- * Only icons already imported across the widget bundle are included,
- * so this adds zero extra bytes to the build.
- *
- * When the IconPickerModal is opened, it loads the full lucide-react library
- * into a module-level cache (getCachedLucideIcon). getWidgetIcon falls back
- * to that cache so widgets with newly picked icons render correctly.
+ * Returns a React component compatible with the LucideIcon signature
+ * (accepts `size`, `style`, `className`), so all existing call sites work
+ * without modification.
  */
-import {
-  // Registry icons
-  Zap, TrendingUp, SlidersHorizontal, Thermometer, BarChart2, List,
-  Clock, CalendarDays, Heading2, Layers2, Cloud, Gauge, Camera,
-  // Widget-component icons
-  Lightbulb, Power, ToggleRight, Sun, SunDim, Activity, Hash,
-  // Common home-automation icons
-  Home, Bell, Wifi, Battery, Plug, Fan, Droplets, Flame, Car, Lock, Star,
-  type LucideIcon,
-} from 'lucide-react';
-import { getCachedLucideIcon } from '../components/config/IconPickerModal';
+import React from 'react';
+import { Icon } from '@iconify/react';
+import { lucidePascalToIconify } from './iconifyLoader';
+import type { LucideIcon } from 'lucide-react';
 
-export const WIDGET_ICON_MAP: Record<string, LucideIcon> = {
-  // Registry
-  Zap, TrendingUp, SlidersHorizontal, Thermometer, BarChart2, List,
-  Clock, CalendarDays, Heading2, Layers2, Cloud, Gauge, Camera,
-  // Widget components
-  Lightbulb, Power, ToggleRight, Sun, SunDim, Activity, Hash,
-  // Home automation
-  Home, Bell, Wifi, Battery, Plug, Fan, Droplets, Flame, Car, Lock, Star,
-};
+/** Wrap an Iconify icon ID into a component that mimics the LucideIcon API */
+function makeIconComponent(iconId: string): LucideIcon {
+  function IconifyWrapper({
+    size = 16,
+    style,
+    className,
+  }: {
+    size?: number;
+    style?: React.CSSProperties;
+    className?: string;
+  }) {
+    return React.createElement(Icon, { icon: iconId, width: size, height: size, style, className });
+  }
+  return IconifyWrapper as unknown as LucideIcon;
+}
 
-/** All entries for the (legacy) inline icon picker – kept for backward compat */
-export const ICON_PICKER_ENTRIES = Object.entries(WIDGET_ICON_MAP) as [string, LucideIcon][];
-
-/** Resolve an icon name string to a LucideIcon component, with optional fallback.
- *  Checks static map first, then the full icon cache (populated once the picker was opened). */
+/** Resolve a stored icon name/ID to a render-ready component.
+ *  - Iconify ID (contains ":") → used directly
+ *  - PascalCase legacy name (e.g. "ZapOff") → converted to "lucide:zap-off"
+ *  - Empty / undefined → returns the fallback Lucide component unchanged */
 export function getWidgetIcon(name: string | undefined, fallback: LucideIcon): LucideIcon {
   if (!name) return fallback;
-  return WIDGET_ICON_MAP[name] ?? getCachedLucideIcon(name) ?? fallback;
+  const iconId = name.includes(':') ? name : lucidePascalToIconify(name);
+  return makeIconComponent(iconId);
 }
+
+/** Curated list of Iconify IDs for the inline tab/widget icon picker.
+ *  Covers the most common home-automation use cases. */
+export const CURATED_ICON_IDS: string[] = [
+  // Home & rooms
+  'lucide:home','lucide:sofa','lucide:bed-double','lucide:bath','lucide:cooking-pot',
+  'lucide:tree-pine','mdi:garage','mdi:garage-open','mdi:door-closed','mdi:door',
+  // Lights & switches
+  'lucide:lightbulb','lucide:lightbulb-off','lucide:lamp','lucide:sun','lucide:moon',
+  'lucide:toggle-right','lucide:plug','lucide:zap','lucide:power',
+  // Climate
+  'lucide:thermometer','lucide:flame','lucide:snowflake','lucide:wind','lucide:droplets',
+  'lucide:fan','mdi:radiator','mdi:heat-pump','mdi:air-conditioner',
+  // Security
+  'lucide:lock','lucide:lock-open','lucide:shield','lucide:bell','lucide:eye',
+  'mdi:motion-sensor','mdi:smoke-detector','mdi:alarm',
+  // Energy
+  'lucide:battery','lucide:gauge','mdi:solar-panel','mdi:lightning-bolt','mdi:meter-electric',
+  // Transport / Garage
+  'lucide:car','mdi:car-electric','mdi:car-key',
+  // Media
+  'lucide:tv','lucide:speaker','lucide:music','lucide:volume-2',
+  // Misc
+  'lucide:star','lucide:heart','lucide:activity','lucide:bar-chart-2','lucide:calendar-days',
+  'lucide:clock','lucide:settings','lucide:layers-2','lucide:cloud','lucide:wifi',
+];

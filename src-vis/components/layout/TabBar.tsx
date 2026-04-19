@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Settings, X } from 'lucide-react';
 import { useDashboardStore, useActiveLayout } from '../../store/dashboardStore';
 import type { Tab } from '../../store/dashboardStore';
-import { ICON_PICKER_ENTRIES, WIDGET_ICON_MAP } from '../../utils/widgetIconMap';
+import { Icon } from '@iconify/react';
+import { CURATED_ICON_IDS, getWidgetIcon } from '../../utils/widgetIconMap';
 import { useT } from '../../i18n';
 
 interface TabBarProps {
@@ -142,13 +143,13 @@ export function TabBar({ readonly = false, viewTabs, viewActiveTabId, onViewTabC
                 )}
               </div>
               <div className="flex flex-wrap gap-1">
-                {ICON_PICKER_ENTRIES.map(([name, Icon]) => {
-                  const selected = settingsTab.icon === name;
+                {CURATED_ICON_IDS.map((iconId) => {
+                  const selected = settingsTab.icon === iconId;
                   return (
                     <button
-                      key={name}
-                      title={name}
-                      onClick={() => updateTab(settingsTabId, { icon: selected ? undefined : name })}
+                      key={iconId}
+                      title={iconId}
+                      onClick={() => updateTab(settingsTabId, { icon: selected ? undefined : iconId })}
                       className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
                       style={{
                         background: selected ? 'var(--accent)' : 'var(--app-bg)',
@@ -156,7 +157,7 @@ export function TabBar({ readonly = false, viewTabs, viewActiveTabId, onViewTabC
                         border:     `1px solid ${selected ? 'var(--accent)' : 'var(--app-border)'}`,
                       }}
                     >
-                      <Icon size={13} />
+                      <Icon icon={iconId} width={13} height={13} />
                     </button>
                   );
                 })}
@@ -174,7 +175,7 @@ export function TabBar({ readonly = false, viewTabs, viewActiveTabId, onViewTabC
         style={{ background: 'var(--app-surface)', borderBottom: '1px solid var(--app-border)' }}>
         {tabs.map((tab) => {
           const isActive = tab.id === activeTabId;
-          const TabIcon = tab.icon ? WIDGET_ICON_MAP[tab.icon] : null;
+          const TabIconComp = tab.icon ? getWidgetIcon(tab.icon, null as never) : null;
           return (
             <div key={tab.id}
               className="group relative flex items-center gap-1.5 px-3 py-2.5 text-sm cursor-pointer border-b-2 transition-colors whitespace-nowrap"
@@ -182,8 +183,8 @@ export function TabBar({ readonly = false, viewTabs, viewActiveTabId, onViewTabC
               onClick={() => handleTabClick(tab.id)}
             >
               {/* Icon */}
-              {TabIcon && (
-                <TabIcon size={14} style={{ color: isActive ? 'var(--accent)' : 'var(--text-secondary)', flexShrink: 0 }} />
+              {TabIconComp && (
+                <TabIconComp size={14} style={{ color: isActive ? 'var(--accent)' : 'var(--text-secondary)', flexShrink: 0 }} />
               )}
 
               {/* Label */}

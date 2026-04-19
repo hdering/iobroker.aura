@@ -1,45 +1,10 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Search, X, Loader2 } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { Icon, getIcon } from '@iconify/react';
 import { ICON_CATEGORIES } from '../../utils/iconCategories';
+import { loadIconSets, areIconSetsLoaded, lucidePascalToIconify } from '../../utils/iconifyLoader';
 import { usePortalTarget } from '../../contexts/PortalTargetContext';
-
-// ── Lazy icon cache ────────────────────────────────────────────────────────────
-let iconCache: Record<string, LucideIcon> | null = null;
-let loadPromise: Promise<Record<string, LucideIcon>> | null = null;
-
-async function loadAllIcons(): Promise<Record<string, LucideIcon>> {
-  if (iconCache) return iconCache;
-  if (!loadPromise) {
-    loadPromise = import('lucide-react').then((mod) => {
-      // lucide-react exports `icons` as a clean namespace (icons/index.js):
-      // only PascalCase names, no Lucide-prefix or Icon-suffix aliases.
-      // This is exactly what we want as the icon map.
-      const ns = (mod as Record<string, unknown>)['icons'] as Record<string, LucideIcon> | undefined;
-      if (ns) {
-        iconCache = ns;
-        return ns;
-      }
-      // Fallback: filter module exports manually
-      const excluded = new Set(['Icon', 'LucideProvider', 'createLucideIcon', 'default', 'icons', 'useLucideContext']);
-      const map: Record<string, LucideIcon> = {};
-      for (const [key, val] of Object.entries(mod as Record<string, unknown>)) {
-        if (typeof val === 'function' && /^[A-Z]/.test(key) && !key.startsWith('Lucide') && !key.endsWith('Icon') && !excluded.has(key)) {
-          map[key] = val as LucideIcon;
-        }
-      }
-      iconCache = map;
-      return map;
-    });
-  }
-  return loadPromise;
-}
-
-/** Returns cached icon if already loaded (synchronous, for widget rendering) */
-export function getCachedLucideIcon(name: string): LucideIcon | null {
-  return iconCache?.[name] ?? null;
-}
 
 // ── Props ──────────────────────────────────────────────────────────────────────
 interface IconPickerModalProps {
@@ -48,21 +13,30 @@ interface IconPickerModalProps {
   onClose: () => void;
 }
 
+/** Normalize stored icon name to Iconify ID for display/comparison */
+function toIconifyId(name: string): string {
+  if (!name) return '';
+  return name.includes(':') ? name : lucidePascalToIconify(name);
+}
+
+/** Check if an icon ID is available in the loaded sets */
+function isIconAvailable(id: string): boolean {
+  return !!getIcon(id);
+}
+
 // ── Icon grid item ─────────────────────────────────────────────────────────────
 function IconItem({
-  name,
-  icon: Icon,
+  id,
   selected,
   onSelect,
 }: {
-  name: string;
-  icon: LucideIcon;
+  id: string;
   selected: boolean;
   onSelect: () => void;
 }) {
   return (
     <button
-      title={name}
+      title={id}
       onClick={onSelect}
       className="w-9 h-9 rounded-lg flex flex-col items-center justify-center transition-colors"
       style={{
@@ -71,7 +45,7 @@ function IconItem({
         border: `1px solid ${selected ? 'var(--accent)' : 'var(--app-border)'}`,
       }}
     >
-      <Icon size={15} />
+      <Icon icon={id} width={15} height={15} />
     </button>
   );
 }
@@ -97,46 +71,72 @@ function CategoryBtn({ label, active, onClick }: { label: string; active: boolea
 // ── Modal ──────────────────────────────────────────────────────────────────────
 export function IconPickerModal({ current, onSelect, onClose }: IconPickerModalProps) {
   const portalTarget = usePortalTarget();
-  const [icons, setIcons] = useState<Record<string, LucideIcon>>(iconCache ?? {});
-  const [loading, setLoading] = useState(!iconCache);
+  const [loading, setLoading] = useState(!areIconSetsLoaded());
+  const [, forceUpdate] = useState(0);
   const [query, setQuery] = useState('');
   const [categoryId, setCategoryId] = useState('all');
   const searchRef = useRef<HTMLInputElement>(null);
 
+  const currentId = toIconifyId(current);
+
   useEffect(() => {
-    if (!iconCache) {
+    if (!areIconSetsLoaded()) {
       setLoading(true);
-      loadAllIcons().then((map) => {
-        setIcons(map);
+      loadIconSets().then(() => {
         setLoading(false);
+        forceUpdate((n) => n + 1);
       });
-    } else {
-      setIcons(iconCache);
     }
-    // Auto-focus search
     setTimeout(() => searchRef.current?.focus(), 50);
   }, []);
 
-  // Build list of icon names to show
-  const entries = useMemo<[string, LucideIcon][]>(() => {
-    const allNames = Object.keys(icons);
+  // Build flat list of all Iconify IDs across all categories
+  const allIds = useMemo(() => {
+    if (loading) return [];
+    const seen = new Set<string>();
+    const result: string[] = [];
+    for (const cat of ICON_CATEGORIES) {
+      for (const name of cat.icons) {
+        const id = toIconifyId(name);
+        if (!seen.has(id) && isIconAvailable(id)) {
+          seen.add(id);
+          result.push(id);
+        }
+      }
+    }
+    return result;
+  }, [loading]);
+
+  // Category counts
+  const categoryCounts = useMemo(() => {
+    if (loading) return {} as Record<string, number>;
+    const counts: Record<string, number> = { all: allIds.length };
+    for (const cat of ICON_CATEGORIES) {
+      counts[cat.id] = cat.icons.filter((n) => isIconAvailable(toIconifyId(n))).length;
+    }
+    return counts;
+  }, [loading, allIds]);
+
+  // Visible icons for current selection
+  const entries = useMemo<string[]>(() => {
+    if (loading) return [];
     const q = query.toLowerCase().trim();
 
-    let names: string[];
     if (q) {
-      // When searching, always search across ALL icons
-      names = allNames.filter((n) => n.toLowerCase().includes(q));
-    } else if (categoryId === 'all') {
-      names = allNames;
-    } else {
-      const cat = ICON_CATEGORIES.find((c) => c.id === categoryId);
-      const catSet = new Set(cat?.icons ?? []);
-      names = allNames.filter((n) => catSet.has(n));
+      // Search by icon name across all icons
+      return allIds.filter((id) => id.toLowerCase().includes(q)).sort();
     }
 
-    names.sort();
-    return names.map((n) => [n, icons[n]]);
-  }, [icons, query, categoryId]);
+    if (categoryId === 'all') {
+      return allIds;
+    }
+
+    const cat = ICON_CATEGORIES.find((c) => c.id === categoryId);
+    if (!cat) return [];
+    return cat.icons
+      .map(toIconifyId)
+      .filter((id) => isIconAvailable(id));
+  }, [loading, allIds, query, categoryId]);
 
   const modal = (
     <div
@@ -196,12 +196,12 @@ export function IconPickerModal({ current, onSelect, onClose }: IconPickerModalP
             style={{ width: 160, borderRight: '1px solid var(--app-border)', scrollbarWidth: 'thin', scrollbarColor: 'var(--app-border) transparent' }}
           >
             <CategoryBtn
-              label={`Alle (${Object.keys(icons).length})`}
+              label={`Alle (${categoryCounts.all ?? 0})`}
               active={!query && categoryId === 'all'}
               onClick={() => { setQuery(''); setCategoryId('all'); }}
             />
             {ICON_CATEGORIES.map((cat) => {
-              const count = cat.icons.filter((n) => n in icons).length;
+              const count = categoryCounts[cat.id] ?? 0;
               if (count === 0) return null;
               return (
                 <CategoryBtn
@@ -230,13 +230,12 @@ export function IconPickerModal({ current, onSelect, onClose }: IconPickerModalP
               </div>
             ) : (
               <div className="flex flex-wrap gap-1">
-                {entries.map(([name, Icon]) => (
+                {entries.map((id) => (
                   <IconItem
-                    key={name}
-                    name={name}
-                    icon={Icon}
-                    selected={current === name}
-                    onSelect={() => { onSelect(name); onClose(); }}
+                    key={id}
+                    id={id}
+                    selected={currentId === id}
+                    onSelect={() => { onSelect(id); onClose(); }}
                   />
                 ))}
               </div>
@@ -244,18 +243,18 @@ export function IconPickerModal({ current, onSelect, onClose }: IconPickerModalP
           </div>
         </div>
 
-        {/* Footer: count + remove */}
+        {/* Footer: count + selected name + remove */}
         <div className="h-px shrink-0" style={{ background: 'var(--app-border)' }} />
         <div className="flex items-center gap-2 px-3 py-2 shrink-0">
           <span className="text-[11px] flex-1" style={{ color: 'var(--text-secondary)' }}>
             {entries.length} Icons
-            {current && (
+            {currentId && (
               <span className="ml-2 font-medium" style={{ color: 'var(--text-primary)' }}>
-                • {current}
+                • {currentId}
               </span>
             )}
           </span>
-          {current && (
+          {currentId && (
             <button
               onClick={() => { onSelect(''); onClose(); }}
               className="text-[11px] px-2 py-1 rounded hover:opacity-70"
