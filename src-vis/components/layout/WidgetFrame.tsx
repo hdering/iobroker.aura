@@ -2004,13 +2004,22 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                       </div>
                     </div>
                     {(o.wakeUpDp as string) && (
-                      <div>
-                        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
-                          Wartezeit nach Wake-Up (Sek.)
-                        </label>
-                        <input type="number" min={1} max={30} value={(o.wakeUpDelay as number) ?? 3}
-                          onChange={(e) => set({ wakeUpDelay: Number(e.target.value) })} className={cCls} style={cSty} />
-                      </div>
+                      <>
+                        <div>
+                          <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Wake-Up Auslöser</label>
+                          <select value={(o.wakeUpMode as string) ?? 'auto'} onChange={(e) => set({ wakeUpMode: e.target.value })} className={cCls} style={cSty}>
+                            <option value="auto">Automatisch (beim Laden)</option>
+                            <option value="onView">Bei Sicht (Viewport)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
+                            Wartezeit nach Wake-Up (Sek.)
+                          </label>
+                          <input type="number" min={1} max={30} value={(o.wakeUpDelay as number) ?? 3}
+                            onChange={(e) => set({ wakeUpDelay: Number(e.target.value) })} className={cCls} style={cSty} />
+                        </div>
+                      </>
                     )}
                   </>
                 );

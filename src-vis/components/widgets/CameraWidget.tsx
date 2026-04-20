@@ -4,7 +4,8 @@ import type { WidgetProps } from '../../types';
 import { CustomGridView } from './CustomGridView';
 import { setStateDirect } from '../../hooks/useIoBroker';
 
-type StreamMode = 'img' | 'iframe' | 'rtsp-hint';
+type StreamMode  = 'img' | 'iframe' | 'rtsp-hint';
+type WakeUpMode  = 'auto' | 'onView';
 
 function detectMode(url: string): StreamMode {
   if (!url) return 'img';
@@ -22,17 +23,26 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
   const showTimestamp   = (opts.showTimestamp   as boolean)             ?? true;
   const wakeUpDp        = (opts.wakeUpDp        as string)              ?? '';
   const wakeUpDelay     = (opts.wakeUpDelay     as number)              ?? 3;
+  const wakeUpMode      = (opts.wakeUpMode      as WakeUpMode)          ?? 'auto';
   const layout          = config.layout ?? 'default';
 
   const mode = detectMode(streamUrl);
 
-  const [imgSrc, setImgSrc]       = useState<string>('');
-  const [loadError, setLoadError] = useState(false);
+  const [imgSrc, setImgSrc]           = useState<string>('');
+  const [loadError, setLoadError]     = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
-  const [waking, setWaking]       = useState(false);
-  const [streamReady, setStreamReady] = useState(!wakeUpDp);
-  const intervalRef  = useRef<ReturnType<typeof setInterval> | null>(null);
-  const wakeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [waking, setWaking]           = useState(false);
+  const [streamReady, setStreamReady] = useState(!wakeUpDp || wakeUpMode === 'auto' ? false : false);
+
+  const containerRef  = useRef<HTMLDivElement>(null);
+  const intervalRef   = useRef<ReturnType<typeof setInterval> | null>(null);
+  const wakeTimerRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Keep latest values accessible in callbacks without re-creating effects
+  const wakeUpDpRef    = useRef(wakeUpDp);
+  const wakeUpDelayRef = useRef(wakeUpDelay);
+  wakeUpDpRef.current    = wakeUpDp;
+  wakeUpDelayRef.current = wakeUpDelay;
 
   const buildSrc = (url: string) => {
     if (!url || mode !== 'img') return url;
@@ -40,27 +50,59 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
     return url.includes('?') ? `${url}&_t=${Date.now()}` : `${url}?_t=${Date.now()}`;
   };
 
-  // Wake-up trigger: send true on mount, false on unmount
+  function doWake() {
+    if (!wakeUpDpRef.current) return;
+    if (wakeTimerRef.current) clearTimeout(wakeTimerRef.current);
+    setStateDirect(wakeUpDpRef.current, true);
+    setWaking(true);
+    setStreamReady(false);
+    wakeTimerRef.current = setTimeout(() => {
+      setWaking(false);
+      setStreamReady(true);
+    }, wakeUpDelayRef.current * 1000);
+  }
+
+  function doSleep() {
+    if (wakeTimerRef.current) clearTimeout(wakeTimerRef.current);
+    if (wakeUpDpRef.current) setStateDirect(wakeUpDpRef.current, false);
+    setWaking(false);
+    setStreamReady(false);
+  }
+
+  // auto mode: wake on mount, sleep on unmount
   useEffect(() => {
     if (!wakeUpDp || !streamUrl) {
       setStreamReady(true);
       return;
     }
-    setWaking(true);
-    setStreamReady(false);
-    setStateDirect(wakeUpDp, true);
-    wakeTimerRef.current = setTimeout(() => {
-      setWaking(false);
-      setStreamReady(true);
-    }, wakeUpDelay * 1000);
+    if (wakeUpMode !== 'auto') return;
+    doWake();
+    return () => doSleep();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wakeUpDp, streamUrl, wakeUpDelay, wakeUpMode]);
+
+  // onView mode: wake when widget enters viewport, sleep when it leaves
+  useEffect(() => {
+    if (!wakeUpDp || !streamUrl || wakeUpMode !== 'onView') return;
+    const el = containerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) doWake();
+        else doSleep();
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(el);
     return () => {
-      if (wakeTimerRef.current) clearTimeout(wakeTimerRef.current);
-      setStateDirect(wakeUpDp, false);
+      observer.disconnect();
+      doSleep();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wakeUpDp, streamUrl, wakeUpDelay]);
+  }, [wakeUpDp, streamUrl, wakeUpMode]);
 
-  // Image refresh loop (img mode only)
+  // Image refresh loop (img mode only, runs once stream is ready)
   useEffect(() => {
     if (!streamUrl || !streamReady || mode !== 'img') return;
     setLoadError(false);
@@ -114,9 +156,26 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
     );
   }
 
+  // onView + not yet visible: show neutral placeholder
+  if (wakeUpDp && wakeUpMode === 'onView' && !waking && !streamReady) {
+    return (
+      <div
+        ref={containerRef}
+        className="flex flex-col items-center justify-center h-full gap-2"
+        style={{ background: 'var(--app-bg)', borderRadius: 'var(--widget-radius)' }}
+      >
+        <Camera size={28} style={{ color: 'var(--text-secondary)' }} />
+        {config.title && (
+          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+        )}
+      </div>
+    );
+  }
+
   if (waking) {
     return (
       <div
+        ref={containerRef}
         className="flex flex-col items-center justify-center h-full gap-2"
         style={{ background: 'var(--app-bg)', borderRadius: 'var(--widget-radius)' }}
       >
@@ -129,7 +188,7 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
   const hasError = loadError && mode === 'img';
 
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-[inherit]">
+    <div ref={containerRef} className="relative h-full w-full overflow-hidden rounded-[inherit]">
       {mode === 'iframe' ? (
         <iframe
           src={streamUrl}
