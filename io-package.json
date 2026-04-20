@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.66",
+    "version": "0.4.67",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.67": {
+        "en": "Camera widget: auto-detect stream type (MJPEG/iframe/RTSP hint), wake-up datapoint for battery cameras with three trigger modes (auto, on-view, on-click)",
+        "de": "Kamera-Widget: automatische Stream-Erkennung (MJPEG/iframe/RTSP-Hinweis), Wake-Up-Datenpunkt für Akku-Kameras mit drei Auslöse-Modi (automatisch, bei Sicht, bei Klick)",
+        "ru": "Виджет камеры: автоопределение типа потока (MJPEG/iframe/RTSP), точка пробуждения для аккумуляторных камер с тремя режимами (авто, при виде, по клику)",
+        "pt": "Widget câmara: deteção automática do tipo de stream (MJPEG/iframe/RTSP), ponto de wake-up para câmaras a bateria com três modos (auto, ao ver, ao clicar)",
+        "nl": "Camera-widget: automatische streamdetectie (MJPEG/iframe/RTSP), wake-up datapunt voor accucamera's met drie modi (auto, bij zicht, bij klik)",
+        "fr": "Widget caméra: détection automatique du type de flux (MJPEG/iframe/RTSP), point de réveil pour caméras à batterie avec trois modes (auto, à la vue, au clic)",
+        "it": "Widget fotocamera: rilevamento automatico del tipo di stream (MJPEG/iframe/RTSP), punto di wake-up per fotocamere a batteria con tre modalità (auto, alla vista, al clic)",
+        "es": "Widget cámara: detección automática del tipo de stream (MJPEG/iframe/RTSP), punto de activación para cámaras de batería con tres modos (auto, al ver, al hacer clic)",
+        "pl": "Widget kamery: automatyczne wykrywanie typu strumienia (MJPEG/iframe/RTSP), punkt wybudzenia dla kamer bateryjnych z trzema trybami (auto, przy widoku, przy kliknięciu)",
+        "uk": "Віджет камери: автовизначення типу потоку (MJPEG/iframe/RTSP), точка пробудження для акумуляторних камер з трьома режимами (авто, при перегляді, по кліку)",
+        "zh-cn": "摄像头小部件：自动检测流类型（MJPEG/iframe/RTSP提示），电池摄像头唤醒数据点，支持三种触发模式（自动、可见时、点击时）"
+      },
       "0.4.66": {
         "en": "Admin PIN is now stored in ioBroker datapoint admin.pinHash – a PIN set on one device or URL applies to all browsers and clients",
         "de": "Admin-PIN wird jetzt im ioBroker-Datenpunkt admin.pinHash gespeichert – ein gesetzter PIN gilt für alle Browser und URLs",
@@ -183,19 +196,6 @@
         "pl": "Wybór ikon: przejście na Iconify z 9400+ ikonami (Lucide + MDI) w bundle offline; 7 nowych kategorii MDI w tym garaż, pompa ciepła, solar, ładowanie EV, sensory; wyższe okno dialogowe; pełna kompatybilność wsteczna",
         "uk": "Вибір іконок: перехід на Iconify з 9400+ іконками (Lucide + MDI) у офлайн-бандлі; 7 нових категорій MDI включаючи гараж, тепловий насос, сонячну енергію, зарядку EV, датчики; вище діалогове вікно; повна зворотна сумісність",
         "zh-cn": "图标选择器：切换到 Iconify，离线捆绑 9400+ 图标（Lucide + MDI）；7 个新 MDI 分类包括车库、热泵、太阳能、电动车充电、传感器；图标对话框更高；完全向后兼容现有图标配置"
-      },
-      "0.4.60": {
-        "en": "Custom layout: widget-field dropdown for all widget types (Shutter, Dimmer, Gauge, Chart, Window/Door Contact, Binary Sensor, EVCC, Image, Weather); DatapointPicker: name shown first, pre-filled search for quick navigation, type badge in color; 'Add widget' dialog: category filter tabs and 'Recently used' chips",
-        "de": "Custom-Layout: Widget-Feld-Dropdown für alle Widget-Typen (Rolladen, Dimmer, Gauge, Diagramm, Fenster-/Türkontakt, Binärsensor, EVCC, Bild, Wetter); Datenpunkt-Auswahl: Name zuerst, vorausgefüllte Suche zur schnellen Navigation, Typ-Badge farbig; 'Widget hinzufügen'-Dialog: Kategorie-Filter-Tabs und 'Zuletzt verwendet'-Chips",
-        "ru": "Кастомный макет: выпадающий список полей виджета для всех типов (ролеты, диммер, манометр, диаграмма, контакт окна/двери, бинарный сенсор, EVCC, изображение, погода); выбор точки данных: имя первым, предзаполненный поиск, значок типа с цветом; диалог 'Добавить виджет': вкладки категорий и чипы 'Недавно использованные'",
-        "pt": "Layout personalizado: dropdown de campo de widget para todos os tipos (estores, dimmer, gauge, gráfico, contacto janela/porta, sensor binário, EVCC, imagem, tempo); seletor de DP: nome primeiro, pesquisa pré-preenchida, badge de tipo colorido; diálogo 'Adicionar widget': abas de categoria e chips 'Recentemente usados'",
-        "nl": "Aangepaste lay-out: widgetveld-dropdown voor alle typen (rolluik, dimmer, gauge, diagram, raam-/deurcontact, binaire sensor, EVCC, afbeelding, weer); DP-kiezer: naam eerst, vooraf ingevulde zoekfunctie, gekleurde typebadge; 'Widget toevoegen'-dialoog: categoriefiltertabbladen en 'Onlangs gebruikt'-chips",
-        "fr": "Mise en page personnalisée: liste déroulante de champ de widget pour tous les types (volet roulant, variateur, jauge, graphique, contact fenêtre/porte, capteur binaire, EVCC, image, météo); sélecteur de DP: nom en premier, recherche pré-remplie, badge de type coloré; dialogue 'Ajouter widget': onglets de filtre de catégorie et puces 'Récemment utilisé'",
-        "it": "Layout personalizzato: dropdown campo widget per tutti i tipi (tapparella, dimmer, gauge, grafico, contatto finestra/porta, sensore binario, EVCC, immagine, meteo); selettore DP: nome prima, ricerca precompilata, badge tipo colorato; dialogo 'Aggiungi widget': schede filtro categoria e chip 'Usati di recente'",
-        "es": "Diseño personalizado: menú desplegable de campo de widget para todos los tipos (persiana, dimmer, gauge, gráfico, contacto ventana/puerta, sensor binario, EVCC, imagen, tiempo); selector de DP: nombre primero, búsqueda prellena, badge de tipo en color; diálogo 'Añadir widget': pestañas de filtro de categoría y chips 'Usados recientemente'",
-        "pl": "Niestandardowy układ: lista rozwijana pola widgetu dla wszystkich typów (roleta, dimmer, miernik, wykres, kontakt okna/drzwi, czujnik binarny, EVCC, obraz, pogoda); selektor DP: nazwa pierwsza, wstępnie wypełnione wyszukiwanie, kolorowa odznaka typu; okno 'Dodaj widget': zakładki filtrów kategorii i chipy 'Ostatnio używane'",
-        "uk": "Кастомний макет: випадаючий список полів віджета для всіх типів (ролети, диммер, манометр, діаграма, контакт вікна/дверей, бінарний сенсор, EVCC, зображення, погода); вибір точки даних: ім'я спочатку, попередньо заповнений пошук, значок типу з кольором; діалог 'Додати віджет': вкладки категорій та чіпи 'Нещодавно використані'",
-        "zh-cn": "自定义布局：所有小部件类型的字段下拉菜单（卷帘、调光器、仪表、图表、窗/门接触传感器、二值传感器、EVCC、图片、天气）；数据点选择器：名称优先、预填搜索快速导航、彩色类型徽章；'添加小部件'对话框：分类过滤标签页和'最近使用'筹码"
       }
     }
   },

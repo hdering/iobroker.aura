@@ -127,6 +127,11 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.67 (2026-04-20)
+- Camera widget: auto-detect stream type – HTML pages (e.g. go2rtc `stream.html`) render in an iframe, RTSP URLs show a helpful hint
+- Camera widget: optional wake-up datapoint for battery-powered cameras (e.g. Eufy) – sends `true` on activation, `false` on deactivation
+- Camera widget: three wake-up trigger modes – automatic (on load), on-view (IntersectionObserver), on-click (manual)
+
 ### 0.4.66 (2026-04-20)
 - Admin PIN is now stored in ioBroker datapoint `admin.pinHash` – a PIN set on one device or URL applies to all browsers and clients
 
