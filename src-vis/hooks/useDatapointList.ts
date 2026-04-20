@@ -62,10 +62,20 @@ function resolveName(name: string | Record<string, string> | undefined, fallback
 }
 
 async function loadAll(): Promise<DatapointEntry[]> {
-  const [stateResult, enumResult] = await Promise.all([
+  const [stateResult, channelResult, deviceResult, enumResult] = await Promise.all([
     getObjectViewDirect('state'),
+    getObjectViewDirect('channel'),
+    getObjectViewDirect('device'),
     getObjectViewDirect('enum', 'enum.', 'enum.\u9999'),
   ]);
+
+  // Build parent name map: id → resolved name (devices first, then channels so channels win)
+  const parentNames = new Map<string, string>();
+  for (const { id, value: obj } of [...deviceResult.rows, ...channelResult.rows]) {
+    if (!obj?.common?.name) continue;
+    const n = resolveName(obj.common.name, '');
+    if (n) parentNames.set(id, n);
+  }
 
   // Build memberId → { rooms, funcs } map from enums
   const enumMap = new Map<string, { rooms: string[]; funcs: string[] }>();
@@ -93,9 +103,28 @@ async function loadAll(): Promise<DatapointEntry[]> {
       const e = enumMap.get(parts.slice(0, i).join('.'));
       if (e) { e.rooms.forEach((r) => roomsSet.add(r)); e.funcs.forEach((f) => funcsSet.add(f)); }
     }
+
+    // Compose name: closest parent (channel preferred over device) › state name
+    const stateName = resolveName(row.value.common.name, '');
+    let parentName = '';
+    for (let i = parts.length - 1; i >= 2; i--) {
+      const pName = parentNames.get(parts.slice(0, i).join('.'));
+      if (pName) { parentName = pName; break; }
+    }
+    let name: string;
+    if (parentName && stateName && parentName !== stateName) {
+      name = `${parentName} › ${stateName}`;
+    } else if (stateName) {
+      name = stateName;
+    } else if (parentName) {
+      name = `${parentName} › ${parts[parts.length - 1]}`;
+    } else {
+      name = parts[parts.length - 1] ?? row.id;
+    }
+
     return {
       id: row.id,
-      name: resolveName(row.value.common.name, row.id.split('.').pop() ?? row.id),
+      name,
       type: row.value.common.type,
       unit: row.value.common.unit,
       role: row.value.common.role,

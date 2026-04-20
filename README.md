@@ -127,6 +127,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.65 (2026-04-20)
+- DatapointPicker: name resolution now includes parent channel/device names for non-Homematic adapters (Zigbee, Shelly, Hue, etc.) – shows e.g. "Living Room Lamp › on" instead of just "on"
+
 ### 0.4.64 (2026-04-19)
 - Fix: iframe 'Keep Alive (no reload)' now correctly preserves state across tab switches – fill-tab views no longer cause iframes to reload
 

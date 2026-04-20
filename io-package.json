@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.64",
+    "version": "0.4.65",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.65": {
+        "en": "DatapointPicker: name resolution now includes parent channel/device names for non-Homematic adapters (Zigbee, Shelly, Hue, etc.) – shows e.g. \"Living Room Lamp › on\" instead of just \"on\"",
+        "de": "DatapointPicker: Namensauflösung berücksichtigt jetzt übergeordnete Kanal-/Geräteobjekte für Nicht-Homematic-Adapter (Zigbee, Shelly, Hue usw.) – zeigt z.B. \"Wohnzimmer Lampe › on\" statt nur \"on\"",
+        "ru": "DatapointPicker: разрешение имён теперь включает имена родительских каналов/устройств для не-Homematic адаптеров (Zigbee, Shelly, Hue и др.)",
+        "pt": "DatapointPicker: resolução de nomes agora inclui nomes de canal/dispositivo pai para adaptadores não-Homematic (Zigbee, Shelly, Hue, etc.)",
+        "nl": "DatapointPicker: naamresolutie bevat nu namen van bovenliggende kanaal-/apparaatobjecten voor niet-Homematic adapters (Zigbee, Shelly, Hue, etc.)",
+        "fr": "DatapointPicker: la résolution de noms inclut désormais les noms de canal/appareil parent pour les adaptateurs non-Homematic (Zigbee, Shelly, Hue, etc.)",
+        "it": "DatapointPicker: la risoluzione dei nomi include ora i nomi del canale/dispositivo padre per adattatori non-Homematic (Zigbee, Shelly, Hue, ecc.)",
+        "es": "DatapointPicker: la resolución de nombres ahora incluye nombres de canal/dispositivo padre para adaptadores no-Homematic (Zigbee, Shelly, Hue, etc.)",
+        "pl": "DatapointPicker: rozwiązywanie nazw uwzględnia teraz nazwy nadrzędnych kanałów/urządzeń dla adapterów innych niż Homematic (Zigbee, Shelly, Hue itp.)",
+        "uk": "DatapointPicker: розпізнавання імен тепер включає імена батьківського каналу/пристрою для не-Homematic адаптерів (Zigbee, Shelly, Hue тощо)",
+        "zh-cn": "DatapointPicker：名称解析现在包含非 Homematic 适配器（Zigbee、Shelly、Hue 等）的父通道/设备名称"
+      },
       "0.4.64": {
         "en": "Fix: iframe 'Keep Alive (no reload)' now correctly preserves state across tab switches – fill-tab views no longer cause iframes to reload",
         "de": "Fix: iFrame 'Aufrechterhalten (kein Reload)' behält den Zustand beim Tab-Wechsel korrekt bei – Tab-füllende Ansichten lösen kein Neuladen mehr aus",
@@ -183,36 +196,8 @@
         "pl": "Niestandardowy układ dla wszystkich widgetów: wolna siatka 3×3, każda komórka konfigurowalna z tytułem/wartością/jednostką/tekstem/punktem danych/polem widgetu, przedrostek/przyrostek, rozmiar czcionki, pogrubienie/kursywa, kolor, wyrównanie; edytor siatki zawsze na dole ustawień widgetu; silniejsze wizualne rozdzielenie ustawień ogólnych i specyficznych dla widgetu",
         "uk": "Кастомний макет для всіх віджетів: вільна сітка 3×3, кожна комірка налаштовується з заголовком/значенням/одиницею/текстом/точкою даних/полем віджета, префікс/суфікс, розмір шрифту, жирний/курсив, колір, вирівнювання; редактор сітки завжди внизу налаштувань віджета; більш чітке візуальне розділення загальних та специфічних налаштувань",
         "zh-cn": "所有小部件支持自定义布局：自由3×3网格，每个单元格可配置标题/值/单位/文本/数据点/小部件字段、前缀/后缀、字体大小、粗体/斜体、颜色、对齐方式；网格编辑器始终显示在小部件设置底部；通用设置与小部件特定设置之间视觉分隔更明显"
-      },
-      "0.4.58": {
-        "en": "New StateImage widget – boolean DP shows configurable icon/color or image per state (true/false), 4 layouts; Calendar: per-widget font scale, important event highlighting by keyword/PRIORITY/description, accent color for card title; ValueWidget minimal: value and unit inline on same baseline",
-        "de": "Neues Zustandsbild-Widget – boolescher DP zeigt konfigurierbares Icon/Farbe oder Bild je Zustand (true/false), 4 Layouts; Kalender: Widget-eigener Schriftskalafaktor, wichtige Termine per Stichwort/PRIORITY/Beschreibung hervorheben, Akzentfarbe für Card-Titel; Wert-Widget Minimal: Wert und Einheit inline auf gleicher Basislinie",
-        "ru": "Новый виджет StateImage – булева точка данных показывает настраиваемый значок/цвет или изображение для каждого состояния (true/false), 4 макета; Календарь: масштаб шрифта для виджета, выделение важных событий по ключевым словам/PRIORITY/описанию, акцентный цвет для заголовка карточки; Виджет значения Minimal: значение и единица инлайн на одной базовой линии",
-        "pt": "Novo widget StateImage – DP booleano mostra ícone/cor ou imagem configurável por estado (true/false), 4 layouts; Calendário: escala de fonte por widget, destaque de eventos importantes por palavra-chave/PRIORITY/descrição, cor de destaque para título de card; Widget de valor Minimal: valor e unidade inline na mesma linha base",
-        "nl": "Nieuw StateImage-widget – booleaanse DP toont configureerbaar pictogram/kleur of afbeelding per toestand (true/false), 4 lay-outs; Kalender: lettertypeschaal per widget, markering van belangrijke evenementen op trefwoord/PRIORITY/beschrijving, accentkleur voor kaartttitel; Waardewidget Minimaal: waarde en eenheid inline op dezelfde basislijn",
-        "fr": "Nouveau widget StateImage – DP booléen affiche une icône/couleur ou image configurable par état (true/false), 4 mises en page; Calendrier: échelle de police par widget, mise en évidence des événements importants par mot-clé/PRIORITY/description, couleur d'accentuation pour le titre de la carte; Widget de valeur Minimal: valeur et unité en ligne sur la même ligne de base",
-        "it": "Nuovo widget StateImage – DP booleano mostra icona/colore o immagine configurabile per stato (true/false), 4 layout; Calendario: scala carattere per widget, evidenziazione eventi importanti per parola chiave/PRIORITY/descrizione, colore accento per titolo card; Widget Valore Minimal: valore e unità inline sulla stessa linea base",
-        "es": "Nuevo widget StateImage – DP booleano muestra icono/color o imagen configurable por estado (true/false), 4 layouts; Calendario: escala de fuente por widget, resaltado de eventos importantes por palabra clave/PRIORITY/descripción, color de acento para título de tarjeta; Widget Valor Minimal: valor y unidad inline en la misma línea base",
-        "pl": "Nowy widget StateImage – boolowski DP wyświetla konfigurowalną ikonę/kolor lub obraz dla każdego stanu (true/false), 4 układy; Kalendarz: skala czcionki dla widżetu, podświetlanie ważnych wydarzeń po słowie kluczowym/PRIORITY/opisie, kolor akcentu dla tytułu karty; Widget wartości Minimal: wartość i jednostka inline na tej samej linii bazowej",
-        "uk": "Новий віджет StateImage – булева точка даних показує налаштовуваний значок/колір або зображення для кожного стану (true/false), 4 макети; Календар: масштаб шрифту для віджета, виділення важливих подій за ключовими словами/PRIORITY/описом, акцентний колір для заголовка картки; Мінімальний віджет значення: значення та одиниця інлайн на одній базовій лінії",
-        "zh-cn": "新增 StateImage 组件 – 布尔数据点根据状态（true/false）显示可配置的图标/颜色或图片，4种布局；日历：每个组件独立字体缩放、按关键词/PRIORITY/描述高亮重要事件、卡片标题使用强调色；值组件最小布局：数值与单位内联对齐在同一基线"
-      },
-      "0.4.57": {
-        "en": "Fix: status badge shows correct WiFi icon – Wifi (green) when reachable, WifiOff (red) when unreachable; was always showing WifiOff regardless of state",
-        "de": "Fix: Status-Badge zeigt korrektes WLAN-Symbol – Wifi (grün) wenn erreichbar, WifiOff (rot) wenn nicht erreichbar; wurde zuvor immer als WifiOff angezeigt",
-        "ru": "Исправление: значок статуса показывает правильный значок Wi-Fi – Wifi (зелёный) при доступности, WifiOff (красный) при недоступности; ранее всегда отображался WifiOff",
-        "pt": "Correção: distintivo de estado mostra ícone WiFi correto – Wifi (verde) quando acessível, WifiOff (vermelho) quando inacessível; antes sempre mostrava WifiOff",
-        "nl": "Fix: statusbadge toont correct WiFi-pictogram – Wifi (groen) wanneer bereikbaar, WifiOff (rood) wanneer niet bereikbaar; toonde altijd WifiOff",
-        "fr": "Correction: le badge d'état affiche la bonne icône WiFi – Wifi (vert) si accessible, WifiOff (rouge) si inaccessible; affichait toujours WifiOff avant",
-        "it": "Fix: il badge di stato mostra l'icona WiFi corretta – Wifi (verde) se raggiungibile, WifiOff (rosso) se non raggiungibile; mostrava sempre WifiOff",
-        "es": "Corrección: la insignia de estado muestra el icono WiFi correcto – Wifi (verde) si accesible, WifiOff (rojo) si inaccesible; antes siempre mostraba WifiOff",
-        "pl": "Poprawka: odznaka statusu pokazuje właściwą ikonę WiFi – Wifi (zielony) gdy dostępny, WifiOff (czerwony) gdy niedostępny; wcześniej zawsze wyświetlała WifiOff",
-        "uk": "Виправлення: значок стану показує правильну іконку WiFi – Wifi (зелений) якщо доступний, WifiOff (червоний) якщо недоступний; раніше завжди показував WifiOff",
-        "zh-cn": "修复：状态徽章显示正确的 WiFi 图标 – 可达时显示 Wifi（绿色），不可达时显示 WifiOff（红色）；之前无论状态如何始终显示 WifiOff"
       }
     }
-
-
   },
   "native": {
     "customUrl": ""
