@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { usePortalTarget } from '../../contexts/PortalTargetContext';
 import { useT, t } from '../../i18n';
@@ -18,6 +18,7 @@ import { WIDGET_REGISTRY, WIDGET_GROUPS, WIDGET_BY_TYPE } from '../../widgetRegi
 import { detectType } from '../../utils/widgetDetection';
 import { AutoListConfig } from '../config/AutoListConfig';
 import { StaticListConfig } from '../config/StaticListConfig';
+import { type CameraSlot, type CameraSlotType, type CameraTemplateId, CAMERA_TEMPLATES, SLOT_TYPE_OPTIONS } from '../widgets/CameraWidget';
 import { detectHistoryAdapters, RANGE_LABELS, type ChartTimeRange, type DetectedAdapter } from '../../hooks/useChartHistory';
 import { useConditionStyle, notifyHiddenState, cleanupHiddenState } from '../../hooks/useConditionStyle';
 import { SwitchWidget } from '../widgets/SwitchWidget';
@@ -824,6 +825,65 @@ function formatLastChange(ts: number): string {
   return diffYear === 1 ? t('lc.1Year') : t('lc.nYears', { n: diffYear });
 }
 
+// ── Camera slot editor row (used in Standard and Custom Grid config) ──────────
+
+interface CameraSlotEditorRowProps {
+  slot:      CameraSlot;
+  idx:       number;
+  label:     string;
+  cCls:      string;
+  cSty:      React.CSSProperties;
+  onChange:  (idx: number, patch: Partial<CameraSlot>) => void;
+  onRemove?: () => void;
+  onPickDp:  (idx: number) => void;
+}
+
+function CameraSlotEditorRow({ slot, idx, label, cCls, cSty, onChange, onRemove, onPickDp }: CameraSlotEditorRowProps) {
+  const hasDP     = ['battery', 'temperature', 'armed', 'motion', 'datapoint'].includes(slot.type);
+  const hasValue  = ['text', 'manufacturer'].includes(slot.type);
+  const hasBool   = ['armed', 'motion'].includes(slot.type);
+  const sec: React.CSSProperties = { color: 'var(--text-secondary)' };
+
+  return (
+    <div className="flex flex-col gap-1 p-2 rounded-lg" style={{ border: '1px solid var(--app-border)' }}>
+      <div className="flex items-center justify-between mb-0.5">
+        <span className="text-[10px] font-medium opacity-50" style={sec}>{label}</span>
+        {onRemove && (
+          <button onClick={onRemove} className="text-[10px] opacity-40 hover:opacity-80 leading-none" style={sec}>✕</button>
+        )}
+      </div>
+      <select value={slot.type} className={cCls} style={cSty}
+        onChange={(e) => onChange(idx, { type: e.target.value as CameraSlotType, datapoint: undefined, value: undefined })}>
+        {SLOT_TYPE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+      </select>
+      {slot.type !== 'empty' && (
+        <input type="text" value={slot.label ?? ''} placeholder="Label (optional)" className={cCls} style={cSty}
+          onChange={(e) => onChange(idx, { label: e.target.value || undefined })} />
+      )}
+      {hasValue && (
+        <input type="text" value={slot.value ?? ''} placeholder="Wert (Freitext)" className={cCls} style={cSty}
+          onChange={(e) => onChange(idx, { value: e.target.value || undefined })} />
+      )}
+      {hasDP && (
+        <div className="flex gap-1">
+          <input type="text" value={slot.datapoint ?? ''} placeholder="Datenpunkt-ID" className={cCls + ' flex-1 font-mono min-w-0'} style={cSty}
+            onChange={(e) => onChange(idx, { datapoint: e.target.value || undefined })} />
+          <button type="button" onClick={() => onPickDp(idx)}
+            className="px-2 rounded-lg shrink-0" style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>…</button>
+        </div>
+      )}
+      {hasBool && (
+        <>
+          <input type="text" value={slot.trueLabel ?? ''} placeholder="Text wenn aktiv (z.B. Scharf)" className={cCls} style={cSty}
+            onChange={(e) => onChange(idx, { trueLabel: e.target.value || undefined })} />
+          <input type="text" value={slot.falseLabel ?? ''} placeholder="Text wenn inaktiv (z.B. Aus)" className={cCls} style={cSty}
+            onChange={(e) => onChange(idx, { falseLabel: e.target.value || undefined })} />
+        </>
+      )}
+    </div>
+  );
+}
+
 export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: WidgetFrameProps) {
   const t = useT();
   const [openPanel, setOpenPanel] = useState<'menu' | 'edit' | 'conditions' | null>(null);
@@ -870,7 +930,8 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
       setOpenPanel(panel);
     }
   };
-  const [pickerTarget, setPickerTarget] = useState<'datapoint' | 'actualDatapoint' | 'localTempDatapoint' | 'shutter_activityDp' | 'shutter_directionDp' | 'shutter_stopDp' | 'gauge_pointer2Dp' | 'gauge_pointer3Dp' | 'windowcontact_batteryDp' | 'status_batteryDp' | 'status_unreachDp' | 'camera_wakeUpDp' | null>(null);
+  const [pickerTarget, setPickerTarget] = useState<'datapoint' | 'actualDatapoint' | 'localTempDatapoint' | 'shutter_activityDp' | 'shutter_directionDp' | 'shutter_stopDp' | 'gauge_pointer2Dp' | 'gauge_pointer3Dp' | 'windowcontact_batteryDp' | 'status_batteryDp' | 'status_unreachDp' | 'camera_wakeUpDp' | 'camera_slot' | null>(null);
+  const [cameraSlotPickerIdx, setCameraSlotPickerIdx] = useState(0);
   const [iconPickerOpen, setIconPickerOpen] = useState(false);
   const [iconPickerTrueOpen,  setIconPickerTrueOpen]  = useState(false);
   const [iconPickerFalseOpen, setIconPickerFalseOpen] = useState(false);
@@ -1398,7 +1459,11 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
             {/* ── Layout & Sichtbare Felder (kombiniert, eingeklappt) ── */}
             {config.type !== 'header' && config.type !== 'iframe' && config.type !== 'fill' && config.type !== 'jsontable' && (() => {
               const activeLayout = config.layout ?? 'default';
-              const layouts: { value: string; label: string }[] = [
+              const layouts: { value: string; label: string }[] = config.type === 'camera' ? [
+                { value: 'minimal', label: 'Minimal' },
+                { value: 'default', label: 'Standard' },
+                { value: 'custom',  label: 'Custom Grid' },
+              ] : [
                 { value: 'default', label: t('wf.edit.layout.standard') },
                 { value: 'card',    label: t('wf.edit.layout.card') },
                 { value: 'compact', label: t('wf.edit.layout.compact') },
@@ -2032,6 +2097,87 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                         </div>
                       </>
                     )}
+
+                    {/* ── Standard layout: video ratio + info rows ── */}
+                    {(config.layout ?? 'minimal') === 'default' && (() => {
+                      const ratio = (o.videoRatio as number) ?? 60;
+                      const items: CameraSlot[] = (o.infoItems as CameraSlot[]) ?? [];
+                      const updateItem = (idx: number, patch: Partial<CameraSlot>) => {
+                        const next = items.map((it, i) => i === idx ? { ...it, ...patch } : it);
+                        set({ infoItems: next });
+                      };
+                      const removeItem = (idx: number) => set({ infoItems: items.filter((_, i) => i !== idx) });
+                      const addItem    = () => set({ infoItems: [...items, { type: 'empty' as CameraSlotType }] });
+                      return (
+                        <>
+                          <div>
+                            <label className="text-[11px] mb-1 flex items-center justify-between" style={{ color: 'var(--text-secondary)' }}>
+                              <span>Video-Anteil</span><span className="font-mono">{ratio}%</span>
+                            </label>
+                            <input type="range" min={20} max={85} value={ratio}
+                              onChange={(e) => set({ videoRatio: Number(e.target.value) })}
+                              className="w-full h-1 rounded" style={{ accentColor: 'var(--accent)' }} />
+                          </div>
+                          <div>
+                            <label className="text-[11px] mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>Info-Zeilen</label>
+                            <div className="flex flex-col gap-1.5">
+                              {items.map((item, idx) => (
+                                <CameraSlotEditorRow key={idx} slot={item} idx={idx} label={`Zeile ${idx + 1}`}
+                                  cCls={cCls} cSty={cSty}
+                                  onChange={updateItem}
+                                  onRemove={() => removeItem(idx)}
+                                  onPickDp={(i) => { setCameraSlotPickerIdx(i); setPickerTarget('camera_slot'); }} />
+                              ))}
+                              <button onClick={addItem}
+                                className="text-xs py-1.5 rounded-lg w-full"
+                                style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px dashed var(--app-border)' }}>
+                                + Zeile hinzufügen
+                              </button>
+                            </div>
+                          </div>
+                        </>
+                      );
+                    })()}
+
+                    {/* ── Custom Grid layout: template + slots ── */}
+                    {(config.layout ?? 'minimal') === 'custom' && (() => {
+                      const tmplId = (o.cameraTemplate as CameraTemplateId) ?? 'stream-left';
+                      const tmpl   = CAMERA_TEMPLATES[tmplId];
+                      const slots: CameraSlot[] = (o.customSlots as CameraSlot[]) ?? [];
+                      const handleTmplChange = (newId: string) => {
+                        const spec    = CAMERA_TEMPLATES[newId as CameraTemplateId];
+                        const padded  = Array.from({ length: spec.slotCount }, (_, i) => slots[i] ?? { type: 'empty' as CameraSlotType });
+                        set({ cameraTemplate: newId, customSlots: padded });
+                      };
+                      const updateSlot = (idx: number, patch: Partial<CameraSlot>) => {
+                        const next = slots.map((s, i) => i === idx ? { ...s, ...patch } : s);
+                        set({ customSlots: next });
+                      };
+                      const paddedSlots = Array.from({ length: tmpl.slotCount }, (_, i) => slots[i] ?? { type: 'empty' as CameraSlotType });
+                      return (
+                        <>
+                          <div>
+                            <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Aufteilung</label>
+                            <select value={tmplId} onChange={(e) => handleTmplChange(e.target.value)} className={cCls} style={cSty}>
+                              {(Object.entries(CAMERA_TEMPLATES) as [CameraTemplateId, typeof tmpl][]).map(([id, spec]) => (
+                                <option key={id} value={id}>{spec.label}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="text-[11px] mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>Slots</label>
+                            <div className="flex flex-col gap-1.5">
+                              {paddedSlots.map((slot, idx) => (
+                                <CameraSlotEditorRow key={idx} slot={slot} idx={idx} label={`Slot ${idx + 1}`}
+                                  cCls={cCls} cSty={cSty}
+                                  onChange={updateSlot}
+                                  onPickDp={(i) => { setCameraSlotPickerIdx(i); setPickerTarget('camera_slot'); }} />
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      );
+                    })()}
                   </>
                 );
               })()}
@@ -2934,7 +3080,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
               })()}
 
               {/* ── Custom-Grid editor (all widgets except excluded) ── */}
-              {!['iframe', 'jsontable', 'trash', 'header', 'fill'].includes(config.type) && (config.layout ?? 'default') === 'custom' && (() => {
+              {!['iframe', 'jsontable', 'trash', 'header', 'fill', 'camera'].includes(config.type) && (config.layout ?? 'default') === 'custom' && (() => {
                 const CELL_LABELS: Record<string, string> = {
                   empty: '–', title: 'Titel', value: 'Wert', unit: 'Einheit', text: 'Text', dp: 'DP', field: 'Feld',
                 };
@@ -3297,6 +3443,11 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
             pickerTarget === 'status_batteryDp'         ? ((config.options?.batteryDp  as string) ?? '') :
             pickerTarget === 'status_unreachDp'         ? ((config.options?.unreachDp  as string) ?? '') :
             pickerTarget === 'camera_wakeUpDp'          ? ((config.options?.wakeUpDp   as string) ?? '') :
+            pickerTarget === 'camera_slot' ? (() => {
+              const key = (config.layout ?? 'minimal') === 'default' ? 'infoItems' : 'customSlots';
+              const arr = (config.options?.[key] as CameraSlot[]) ?? [];
+              return arr[cameraSlotPickerIdx]?.datapoint ?? '';
+            })() :
             ((config.options?.actualDatapoint as string) ?? '')
           }
           onSelect={(id, unit, name, role, dpType) => {
@@ -3328,6 +3479,11 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
               onConfigChange({ ...config, options: { ...config.options, unreachDp: id } });
             } else if (pickerTarget === 'camera_wakeUpDp') {
               onConfigChange({ ...config, options: { ...config.options, wakeUpDp: id } });
+            } else if (pickerTarget === 'camera_slot') {
+              const key = (config.layout ?? 'minimal') === 'default' ? 'infoItems' : 'customSlots';
+              const arr = [...((config.options?.[key] as CameraSlot[]) ?? [])];
+              arr[cameraSlotPickerIdx] = { ...arr[cameraSlotPickerIdx], datapoint: id };
+              onConfigChange({ ...config, options: { ...config.options, [key]: arr } });
             } else {
               onConfigChange({ ...config, options: { ...config.options, actualDatapoint: id } });
             }
