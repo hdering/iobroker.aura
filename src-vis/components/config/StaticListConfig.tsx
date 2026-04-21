@@ -10,7 +10,6 @@ import type { WidgetConfig } from '../../types';
 import type { StaticListEntry, StaticListOptions } from '../widgets/ListWidget';
 import { DatapointPicker } from './DatapointPicker';
 import { lookupDatapointEntry } from '../../hooks/useDatapointList';
-import { saveAll, saveToIoBroker } from '../../store/persistManager';
 
 interface Props {
   config: WidgetConfig;
@@ -99,10 +98,7 @@ export function StaticListConfig({ config, onConfigChange }: Props) {
   const [showPicker, setShowPicker] = useState(false);
 
   const setOpts = (patch: Partial<StaticListOptions>) => {
-    const updated = { ...config, options: { ...opts, ...patch } };
-    onConfigChange(updated);
-    saveAll();
-    saveToIoBroker();
+    onConfigChange({ ...config, options: { ...opts, ...patch } });
   };
 
   const addEntry = (id: string, name?: string, unit?: string) => {
@@ -132,9 +128,16 @@ export function StaticListConfig({ config, onConfigChange }: Props) {
       {entries.length > 0 && (
         <>
           <div>
-            <label className="text-[11px] mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
-              Datenpunkte ({entries.length})
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
+                Datenpunkte ({entries.length})
+              </label>
+              <button onClick={() => setOpts({ entries: [] })}
+                className="text-[10px] hover:opacity-70"
+                style={{ color: 'var(--accent-red, #ef4444)' }}>
+                Alle löschen
+              </button>
+            </div>
             <div className="aura-scroll space-y-1 max-h-72 overflow-y-auto">
               {entries.map(e => (
                 <EntryRow

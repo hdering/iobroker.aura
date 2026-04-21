@@ -4,6 +4,7 @@ import { useDashboardStore } from '../store/dashboardStore';
 import { useThemeStore } from '../store/themeStore';
 import { useGroupStore } from '../store/groupStore';
 import { useConfigStore } from '../store/configStore';
+import { isDirty } from '../store/persistManager';
 
 const IOBROKER_CONFIG_KEY = 'aura.0.config.dashboard';
 const SYNC_STORE_KEYS = ['aura-dashboard', 'aura-theme', 'aura-groups', 'aura-config'] as const;
@@ -20,6 +21,8 @@ const SYNC_STORE_KEYS = ['aura-dashboard', 'aura-theme', 'aura-groups', 'aura-co
  */
 export function useConfigSync(connected: boolean, configLoaded: React.MutableRefObject<boolean>): void {
   const applyRemoteConfigRaw = useCallback((raw: string) => {
+    // Don't overwrite pending local changes – user is still editing
+    if (isDirty()) return;
     try {
       const remote = JSON.parse(raw) as Record<string, unknown>;
       let changed = false;

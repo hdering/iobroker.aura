@@ -3,7 +3,6 @@ import { RefreshCw, Search, Check, X, ChevronDown, Settings2, ChevronRight, Chev
 import type { WidgetConfig } from '../../types';
 import { discoverDatapoints, loadFilterOptions } from '../widgets/AutoListWidget';
 import type { AutoListOptions, AutoListEntry, DiscoveredDp } from '../widgets/AutoListWidget';
-import { saveAll, saveToIoBroker } from '../../store/persistManager';
 import { useT } from '../../i18n';
 
 // ── MultiSelect dropdown ───────────────────────────────────────────────────────
@@ -230,8 +229,6 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
 
   const setOpts = (patch: Partial<AutoListOptions>) => {
     onConfigChange({ ...config, options: { ...opts, ...patch } });
-    saveAll();
-    saveToIoBroker();
   };
 
   const search = async () => {
@@ -391,9 +388,18 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
 
       {/* ── Current entries ── */}
       <div>
-        <label className="text-[11px] mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
-          {t('autolist.datapoints')} {(opts.entries ?? []).length > 0 && `(${opts.entries.length})`}
-        </label>
+        <div className="flex items-center justify-between mb-1.5">
+          <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
+            {t('autolist.datapoints')} {(opts.entries ?? []).length > 0 && `(${opts.entries.length})`}
+          </label>
+          {(opts.entries ?? []).length > 0 && (
+            <button onClick={() => setOpts({ entries: [] })}
+              className="text-[10px] hover:opacity-70"
+              style={{ color: 'var(--accent-red, #ef4444)' }}>
+              Alle löschen
+            </button>
+          )}
+        </div>
         {(opts.entries ?? []).length > 0 && (
           <div className="aura-scroll space-y-1 max-h-72 overflow-y-auto mb-1.5">
             {opts.entries.map(e => (
