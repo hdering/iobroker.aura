@@ -402,7 +402,7 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
     setSyncing(true);
     try {
       const found = await discoverDatapoints(opts);
-      const filtered = opts.filterRelevant ? found.filter(d => d.isRelevant) : found;
+      const filtered = (opts.filterRelevant ?? true) ? found.filter(d => d.isRelevant) : found;
       const existingIds = new Set(entries.map(e => e.id));
       const newEntries = filtered.filter(d => !existingIds.has(d.id)).map(d => ({ id: d.id, label: undefined as string | undefined, rooms: d.rooms, unit: d.unit, role: d.role, writable: d.write }));
       if (newEntries.length > 0) {
@@ -446,8 +446,7 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
     if (editMode || valueFilter === 'all') return entries;
     return entries.filter(e => {
       const val = states[e.id]?.val ?? null;
-      // If state not yet loaded, show the entry (avoid flicker on load)
-      if (val === null) return true;
+      if (val === null) return false;
       return valueFilter === 'active' ? isActive(val) : !isActive(val);
     });
   }, [entries, states, valueFilter, editMode]); // eslint-disable-line react-hooks/exhaustive-deps

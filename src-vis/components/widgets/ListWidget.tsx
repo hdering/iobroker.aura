@@ -239,7 +239,7 @@ export function ListWidget({ config, editMode, onConfigChange }: WidgetProps) {
     if (editMode || valueFilter === 'all') return entries;
     return entries.filter(e => {
       const val = states[e.id]?.val ?? null;
-      if (val === null) return true; // not yet loaded → show
+      if (val === null) return false;
       return valueFilter === 'active' ? isActive(val) : !isActive(val);
     });
   }, [entries, states, valueFilter, editMode]); // eslint-disable-line react-hooks/exhaustive-deps
