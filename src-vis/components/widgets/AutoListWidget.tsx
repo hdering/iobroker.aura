@@ -87,20 +87,10 @@ export async function loadFilterOptions(): Promise<{ roles: string[]; rooms: str
 export async function discoverDatapoints(
   opts: Pick<AutoListOptions, 'filterRoles' | 'filterIdPattern' | 'filterRooms' | 'filterFuncs'>,
 ): Promise<DiscoveredDp[]> {
-  const [stateResult, channelResult, deviceResult, enumResult] = await Promise.all([
+  const [stateResult, enumResult] = await Promise.all([
     getObjectViewDirect('state'),
-    getObjectViewDirect('channel'),
-    getObjectViewDirect('device'),
     getObjectViewDirect('enum', 'enum.', 'enum.\u9999'),
   ]);
-
-  // Build parent name map (channels take priority over devices, same as useDatapointList)
-  const parentNames = new Map<string, string>();
-  for (const { id, value: obj } of [...deviceResult.rows, ...channelResult.rows]) {
-    if (!obj?.common?.name) continue;
-    const n = resolveName(obj.common.name as string | Record<string, string>, '');
-    if (n) parentNames.set(id, n);
-  }
 
   // Build memberId → { rooms, funcs } map.
   // IMPORTANT: index by each member ID so we can do parent-path traversal below.
@@ -158,29 +148,11 @@ export async function discoverDatapoints(
         const e = enumMap.get(parts.slice(0, i).join('.'));
         if (e) e.rooms.forEach(r => roomsSet.add(r));
       }
-      // Compose name: parentName › stateName (same logic as useDatapointList)
-      const stateName = resolveName(obj.common.name as string | Record<string, string>, '');
-      let parentName = '';
-      for (let i = parts.length - 1; i >= 2; i--) {
-        const pn = parentNames.get(parts.slice(0, i).join('.'));
-        if (pn) { parentName = pn; break; }
-      }
-      let name: string;
-      if (parentName && stateName && parentName !== stateName) {
-        name = `${parentName} \u203a ${stateName}`;
-      } else if (stateName) {
-        name = stateName;
-      } else if (parentName) {
-        name = `${parentName} \u203a ${parts[parts.length - 1]}`;
-      } else {
-        name = parts[parts.length - 1] ?? id;
-      }
-
       const role = obj.common.role as string | undefined;
       const type = obj.common.type as string | undefined;
       return {
         id,
-        name,
+        name: resolveName(obj.common.name as string | Record<string, string>, id.split('.').pop() ?? id),
         role,
         type,
         unit: (obj.common.unit as string | undefined) || undefined,
@@ -394,7 +366,7 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
       const found = await discoverDatapoints(opts);
       const filtered = opts.filterRelevant ? found.filter(d => d.isRelevant) : found;
       const existingIds = new Set(entries.map(e => e.id));
-      const newEntries = filtered.filter(d => !existingIds.has(d.id)).map(d => ({ id: d.id, label: d.name, rooms: d.rooms, unit: d.unit, role: d.role, writable: d.write }));
+      const newEntries = filtered.filter(d => !existingIds.has(d.id)).map(d => ({ id: d.id, label: undefined as string | undefined, rooms: d.rooms, unit: d.unit, role: d.role, writable: d.write }));
       if (newEntries.length > 0) {
         saveOpts({ entries: [...entries, ...newEntries] });
         saveAll();
