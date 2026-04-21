@@ -175,6 +175,13 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.80 (2026-04-21)
+- Feat(wizard): reworked tab wizard with 3-step flow (theme selection → datapoint picker → layout)
+- Feat(wizard): improved widget-type detection for shutters, window contacts and binary sensors
+- Feat(wizard): battery status theme pre-fills color thresholds (green/yellow/red)
+- Feat(widgets): color thresholds (colorThresholds) option for value, dimmer, shutter and thermostat widgets
+- Fix(panel): color thresholds editor moved to bottom of property panel
+
 ### 0.4.79 (2026-04-21)
 - Fix(camera): stream-timeout default changed to 60 s; fixed config saving 0 as undefined (could not be disabled)
 

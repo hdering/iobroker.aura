@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.79",
+    "version": "0.4.80",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.80": {
+        "en": "Feat: reworked tab wizard (3-step flow: theme → datapoints → layout); improved widget-type detection for shutters, window contacts and binary sensors; color thresholds for value, dimmer, shutter and thermostat widgets",
+        "de": "Neu: Tab-Wizard überarbeitet (3-Schritt-Flow: Thema → Datenpunkte → Layout); verbesserte Widget-Typ-Erkennung für Rollladen, Fensterkontakt und Binärsensoren; Farbschwellen für Wert-Anzeige, Dimmer, Rollladen und Thermostat",
+        "ru": "Новое: переработан мастер вкладок (3 шага: тема → точки данных → макет); улучшено определение типа виджета для жалюзи, оконных контактов и бинарных датчиков; цветовые пороги для виджетов значения, диммера, жалюзи и термостата",
+        "pt": "Novo: assistente de abas reformulado (fluxo de 3 etapas: tema → pontos de dados → layout); detecção aprimorada de tipo de widget para estores, contatos de janela e sensores binários; limites de cor para widgets de valor, dimmer, estore e termostato",
+        "nl": "Nieuw: tab-wizard herzien (3-staps flow: thema → datapunten → layout); verbeterde widget-type-detectie voor rolluiken, raamcontacten en binaire sensoren; kleurdrempels voor waarde-, dimmer-, rolluik- en thermostaat-widgets",
+        "fr": "Nouveau: assistant d'onglets remanié (flux en 3 étapes: thème → points de données → mise en page); détection améliorée du type de widget pour volets, contacts de fenêtre et capteurs binaires; seuils de couleur pour les widgets valeur, gradateur, volet et thermostat",
+        "it": "Nuovo: procedura guidata schede rinnovata (flusso in 3 passi: tema → punti dati → layout); rilevamento tipo widget migliorato per tapparelle, contatti finestra e sensori binari; soglie colore per widget valore, dimmer, tapparella e termostato",
+        "es": "Nuevo: asistente de pestañas rediseñado (flujo de 3 pasos: tema → puntos de datos → diseño); detección de tipo de widget mejorada para persianas, contactos de ventana y sensores binarios; umbrales de color para widgets de valor, dimmer, persiana y termostato",
+        "pl": "Nowe: przeprojektowany kreator zakładek (3-krokowy przepływ: motyw → punkty danych → układ); ulepszone wykrywanie typu widgetu dla rolet, kontaktronów okiennych i czujników binarnych; progi kolorów dla widgetów wartości, ściemniacza, rolety i termostatu",
+        "uk": "Нове: перероблений майстер вкладок (3-кроковий потік: тема → точки даних → макет); покращене визначення типу віджету для жалюзі, віконних контактів та бінарних датчиків; кольорові пороги для віджетів значення, диммера, жалюзі та термостата",
+        "zh-cn": "新增：重新设计的标签向导（3步流程：主题→数据点→布局）；改进了百叶窗、窗口联系人和二进制传感器的小部件类型检测；为值、调光器、百叶窗和温控器小部件添加颜色阈值"
+      },
       "0.4.79": {
         "en": "Fix(camera): stream-timeout default is now 60 s; fixed saving 0 as undefined so timeout can be properly disabled",
         "de": "Fix(Kamera): Stream-Timeout Standard ist jetzt 60 s; Fehler behoben, der 0 als undefined speicherte, sodass der Timeout nicht deaktiviert werden konnte",
@@ -183,32 +196,6 @@
         "pl": "Widget kamery: automatyczne wykrywanie strumienia, wybudzanie dla kamer bateryjnych (3 tryby), nowe układy (Minimalny/Standardowy/Custom Grid), wykrywanie zdrowia strumienia z odliczaniem + nakładką błędu, konfigurowalny timeout",
         "uk": "Віджет камери: автовизначення потоку, wake-up для акумуляторних камер (3 режими), нові макети (Мінімальний/Стандарт/Custom Grid), виявлення стану потоку з відліком + оверлеєм помилки, налаштовуваний тайм-аут",
         "zh-cn": "摄像头小部件：流类型自动检测，电池摄像头唤醒数据点（3种模式），新布局（最小/标准/自定义网格），流健康检测（倒计时徽章+错误覆盖层），可配置流超时"
-      },
-      "0.4.67": {
-        "en": "Camera widget: stream type auto-detection and wake-up datapoint for battery cameras",
-        "de": "Kamera-Widget: automatische Stream-Erkennung und Wake-Up-Datenpunkt für Akku-Kameras",
-        "ru": "Виджет камеры: автоопределение типа потока и wake-up для аккумуляторных камер",
-        "pt": "Widget câmara: deteção automática do tipo de stream e wake-up para câmaras a bateria",
-        "nl": "Camera-widget: automatische streamdetectie en wake-up datapunt voor accucamera",
-        "fr": "Widget caméra: détection automatique du type de flux et point de réveil pour caméra batterie",
-        "it": "Widget fotocamera: rilevamento automatico del tipo di stream e wake-up per fotocamere a batteria",
-        "es": "Widget cámara: detección automática del tipo de stream y wake-up para cámaras de batería",
-        "pl": "Widget kamery: automatyczne wykrywanie strumienia i wybudzanie dla kamer bateryjnych",
-        "uk": "Віджет камери: автовизначення типу потоку та wake-up для акумуляторних камер",
-        "zh-cn": "摄像头小部件：流类型自动检测和电池摄像头唤醒数据点"
-      },
-      "0.4.66": {
-        "en": "Admin PIN is now stored in ioBroker datapoint admin.pinHash – a PIN set on one device or URL applies to all browsers and clients",
-        "de": "Admin-PIN wird jetzt im ioBroker-Datenpunkt admin.pinHash gespeichert – ein gesetzter PIN gilt für alle Browser und URLs",
-        "ru": "PIN администратора теперь хранится в точке данных ioBroker admin.pinHash – PIN, установленный на одном устройстве, действует для всех браузеров и клиентов",
-        "pt": "O PIN de administrador é agora armazenado no ponto de dados ioBroker admin.pinHash – um PIN definido num dispositivo ou URL aplica-se a todos os browsers e clientes",
-        "nl": "Admin PIN wordt nu opgeslagen in ioBroker datapunt admin.pinHash – een ingestelde PIN geldt voor alle browsers en URL's",
-        "fr": "Le PIN administrateur est maintenant stocké dans le point de données ioBroker admin.pinHash – un PIN défini sur un appareil ou une URL s'applique à tous les navigateurs et clients",
-        "it": "Il PIN amministratore è ora memorizzato nel punto dati ioBroker admin.pinHash – un PIN impostato su un dispositivo o URL vale per tutti i browser e client",
-        "es": "El PIN de administrador ahora se almacena en el punto de datos ioBroker admin.pinHash – un PIN establecido en un dispositivo o URL se aplica a todos los navegadores y clientes",
-        "pl": "PIN administratora jest teraz przechowywany w punkcie danych ioBroker admin.pinHash – PIN ustawiony na jednym urządzeniu lub URL obowiązuje dla wszystkich przeglądarek i klientów",
-        "uk": "PIN адміністратора тепер зберігається в точці даних ioBroker admin.pinHash – PIN, встановлений на одному пристрої або URL, діє для всіх браузерів і клієнтів",
-        "zh-cn": "管理员 PIN 现在存储在 ioBroker 数据点 admin.pinHash 中 – 在一个设备或 URL 上设置的 PIN 适用于所有浏览器和客户端"
       }
     }
   },
