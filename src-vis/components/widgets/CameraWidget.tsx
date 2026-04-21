@@ -425,7 +425,7 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
   const wakeUpDp        = (opts.wakeUpDp        as string)              ?? '';
   const wakeUpDelay     = (opts.wakeUpDelay     as number)              ?? 3;
   const wakeUpMode      = (opts.wakeUpMode      as WakeUpMode)          ?? 'auto';
-  const streamTimeout   = (opts.streamTimeout   as number)              ?? 0;
+  const streamTimeout   = (opts.streamTimeout   as number)              ?? 60;
   const videoRatio      = (opts.videoRatio      as number)              ?? 60;
   const infoItems       = (opts.infoItems       as CameraSlot[])        ?? [];
   const cameraTemplate  = (opts.cameraTemplate  as CameraTemplateId)    ?? 'stream-left';

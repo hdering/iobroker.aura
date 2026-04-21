@@ -175,6 +175,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.79 (2026-04-21)
+- Fix(camera): stream-timeout default changed to 60 s; fixed config saving 0 as undefined (could not be disabled)
+
 ### 0.4.78 (2026-04-21)
 - Feat(list): icon picker per datapoint in static list widget
 - Fix(list): removed non-functional delete (X) buttons from static and dynamic list widget views

@@ -2111,8 +2111,8 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                           <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
                             Stream-Timeout (Sek., 0 = deaktiviert)
                           </label>
-                          <input type="number" min={0} value={(o.streamTimeout as number) ?? 0}
-                            onChange={(e) => set({ streamTimeout: Number(e.target.value) || undefined })}
+                          <input type="number" min={0} value={(o.streamTimeout as number) ?? 60}
+                            onChange={(e) => set({ streamTimeout: Number(e.target.value) })}
                             className={cCls} style={cSty} />
                         </div>
                       </>

@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.78",
+    "version": "0.4.79",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.79": {
+        "en": "Fix(camera): stream-timeout default is now 60 s; fixed saving 0 as undefined so timeout can be properly disabled",
+        "de": "Fix(Kamera): Stream-Timeout Standard ist jetzt 60 s; Fehler behoben, der 0 als undefined speicherte, sodass der Timeout nicht deaktiviert werden konnte",
+        "ru": "Fix(камера): таймаут потока по умолчанию теперь 60 с; исправлено сохранение 0 как undefined, из-за чего таймаут нельзя было отключить",
+        "pt": "Fix(câmera): timeout de stream padrão agora é 60 s; corrigido salvamento de 0 como undefined, impedindo desativação do timeout",
+        "nl": "Fix(camera): standaard stream-timeout is nu 60 s; bug opgelost waarbij 0 als undefined werd opgeslagen zodat de timeout niet uitgeschakeld kon worden",
+        "fr": "Fix(caméra): le timeout de flux par défaut est maintenant 60 s; correction de la sauvegarde de 0 en tant que undefined empêchant la désactivation du timeout",
+        "it": "Fix(fotocamera): timeout stream predefinito ora 60 s; corretto salvataggio di 0 come undefined che impediva di disabilitare il timeout",
+        "es": "Fix(cámara): el timeout de stream por defecto es ahora 60 s; corregido el guardado de 0 como undefined que impedía desactivar el timeout",
+        "pl": "Fix(kamera): domyślny timeout strumienia wynosi teraz 60 s; naprawiono zapisywanie 0 jako undefined uniemożliwiające wyłączenie timeout",
+        "uk": "Fix(камера): стандартний таймаут потоку тепер 60 с; виправлено збереження 0 як undefined, через що таймаут не можна було вимкнути",
+        "zh-cn": "修复(摄像头)：流超时默认值现在为60秒；修复了将0保存为undefined导致无法禁用超时的问题"
+      },
       "0.4.78": {
         "en": "Feat: icon picker per datapoint in static list; removed non-functional delete buttons from list widgets; calendar widget auto-retries every 45 s after adapter restart",
         "de": "Neu: Icon-Auswahl pro Datenpunkt in statischer Liste; nicht-funktionale Löschen-Buttons aus Listen-Widgets entfernt; Kalender-Widget wiederholt Fetch alle 45 s nach Adapter-Neustart",
