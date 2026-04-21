@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { RefreshCw, X } from 'lucide-react';
+import { RefreshCw, X, Filter } from 'lucide-react';
 import type { WidgetProps, ioBrokerState } from '../../types';
 import { getObjectViewDirect, getObjectDirect, useIoBroker } from '../../hooks/useIoBroker';
 import { saveAll, saveToIoBroker } from '../../store/persistManager';
@@ -87,10 +87,20 @@ export async function loadFilterOptions(): Promise<{ roles: string[]; rooms: str
 export async function discoverDatapoints(
   opts: Pick<AutoListOptions, 'filterRoles' | 'filterIdPattern' | 'filterRooms' | 'filterFuncs'>,
 ): Promise<DiscoveredDp[]> {
-  const [stateResult, enumResult] = await Promise.all([
+  const [stateResult, channelResult, deviceResult, enumResult] = await Promise.all([
     getObjectViewDirect('state'),
+    getObjectViewDirect('channel'),
+    getObjectViewDirect('device'),
     getObjectViewDirect('enum', 'enum.', 'enum.\u9999'),
   ]);
+
+  // Build parent name map (channels take priority over devices, same as useDatapointList)
+  const parentNames = new Map<string, string>();
+  for (const { id, value: obj } of [...deviceResult.rows, ...channelResult.rows]) {
+    if (!obj?.common?.name) continue;
+    const n = resolveName(obj.common.name as string | Record<string, string>, '');
+    if (n) parentNames.set(id, n);
+  }
 
   // Build memberId → { rooms, funcs } map.
   // IMPORTANT: index by each member ID so we can do parent-path traversal below.
@@ -148,11 +158,29 @@ export async function discoverDatapoints(
         const e = enumMap.get(parts.slice(0, i).join('.'));
         if (e) e.rooms.forEach(r => roomsSet.add(r));
       }
+      // Compose name: parentName › stateName (same logic as useDatapointList)
+      const stateName = resolveName(obj.common.name as string | Record<string, string>, '');
+      let parentName = '';
+      for (let i = parts.length - 1; i >= 2; i--) {
+        const pn = parentNames.get(parts.slice(0, i).join('.'));
+        if (pn) { parentName = pn; break; }
+      }
+      let name: string;
+      if (parentName && stateName && parentName !== stateName) {
+        name = `${parentName} \u203a ${stateName}`;
+      } else if (stateName) {
+        name = stateName;
+      } else if (parentName) {
+        name = `${parentName} \u203a ${parts[parts.length - 1]}`;
+      } else {
+        name = parts[parts.length - 1] ?? id;
+      }
+
       const role = obj.common.role as string | undefined;
       const type = obj.common.type as string | undefined;
       return {
         id,
-        name: resolveName(obj.common.name, id.split('.').pop() ?? id),
+        name,
         role,
         type,
         unit: (obj.common.unit as string | undefined) || undefined,
@@ -331,6 +359,7 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
   const [states, setStates] = useState<Record<string, ioBrokerState | null>>({});
   const [resolvedNames, setResolvedNames] = useState<Record<string, string>>({});
   const [syncing, setSyncing] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
   const syncMs = (opts.syncIntervalMin ?? 5) * 60_000;
   const layout = config.layout ?? 'default';
 
@@ -383,26 +412,15 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
 
   const removeEntry = (id: string) => saveOpts({ entries: entries.filter(e => e.id !== id) });
 
-  const getLabel = (entry: AutoListEntry) => {
-    let label = entry.label;
-    if (label) {
-      // If label looks like a DP path (ends with same last segment as the ID),
-      // use the parent segment (device name) instead of the full path.
-      const idLastSeg = entry.id.split('.').pop() ?? '';
-      if (idLastSeg && label.includes('.') && label.split('.').pop() === idLastSeg) {
-        const segs = label.split('.');
-        label = segs.length >= 2 ? (segs[segs.length - 2] || label) : label;
-      }
-    } else {
-      label = resolvedNames[entry.id] || entry.id.split('.').pop() || entry.id;
-    }
-    return applyDpNameFilter(label);
-  };
+  const getLabel = (entry: AutoListEntry) =>
+    applyDpNameFilter(entry.label || resolvedNames[entry.id] || entry.id.split('.').pop() || entry.id);
 
   // ── Value filter ───────────────────────────────────────────────────────────
   const valueFilter = opts.valueFilter ?? 'all';
   const filterActiveLabel   = opts.filterActiveLabel   || 'Nur aktive';
   const filterInactiveLabel = opts.filterInactiveLabel || 'Nur inaktive';
+  type FilterMode = 'all' | 'active' | 'inactive';
+  const filterLabels: Record<FilterMode, string> = { all: 'Alle', active: filterActiveLabel, inactive: filterInactiveLabel };
 
   /** true = value is considered "active" (on / > 0) */
   const isActive = (val: ioBrokerState['val']): boolean => {
@@ -439,10 +457,45 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
           </span>
         )}
       </span>
-      <button onClick={runSync} title="Jetzt synchronisieren"
-        className="hover:opacity-70 transition-opacity p-0.5" style={{ color: 'var(--text-secondary)' }}>
-        <RefreshCw size={11} className={syncing ? 'animate-spin' : ''} />
-      </button>
+      <div className="flex items-center gap-1 shrink-0">
+        <div className="relative">
+          <button
+            onClick={() => setShowFilter(v => !v)}
+            className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] hover:opacity-80"
+            style={{
+              background: valueFilter !== 'all' ? 'color-mix(in srgb, var(--accent) 15%, transparent)' : 'transparent',
+              color: valueFilter !== 'all' ? 'var(--accent)' : 'var(--text-secondary)',
+              border: `1px solid ${valueFilter !== 'all' ? 'color-mix(in srgb, var(--accent) 40%, transparent)' : 'transparent'}`,
+            }}
+            title="Filter">
+            <Filter size={10} />
+            {valueFilter !== 'all' && <span>{filterLabels[valueFilter as FilterMode]}</span>}
+          </button>
+          {showFilter && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setShowFilter(false)} />
+              <div className="absolute right-0 top-6 rounded-lg shadow-xl z-20 overflow-hidden min-w-[110px]"
+                style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}>
+                {(Object.keys(filterLabels) as FilterMode[]).map(mode => (
+                  <button key={mode}
+                    onClick={() => { saveOpts({ valueFilter: mode }); setShowFilter(false); }}
+                    className="w-full px-3 py-2 text-xs text-left hover:opacity-80"
+                    style={{
+                      background: valueFilter === mode ? 'color-mix(in srgb, var(--accent) 12%, transparent)' : 'transparent',
+                      color: valueFilter === mode ? 'var(--accent)' : 'var(--text-primary)',
+                    }}>
+                    {filterLabels[mode]}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+        <button onClick={runSync} title="Jetzt synchronisieren"
+          className="hover:opacity-70 transition-opacity p-0.5" style={{ color: 'var(--text-secondary)' }}>
+          <RefreshCw size={11} className={syncing ? 'animate-spin' : ''} />
+        </button>
+      </div>
     </div>
   ) : null;
 

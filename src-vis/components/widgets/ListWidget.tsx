@@ -449,14 +449,14 @@ export function ListWidget({ config, editMode, onConfigChange }: WidgetProps) {
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="text-xs truncate" style={{ color: 'var(--text-primary)' }}>{label}</div>
-                  {opts.showId && (
-                    <div className="text-[9px] truncate font-mono" style={{ color: 'var(--text-secondary)' }}>
-                      {entry.id}
-                    </div>
-                  )}
                   {opts.showRoom && (resolvedRooms[entry.id]?.join(', ') || null) && (
                     <div className="text-[10px] truncate" style={{ color: 'var(--text-secondary)' }}>
                       {resolvedRooms[entry.id].join(', ')}
+                    </div>
+                  )}
+                  {opts.showId && (
+                    <div className="text-[9px] truncate font-mono" style={{ color: 'var(--text-secondary)' }}>
+                      {entry.id}
                     </div>
                   )}
                 </div>
