@@ -175,12 +175,14 @@ npm run build:adapter
 
 ## Changelog
 
-### 0.4.67 (2026-04-21)
-- Camera widget: auto-detect stream type – HTML pages (e.g. go2rtc `stream.html`) render in an iframe, RTSP URLs show a helpful hint
-- Camera widget: optional wake-up datapoint for battery-powered cameras (e.g. Eufy) with three trigger modes (auto, on-view, on-click)
+### 0.4.68 (2026-04-21)
 - Camera widget: new layouts – Minimal (stream only), Standard (stream + configurable info rows), Custom Grid (5 predefined templates with configurable slots)
 - Camera widget: stream health detection – countdown timer with color-coded badge, consecutive error counting; shows "Stream ended" / "Connection lost" overlay with re-activate button
 - Camera widget: configurable stream timeout (seconds); info slots and widget name always visible regardless of stream state
+
+### 0.4.67 (2026-04-21)
+- Camera widget: auto-detect stream type – HTML pages (e.g. go2rtc `stream.html`) render in an iframe, RTSP URLs show a helpful hint
+- Camera widget: optional wake-up datapoint for battery-powered cameras (e.g. Eufy) with three trigger modes (auto, on-view, on-click)
 
 ### 0.4.66 (2026-04-20)
 - Admin PIN is now stored in ioBroker datapoint `admin.pinHash` – a PIN set on one device or URL applies to all browsers and clients

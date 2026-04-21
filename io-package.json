@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.67",
+    "version": "0.4.68",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,7 +106,7 @@
       }
     ],
     "news": {
-      "0.4.67": {
+      "0.4.68": {
         "en": "Camera widget: stream type auto-detection, wake-up datapoint for battery cameras (3 modes), new layouts (Minimal/Standard/Custom Grid), stream health detection with countdown + error overlay, configurable stream timeout",
         "de": "Kamera-Widget: automatische Stream-Erkennung, Wake-Up-Datenpunkt für Akku-Kameras (3 Modi), neue Layouts (Minimal/Standard/Custom Grid), Stream-Gesundheitserkennung mit Countdown + Fehler-Overlay, einstellbarer Stream-Timeout",
         "ru": "Виджет камеры: автоопределение потока, wake-up для аккумуляторных камер (3 режима), новые макеты (минимальный/стандарт/сетка), определение состояния потока с обратным отсчётом и оверлеем ошибки, настраиваемый таймаут",
@@ -118,6 +118,19 @@
         "pl": "Widget kamery: automatyczne wykrywanie strumienia, wybudzanie dla kamer bateryjnych (3 tryby), nowe układy (Minimalny/Standardowy/Custom Grid), wykrywanie zdrowia strumienia z odliczaniem + nakładką błędu, konfigurowalny timeout",
         "uk": "Віджет камери: автовизначення потоку, wake-up для акумуляторних камер (3 режими), нові макети (Мінімальний/Стандарт/Custom Grid), виявлення стану потоку з відліком + оверлеєм помилки, налаштовуваний тайм-аут",
         "zh-cn": "摄像头小部件：流类型自动检测，电池摄像头唤醒数据点（3种模式），新布局（最小/标准/自定义网格），流健康检测（倒计时徽章+错误覆盖层），可配置流超时"
+      },
+      "0.4.67": {
+        "en": "Camera widget: stream type auto-detection and wake-up datapoint for battery cameras",
+        "de": "Kamera-Widget: automatische Stream-Erkennung und Wake-Up-Datenpunkt für Akku-Kameras",
+        "ru": "Виджет камеры: автоопределение типа потока и wake-up для аккумуляторных камер",
+        "pt": "Widget câmara: deteção automática do tipo de stream e wake-up para câmaras a bateria",
+        "nl": "Camera-widget: automatische streamdetectie en wake-up datapunt voor accucamera",
+        "fr": "Widget caméra: détection automatique du type de flux et point de réveil pour caméra batterie",
+        "it": "Widget fotocamera: rilevamento automatico del tipo di stream e wake-up per fotocamere a batteria",
+        "es": "Widget cámara: detección automática del tipo de stream y wake-up para cámaras de batería",
+        "pl": "Widget kamery: automatyczne wykrywanie strumienia i wybudzanie dla kamer bateryjnych",
+        "uk": "Віджет камери: автовизначення типу потоку та wake-up для акумуляторних камер",
+        "zh-cn": "摄像头小部件：流类型自动检测和电池摄像头唤醒数据点"
       },
       "0.4.66": {
         "en": "Admin PIN is now stored in ioBroker datapoint admin.pinHash – a PIN set on one device or URL applies to all browsers and clients",
