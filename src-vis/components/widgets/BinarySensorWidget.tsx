@@ -10,12 +10,13 @@ export const BINARY_SENSOR_PRESETS: Record<string, {
   labelOn: string; labelOff: string;
   colorOn: string; colorOff: string;
 }> = {
-  motion:    { labelOn: 'Bewegung',  labelOff: 'Ruhig',  colorOn: '#f59e0b', colorOff: 'var(--accent-green)' },
-  smoke:     { labelOn: 'Alarm!',    labelOff: 'OK',     colorOn: 'var(--accent-red, #ef4444)', colorOff: 'var(--accent-green)' },
-  doorbell:  { labelOn: 'Klingelt',  labelOff: 'Ruhig',  colorOn: '#f59e0b', colorOff: 'var(--text-secondary)' },
-  vibration: { labelOn: 'Vibration', labelOff: 'Ruhig',  colorOn: '#f59e0b', colorOff: 'var(--accent-green)' },
-  flood:     { labelOn: 'Wasser!',   labelOff: 'Trocken',colorOn: 'var(--accent-red, #ef4444)', colorOff: 'var(--accent-green)' },
-  generic:   { labelOn: 'Aktiv',     labelOff: 'Inaktiv',colorOn: 'var(--accent-green)', colorOff: 'var(--text-secondary)' },
+  motion:    { labelOn: 'Bewegung',  labelOff: 'Ruhig',   colorOn: '#f59e0b',                     colorOff: 'var(--accent-green)' },
+  smoke:     { labelOn: 'Alarm!',    labelOff: 'OK',      colorOn: 'var(--accent-red, #ef4444)',   colorOff: 'var(--accent-green)' },
+  doorbell:  { labelOn: 'Klingelt',  labelOff: 'Ruhig',   colorOn: '#f59e0b',                     colorOff: 'var(--text-secondary)' },
+  vibration: { labelOn: 'Vibration', labelOff: 'Ruhig',   colorOn: '#f59e0b',                     colorOff: 'var(--accent-green)' },
+  flood:     { labelOn: 'Wasser!',   labelOff: 'Trocken', colorOn: 'var(--accent-red, #ef4444)',   colorOff: 'var(--accent-green)' },
+  lowbat:    { labelOn: 'Leer',      labelOff: 'OK',      colorOn: 'var(--accent-red, #ef4444)',   colorOff: 'var(--accent-green)' },
+  generic:   { labelOn: 'Aktiv',     labelOff: 'Inaktiv', colorOn: 'var(--accent-green)',          colorOff: 'var(--text-secondary)' },
 };
 
 export function BinarySensorWidget({ config }: WidgetProps) {

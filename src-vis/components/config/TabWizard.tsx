@@ -184,7 +184,20 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
     const layouts = generateLayouts(activeWidgets, undefined, { gridCols: effectiveCols });
     const layout = layouts.find((l) => l.id === selectedLayoutId) ?? layouts[0];
     if (!layout) return;
-    const widgets = layout.widgets.map((w, i) => ({ ...w, id: `wiz-${ts}-${i}` }));
+    const widgets = layout.widgets.map((w, i) => {
+      const base = { ...w, id: `wiz-${ts}-${i}` };
+      if (theme === 'battery') {
+        if (base.type === 'binarysensor') {
+          // lowbat indicator: red when true (low), green when false (OK)
+          return { ...base, options: { ...base.options, sensorType: 'lowbat' } };
+        }
+        if (base.type === 'value') {
+          // battery %: red <20, yellow <50, green ≥50
+          return { ...base, options: { ...base.options, colorThresholds: [[20, 'var(--accent-red, #ef4444)'], [50, '#f59e0b'], [101, 'var(--accent-green)']] } };
+        }
+      }
+      return base;
+    });
     onAdd(name, widgets);
   };
 

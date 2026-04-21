@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Activity, TrendingUp, Hash } from 'lucide-react';
 import { useDatapoint } from '../../hooks/useDatapoint';
 import type { WidgetProps } from '../../types';
@@ -23,6 +24,21 @@ export function ValueWidget({ config }: WidgetProps) {
     : typeof value === 'number' ? value.toLocaleString('de-DE')
     : String(value);
 
+  // Threshold-based color: [[maxExclusive, color], …] sorted ascending
+  const thresholds = o.colorThresholds as Array<[number, string]> | undefined;
+  const thresholdColor = useMemo(() => {
+    if (!thresholds?.length) return undefined;
+    const num = typeof value === 'number' ? value : parseFloat(String(value));
+    if (isNaN(num)) return undefined;
+    for (const [thresh, color] of thresholds) {
+      if (num < thresh) return color;
+    }
+    return thresholds[thresholds.length - 1][1];
+  }, [thresholds, value]);
+
+  const accentColor = thresholdColor ?? 'var(--accent)';
+  const valueColor  = thresholdColor ?? 'var(--text-primary)';
+
   // --- CUSTOM ---
   if (layout === 'custom') return <CustomGridView config={config} value={displayValue} unit={unit} />;
 
@@ -41,18 +57,18 @@ export function ValueWidget({ config }: WidgetProps) {
   if (layout === 'card') {
     return (
       <div className="flex h-full gap-3">
-        <div className="w-1 rounded-full self-stretch" style={{ background: 'var(--accent)' }} />
+        <div className="w-1 rounded-full self-stretch" style={{ background: accentColor }} />
         <div className="flex flex-col justify-between flex-1">
           {showTitle && (
             <div className="flex items-center gap-2">
-              <CardIcon size={14} style={{ color: 'var(--accent)' }} />
+              <CardIcon size={14} style={{ color: accentColor }} />
               <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
             </div>
           )}
           {showValue && (
             <div>
-              <span className="text-4xl font-black" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>{displayValue}</span>
-              {showUnit && unit && <span className="text-lg ml-1 font-medium" style={{ color: 'var(--accent)' }}>{unit}</span>}
+              <span className="text-4xl font-black" style={{ color: valueColor, letterSpacing: '-0.02em' }}>{displayValue}</span>
+              {showUnit && unit && <span className="text-lg ml-1 font-medium" style={{ color: accentColor }}>{unit}</span>}
             </div>
           )}
         </div>
@@ -71,7 +87,7 @@ export function ValueWidget({ config }: WidgetProps) {
           </div>
         )}
         {showValue && (
-          <span className="text-xl font-bold shrink-0" style={{ color: 'var(--text-primary)' }}>
+          <span className="text-xl font-bold shrink-0" style={{ color: valueColor }}>
             {displayValue}{showUnit && unit && <span className="text-sm ml-0.5" style={{ color: 'var(--text-secondary)' }}>{unit}</span>}
           </span>
         )}
@@ -85,7 +101,7 @@ export function ValueWidget({ config }: WidgetProps) {
       <div className="flex flex-col items-center justify-center h-full">
         {showValue && (
           <div className="flex items-baseline gap-1 leading-none">
-            <span className="font-black" style={{ color: 'var(--accent)', fontSize: 'calc(clamp(2rem, 4vw, 3.5rem) * var(--font-scale, 1))' }}>{displayValue}</span>
+            <span className="font-black" style={{ color: accentColor, fontSize: 'calc(clamp(2rem, 4vw, 3.5rem) * var(--font-scale, 1))' }}>{displayValue}</span>
             {showUnit && unit && <span className="text-lg font-medium" style={{ color: 'var(--text-secondary)' }}>{unit}</span>}
           </div>
         )}
@@ -110,7 +126,7 @@ export function ValueWidget({ config }: WidgetProps) {
       )}
       {showValue && (
         <div className="flex items-end gap-1.5">
-          <span className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>{displayValue}</span>
+          <span className="text-3xl font-bold" style={{ color: valueColor }}>{displayValue}</span>
           {showUnit && unit && <span className="text-sm mb-0.5" style={{ color: 'var(--text-secondary)' }}>{unit}</span>}
         </div>
       )}
