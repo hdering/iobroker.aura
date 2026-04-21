@@ -2773,11 +2773,12 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                         style={sInputStyle}>
                         {Object.keys(BINARY_SENSOR_PRESETS).map((k) => (
                           <option key={k} value={k}>
-                            {k === 'motion' ? 'Bewegungsmelder' :
-                             k === 'smoke' ? 'Rauchmelder' :
-                             k === 'doorbell' ? 'Türklingel' :
+                            {k === 'motion'    ? 'Bewegungsmelder' :
+                             k === 'smoke'     ? 'Rauchmelder' :
+                             k === 'doorbell'  ? 'Türklingel' :
                              k === 'vibration' ? 'Erschütterung' :
-                             k === 'flood' ? 'Wassermelder' :
+                             k === 'flood'     ? 'Wassermelder' :
+                             k === 'lowbat'    ? 'Batterie-Warnung' :
                              'Generisch'}
                           </option>
                         ))}
