@@ -449,6 +449,15 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
             style={{ left: (opts.showId ?? false) ? '18px' : '2px' }} />
         </button>
       </div>
+      <div className="flex items-center justify-between">
+        <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Nur relevante DPs (Auto-Sync)</label>
+        <button onClick={() => setOpts({ filterRelevant: !(opts.filterRelevant ?? false) })}
+          className="relative w-9 h-5 rounded-full transition-colors"
+          style={{ background: (opts.filterRelevant ?? false) ? 'var(--accent)' : 'var(--app-border)' }}>
+          <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all"
+            style={{ left: (opts.filterRelevant ?? false) ? '18px' : '2px' }} />
+        </button>
+      </div>
       <div>
         <label className="text-[11px] mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>Anzeige-Filter (Frontend)</label>
         <div className="flex rounded-lg overflow-hidden" style={{ border: '1px solid var(--app-border)' }}>

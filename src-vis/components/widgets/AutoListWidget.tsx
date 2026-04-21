@@ -6,6 +6,7 @@ import { saveAll, saveToIoBroker } from '../../store/persistManager';
 import { isRelevantDp } from '../../utils/dpRelevance';
 import { getRoleDisplay } from '../../utils/listEntryDisplay';
 import { CustomGridView } from './CustomGridView';
+import { applyDpNameFilter } from '../../utils/dpNameFilter';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -29,6 +30,7 @@ export interface AutoListOptions {
   syncIntervalMin?: number;
   showRoom?: boolean;
   showId?: boolean;
+  filterRelevant?: boolean;
   /** 'all' = show everything (default), 'active' = only on/> 0, 'inactive' = only off/0 */
   valueFilter?: 'all' | 'active' | 'inactive';
   filterActiveLabel?: string;
@@ -361,8 +363,9 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
     setSyncing(true);
     try {
       const found = await discoverDatapoints(opts);
+      const filtered = opts.filterRelevant ? found.filter(d => d.isRelevant) : found;
       const existingIds = new Set(entries.map(e => e.id));
-      const newEntries = found.filter(d => !existingIds.has(d.id)).map(d => ({ id: d.id, label: d.name, rooms: d.rooms, unit: d.unit, role: d.role, writable: d.write }));
+      const newEntries = filtered.filter(d => !existingIds.has(d.id)).map(d => ({ id: d.id, label: d.name, rooms: d.rooms, unit: d.unit, role: d.role, writable: d.write }));
       if (newEntries.length > 0) {
         saveOpts({ entries: [...entries, ...newEntries] });
         saveAll();
@@ -380,8 +383,21 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
 
   const removeEntry = (id: string) => saveOpts({ entries: entries.filter(e => e.id !== id) });
 
-  const getLabel = (entry: AutoListEntry) =>
-    entry.label || resolvedNames[entry.id] || entry.id.split('.').pop() || entry.id;
+  const getLabel = (entry: AutoListEntry) => {
+    let label = entry.label;
+    if (label) {
+      // If label looks like a DP path (ends with same last segment as the ID),
+      // use the parent segment (device name) instead of the full path.
+      const idLastSeg = entry.id.split('.').pop() ?? '';
+      if (idLastSeg && label.includes('.') && label.split('.').pop() === idLastSeg) {
+        const segs = label.split('.');
+        label = segs.length >= 2 ? (segs[segs.length - 2] || label) : label;
+      }
+    } else {
+      label = resolvedNames[entry.id] || entry.id.split('.').pop() || entry.id;
+    }
+    return applyDpNameFilter(label);
+  };
 
   // ── Value filter ───────────────────────────────────────────────────────────
   const valueFilter = opts.valueFilter ?? 'all';

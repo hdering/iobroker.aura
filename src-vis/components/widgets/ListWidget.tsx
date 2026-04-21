@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { Filter, X } from 'lucide-react';
 import { useIoBroker, getObjectDirect, getObjectViewDirect } from '../../hooks/useIoBroker';
+import { applyDpNameFilter } from '../../utils/dpNameFilter';
 import { saveAll, saveToIoBroker } from '../../store/persistManager';
 import type { WidgetProps, ioBrokerState } from '../../types';
 import { resolveName } from './AutoListWidget';
@@ -212,7 +213,7 @@ export function ListWidget({ config, editMode, onConfigChange }: WidgetProps) {
   };
 
   const getLabel = (entry: StaticListEntry) =>
-    entry.label || resolvedNames[entry.id] || entry.id.split('.').pop() || entry.id;
+    applyDpNameFilter(entry.label || resolvedNames[entry.id] || entry.id.split('.').pop() || entry.id);
 
   // Value filter (same logic as AutoListWidget)
   const valueFilter = (opts.valueFilter ?? 'all') as FilterMode;

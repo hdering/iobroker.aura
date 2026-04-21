@@ -2,7 +2,7 @@ import type { StateStorage } from 'zustand/middleware';
 import { setStateDirect } from '../hooks/useIoBroker';
 
 const IOBROKER_CONFIG_KEY = 'aura.0.config.dashboard';
-const SYNC_STORE_KEYS = ['aura-dashboard', 'aura-theme', 'aura-groups', 'aura-config'] as const;
+const SYNC_STORE_KEYS = ['aura-dashboard', 'aura-theme', 'aura-groups', 'aura-config', 'aura-global-settings'] as const;
 
 // All writes from managed stores go here instead of directly to localStorage
 const pending = new Map<string, string>();

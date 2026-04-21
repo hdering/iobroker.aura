@@ -4,6 +4,7 @@ import { useActiveLayout, useDashboardStore } from '../../store/dashboardStore';
 import { useConnectionStore } from '../../store/connectionStore';
 import { useConfigStore } from '../../store/configStore';
 import { useAdminPrefsStore } from '../../store/adminPrefsStore';
+import { useGlobalSettingsStore } from '../../store/globalSettingsStore';
 import { reconnectSocket, getObjectViewDirect, getStateDirect, setStateDirect } from '../../hooks/useIoBroker';
 import { Eye, EyeOff, AlertTriangle, RefreshCw, Tablet, Edit3, Check, X, Trash2 } from 'lucide-react';
 import { useT } from '../../i18n';
@@ -596,6 +597,41 @@ function LayoutContextSwitcher({
   );
 }
 
+// ── DP Name Filter ─────────────────────────────────────────────────────────────
+
+function DpNameFilterCard() {
+  const { dpNameSuffixes, dpNameReplaceDots, setDpNameSuffixes, setDpNameReplaceDots } = useGlobalSettingsStore();
+  return (
+    <Card title="DP-Namen bereinigen">
+      <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
+        Gilt global überall wo DP-Namen angezeigt werden.
+      </p>
+      <div className="space-y-3">
+        <div>
+          <label className="text-xs block mb-1" style={{ color: 'var(--text-secondary)' }}>
+            Suffixe entfernen (kommagetrennt)
+          </label>
+          <input
+            value={dpNameSuffixes}
+            onChange={e => setDpNameSuffixes(e.target.value)}
+            placeholder=".STATE, .LEVEL, :1, :2, :3"
+            className="w-full rounded-lg px-3 py-2 text-xs font-mono focus:outline-none"
+            style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
+          />
+          <p className="text-[10px] mt-1" style={{ color: 'var(--text-secondary)', opacity: 0.6 }}>
+            Wird am Ende des Namens abgeschnitten (Groß-/Kleinschreibung egal)
+          </p>
+        </div>
+        <ToggleRow
+          label="Punkte durch Leerzeichen ersetzen"
+          value={dpNameReplaceDots}
+          onChange={setDpNameReplaceDots}
+        />
+      </div>
+    </Card>
+  );
+}
+
 // ── Main ───────────────────────────────────────────────────────────────────────
 
 export function AdminSettings() {
@@ -890,10 +926,11 @@ export function AdminSettings() {
         />
       </div>
 
-      {/* Row 2: Clients + Expert side by side */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* Row 2: Clients + Expert + DP-Namen */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <ClientsCard />
         <ExpertSettings />
+        <DpNameFilterCard />
       </div>
 
       {/* Reset */}
