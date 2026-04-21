@@ -102,6 +102,54 @@ restriction entirely.
 
 ---
 
+## Widget Notes
+
+### Camera widget
+
+#### Stream URL types
+
+The camera widget auto-detects the stream type based on the URL:
+
+| URL pattern | Rendering | Notes |
+|---|---|---|
+| `*.html` / `*.htm` | `<iframe>` | Works with go2rtc `stream.html`, any HTML-based player |
+| `rtsp://` / `rtsps://` | Hint message | RTSP is not supported natively in browsers – use go2rtc as a proxy and enter the MJPEG URL instead |
+| everything else | `<img>` | MJPEG (refresh interval = 0) or periodic snapshot |
+
+**go2rtc MJPEG URL:** `http://<host>:1984/api/stream.mjpeg?src=<stream-name>`
+
+#### Mixed Content (HTTP stream in HTTPS dashboard)
+
+If Aura is served over **HTTPS** and the camera URL is **HTTP**, browsers apply mixed content rules:
+
+| Client | Behaviour |
+|---|---|
+| Desktop Chrome / Firefox | Usually allows passive content (`<img>` MJPEG), may block `<iframe>` |
+| Chrome on Android | Allows passive mixed content |
+| **Android WebView** (Fully Kiosk, custom apps) | **Blocks all mixed content by default** |
+| Safari / iOS | Blocks active mixed content (`<iframe>`) |
+
+**Fixes:**
+- **Fully Kiosk Browser:** Settings → Advanced Web Settings → **Allow Mixed Content** ✓
+- **Clean solution:** serve go2rtc behind a reverse proxy with HTTPS so the camera URL is also `https://`
+- **Quick workaround:** open Aura via `http://` instead of `https://` in the kiosk browser (only if your network is trusted)
+
+The widget config panel shows a warning automatically when a `http://` stream URL is detected while Aura is running on `https://`.
+
+#### Wake-up datapoint (battery cameras, e.g. Eufy)
+
+Some cameras (e.g. Eufy) need an explicit activation signal before the stream is available. Configure an ioBroker datapoint in the widget settings – the widget sends `true` when the stream should start and `false` when it stops.
+
+Three trigger modes are available:
+
+| Mode | When is `true` sent? |
+|---|---|
+| Automatisch | On page load |
+| Bei Sicht | When the widget scrolls into the viewport |
+| Bei Klick | When the user taps the widget placeholder |
+
+---
+
 ## Bugs & Feature Requests
 
 Please report directly as a GitHub issue:

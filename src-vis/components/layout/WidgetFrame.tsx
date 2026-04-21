@@ -1970,6 +1970,16 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                     <div>
                       <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Stream-URL</label>
                       <input type="url" value={(o.streamUrl as string) ?? ''} onChange={(e) => set({ streamUrl: e.target.value || undefined })} placeholder="http://…/stream.mjpg" className={cCls + ' font-mono'} style={cSty} />
+                      {(() => {
+                        const url = (o.streamUrl as string) ?? '';
+                        const mixedContent = url.startsWith('http://') && window.location.protocol === 'https:';
+                        if (!mixedContent) return null;
+                        return (
+                          <p className="text-[10px] mt-1 leading-tight" style={{ color: '#f59e0b' }}>
+                            ⚠ Mixed Content: Aura läuft über HTTPS, die Stream-URL ist HTTP. Desktop-Browser erlauben dies oft, mobile WebViews (z.B. Fully Kiosk) blockieren es. Lösung: in Fully Kiosk → Advanced Web Settings → <em>Allow Mixed Content</em> aktivieren, oder go2rtc per HTTPS bereitstellen.
+                          </p>
+                        );
+                      })()}
                     </div>
                     <div>
                       <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Aktualisierung (Sek., 0 = MJPEG)</label>
