@@ -15,6 +15,7 @@ import { useConfigStore } from '../../store/configStore';
 import { useT } from '../../i18n';
 import { ensureDatapointCache } from '../../hooks/useDatapointList';
 import { DP_TEMPLATES, DP_TEMPLATE_CATEGORIES, detectWidgetTypeFromRole, findTemplateByRole } from '../../utils/dpTemplates';
+import { slugify } from '../../utils/slugify';
 
 // Layout labels are resolved inside components via t() to support i18n
 const LAYOUT_IDS: WidgetLayout[] = ['default', 'card', 'compact', 'minimal'];
@@ -719,9 +720,23 @@ export function AdminEditor() {
   const guidelinesEnabled = frontend.guidelinesEnabled ?? false;
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renamingValue, setRenamingValue] = useState('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [settingsTabId, setSettingsTabId] = useState<string | null>(null);
   const [panelPos, setPanelPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const settingsBtnRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+
+  const commitRenameWithSlug = (tabId: string, newName: string) => {
+    const tab = tabs.find((t) => t.id === tabId);
+    if (tab) {
+      const currentSlug = tab.slug ?? tab.id;
+      if (currentSlug === slugify(tab.name)) {
+        updateTab(tabId, { name: newName, slug: slugify(newName) });
+      } else {
+        renameTab(tabId, newName);
+      }
+    }
+    setRenamingId(null);
+  };
 
   const openTabSettings = (tabId: string) => {
     const btn = settingsBtnRefs.current.get(tabId);
@@ -806,12 +821,12 @@ export function AdminEditor() {
                   <input autoFocus value={renamingValue}
                     onChange={(e) => setRenamingValue(e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter') { renameTab(tab.id, renamingValue); setRenamingId(null); }
+                      if (e.key === 'Enter') commitRenameWithSlug(tab.id, renamingValue);
                       if (e.key === 'Escape') setRenamingId(null);
                     }}
                     className="text-xs rounded px-2 py-1 w-28 focus:outline-none"
                     style={{ background: 'var(--app-surface)', color: 'var(--text-primary)', border: '1px solid var(--accent)' }} />
-                  <button onClick={() => { renameTab(tab.id, renamingValue); setRenamingId(null); }}
+                  <button onClick={() => commitRenameWithSlug(tab.id, renamingValue)}
                     className="p-1 rounded hover:opacity-70" style={{ color: 'var(--accent-green)' }}>
                     <Check size={13} />
                   </button>
@@ -841,10 +856,23 @@ export function AdminEditor() {
                       <Edit3 size={11} />
                     </button>
                     {tabs.length > 1 && (
-                      <button onClick={() => removeTab(tab.id)}
-                        className="p-0.5 rounded hover:opacity-70" style={{ color: 'var(--accent-red)' }}>
-                        <Trash2 size={11} />
-                      </button>
+                      confirmDeleteId === tab.id ? (
+                        <>
+                          <button onClick={() => setConfirmDeleteId(null)}
+                            className="p-0.5 rounded hover:opacity-70" style={{ color: 'var(--text-secondary)' }}>
+                            <X size={11} />
+                          </button>
+                          <button onClick={() => { removeTab(tab.id); setConfirmDeleteId(null); }}
+                            className="p-0.5 rounded hover:opacity-70" style={{ color: 'var(--accent-red)' }}>
+                            <Check size={11} />
+                          </button>
+                        </>
+                      ) : (
+                        <button onClick={() => setConfirmDeleteId(tab.id)}
+                          className="p-0.5 rounded hover:opacity-70" style={{ color: 'var(--accent-red)' }}>
+                          <Trash2 size={11} />
+                        </button>
+                      )
                     )}
                   </div>
                 </div>
@@ -916,7 +944,15 @@ export function AdminEditor() {
               <input
                 type="text"
                 value={settingsTab.name}
-                onChange={(e) => updateTab(settingsTabId, { name: e.target.value })}
+                onChange={(e) => {
+                  const newName = e.target.value;
+                  const currentSlug = settingsTab.slug ?? settingsTab.id;
+                  if (currentSlug === slugify(settingsTab.name)) {
+                    updateTab(settingsTabId, { name: newName, slug: slugify(newName) });
+                  } else {
+                    updateTab(settingsTabId, { name: newName });
+                  }
+                }}
                 className="w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
                 style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
               />

@@ -30,6 +30,7 @@ export function TabBar({ readonly = false, viewTabs, viewActiveTabId, onViewTabC
   const activeTabId = viewActiveTabId ?? activeLayout.activeTabId;
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
@@ -180,7 +181,7 @@ export function TabBar({ readonly = false, viewTabs, viewActiveTabId, onViewTabC
             <div key={tab.id}
               className="group relative flex items-center gap-1.5 px-3 py-2.5 text-sm cursor-pointer border-b-2 transition-colors whitespace-nowrap"
               style={{ borderBottomColor: isActive ? 'var(--accent)' : 'transparent', color: isActive ? 'var(--accent)' : 'var(--text-secondary)' }}
-              onClick={() => handleTabClick(tab.id)}
+              onClick={() => { setConfirmDeleteId(null); handleTabClick(tab.id); }}
             >
               {/* Icon */}
               {TabIconComp && (
@@ -218,9 +219,20 @@ export function TabBar({ readonly = false, viewTabs, viewActiveTabId, onViewTabC
 
               {/* Remove button (edit mode only) */}
               {!readonly && editMode && tabs.length > 1 && (
-                <button onClick={(e) => { e.stopPropagation(); removeTab(tab.id); }}
-                  className="opacity-0 group-hover:opacity-100 w-4 h-4 flex items-center justify-center rounded-full text-xs transition-all hover:opacity-80"
-                  style={{ background: 'var(--accent-red)', color: '#fff' }}>✕</button>
+                confirmDeleteId === tab.id ? (
+                  <>
+                    <button onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(null); }}
+                      className="w-4 h-4 flex items-center justify-center rounded-full text-xs transition-all hover:opacity-80"
+                      style={{ background: 'var(--app-border)', color: 'var(--text-secondary)' }}>✕</button>
+                    <button onClick={(e) => { e.stopPropagation(); removeTab(tab.id); setConfirmDeleteId(null); }}
+                      className="w-4 h-4 flex items-center justify-center rounded-full text-xs transition-all hover:opacity-80"
+                      style={{ background: 'var(--accent-red)', color: '#fff' }}>✓</button>
+                  </>
+                ) : (
+                  <button onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(tab.id); }}
+                    className="opacity-0 group-hover:opacity-100 w-4 h-4 flex items-center justify-center rounded-full text-xs transition-all hover:opacity-80"
+                    style={{ background: 'var(--accent-red)', color: '#fff' }}>✕</button>
+                )
               )}
             </div>
           );
