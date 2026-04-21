@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Camera, BatteryMedium, Thermometer, Shield, Activity, Building2 } from 'lucide-react';
+import { Camera, BatteryMedium, Thermometer, Shield, Activity, Building2, RefreshCw } from 'lucide-react';
 import type { WidgetProps } from '../../types';
 import { setStateDirect, subscribeStateDirect } from '../../hooks/useIoBroker';
 import type { ioBrokerState } from '../../types';
@@ -25,7 +25,7 @@ export type CameraTemplateId =
 export interface TemplateSpec {
   label: string;
   slotCount: number;
-  gridAreas: string | null; // null = stream-full (overlay)
+  gridAreas: string | null;
   gridCols: string;
   gridRows: string;
 }
@@ -81,8 +81,9 @@ export const SLOT_TYPE_OPTIONS: { value: CameraSlotType; label: string }[] = [
 
 // ── Internal types ────────────────────────────────────────────────────────────
 
-type StreamMode = 'img' | 'iframe' | 'rtsp-hint';
-type WakeUpMode = 'auto' | 'onView' | 'onClick';
+type StreamMode  = 'img' | 'iframe' | 'rtsp-hint';
+type WakeUpMode  = 'auto' | 'onView' | 'onClick';
+type StopReason  = 'initial' | 'timeout' | 'error';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -105,32 +106,31 @@ const DEFAULT_LABELS: Partial<Record<CameraSlotType, string>> = {
 function slotBool(val: unknown): boolean {
   return val === true || val === 1 || val === 'true' || val === '1';
 }
-
 function slotNum(val: unknown): number {
   return typeof val === 'number' ? val : parseFloat(String(val ?? ''));
 }
 
-// ── InfoCell – square cell used in custom grid ────────────────────────────────
+function fmtSeconds(s: number): string {
+  if (s >= 60) return `${Math.floor(s / 60)}m ${s % 60}s`;
+  return `${s}s`;
+}
+
+// ── InfoCell ──────────────────────────────────────────────────────────────────
 
 function InfoCell({ slot, value }: { slot: CameraSlot; value: unknown }) {
-  if (slot.type === 'empty') {
-    return <div style={{ background: 'var(--app-bg)', borderRadius: '4px' }} />;
-  }
+  if (slot.type === 'empty') return <div style={{ background: 'var(--app-bg)', borderRadius: '4px' }} />;
 
-  const label  = slot.label ?? DEFAULT_LABELS[slot.type];
-  const num    = slotNum(value);
-  const bool   = slotBool(value);
+  const label = slot.label ?? DEFAULT_LABELS[slot.type];
+  const num   = slotNum(value);
+  const bool  = slotBool(value);
   const sec: React.CSSProperties = { color: 'var(--text-secondary)' };
   const pri: React.CSSProperties = { color: 'var(--text-primary)' };
-  const base   = 'flex flex-col items-center justify-center h-full w-full p-1.5 gap-0.5 overflow-hidden';
-  const bg     = { background: 'var(--widget-bg)', borderRadius: '4px' };
-  const Lbl    = label
-    ? <span className="text-[9px] truncate max-w-full text-center" style={sec}>{label}</span>
-    : null;
+  const base  = 'flex flex-col items-center justify-center h-full w-full p-1.5 gap-0.5 overflow-hidden';
+  const bg    = { background: 'var(--widget-bg)', borderRadius: '4px' };
+  const Lbl   = label ? <span className="text-[9px] truncate max-w-full text-center" style={sec}>{label}</span> : null;
 
   switch (slot.type) {
-    case 'text':
-    case 'manufacturer':
+    case 'text': case 'manufacturer':
       return (
         <div className={base} style={{ ...bg, ...pri }}>
           {slot.type === 'manufacturer' && <Building2 size={13} style={sec} />}
@@ -138,7 +138,6 @@ function InfoCell({ slot, value }: { slot: CameraSlot; value: unknown }) {
           <span className="text-xs font-medium truncate max-w-full text-center">{slot.value || '–'}</span>
         </div>
       );
-
     case 'datapoint':
       return (
         <div className={base} style={{ ...bg, ...pri }}>
@@ -146,7 +145,6 @@ function InfoCell({ slot, value }: { slot: CameraSlot; value: unknown }) {
           <span className="text-xs font-medium truncate">{value != null ? String(value) : '–'}</span>
         </div>
       );
-
     case 'battery': {
       const pct = isNaN(num) ? null : Math.round(num);
       return (
@@ -157,7 +155,6 @@ function InfoCell({ slot, value }: { slot: CameraSlot; value: unknown }) {
         </div>
       );
     }
-
     case 'temperature': {
       const temp = isNaN(num) ? null : num.toFixed(1);
       return (
@@ -168,7 +165,6 @@ function InfoCell({ slot, value }: { slot: CameraSlot; value: unknown }) {
         </div>
       );
     }
-
     case 'armed': {
       const color = bool ? '#ef4444' : '#22c55e';
       return (
@@ -181,7 +177,6 @@ function InfoCell({ slot, value }: { slot: CameraSlot; value: unknown }) {
         </div>
       );
     }
-
     case 'motion': {
       const color = bool ? '#f59e0b' : undefined;
       return (
@@ -194,19 +189,18 @@ function InfoCell({ slot, value }: { slot: CameraSlot; value: unknown }) {
         </div>
       );
     }
-
     default: return null;
   }
 }
 
-// ── InfoRow – horizontal row used in standard layout ──────────────────────────
+// ── InfoRow ───────────────────────────────────────────────────────────────────
 
 function InfoRow({ slot, value }: { slot: CameraSlot; value: unknown }) {
   if (slot.type === 'empty') return null;
 
-  const label  = slot.label ?? DEFAULT_LABELS[slot.type];
-  const num    = slotNum(value);
-  const bool   = slotBool(value);
+  const label = slot.label ?? DEFAULT_LABELS[slot.type];
+  const num   = slotNum(value);
+  const bool  = slotBool(value);
   const sec: React.CSSProperties = { color: 'var(--text-secondary)' };
   const pri: React.CSSProperties = { color: 'var(--text-primary)' };
 
@@ -215,8 +209,7 @@ function InfoRow({ slot, value }: { slot: CameraSlot; value: unknown }) {
   let valStyle: React.CSSProperties = pri;
 
   switch (slot.type) {
-    case 'text':
-    case 'manufacturer':
+    case 'text': case 'manufacturer':
       icon    = slot.type === 'manufacturer' ? <Building2 size={11} style={sec} /> : null;
       display = slot.value || '–';
       break;
@@ -254,21 +247,22 @@ function InfoRow({ slot, value }: { slot: CameraSlot; value: unknown }) {
   );
 }
 
-// ── StreamView – renders img / iframe / error states ──────────────────────────
+// ── StreamView ────────────────────────────────────────────────────────────────
 
 interface StreamViewProps {
-  streamUrl:      string;
-  mode:           StreamMode;
-  imgSrc:         string;
-  fitMode:        'cover' | 'contain';
-  loadError:      boolean;
-  onError:        () => void;
-  onLoad:         () => void;
-  showTimestamp:  boolean;
-  lastRefresh:    Date | null;
-  editMode:       boolean;
-  refreshInterval:number;
-  title?:         string;
+  streamUrl:       string;
+  mode:            StreamMode;
+  imgSrc:          string;
+  fitMode:         'cover' | 'contain';
+  loadError:       boolean;
+  onError:         () => void;
+  onLoad:          () => void;
+  showTimestamp:   boolean;
+  lastRefresh:     Date | null;
+  editMode:        boolean;
+  refreshInterval: number;
+  title?:          string;
+  streamSecondsLeft: number | null;
 }
 
 function StreamView(p: StreamViewProps) {
@@ -281,7 +275,6 @@ function StreamView(p: StreamViewProps) {
       </div>
     );
   }
-
   if (p.mode === 'rtsp-hint') {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-1 p-2"
@@ -296,6 +289,12 @@ function StreamView(p: StreamViewProps) {
   }
 
   const hasError = p.loadError && p.mode === 'img';
+
+  // Countdown color: green → amber ≤60s → red ≤10s
+  const sLeft = p.streamSecondsLeft;
+  const countdownColor = sLeft != null
+    ? sLeft <= 10 ? '#ef4444' : sLeft <= 60 ? '#f59e0b' : 'rgba(255,255,255,0.7)'
+    : null;
 
   return (
     <div className="relative h-full w-full overflow-hidden">
@@ -315,6 +314,15 @@ function StreamView(p: StreamViewProps) {
         </div>
       )}
 
+      {/* Countdown badge – bottom left */}
+      {sLeft != null && !hasError && (
+        <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded text-[9px] font-mono flex items-center gap-0.5"
+          style={{ background: 'rgba(0,0,0,0.5)', color: countdownColor ?? '#fff' }}>
+          {fmtSeconds(sLeft)}
+        </div>
+      )}
+
+      {/* Timestamp badge – bottom right */}
       {p.showTimestamp && p.lastRefresh && !hasError && p.mode === 'img' && (
         <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded text-[9px] font-mono"
           style={{ background: 'rgba(0,0,0,0.5)', color: 'rgba(255,255,255,0.8)' }}>
@@ -335,36 +343,49 @@ function StreamView(p: StreamViewProps) {
   );
 }
 
-// ── StreamCell – stream + wake-up states, scoped to its container ─────────────
-// Used in Standard/Custom layouts so info slots remain visible independently.
+// ── StreamCell ────────────────────────────────────────────────────────────────
 
 interface StreamCellProps extends StreamViewProps {
   wakeUpDp:    string;
   wakeUpMode:  WakeUpMode;
   waking:      boolean;
   streamReady: boolean;
+  stopReason:  StopReason;
   doWake:      () => void;
   sectionRef?: React.RefObject<HTMLDivElement>;
 }
 
-function StreamCell({ wakeUpDp, wakeUpMode, waking, streamReady, doWake, sectionRef, editMode, ...svProps }: StreamCellProps) {
+function StreamCell({ wakeUpDp, wakeUpMode, waking, streamReady, stopReason, doWake, sectionRef, editMode, ...svProps }: StreamCellProps) {
   const needsWake = !!wakeUpDp && !!svProps.streamUrl;
 
+  // ── onClick: not yet active or stream ended ──────────────────────────────────
   if (needsWake && wakeUpMode === 'onClick' && !waking && !streamReady) {
+    const isReactivate = stopReason !== 'initial';
+    const label = stopReason === 'timeout' ? 'Stream beendet'
+                : stopReason === 'error'   ? 'Verbindung verloren'
+                : null;
     return (
       <div ref={sectionRef}
         onClick={editMode ? undefined : doWake}
         className="flex flex-col items-center justify-center h-full gap-1.5 select-none"
         style={{ background: 'var(--app-bg)', cursor: editMode ? 'default' : 'pointer' }}>
         <div className="flex items-center justify-center rounded-full w-9 h-9"
-          style={{ background: 'var(--accent)', opacity: 0.85 }}>
-          <Camera size={18} color="#fff" />
+          style={{ background: isReactivate ? 'rgba(239,68,68,0.15)' : 'var(--accent)', opacity: isReactivate ? 1 : 0.85, border: isReactivate ? '1.5px solid #ef4444' : 'none' }}>
+          {isReactivate
+            ? <RefreshCw size={16} color="#ef4444" />
+            : <Camera size={18} color="#fff" />}
         </div>
-        {!editMode && <span className="text-[10px] opacity-50" style={{ color: 'var(--text-secondary)' }}>Tippen zum Aktivieren</span>}
+        {label && <span className="text-[10px] font-medium" style={{ color: '#ef4444' }}>{label}</span>}
+        {!editMode && (
+          <span className="text-[10px] opacity-50" style={{ color: 'var(--text-secondary)' }}>
+            {isReactivate ? 'Tippen zum Reaktivieren' : 'Tippen zum Aktivieren'}
+          </span>
+        )}
       </div>
     );
   }
 
+  // ── onView: not yet in viewport ──────────────────────────────────────────────
   if (needsWake && wakeUpMode === 'onView' && !waking && !streamReady) {
     return (
       <div ref={sectionRef} className="flex items-center justify-center h-full"
@@ -374,6 +395,7 @@ function StreamCell({ wakeUpDp, wakeUpMode, waking, streamReady, doWake, section
     );
   }
 
+  // ── Waking spinner ───────────────────────────────────────────────────────────
   if (waking) {
     return (
       <div ref={sectionRef} className="flex flex-col items-center justify-center h-full gap-1.5"
@@ -384,6 +406,7 @@ function StreamCell({ wakeUpDp, wakeUpMode, waking, streamReady, doWake, section
     );
   }
 
+  // ── Active stream ────────────────────────────────────────────────────────────
   return (
     <div ref={sectionRef} className="h-full w-full overflow-hidden">
       <StreamView {...svProps} editMode={editMode} />
@@ -402,6 +425,7 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
   const wakeUpDp        = (opts.wakeUpDp        as string)              ?? '';
   const wakeUpDelay     = (opts.wakeUpDelay     as number)              ?? 3;
   const wakeUpMode      = (opts.wakeUpMode      as WakeUpMode)          ?? 'auto';
+  const streamTimeout   = (opts.streamTimeout   as number)              ?? 0;
   const videoRatio      = (opts.videoRatio      as number)              ?? 60;
   const infoItems       = (opts.infoItems       as CameraSlot[])        ?? [];
   const cameraTemplate  = (opts.cameraTemplate  as CameraTemplateId)    ?? 'stream-left';
@@ -410,22 +434,28 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
 
   const mode = detectMode(streamUrl);
 
-  // ── Stream state ────────────────────────────────────────────────────────────
-  const [imgSrc,      setImgSrc]      = useState('');
-  const [loadError,   setLoadError]   = useState(false);
-  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
-  const [waking,      setWaking]      = useState(false);
-  const [streamReady, setStreamReady] = useState(false);
+  // ── Stream state ─────────────────────────────────────────────────────────────
+  const [imgSrc,           setImgSrc]           = useState('');
+  const [loadError,        setLoadError]        = useState(false);
+  const [lastRefresh,      setLastRefresh]      = useState<Date | null>(null);
+  const [waking,           setWaking]           = useState(false);
+  const [streamReady,      setStreamReady]      = useState(false);
+  const [stopReason,       setStopReason]       = useState<StopReason>('initial');
+  const [streamSecondsLeft,setStreamSecondsLeft]= useState<number | null>(null);
 
-  const containerRef   = useRef<HTMLDivElement>(null);
-  const intervalRef    = useRef<ReturnType<typeof setInterval> | null>(null);
-  const wakeTimerRef   = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const wakeUpDpRef    = useRef(wakeUpDp);
-  const wakeUpDelayRef = useRef(wakeUpDelay);
-  wakeUpDpRef.current    = wakeUpDp;
-  wakeUpDelayRef.current = wakeUpDelay;
+  const containerRef        = useRef<HTMLDivElement>(null);
+  const intervalRef         = useRef<ReturnType<typeof setInterval> | null>(null);
+  const wakeTimerRef        = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const countdownRef        = useRef<ReturnType<typeof setInterval> | null>(null);
+  const consecutiveErrRef   = useRef(0);
+  const wakeUpDpRef         = useRef(wakeUpDp);
+  const wakeUpDelayRef      = useRef(wakeUpDelay);
+  const streamTimeoutCfgRef = useRef(streamTimeout);
+  wakeUpDpRef.current         = wakeUpDp;
+  wakeUpDelayRef.current      = wakeUpDelay;
+  streamTimeoutCfgRef.current = streamTimeout;
 
-  // ── Info DP subscriptions ───────────────────────────────────────────────────
+  // ── Info DP subscriptions ─────────────────────────────────────────────────────
   const [dpValues, setDpValues] = useState<Record<string, ioBrokerState['val']>>({});
 
   const allDpKey = useMemo(() => {
@@ -452,33 +482,56 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
     return () => unsubs.forEach(fn => fn());
   }, [allDpKey]);
 
-  // ── Wake-up helpers ─────────────────────────────────────────────────────────
-  const buildSrc = (url: string) => {
-    if (!url || mode !== 'img') return url;
-    if (refreshInterval === 0) return url;
-    return url.includes('?') ? `${url}&_t=${Date.now()}` : `${url}?_t=${Date.now()}`;
-  };
+  // ── Wake-up / sleep helpers ───────────────────────────────────────────────────
+
+  function clearCountdown() {
+    if (countdownRef.current) { clearInterval(countdownRef.current); countdownRef.current = null; }
+    setStreamSecondsLeft(null);
+  }
+
+  function startCountdown(seconds: number) {
+    clearCountdown();
+    setStreamSecondsLeft(seconds);
+    countdownRef.current = setInterval(() => {
+      setStreamSecondsLeft(prev => (prev !== null && prev > 0 ? prev - 1 : prev));
+    }, 1000);
+  }
+
+  function doSleep(reason: StopReason = 'initial') {
+    if (wakeTimerRef.current) clearTimeout(wakeTimerRef.current);
+    clearCountdown();
+    if (wakeUpDpRef.current) setStateDirect(wakeUpDpRef.current, false);
+    consecutiveErrRef.current = 0;
+    setWaking(false);
+    setStreamReady(false);
+    setStopReason(reason);
+  }
 
   function doWake() {
     if (!wakeUpDpRef.current) return;
     if (wakeTimerRef.current) clearTimeout(wakeTimerRef.current);
+    clearCountdown();
     setStateDirect(wakeUpDpRef.current, true);
     setWaking(true);
     setStreamReady(false);
+    setStopReason('initial');
+    consecutiveErrRef.current = 0;
     wakeTimerRef.current = setTimeout(() => {
       setWaking(false);
       setStreamReady(true);
+      if (streamTimeoutCfgRef.current > 0) {
+        startCountdown(streamTimeoutCfgRef.current);
+      }
     }, wakeUpDelayRef.current * 1000);
   }
 
-  function doSleep() {
-    if (wakeTimerRef.current) clearTimeout(wakeTimerRef.current);
-    if (wakeUpDpRef.current) setStateDirect(wakeUpDpRef.current, false);
-    setWaking(false);
-    setStreamReady(false);
-  }
+  // Countdown reaches 0 → auto-sleep
+  useEffect(() => {
+    if (streamSecondsLeft === 0 && streamReady) doSleep('timeout');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [streamSecondsLeft]);
 
-  // ── Wake-up effects ─────────────────────────────────────────────────────────
+  // ── Wake-up effects ────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!wakeUpDp || !streamUrl) { setStreamReady(true); return; }
     if (wakeUpMode !== 'auto') return;
@@ -506,7 +559,13 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wakeUpDp, streamUrl, wakeUpMode]);
 
-  // ── Image refresh loop ──────────────────────────────────────────────────────
+  // ── Image refresh loop ─────────────────────────────────────────────────────────
+  const buildSrc = (url: string) => {
+    if (!url || mode !== 'img') return url;
+    if (refreshInterval === 0) return url;
+    return url.includes('?') ? `${url}&_t=${Date.now()}` : `${url}?_t=${Date.now()}`;
+  };
+
   useEffect(() => {
     if (!streamUrl || !streamReady || mode !== 'img') return;
     setLoadError(false);
@@ -522,32 +581,57 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [streamUrl, refreshInterval, streamReady, mode]);
 
-  // ── Shared props ─────────────────────────────────────────────────────────────
+  // ── Error handler ──────────────────────────────────────────────────────────────
+  // For snapshot mode: require 3 consecutive errors before declaring stream dead.
+  // For MJPEG (refreshInterval=0): single error is enough (connection closed by server).
+  const MAX_ERRORS = refreshInterval > 0 ? 3 : 1;
+
+  function handleStreamError() {
+    setLoadError(true);
+    if (!wakeUpDp) return;
+    consecutiveErrRef.current++;
+    if (consecutiveErrRef.current >= MAX_ERRORS) {
+      doSleep('error');
+    }
+  }
+
+  function handleStreamLoad() {
+    setLoadError(false);
+    consecutiveErrRef.current = 0;
+  }
+
+  // ── Shared props ────────────────────────────────────────────────────────────────
   const needsWake = !!wakeUpDp && !!streamUrl;
 
   const svProps: StreamViewProps = {
     streamUrl, mode, imgSrc, fitMode, loadError,
-    onError: () => setLoadError(true),
-    onLoad:  () => setLoadError(false),
+    onError: handleStreamError,
+    onLoad:  handleStreamLoad,
     showTimestamp, lastRefresh, editMode, refreshInterval,
     title: config.title,
+    streamSecondsLeft,
   };
 
-  const scProps = { ...svProps, wakeUpDp, wakeUpMode, waking, streamReady, doWake };
+  const scProps: StreamCellProps = {
+    ...svProps, wakeUpDp, wakeUpMode, waking, streamReady, stopReason, doWake,
+  };
 
-  // ── MINIMAL layout: full-widget wake-up states ───────────────────────────────
+  // ── MINIMAL layout ──────────────────────────────────────────────────────────────
   if (layout === 'minimal') {
     if (needsWake && wakeUpMode === 'onClick' && !waking && !streamReady) {
+      const isReactivate = stopReason !== 'initial';
       return (
         <div ref={containerRef} onClick={editMode ? undefined : doWake}
           className="flex flex-col items-center justify-center h-full gap-2 select-none rounded-[inherit]"
           style={{ background: 'var(--app-bg)', cursor: editMode ? 'default' : 'pointer' }}>
           <div className="flex items-center justify-center rounded-full w-10 h-10"
-            style={{ background: 'var(--accent)', opacity: 0.85 }}>
-            <Camera size={20} color="#fff" />
+            style={{ background: isReactivate ? 'rgba(239,68,68,0.15)' : 'var(--accent)', opacity: isReactivate ? 1 : 0.85, border: isReactivate ? '1.5px solid #ef4444' : 'none' }}>
+            {isReactivate ? <RefreshCw size={18} color="#ef4444" /> : <Camera size={20} color="#fff" />}
           </div>
           {config.title && <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>}
-          {!editMode && <p className="text-[10px] opacity-50" style={{ color: 'var(--text-secondary)' }}>Tippen zum Aktivieren</p>}
+          {stopReason === 'timeout' && <p className="text-[10px]" style={{ color: '#ef4444' }}>Stream beendet</p>}
+          {stopReason === 'error'   && <p className="text-[10px]" style={{ color: '#ef4444' }}>Verbindung verloren</p>}
+          {!editMode && <p className="text-[10px] opacity-50" style={{ color: 'var(--text-secondary)' }}>{isReactivate ? 'Tippen zum Reaktivieren' : 'Tippen zum Aktivieren'}</p>}
         </div>
       );
     }
@@ -576,8 +660,7 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
     );
   }
 
-  // ── DEFAULT (Standard) layout ────────────────────────────────────────────────
-  // Info rows are always visible; only the stream cell shows wake-up states.
+  // ── DEFAULT (Standard) layout ───────────────────────────────────────────────────
   if (layout === 'default') {
     const vidH = Math.max(20, Math.min(85, videoRatio));
     return (
@@ -598,11 +681,9 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
     );
   }
 
-  // ── CUSTOM GRID layout ───────────────────────────────────────────────────────
-  // Info slots always visible; stream cell shows wake-up states.
+  // ── CUSTOM GRID layout ──────────────────────────────────────────────────────────
   const tmpl = CAMERA_TEMPLATES[cameraTemplate] ?? CAMERA_TEMPLATES['stream-left'];
 
-  // stream-full: StreamCell fullscreen + badge overlay always rendered
   if (cameraTemplate === 'stream-full') {
     return (
       <div ref={containerRef} className="relative h-full w-full overflow-hidden rounded-[inherit]">
@@ -623,7 +704,7 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
               case 'battery':   display = !isNaN(num) ? `${Math.round(num)}%` : '–'; break;
               case 'temperature': display = !isNaN(num) ? `${num.toFixed(1)}°C` : '–'; break;
               case 'armed':
-                color   = bool ? '#ef4444' : '#22c55e';
+                color = bool ? '#ef4444' : '#22c55e';
                 display = bool ? (slot.trueLabel || 'Scharf') : (slot.falseLabel || 'Aus'); break;
               case 'motion':
                 if (bool) color = '#f59e0b';
@@ -641,7 +722,6 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
     );
   }
 
-  // Other templates: CSS grid-template-areas
   const filledSlots = customSlots.slice(0, tmpl.slotCount);
   const emptyCount  = Math.max(0, tmpl.slotCount - filledSlots.length);
 
