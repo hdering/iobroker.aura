@@ -335,6 +335,62 @@ function StreamView(p: StreamViewProps) {
   );
 }
 
+// ── StreamCell – stream + wake-up states, scoped to its container ─────────────
+// Used in Standard/Custom layouts so info slots remain visible independently.
+
+interface StreamCellProps extends StreamViewProps {
+  wakeUpDp:    string;
+  wakeUpMode:  WakeUpMode;
+  waking:      boolean;
+  streamReady: boolean;
+  doWake:      () => void;
+  sectionRef?: React.RefObject<HTMLDivElement>;
+}
+
+function StreamCell({ wakeUpDp, wakeUpMode, waking, streamReady, doWake, sectionRef, editMode, ...svProps }: StreamCellProps) {
+  const needsWake = !!wakeUpDp && !!svProps.streamUrl;
+
+  if (needsWake && wakeUpMode === 'onClick' && !waking && !streamReady) {
+    return (
+      <div ref={sectionRef}
+        onClick={editMode ? undefined : doWake}
+        className="flex flex-col items-center justify-center h-full gap-1.5 select-none"
+        style={{ background: 'var(--app-bg)', cursor: editMode ? 'default' : 'pointer' }}>
+        <div className="flex items-center justify-center rounded-full w-9 h-9"
+          style={{ background: 'var(--accent)', opacity: 0.85 }}>
+          <Camera size={18} color="#fff" />
+        </div>
+        {!editMode && <span className="text-[10px] opacity-50" style={{ color: 'var(--text-secondary)' }}>Tippen zum Aktivieren</span>}
+      </div>
+    );
+  }
+
+  if (needsWake && wakeUpMode === 'onView' && !waking && !streamReady) {
+    return (
+      <div ref={sectionRef} className="flex items-center justify-center h-full"
+        style={{ background: 'var(--app-bg)' }}>
+        <Camera size={24} style={{ color: 'var(--text-secondary)', opacity: 0.4 }} />
+      </div>
+    );
+  }
+
+  if (waking) {
+    return (
+      <div ref={sectionRef} className="flex flex-col items-center justify-center h-full gap-1.5"
+        style={{ background: 'var(--app-bg)' }}>
+        <Camera size={24} style={{ color: 'var(--accent)' }} />
+        <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>Kamera wird aktiviert…</span>
+      </div>
+    );
+  }
+
+  return (
+    <div ref={sectionRef} className="h-full w-full overflow-hidden">
+      <StreamView {...svProps} editMode={editMode} />
+    </div>
+  );
+}
+
 // ── Main CameraWidget ─────────────────────────────────────────────────────────
 
 export function CameraWidget({ config, editMode }: WidgetProps) {
@@ -466,46 +522,10 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [streamUrl, refreshInterval, streamReady, mode]);
 
-  // ── Wake-up placeholder screens ─────────────────────────────────────────────
+  // ── Shared props ─────────────────────────────────────────────────────────────
   const needsWake = !!wakeUpDp && !!streamUrl;
 
-  if (needsWake && wakeUpMode === 'onView' && !waking && !streamReady) {
-    return (
-      <div ref={containerRef} className="flex flex-col items-center justify-center h-full gap-2"
-        style={{ background: 'var(--app-bg)', borderRadius: 'var(--widget-radius)' }}>
-        <Camera size={28} style={{ color: 'var(--text-secondary)' }} />
-        {config.title && <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>}
-      </div>
-    );
-  }
-
-  if (needsWake && wakeUpMode === 'onClick' && !waking && !streamReady) {
-    return (
-      <div ref={containerRef} onClick={editMode ? undefined : doWake}
-        className="flex flex-col items-center justify-center h-full gap-2 select-none"
-        style={{ background: 'var(--app-bg)', borderRadius: 'var(--widget-radius)', cursor: editMode ? 'default' : 'pointer' }}>
-        <div className="flex items-center justify-center rounded-full w-10 h-10"
-          style={{ background: 'var(--accent)', opacity: 0.85 }}>
-          <Camera size={20} color="#fff" />
-        </div>
-        {config.title && <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>}
-        {!editMode && <p className="text-[10px] opacity-50" style={{ color: 'var(--text-secondary)' }}>Tippen zum Aktivieren</p>}
-      </div>
-    );
-  }
-
-  if (waking) {
-    return (
-      <div ref={containerRef} className="flex flex-col items-center justify-center h-full gap-2"
-        style={{ background: 'var(--app-bg)', borderRadius: 'var(--widget-radius)' }}>
-        <Camera size={28} style={{ color: 'var(--accent)' }} />
-        <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Kamera wird aktiviert…</p>
-      </div>
-    );
-  }
-
-  // ── Shared stream view props ─────────────────────────────────────────────────
-  const sv: StreamViewProps = {
+  const svProps: StreamViewProps = {
     streamUrl, mode, imgSrc, fitMode, loadError,
     onError: () => setLoadError(true),
     onLoad:  () => setLoadError(false),
@@ -513,23 +533,58 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
     title: config.title,
   };
 
-  // ── MINIMAL layout ───────────────────────────────────────────────────────────
+  const scProps = { ...svProps, wakeUpDp, wakeUpMode, waking, streamReady, doWake };
+
+  // ── MINIMAL layout: full-widget wake-up states ───────────────────────────────
   if (layout === 'minimal') {
+    if (needsWake && wakeUpMode === 'onClick' && !waking && !streamReady) {
+      return (
+        <div ref={containerRef} onClick={editMode ? undefined : doWake}
+          className="flex flex-col items-center justify-center h-full gap-2 select-none rounded-[inherit]"
+          style={{ background: 'var(--app-bg)', cursor: editMode ? 'default' : 'pointer' }}>
+          <div className="flex items-center justify-center rounded-full w-10 h-10"
+            style={{ background: 'var(--accent)', opacity: 0.85 }}>
+            <Camera size={20} color="#fff" />
+          </div>
+          {config.title && <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>}
+          {!editMode && <p className="text-[10px] opacity-50" style={{ color: 'var(--text-secondary)' }}>Tippen zum Aktivieren</p>}
+        </div>
+      );
+    }
+    if (needsWake && wakeUpMode === 'onView' && !waking && !streamReady) {
+      return (
+        <div ref={containerRef} className="flex flex-col items-center justify-center h-full gap-2 rounded-[inherit]"
+          style={{ background: 'var(--app-bg)' }}>
+          <Camera size={28} style={{ color: 'var(--text-secondary)' }} />
+          {config.title && <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>}
+        </div>
+      );
+    }
+    if (waking) {
+      return (
+        <div ref={containerRef} className="flex flex-col items-center justify-center h-full gap-2 rounded-[inherit]"
+          style={{ background: 'var(--app-bg)' }}>
+          <Camera size={28} style={{ color: 'var(--accent)' }} />
+          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Kamera wird aktiviert…</p>
+        </div>
+      );
+    }
     return (
       <div ref={containerRef} className="h-full w-full overflow-hidden rounded-[inherit]">
-        <StreamView {...sv} />
+        <StreamView {...svProps} />
       </div>
     );
   }
 
   // ── DEFAULT (Standard) layout ────────────────────────────────────────────────
+  // Info rows are always visible; only the stream cell shows wake-up states.
   if (layout === 'default') {
     const vidH = Math.max(20, Math.min(85, videoRatio));
     return (
       <div ref={containerRef} className="h-full w-full overflow-hidden rounded-[inherit] flex flex-col"
         style={{ background: 'var(--widget-bg)' }}>
         <div style={{ height: `${vidH}%`, flexShrink: 0, overflow: 'hidden' }}>
-          <StreamView {...sv} />
+          <StreamCell {...scProps} />
         </div>
         <div style={{ height: `${100 - vidH}%`, overflow: 'hidden auto', display: 'flex', flexDirection: 'column', gap: '2px', padding: '4px' }}>
           {infoItems.length === 0
@@ -544,14 +599,15 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
   }
 
   // ── CUSTOM GRID layout ───────────────────────────────────────────────────────
+  // Info slots always visible; stream cell shows wake-up states.
   const tmpl = CAMERA_TEMPLATES[cameraTemplate] ?? CAMERA_TEMPLATES['stream-left'];
 
-  // stream-full: fullscreen + badge overlay
+  // stream-full: StreamCell fullscreen + badge overlay always rendered
   if (cameraTemplate === 'stream-full') {
     return (
       <div ref={containerRef} className="relative h-full w-full overflow-hidden rounded-[inherit]">
-        <StreamView {...sv} />
-        <div className="absolute bottom-0 left-0 right-0 flex gap-1 p-1.5 flex-wrap justify-start items-end"
+        <StreamCell {...scProps} />
+        <div className="absolute bottom-0 left-0 right-0 flex gap-1 p-1.5 flex-wrap justify-start items-end pointer-events-none"
           style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.55))' }}>
           {customSlots.map((slot, i) => {
             if (slot.type === 'empty') return null;
@@ -601,7 +657,7 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
         background: 'var(--app-bg)',
       }}>
       <div style={{ gridArea: 'stream', overflow: 'hidden', borderRadius: '4px' }}>
-        <StreamView {...sv} />
+        <StreamCell {...scProps} />
       </div>
       {filledSlots.map((slot, i) => (
         <div key={i} style={{ gridArea: `slot${i}`, overflow: 'hidden', borderRadius: '4px' }}>
