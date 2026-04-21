@@ -64,12 +64,22 @@ function resolveName(name: string | Record<string, string> | undefined, fallback
 }
 
 async function loadAll(): Promise<DatapointEntry[]> {
-  const [stateResult, channelResult, deviceResult, enumResult] = await Promise.all([
+  const [stateResult, channelResult, deviceResult, enumResult, instanceResult] = await Promise.all([
     getObjectViewDirect('state'),
     getObjectViewDirect('channel'),
     getObjectViewDirect('device'),
     getObjectViewDirect('enum', 'enum.', 'enum.\u9999'),
+    getObjectViewDirect('instance', 'system.adapter.', 'system.adapter.\u9999'),
   ]);
+
+  // Build set of enabled instance prefixes: "hm-rpc.0", "history.0", …
+  const enabledPrefixes = new Set<string>();
+  for (const { id, value: obj } of instanceResult.rows) {
+    if (obj?.common?.enabled === true) {
+      // id is "system.adapter.hm-rpc.0" → strip prefix
+      enabledPrefixes.add(id.slice('system.adapter.'.length));
+    }
+  }
 
   // Build parent name map: id → resolved name (devices first, then channels so channels win)
   const parentNames = new Map<string, string>();
@@ -95,7 +105,12 @@ async function loadAll(): Promise<DatapointEntry[]> {
     }
   }
 
-  return stateResult.rows.map((row) => {
+  return stateResult.rows.filter((row) => {
+    // e.g. "hm-rpc.0.ABC.STATE" → prefix "hm-rpc.0"
+    const dot2 = row.id.indexOf('.', row.id.indexOf('.') + 1);
+    const prefix = dot2 !== -1 ? row.id.slice(0, dot2) : row.id;
+    return enabledPrefixes.size === 0 || enabledPrefixes.has(prefix);
+  }).map((row) => {
     // Check state ID and all parent paths (channel, device) – enum members
     // can reference any level of the object hierarchy, not just states directly.
     const parts = row.id.split('.');

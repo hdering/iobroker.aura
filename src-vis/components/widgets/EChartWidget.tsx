@@ -48,6 +48,7 @@ export function EChartWidget({ config, editMode }: WidgetProps) {
   const echartRightMin = o.echartRightMin as number | undefined;
   const echartRightMax = o.echartRightMax as number | undefined;
   const echartJsonExtra = (o.echartJsonExtra as string | undefined) ?? '';
+  const echartShowYAxis = (o.echartShowYAxis as boolean | undefined) ?? true;
   const isGauge = config.layout === 'gauge' as string;
 
   const seriesDataMap = useMultiSeriesData(echartSeries, connected, subscribe);
@@ -142,12 +143,14 @@ export function EChartWidget({ config, editMode }: WidgetProps) {
   const leftAxis: Record<string, unknown> = {
     type: 'value',
     axisLabel: {
+      show: echartShowYAxis,
       color: '#888',
       fontSize: 10,
       formatter: echartLeftUnit ? `{value} ${echartLeftUnit}` : '{value}',
     },
-    axisLine: { lineStyle: { color: '#444' } },
-    splitLine: { lineStyle: { color: '#333' } },
+    axisTick: { show: echartShowYAxis },
+    axisLine: { show: echartShowYAxis, lineStyle: { color: '#444' } },
+    splitLine: { show: echartShowYAxis, lineStyle: { color: '#333' } },
     ...(echartLeftMin !== undefined ? { min: echartLeftMin } : {}),
     ...(echartLeftMax !== undefined ? { max: echartLeftMax } : {}),
   };
@@ -156,11 +159,13 @@ export function EChartWidget({ config, editMode }: WidgetProps) {
     ? {
         type: 'value',
         axisLabel: {
+          show: echartShowYAxis,
           color: '#888',
           fontSize: 10,
           formatter: echartRightUnit ? `{value} ${echartRightUnit}` : '{value}',
         },
-        axisLine: { lineStyle: { color: '#444' } },
+        axisTick: { show: echartShowYAxis },
+        axisLine: { show: echartShowYAxis, lineStyle: { color: '#444' } },
         splitLine: { show: false },
         ...(echartRightMin !== undefined ? { min: echartRightMin } : {}),
         ...(echartRightMax !== undefined ? { max: echartRightMax } : {}),
@@ -190,14 +195,20 @@ export function EChartWidget({ config, editMode }: WidgetProps) {
       borderColor: 'var(--app-border, #333)',
       textStyle: { color: 'var(--text-primary, #ccc)', fontSize: 11 },
       formatter: (params: unknown) => {
-        const items = params as { axisValue: number; seriesName: string; value: [number, number]; marker: string }[];
+        const items = params as { axisValue: number; seriesName: string; value: [number, number]; marker: string; seriesIndex: number }[];
         if (!items?.length) return '';
         const ts = items[0].axisValue;
         const date = new Date(ts);
         const timeStr = date.toLocaleString('de-DE', {
           day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
         });
-        const lines = items.map((p) => `${p.marker} ${p.seriesName}: <b>${p.value[1]}</b>`);
+        const lines = items.map((p) => {
+          const seriesCfg = echartSeries[p.seriesIndex];
+          const unit = (seriesCfg?.yAxisIndex ?? 0) === 1 ? echartRightUnit : echartLeftUnit;
+          const raw = p.value[1];
+          const dispVal = typeof raw === 'number' ? parseFloat(raw.toFixed(2)) : raw;
+          return `${p.marker} ${p.seriesName}: <b>${dispVal}${unit ? '\u202F' + unit : ''}</b>`;
+        });
         return `${timeStr}<br/>${lines.join('<br/>')}`;
       },
     },
@@ -205,8 +216,8 @@ export function EChartWidget({ config, editMode }: WidgetProps) {
       ? { show: true, textStyle: { color: '#888', fontSize: 11 }, top: 4 }
       : { show: false },
     grid: {
-      left: 60,
-      right: hasRightAxis ? 60 : 20,
+      left: echartShowYAxis ? 60 : 12,
+      right: hasRightAxis && echartShowYAxis ? 60 : 12,
       top: echartShowLegend ? 30 : 16,
       bottom: 40,
       containLabel: false,

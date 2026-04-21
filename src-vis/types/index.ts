@@ -94,6 +94,7 @@ export interface ioBrokerObject {
     max?: number;
     read?: boolean;
     write?: boolean;
+    enabled?: boolean;     // instance: whether the adapter instance is enabled
     members?: string[];   // enum.rooms / enum.functions member IDs
     custom?: Record<string, { enabled?: boolean } | null>;
   };

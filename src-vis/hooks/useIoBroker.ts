@@ -268,7 +268,7 @@ export function deleteObjectDirect(id: string): Promise<void> {
 
 // Standalone-Funktion – kein Hook, kein Reconnect-Seiteneffekt
 export function getObjectViewDirect(
-  type: 'state' | 'channel' | 'device' | 'enum',
+  type: 'state' | 'channel' | 'device' | 'enum' | 'instance',
   startkey = '',
   endkey = '\u9999',
 ): Promise<ObjectViewResult> {

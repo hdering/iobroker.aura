@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.68",
+    "version": "0.4.69",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.69": {
+        "en": "DatapointPicker: only shows states from enabled adapter instances; EChart: toggle to hide Y-axis scale and grid lines; EChart tooltip now shows units and rounds to 2 decimal places",
+        "de": "DatapointPicker: zeigt nur States aktiver Adapterinstanzen; EChart: Schalter zum Ausblenden der Y-Achse und Gitternetzlinien; EChart-Tooltip zeigt Einheiten und rundet auf 2 Dezimalstellen",
+        "ru": "DatapointPicker: показывает только состояния активных экземпляров адаптеров; EChart: переключатель скрытия оси Y и линий сетки; Tooltip показывает единицы и округляет до 2 знаков",
+        "pt": "DatapointPicker: mostra apenas estados de instâncias de adaptadores ativas; EChart: botão para ocultar escala do eixo Y e linhas de grelha; tooltip mostra unidades e arredonda para 2 casas decimais",
+        "nl": "DatapointPicker: toont alleen states van actieve adapterinstanties; EChart: schakelaar om Y-as en rasterlijnen te verbergen; tooltip toont eenheden en rondt af op 2 decimalen",
+        "fr": "DatapointPicker: n'affiche que les états des instances d'adaptateurs actives; EChart: bouton pour masquer l'axe Y et les lignes de grille; tooltip affiche les unités et arrondit à 2 décimales",
+        "it": "DatapointPicker: mostra solo gli stati delle istanze di adattatori attive; EChart: interruttore per nascondere l'asse Y e le linee della griglia; il tooltip mostra le unità e arrotonda a 2 decimali",
+        "es": "DatapointPicker: muestra solo estados de instancias de adaptadores activas; EChart: interruptor para ocultar escala del eje Y y líneas de cuadrícula; tooltip muestra unidades y redondea a 2 decimales",
+        "pl": "DatapointPicker: wyświetla tylko stany aktywnych instancji adapterów; EChart: przełącznik ukrywania osi Y i linii siatki; tooltip pokazuje jednostki i zaokrągla do 2 miejsc po przecinku",
+        "uk": "DatapointPicker: показує лише стани активних екземплярів адаптерів; EChart: перемикач приховування осі Y та ліній сітки; tooltip показує одиниці та округлює до 2 знаків",
+        "zh-cn": "DatapointPicker：仅显示已启用适配器实例的状态；EChart：切换按钮隐藏Y轴刻度和网格线；EChart工具提示显示单位并四舍五入到2位小数"
+      },
       "0.4.68": {
         "en": "Camera widget: stream type auto-detection, wake-up datapoint for battery cameras (3 modes), new layouts (Minimal/Standard/Custom Grid), stream health detection with countdown + error overlay, configurable stream timeout",
         "de": "Kamera-Widget: automatische Stream-Erkennung, Wake-Up-Datenpunkt für Akku-Kameras (3 Modi), neue Layouts (Minimal/Standard/Custom Grid), Stream-Gesundheitserkennung mit Countdown + Fehler-Overlay, einstellbarer Stream-Timeout",

@@ -42,6 +42,7 @@ export function EChartConfig({ config, onConfigChange }: EChartConfigProps) {
   const o = config.options ?? {};
   const series = (o.echartSeries as EChartSeriesConfig[] | undefined) ?? [];
   const echartShowLegend = (o.echartShowLegend as boolean | undefined) ?? true;
+  const echartShowYAxis = (o.echartShowYAxis as boolean | undefined) ?? true;
   const echartLeftUnit = (o.echartLeftUnit as string | undefined) ?? '';
   const echartRightUnit = (o.echartRightUnit as string | undefined) ?? '';
   const echartLeftMin = (o.echartLeftMin as string | undefined) ?? '';
@@ -450,6 +451,21 @@ export function EChartConfig({ config, onConfigChange }: EChartConfigProps) {
             <span
               className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
               style={{ left: echartShowLegend ? '18px' : '2px' }}
+            />
+          </button>
+        </div>
+
+        {/* Show Y-axis scale */}
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Y-Achse anzeigen</label>
+          <button
+            onClick={() => setO({ echartShowYAxis: !echartShowYAxis })}
+            className="relative w-9 h-5 rounded-full transition-colors"
+            style={{ background: echartShowYAxis ? 'var(--accent)' : 'var(--app-border)' }}
+          >
+            <span
+              className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+              style={{ left: echartShowYAxis ? '18px' : '2px' }}
             />
           </button>
         </div>

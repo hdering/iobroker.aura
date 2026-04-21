@@ -175,6 +175,11 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.69 (2026-04-21)
+- DatapointPicker: only shows states from enabled adapter instances (common.enabled === true)
+- EChart widget: toggle to hide Y-axis scale, tick marks, and grid lines
+- EChart tooltip: shows units next to values and rounds to 2 decimal places
+
 ### 0.4.68 (2026-04-21)
 - Camera widget: new layouts – Minimal (stream only), Standard (stream + configurable info rows), Custom Grid (5 predefined templates with configurable slots)
 - Camera widget: stream health detection – countdown timer with color-coded badge, consecutive error counting; shows "Stream ended" / "Connection lost" overlay with re-activate button
