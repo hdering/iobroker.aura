@@ -12,6 +12,7 @@ import { DatapointPicker } from '../../components/config/DatapointPicker';
 import { WidgetPreview } from '../../components/config/WidgetPreview';
 import type { WidgetConfig, WidgetType, WidgetLayout } from '../../types';
 import { WIDGET_REGISTRY, WIDGET_BY_TYPE, WIDGET_GROUPS, getEffectiveSize, type WidgetGroup } from '../../widgetRegistry';
+import { applyDpNameFilter } from '../../utils/dpNameFilter';
 import { useConfigStore } from '../../store/configStore';
 import { exportWidget } from '../../utils/widgetExportImport';
 import { detectType } from '../../utils/widgetDetection';
@@ -828,7 +829,7 @@ function NewWidgetDialog({
             currentValue={datapoint}
             onSelect={(id, dpUnit, dpName, role, dpType) => {
               setDatapoint(id);
-              if (!title.trim() && dpName) setTitle(dpName);
+              if (!title.trim() && dpName) setTitle(applyDpNameFilter(dpName));
               if (!unit && dpUnit) setUnit(dpUnit);
               if (role || dpType) {
                 const det = detectType({ id, name: dpName ?? id, role, type: dpType, unit: dpUnit, rooms: [], funcs: [], logging: [] });
