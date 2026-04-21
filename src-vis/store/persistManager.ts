@@ -21,6 +21,16 @@ export function isDirty(): boolean {
   return pending.size > 0;
 }
 
+/** Immediately commit one key from pending to localStorage without leaving it dirty. */
+export function flushKey(key: string): void {
+  const value = pending.get(key);
+  if (value !== undefined) {
+    localStorage.setItem(key, value);
+    pending.delete(key);
+    notify();
+  }
+}
+
 /** Flush buffered writes to localStorage */
 export function saveAll(): void {
   pending.forEach((val, key) => localStorage.setItem(key, val));

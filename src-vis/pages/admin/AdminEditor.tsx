@@ -11,6 +11,7 @@ import { TabWizard } from '../../components/config/TabWizard';
 import { DatapointPicker } from '../../components/config/DatapointPicker';
 import type { WidgetConfig, WidgetType, WidgetLayout } from '../../types';
 import { WIDGET_REGISTRY, WIDGET_BY_TYPE, getEffectiveSize } from '../../widgetRegistry';
+import { applyDpNameFilter } from '../../utils/dpNameFilter';
 import { useConfigStore } from '../../store/configStore';
 import { useT } from '../../i18n';
 import { ensureDatapointCache } from '../../hooks/useDatapointList';
@@ -435,7 +436,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
             currentValue={datapoint}
             onSelect={(id, dpUnit, dpName) => {
               setDatapoint(id);
-              if (!title.trim() && dpName) setTitle(dpName);
+              if (!title.trim() && dpName) setTitle(applyDpNameFilter(dpName));
               if (!unit.trim() && dpUnit) setUnit(dpUnit);
             }}
             onClose={() => setShowPicker(false)}

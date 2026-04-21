@@ -5,6 +5,7 @@ import { useT, t } from '../../i18n';
 import { X, Pencil, Database, Sparkles, EyeOff, ChevronDown, Plus, Trash2, Download, ArrowRightLeft, Copy } from 'lucide-react';
 import { exportWidget } from '../../utils/widgetExportImport';
 import { getWidgetIcon } from '../../utils/widgetIconMap';
+import { applyDpNameFilter } from '../../utils/dpNameFilter';
 import { useDashboardStore, useActiveLayout } from '../../store/dashboardStore';
 import { useActiveLayoutId } from '../../contexts/ActiveLayoutContext';
 import { useEffectiveSettings } from '../../hooks/useEffectiveSettings';
@@ -1735,7 +1736,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                         const supportsUnit = ['value', 'chart', 'gauge', 'fill'].includes(config.type);
                         const apply = (name: string | undefined, unit: string | undefined) => {
                           let updated: typeof config = { ...config, datapoint: id };
-                          if (!updated.title?.trim() && name) updated = { ...updated, title: name };
+                          if (!updated.title?.trim() && name) updated = { ...updated, title: applyDpNameFilter(name) };
                           if (supportsUnit && !(updated.options?.unit as string | undefined) && unit) {
                             updated = { ...updated, options: { ...updated.options, unit } };
                           }

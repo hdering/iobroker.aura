@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { managedStorage } from './persistManager';
+import { managedStorage, flushKey } from './persistManager';
 import { slugify } from '../utils/slugify';
 import type { WidgetConfig } from '../types';
 import type { ThemeVars } from '../themes';
@@ -242,10 +242,12 @@ export const useDashboardStore = create<DashboardState>()(
           })) })
         ),
 
-      setActiveTab: (id) =>
+      setActiveTab: (id) => {
         set((s) =>
           ({ layouts: patchLayout(s.layouts, s.activeLayoutId, (l) => ({ ...l, activeTabId: id })) })
-        ),
+        );
+        flushKey('aura-dashboard');
+      },
 
       setDefaultTab: (layoutId, tabId) =>
         set((s) => ({ layouts: patchLayout(s.layouts, layoutId, (l) => ({ ...l, defaultTabId: tabId })) })),
