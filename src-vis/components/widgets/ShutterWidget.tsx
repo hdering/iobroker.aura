@@ -1,5 +1,5 @@
 import { ChevronUp, ChevronDown, Square } from 'lucide-react';
-import { useRef } from 'react';
+import { useRef, useMemo } from 'react';
 import { useDatapoint } from '../../hooks/useDatapoint';
 import { useIoBroker } from '../../hooks/useIoBroker';
 import type { WidgetProps } from '../../types';
@@ -116,6 +116,17 @@ export function ShutterWidget({ config }: WidgetProps) {
   };
 
   const accentColor = isMoving ? 'var(--accent-yellow)' : pos > 0 ? 'var(--accent)' : 'var(--text-secondary)';
+
+  const thresholds = opts.colorThresholds as Array<[number, string]> | undefined;
+  const thresholdColor = useMemo(() => {
+    if (!thresholds?.length) return undefined;
+    for (const [thresh, color] of thresholds) {
+      if (pos < thresh) return color;
+    }
+    return thresholds[thresholds.length - 1][1];
+  }, [thresholds, pos]);
+  const valueColor = thresholdColor ?? 'var(--text-primary)';
+
   const showTitle    = opts.showTitle    !== false;
   const showValue    = opts.showValue    !== false;
   const showControls = opts.showControls !== false;
@@ -158,7 +169,7 @@ export function ShutterWidget({ config }: WidgetProps) {
         )}
         <ShutterViz closedFrac={closedFrac} accentColor={accentColor} isMoving={isMoving} className="flex-1" />
         <div className="flex items-center justify-between">
-          {showValue && <span className="text-xl font-black" style={{ color: 'var(--text-primary)' }}>{pos}%</span>}
+          {showValue && <span className="text-xl font-black" style={{ color: valueColor }}>{pos}%</span>}
           {showControls && <BtnRow onUp={openFully} onStop={stop} onDown={closeFully} size="md" />}
         </div>
         {showSlider && slider}
@@ -175,7 +186,7 @@ export function ShutterWidget({ config }: WidgetProps) {
           style={{ width: 22, height: 22, flexShrink: 0 }} />
         {showTitle && <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
         {!showTitle && <span className="flex-1" />}
-        {showValue && <span className="text-sm font-bold shrink-0" style={{ color: isMoving ? 'var(--accent-yellow)' : 'var(--text-primary)' }}>{pos}%</span>}
+        {showValue && <span className="text-sm font-bold shrink-0" style={{ color: thresholdColor ?? (isMoving ? 'var(--accent-yellow)' : 'var(--text-primary)') }}>{pos}%</span>}
         {showControls && <BtnRow onUp={openFully} onStop={stop} onDown={closeFully} size="sm" />}
         <StatusBadges config={config} />
       </div>
@@ -194,7 +205,7 @@ export function ShutterWidget({ config }: WidgetProps) {
         )}
         {showValue && (
           <div className="text-center">
-            <p className="text-2xl font-black leading-none" style={{ color: 'var(--text-primary)' }}>{pos}%</p>
+            <p className="text-2xl font-black leading-none" style={{ color: valueColor }}>{pos}%</p>
             {isMoving && <p className="text-[10px] animate-pulse mt-0.5" style={{ color: 'var(--accent-yellow)' }}>
               {movingDir === 'up' ? '▲' : '▼'}
             </p>}
@@ -237,7 +248,7 @@ export function ShutterWidget({ config }: WidgetProps) {
           {showValue && (
             <div className="flex justify-between items-baseline mb-1">
               <span className="text-[11px]" style={{ color: isMoving ? 'var(--accent-yellow)' : 'var(--text-secondary)' }}>{statusText}</span>
-              <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{pos}%</span>
+              <span className="text-sm font-bold" style={{ color: valueColor }}>{pos}%</span>
             </div>
           )}
           {showSlider && slider}

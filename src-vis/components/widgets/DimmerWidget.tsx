@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Sun, SunDim } from 'lucide-react';
 import { useDatapoint } from '../../hooks/useDatapoint';
 import { useIoBroker } from '../../hooks/useIoBroker';
@@ -16,6 +17,16 @@ export function DimmerWidget({ config }: WidgetProps) {
   const showTitle  = o.showTitle  !== false;
   const showValue  = o.showValue  !== false;
   const showSlider = o.showSlider !== false;
+
+  const thresholds = o.colorThresholds as Array<[number, string]> | undefined;
+  const thresholdColor = useMemo(() => {
+    if (!thresholds?.length) return undefined;
+    for (const [thresh, color] of thresholds) {
+      if (level < thresh) return color;
+    }
+    return thresholds[thresholds.length - 1][1];
+  }, [thresholds, level]);
+  const valueColor = thresholdColor ?? 'var(--text-primary)';
 
   const slider = (
     <input type="range" min={0} max={100} value={level}
@@ -45,7 +56,7 @@ export function DimmerWidget({ config }: WidgetProps) {
         <div className="flex flex-col items-center gap-3 flex-1 justify-center">
           <Sun size={40} strokeWidth={1.5}
             style={{ color: 'var(--accent-yellow)', opacity, filter: level > 0 ? `drop-shadow(0 0 ${level / 10}px var(--accent-yellow))` : 'none', transition: 'all 0.3s' }} />
-          {showValue && <span className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{level}%</span>}
+          {showValue && <span className="text-2xl font-bold" style={{ color: valueColor }}>{level}%</span>}
         </div>
         {showSlider && slider}
         <StatusBadges config={config} />
@@ -61,7 +72,7 @@ export function DimmerWidget({ config }: WidgetProps) {
           <CompactIcon size={15} style={{ color: level > 0 ? 'var(--accent-yellow)' : 'var(--text-secondary)', flexShrink: 0 }} />
           {showTitle && <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
           {!showTitle && <span className="flex-1" />}
-          {showValue && <span className="text-sm font-bold shrink-0" style={{ color: 'var(--text-primary)' }}>{level}%</span>}
+          {showValue && <span className="text-sm font-bold shrink-0" style={{ color: valueColor }}>{level}%</span>}
         </div>
         {showSlider && (
           <input type="range" min={0} max={100} step={1} value={level}
@@ -78,7 +89,7 @@ export function DimmerWidget({ config }: WidgetProps) {
   if (layout === 'minimal') {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-3" style={{ position: 'relative' }}>
-        {showValue && <span className="text-3xl font-black" style={{ color: level > 0 ? 'var(--accent-yellow)' : 'var(--text-secondary)' }}>{level}%</span>}
+        {showValue && <span className="text-3xl font-black" style={{ color: thresholdColor ?? (level > 0 ? 'var(--accent-yellow)' : 'var(--text-secondary)') }}>{level}%</span>}
         {showSlider && slider}
         <StatusBadges config={config} />
       </div>
@@ -97,7 +108,7 @@ export function DimmerWidget({ config }: WidgetProps) {
       <div className="space-y-2">
         {showValue && (
           <div className="flex justify-between items-center">
-            <span className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{level}%</span>
+            <span className="text-2xl font-bold" style={{ color: valueColor }}>{level}%</span>
             <div className="w-3 h-3 rounded-full transition-all"
               style={{ background: level > 0 ? 'var(--accent-yellow)' : 'var(--app-border)', boxShadow: level > 0 ? '0 0 6px var(--accent-yellow)' : 'none' }} />
           </div>

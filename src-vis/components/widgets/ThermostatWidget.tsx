@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { Thermometer, Flame, Wind, X, Snowflake } from 'lucide-react';
 import { useDatapoint } from '../../hooks/useDatapoint';
@@ -189,6 +189,17 @@ export function ThermostatWidget({ config, editMode }: WidgetProps) {
   const isCooling  = actual !== null && target < actual - 0.2;
   const accentColor = isHeating ? 'var(--accent-red)' : isCooling ? 'var(--accent)' : 'var(--text-secondary)';
 
+  const thresholds = o.colorThresholds as Array<[number, string]> | undefined;
+  const thresholdNum = actual ?? target;
+  const thresholdColor = useMemo(() => {
+    if (!thresholds?.length) return undefined;
+    for (const [thresh, color] of thresholds) {
+      if (thresholdNum < thresh) return color;
+    }
+    return thresholds[thresholds.length - 1][1];
+  }, [thresholds, thresholdNum]);
+  const valueColor = thresholdColor ?? accentColor;
+
   const displayTitle = resolveTitle(config);
 
   const setTemp = (v: number) => setState(config.datapoint, clamp(v, minTemp, maxTemp, step));
@@ -246,7 +257,7 @@ export function ThermostatWidget({ config, editMode }: WidgetProps) {
             <div>
               {showSetpoint && (
                 <>
-                  <p className="font-black leading-none" style={{ fontSize: 'calc(3.5rem * var(--font-scale, 1))', color: accentColor }}>
+                  <p className="font-black leading-none" style={{ fontSize: 'calc(3.5rem * var(--font-scale, 1))', color: valueColor }}>
                     {target.toFixed(1)}
                   </p>
                   <p className="text-base font-light mt-0.5" style={{ color: 'var(--text-secondary)' }}>{t('thermo.setPoint')}</p>
@@ -318,7 +329,7 @@ export function ThermostatWidget({ config, editMode }: WidgetProps) {
         <div className={`flex flex-col items-center justify-center h-full gap-2 ${wrapperCls}`} style={{ position: 'relative' }} onClick={handleClick}>
           <Thermometer size={22} style={{ color: accentColor }} />
           {showSetpoint && (
-            <span className="font-black" style={{ fontSize: 'calc(2.5rem * var(--font-scale, 1))', color: 'var(--text-primary)', lineHeight: 1 }}>
+            <span className="font-black" style={{ fontSize: 'calc(2.5rem * var(--font-scale, 1))', color: valueColor, lineHeight: 1 }}>
               {target.toFixed(1)}°
             </span>
           )}
@@ -362,7 +373,7 @@ export function ThermostatWidget({ config, editMode }: WidgetProps) {
           <div>
             {showSetpoint && (
               <>
-                <p className="font-black leading-none" style={{ fontSize: 'calc(2.8rem * var(--font-scale, 1))', color: accentColor }}>
+                <p className="font-black leading-none" style={{ fontSize: 'calc(2.8rem * var(--font-scale, 1))', color: valueColor }}>
                   {target.toFixed(1)}
                 </p>
                 <p className="text-sm font-light" style={{ color: 'var(--text-secondary)' }}>{t('thermo.setPoint')}</p>

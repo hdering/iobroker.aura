@@ -1793,7 +1793,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                   </p>
                 </div>
               )}
-              {config.type === 'value' && (() => {
+              {(config.type === 'value' || config.type === 'dimmer' || config.type === 'shutter' || config.type === 'thermostat') && (() => {
                 type CT = [number, string];
                 const thresholds = (config.options?.colorThresholds as CT[]) ?? [];
                 const setThresholds = (next: CT[]) =>
