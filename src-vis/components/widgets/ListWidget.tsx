@@ -22,6 +22,7 @@ export interface StaticListOptions {
   valueFilter?: 'all' | 'active' | 'inactive';
   showId?: boolean;
   showTitle?: boolean;
+  showCount?: boolean;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -165,6 +166,7 @@ export function ListWidget({ config, editMode, onConfigChange }: WidgetProps) {
   const activeCount = entries.filter(e => isActive(states[e.id]?.val ?? null)).length;
 
   const showTitle = opts.showTitle !== false;
+  const showCount = opts.showCount !== false;
 
   const layout = config.layout ?? 'default';
   if (layout === 'custom') return <CustomGridView config={config} value="" />;
@@ -177,7 +179,7 @@ export function ListWidget({ config, editMode, onConfigChange }: WidgetProps) {
         style={{ borderBottom: '1px solid var(--widget-border)' }}>
         <span className="text-xs font-semibold truncate" style={{ color: 'var(--text-secondary)' }}>
           {config.title || 'Statische Liste'}
-          {entries.length > 0 && (
+          {showCount && entries.length > 0 && (
             <span className="ml-1 opacity-50">
               ({valueFilter !== 'all' ? `${visibleEntries.length}/` : ''}{entries.length})
             </span>

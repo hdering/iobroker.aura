@@ -28,6 +28,7 @@ export interface AutoListOptions {
   /** 'all' = show everything (default), 'active' = only on/> 0, 'inactive' = only off/0 */
   valueFilter?: 'all' | 'active' | 'inactive';
   showTitle?: boolean;
+  showCount?: boolean;
 }
 
 export interface DiscoveredDp {
@@ -346,6 +347,7 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
   }, [entries, states, valueFilter, editMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const showTitle = opts.showTitle !== false;
+  const showCount = opts.showCount !== false;
 
   // ── Shared header ──────────────────────────────────────────────────────────
   const header = showTitle ? (
@@ -353,7 +355,7 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
       style={{ borderBottom: '1px solid var(--widget-border)' }}>
       <span className="text-xs font-semibold truncate" style={{ color: 'var(--text-secondary)' }}>
         {config.title || 'Dynamische Liste'}
-        {entries.length > 0 && (
+        {showCount && entries.length > 0 && (
           <span className="ml-1 opacity-50">
             ({valueFilter !== 'all' ? `${visibleEntries.length}/` : ''}{entries.length})
           </span>

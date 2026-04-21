@@ -3,6 +3,7 @@ import { RefreshCw, Search, Check, X, ChevronDown, Settings2, ChevronRight, Chev
 import type { WidgetConfig } from '../../types';
 import { discoverDatapoints, loadFilterOptions } from '../widgets/AutoListWidget';
 import type { AutoListOptions, AutoListEntry, DiscoveredDp } from '../widgets/AutoListWidget';
+import { saveAll, saveToIoBroker } from '../../store/persistManager';
 import { useT } from '../../i18n';
 
 // ── MultiSelect dropdown ───────────────────────────────────────────────────────
@@ -227,8 +228,11 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
   // Reset search results when any filter value changes
   const resetSearch = () => { setResults([]); setSelected(new Set()); setSearched(false); setShowOthers(false); };
 
-  const setOpts = (patch: Partial<AutoListOptions>) =>
+  const setOpts = (patch: Partial<AutoListOptions>) => {
     onConfigChange({ ...config, options: { ...opts, ...patch } });
+    saveAll();
+    saveToIoBroker();
+  };
 
   const search = async () => {
     setLoading(true);
@@ -249,10 +253,13 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
     }
   };
 
-  // Apply replaces the entries entirely – filter change = fresh list
+  // Apply merges new entries with existing ones to preserve custom labels/units
   const apply = () => {
     const discovered = new Map(results.map(d => [d.id, d]));
+    const existingMap = new Map((opts.entries ?? []).map(e => [e.id, e]));
     const entries: AutoListEntry[] = [...selected].map(id => {
+      const existing = existingMap.get(id);
+      if (existing) return existing; // preserve user-edited label/unit/trueLabel/falseLabel
       const dp = discovered.get(id);
       return { id, label: dp?.name, rooms: dp?.rooms, unit: dp?.unit };
     });
@@ -408,6 +415,15 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
         <input type="number" min={1} className={iCls} style={iSty}
           value={opts.syncIntervalMin ?? 5}
           onChange={e => setOpts({ syncIntervalMin: Number(e.target.value) })} />
+      </div>
+      <div className="flex items-center justify-between">
+        <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Anzahl anzeigen</label>
+        <button onClick={() => setOpts({ showCount: !(opts.showCount ?? true) })}
+          className="relative w-9 h-5 rounded-full transition-colors"
+          style={{ background: (opts.showCount ?? true) ? 'var(--accent)' : 'var(--app-border)' }}>
+          <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all"
+            style={{ left: (opts.showCount ?? true) ? '18px' : '2px' }} />
+        </button>
       </div>
       <div className="flex items-center justify-between">
         <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{t('autolist.showRoom')}</label>
