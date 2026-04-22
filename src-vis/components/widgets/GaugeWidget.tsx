@@ -1,6 +1,5 @@
 import { useDatapoint } from '../../hooks/useDatapoint';
 import type { WidgetProps } from '../../types';
-import { CustomGridView } from './CustomGridView';
 
 function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
   const rad = (angleDeg * Math.PI) / 180;
@@ -137,10 +136,9 @@ function GaugeSVG({
 
 // ── Main widget ───────────────────────────────────────────────────────────────
 export function GaugeWidget({ config }: WidgetProps) {
-  const opts   = config.options ?? {};
-  const layout = config.layout ?? 'default';
+  const opts = config.options ?? {};
 
-  const { value }    = useDatapoint(config.datapoint);
+  const { value } = useDatapoint(config.datapoint);
 
   const minDp  = (opts.minDatapoint as string) ?? '';
   const maxDp  = (opts.maxDatapoint as string) ?? '';
@@ -228,54 +226,7 @@ export function GaugeWidget({ config }: WidgetProps) {
     );
   });
 
-  if (layout === 'custom') {
-    const displayValue = safeVal === 0 && value === null ? '–' : (decimals === 0 ? String(Math.round(safeVal)) : safeVal.toFixed(decimals));
-    return (
-      <CustomGridView
-        config={config}
-        value={displayValue}
-        unit={unit}
-        extraFields={{
-          value:   displayValue,
-          unit:    unit || '–',
-          min:     String(effectiveMin),
-          max:     String(effectiveMax),
-          percent: effectiveMax > effectiveMin ? `${Math.round(((safeVal - effectiveMin) / (effectiveMax - effectiveMin)) * 100)}%` : '–',
-        }}
-      />
-    );
-  }
-
-  if (layout === 'minimal') {
-    return (
-      <div className="flex flex-col items-center justify-center h-full gap-1">
-        <GaugeSVG {...gaugeProps} scale={0.85} />
-        {secondaryBadges.length > 0 && <div className="flex flex-wrap justify-center gap-1">{secondaryBadges}</div>}
-      </div>
-    );
-  }
-
   const showTitle = opts.showTitle !== false;
-
-  if (layout === 'compact') {
-    const displayVal = isNaN(safeVal) ? '–'
-      : decimals === 0 ? String(Math.round(safeVal)) : safeVal.toFixed(decimals);
-    // Accent colour from zone or default
-    let accentColor = 'var(--accent)';
-    if (colorZones && zones.length > 0) {
-      const z = zones.find((zone) => safeVal <= zone.max);
-      if (z) accentColor = z.color;
-    }
-    return (
-      <div className="flex items-center justify-between h-full gap-2">
-        {showTitle && <span className="text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
-        <span className="text-xl font-bold shrink-0 tabular-nums" style={{ color: accentColor }}>
-          {displayVal}
-          {unit && <span className="text-sm ml-0.5 font-normal" style={{ color: 'var(--text-secondary)' }}>{unit}</span>}
-        </span>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col h-full">
@@ -283,7 +234,7 @@ export function GaugeWidget({ config }: WidgetProps) {
         <p className="text-xs mb-1 truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
       )}
       <div className="flex-1 flex items-center justify-center">
-        <GaugeSVG {...gaugeProps} scale={layout === 'card' ? 1 : 0.95} />
+        <GaugeSVG {...gaugeProps} scale={0.95} />
       </div>
       {secondaryBadges.length > 0 && (
         <div className="flex flex-wrap justify-center gap-1.5 pb-1 shrink-0">{secondaryBadges}</div>
