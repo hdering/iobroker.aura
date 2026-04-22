@@ -1,8 +1,7 @@
-import { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { BarChart2, Loader } from 'lucide-react';
 import { useIoBroker } from '../../hooks/useIoBroker';
-import { useMultiSeriesData, type EChartSeriesConfig, type FixedTimeRange } from '../../hooks/useMultiSeriesData';
+import { useMultiSeriesData, type EChartSeriesConfig } from '../../hooks/useMultiSeriesData';
 import type { WidgetProps } from '../../types';
 import { CustomGridView } from './CustomGridView';
 
@@ -50,24 +49,9 @@ export function EChartWidget({ config, editMode }: WidgetProps) {
   const echartRightMax = o.echartRightMax as number | undefined;
   const echartJsonExtra   = (o.echartJsonExtra   as string  | undefined) ?? '';
   const echartShowYAxis   = (o.echartShowYAxis   as boolean | undefined) ?? true;
-  const echartFixedRange  = (o.echartFixedRange  as boolean | undefined) ?? false;
-  const echartFixedStart  = (o.echartFixedStart  as string  | undefined) ?? '00:00';
-  const echartFixedEnd    = (o.echartFixedEnd    as string  | undefined) ?? '23:59';
   const isGauge = config.layout === 'gauge' as string;
 
-  const fixedTimeRange = useMemo<FixedTimeRange | undefined>(() => {
-    if (!echartFixedRange) return undefined;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const base = today.getTime();
-    const parseHHMM = (s: string) => {
-      const [h, m] = s.split(':').map(Number);
-      return base + (isNaN(h) ? 0 : h) * 3_600_000 + (isNaN(m) ? 0 : m) * 60_000;
-    };
-    return { start: parseHHMM(echartFixedStart), end: parseHHMM(echartFixedEnd) };
-  }, [echartFixedRange, echartFixedStart, echartFixedEnd]);
-
-  const seriesDataMap = useMultiSeriesData(echartSeries, connected, subscribe, fixedTimeRange);
+  const seriesDataMap = useMultiSeriesData(echartSeries, connected, subscribe);
 
   if (layout === 'custom') return <CustomGridView config={config} value="" />;
 
@@ -240,7 +224,6 @@ export function EChartWidget({ config, editMode }: WidgetProps) {
     },
     xAxis: {
       type: 'time',
-      ...(fixedTimeRange ? { min: fixedTimeRange.start, max: Math.min(fixedTimeRange.end, Date.now()) } : {}),
       axisLabel: { color: '#888', fontSize: 10 },
       axisLine: { lineStyle: { color: '#444' } },
       splitLine: { show: false },

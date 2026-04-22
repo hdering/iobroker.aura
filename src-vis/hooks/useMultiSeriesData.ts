@@ -4,11 +4,6 @@ import type { ioBrokerState } from '../types';
 
 export type EChartTimeRange = '1h' | '6h' | '24h' | '7d' | '30d';
 
-export interface FixedTimeRange {
-  start: number;
-  end: number;
-}
-
 export interface EChartSeriesConfig {
   id: string;
   name: string;
@@ -48,7 +43,6 @@ export function useMultiSeriesData(
   series: EChartSeriesConfig[],
   connected: boolean,
   subscribe: (id: string, cb: (state: ioBrokerState) => void) => () => void,
-  fixedTimeRange?: FixedTimeRange,
 ): Map<string, SeriesDataResult> {
   const [resultsMap, setResultsMap] = useState<Map<string, SeriesDataResult>>(new Map());
   const mountedRef = useRef(true);
@@ -58,10 +52,9 @@ export function useMultiSeriesData(
     return () => { mountedRef.current = false; };
   }, []);
 
-  const depKey = JSON.stringify([
+  const depKey = JSON.stringify(
     series.map((s) => [s.id, s.datapointId, s.historyInstance, s.historyRange]),
-    fixedTimeRange ? [fixedTimeRange.start, fixedTimeRange.end] : null,
-  ]);
+  );
 
   // Fetch history for all series
   useEffect(() => {
