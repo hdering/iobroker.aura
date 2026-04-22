@@ -17,7 +17,7 @@ import { getObjectDirect, subscribeStateDirect, getStateDirect } from '../../hoo
 import { lookupDatapointEntry, ensureDatapointCache } from '../../hooks/useDatapointList';
 import { WIDGET_REGISTRY, WIDGET_GROUPS, WIDGET_BY_TYPE } from '../../widgetRegistry';
 import { detectType } from '../../utils/widgetDetection';
-import { DP_TEMPLATES, findMainDpForSecondary } from '../../utils/dpTemplates';
+import { DP_TEMPLATES, findMainDpForSecondary, autoDetectStatusDps } from '../../utils/dpTemplates';
 import { AutoListConfig } from '../config/AutoListConfig';
 import { StaticListConfig } from '../config/StaticListConfig';
 import { type CameraSlot, type CameraSlotType, type CameraTemplateId, CAMERA_TEMPLATES, SLOT_TYPE_OPTIONS } from '../widgets/CameraWidget';
@@ -3636,18 +3636,29 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                       ?? sdp.siblingNames.map((n) => sibsUp.find((e) => e.id === `${parentUp}.0.${n}`)?.id).find(Boolean);
                     if (found) secondaryDpOptions[sdp.optionKey] = found;
                   }
+                  // Generic fallback for any battery/unreach not found via template
+                  const statusDps = autoDetectStatusDps(id, entries);
+                  if (statusDps.batteryDp  && !secondaryDpOptions.batteryDp)  secondaryDpOptions.batteryDp  = statusDps.batteryDp;
+                  if (statusDps.unreachDp  && !secondaryDpOptions.unreachDp)  secondaryDpOptions.unreachDp  = statusDps.unreachDp;
                   if (Object.keys(secondaryDpOptions).length > 0)
                     onConfigChange({ ...updatedConfig, options: { ...updatedConfig.options, ...secondaryDpOptions } });
                 } else {
                   // Reverse path: selected DP might be secondary (e.g. ACTUAL_TEMPERATURE)
                   // → find primary sibling (e.g. SET_TEMPERATURE) and upgrade widget type
                   const upgrade = findMainDpForSecondary(id, entries);
-                  if (!upgrade) return;
-                  const parts = upgrade.mainDpId.split('.');
+                  const mainId = upgrade ? upgrade.mainDpId : id;
+                  const parts = mainId.split('.');
                   const parent = parts.slice(0, -1).join('.');
                   const parentUp = parts.slice(0, -2).join('.');
                   const sibs   = entries.filter((e) => e.id.startsWith(parent + '.'));
                   const sibsUp = entries.filter((e) => e.id.startsWith(parentUp + '.'));
+                  const statusDps = autoDetectStatusDps(mainId, entries);
+                  if (!upgrade) {
+                    // No template and no upgrade: only fill battery/unreach if found
+                    if (statusDps.batteryDp || statusDps.unreachDp)
+                      onConfigChange({ ...updatedConfig, options: { ...updatedConfig.options, ...statusDps } });
+                    return;
+                  }
                   const upgradeOptions: Record<string, unknown> = { [upgrade.selectedOptionKey]: id };
                   for (const sdp of upgrade.template.secondaryDps) {
                     if (sdp.optionKey === upgrade.selectedOptionKey) continue;
@@ -3655,6 +3666,8 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                       ?? sdp.siblingNames.map((n) => sibsUp.find((e) => e.id === `${parentUp}.0.${n}`)?.id).find(Boolean);
                     if (found) upgradeOptions[sdp.optionKey] = found;
                   }
+                  if (statusDps.batteryDp  && !upgradeOptions.batteryDp)  upgradeOptions.batteryDp  = statusDps.batteryDp;
+                  if (statusDps.unreachDp  && !upgradeOptions.unreachDp)  upgradeOptions.unreachDp  = statusDps.unreachDp;
                   onConfigChange({
                     ...updatedConfig,
                     type: upgrade.template.widgetType,

@@ -131,6 +131,8 @@ export const DP_TEMPLATES: DpTemplate[] = [
         optionKey: 'stopDp',
         siblingNames: ['STOP', 'stop', 'Pause', 'pause'],
       },
+      { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow', 'BATTERY_LOW'] },
+      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
     ],
   },
   {
@@ -152,6 +154,8 @@ export const DP_TEMPLATES: DpTemplate[] = [
         optionKey: 'stopDp',
         siblingNames: ['STOP', 'stop', 'Pause', 'pause'],
       },
+      { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow', 'BATTERY_LOW'] },
+      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
     ],
   },
 
@@ -204,7 +208,8 @@ export const DP_TEMPLATES: DpTemplate[] = [
     widgetType: 'dimmer',
     category: 'lighting',
     secondaryDps: [
-      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE'] },
+      { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow', 'BATTERY_LOW'] },
+      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
     ],
   },
   {
@@ -214,7 +219,8 @@ export const DP_TEMPLATES: DpTemplate[] = [
     widgetType: 'switch',
     category: 'lighting',
     secondaryDps: [
-      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE'] },
+      { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow', 'BATTERY_LOW'] },
+      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
     ],
   },
 
@@ -226,7 +232,8 @@ export const DP_TEMPLATES: DpTemplate[] = [
     widgetType: 'switch',
     category: 'switching',
     secondaryDps: [
-      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE'] },
+      { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow', 'BATTERY_LOW'] },
+      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
     ],
   },
   {
@@ -236,7 +243,8 @@ export const DP_TEMPLATES: DpTemplate[] = [
     widgetType: 'switch',
     category: 'switching',
     secondaryDps: [
-      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE'] },
+      { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow', 'BATTERY_LOW'] },
+      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
     ],
   },
   {
@@ -246,7 +254,8 @@ export const DP_TEMPLATES: DpTemplate[] = [
     widgetType: 'switch',
     category: 'switching',
     secondaryDps: [
-      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE'] },
+      { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow', 'BATTERY_LOW'] },
+      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
     ],
   },
 
@@ -305,7 +314,9 @@ export const DP_TEMPLATES: DpTemplate[] = [
     icon: '⚡',
     widgetType: 'value',
     category: 'energy',
-    secondaryDps: [],
+    secondaryDps: [
+      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
+    ],
   },
   {
     id: 'value_energy',
@@ -313,7 +324,9 @@ export const DP_TEMPLATES: DpTemplate[] = [
     icon: '🔋',
     widgetType: 'value',
     category: 'energy',
-    secondaryDps: [],
+    secondaryDps: [
+      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
+    ],
   },
 
   // ── MESSWERTE ────────────────────────────────────────────────────────────
@@ -323,7 +336,10 @@ export const DP_TEMPLATES: DpTemplate[] = [
     icon: '🌡',
     widgetType: 'value',
     category: 'sensor',
-    secondaryDps: [],
+    secondaryDps: [
+      { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow', 'BATTERY_LOW'] },
+      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
+    ],
   },
   {
     id: 'value_humidity',
@@ -331,7 +347,10 @@ export const DP_TEMPLATES: DpTemplate[] = [
     icon: '💧',
     widgetType: 'value',
     category: 'sensor',
-    secondaryDps: [],
+    secondaryDps: [
+      { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow', 'BATTERY_LOW'] },
+      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
+    ],
   },
   {
     id: 'value',
@@ -339,7 +358,10 @@ export const DP_TEMPLATES: DpTemplate[] = [
     icon: '📊',
     widgetType: 'value',
     category: 'sensor',
-    secondaryDps: [],
+    secondaryDps: [
+      { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow', 'BATTERY_LOW'] },
+      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
+    ],
   },
 ];
 
@@ -471,4 +493,34 @@ export function findMainDpForSecondary(
   }
 
   return null;
+}
+
+// ── Generic battery/unreach auto-detection ─────────────────────────────────
+
+const BATTERY_NAMES = ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow', 'BATTERY_LOW'];
+const UNREACH_NAMES = ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'];
+
+/**
+ * Looks for battery and unreach sibling DPs next to dpId.
+ * Works for all widget types regardless of template.
+ */
+export function autoDetectStatusDps(
+  dpId: string,
+  entries: Array<{ id: string }>,
+): { batteryDp?: string; unreachDp?: string } {
+  const parts = dpId.split('.');
+  const parent   = parts.slice(0, -1).join('.');
+  const parentUp = parts.slice(0, -2).join('.');
+  const sibs   = entries.filter((e) => e.id.startsWith(parent + '.'));
+  const sibsUp = entries.filter((e) => e.id.startsWith(parentUp + '.'));
+  const find   = (names: string[]) =>
+    names.map((n) => sibs.find((e) => e.id === `${parent}.${n}`)?.id).find(Boolean);
+  const findUp = (names: string[]) =>
+    names.map((n) => sibsUp.find((e) => e.id === `${parentUp}.0.${n}` || e.id === `${parentUp}.${n}`)?.id).find(Boolean);
+  const result: { batteryDp?: string; unreachDp?: string } = {};
+  const batt    = find(BATTERY_NAMES) ?? findUp(BATTERY_NAMES);
+  const unreach = find(UNREACH_NAMES) ?? findUp(UNREACH_NAMES);
+  if (batt)    result.batteryDp  = batt;
+  if (unreach) result.unreachDp = unreach;
+  return result;
 }

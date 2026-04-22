@@ -15,7 +15,7 @@ import { applyDpNameFilter } from '../../utils/dpNameFilter';
 import { useConfigStore } from '../../store/configStore';
 import { useT } from '../../i18n';
 import { ensureDatapointCache } from '../../hooks/useDatapointList';
-import { DP_TEMPLATES, DP_TEMPLATE_CATEGORIES, detectWidgetTypeFromRole, findTemplateByRole, findMainDpForSecondary } from '../../utils/dpTemplates';
+import { DP_TEMPLATES, DP_TEMPLATE_CATEGORIES, detectWidgetTypeFromRole, findTemplateByRole, findMainDpForSecondary, autoDetectStatusDps } from '../../utils/dpTemplates';
 import { slugify } from '../../utils/slugify';
 
 // Layout labels are resolved inside components via t() to support i18n
@@ -171,19 +171,25 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
     const activeTemplate = DP_TEMPLATES.find((tpl) => tpl.id === templateId && tpl.secondaryDps.length > 0)
       ?? DP_TEMPLATES.find((tpl) => tpl.widgetType === type && tpl.secondaryDps.length > 0);
     const secondaryDpOptions: Record<string, unknown> = {};
-    if (activeTemplate && dpId) {
+    if (dpId) {
       try {
         const entries = await ensureDatapointCache();
-        const parts = dpId.split('.');
-        const parent = parts.slice(0, -1).join('.');
-        const parentUp = parts.slice(0, -2).join('.');
-        const sibs   = entries.filter((e) => e.id.startsWith(parent + '.'));
-        const sibsUp = entries.filter((e) => e.id.startsWith(parentUp + '.'));
-        for (const sdp of activeTemplate.secondaryDps) {
-          const found = sdp.siblingNames.map((n) => sibs.find((e) => e.id === `${parent}.${n}`)?.id).find(Boolean)
-            ?? sdp.siblingNames.map((n) => sibsUp.find((e) => e.id === `${parentUp}.0.${n}`)?.id).find(Boolean);
-          if (found) secondaryDpOptions[sdp.optionKey] = found;
+        if (activeTemplate) {
+          const parts = dpId.split('.');
+          const parent = parts.slice(0, -1).join('.');
+          const parentUp = parts.slice(0, -2).join('.');
+          const sibs   = entries.filter((e) => e.id.startsWith(parent + '.'));
+          const sibsUp = entries.filter((e) => e.id.startsWith(parentUp + '.'));
+          for (const sdp of activeTemplate.secondaryDps) {
+            const found = sdp.siblingNames.map((n) => sibs.find((e) => e.id === `${parent}.${n}`)?.id).find(Boolean)
+              ?? sdp.siblingNames.map((n) => sibsUp.find((e) => e.id === `${parentUp}.0.${n}`)?.id).find(Boolean);
+            if (found) secondaryDpOptions[sdp.optionKey] = found;
+          }
         }
+        // Fallback: generic battery/unreach detection for all widget types
+        const statusDps = autoDetectStatusDps(dpId, entries);
+        if (statusDps.batteryDp  && !secondaryDpOptions.batteryDp)  secondaryDpOptions.batteryDp  = statusDps.batteryDp;
+        if (statusDps.unreachDp  && !secondaryDpOptions.unreachDp)  secondaryDpOptions.unreachDp  = statusDps.unreachDp;
       } catch { /* ignore */ }
     }
 
