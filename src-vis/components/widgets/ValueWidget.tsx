@@ -82,7 +82,7 @@ export function ValueWidget({ config }: WidgetProps) {
       <div className="flex items-center justify-between h-full gap-2">
         {showTitle && (
           <div className="flex items-center gap-2 min-w-0">
-            <CompactIcon size={14} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
+            <CompactIcon size={16} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
             <span className="text-sm truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>
           </div>
         )}

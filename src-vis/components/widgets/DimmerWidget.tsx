@@ -69,7 +69,7 @@ export function DimmerWidget({ config }: WidgetProps) {
     return (
       <div className="flex flex-col justify-center h-full gap-1.5" style={{ position: 'relative' }}>
         <div className="flex items-center gap-2">
-          <CompactIcon size={15} style={{ color: level > 0 ? 'var(--accent-yellow)' : 'var(--text-secondary)', flexShrink: 0 }} />
+          <CompactIcon size={16} style={{ color: level > 0 ? 'var(--accent-yellow)' : 'var(--text-secondary)', flexShrink: 0 }} />
           {showTitle && <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
           {!showTitle && <span className="flex-1" />}
           {showValue && <span className="text-sm font-bold shrink-0" style={{ color: valueColor }}>{level}%</span>}

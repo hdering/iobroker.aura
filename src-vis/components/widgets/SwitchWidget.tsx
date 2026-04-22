@@ -49,9 +49,9 @@ export function SwitchWidget({ config }: WidgetProps) {
   // --- COMPACT: Zeile mit Icon + Titel + Toggle ---
   if (layout === 'compact') {
     return (
-      <div className="flex items-center gap-3 h-full" style={{ position: 'relative' }}>
-        <CompactIcon size={18} style={{ color: isOn ? 'var(--accent-green)' : 'var(--text-secondary)', flexShrink: 0 }} />
-        {showTitle && <span className="flex-1 text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{config.title}</span>}
+      <div className="flex items-center gap-2 h-full" style={{ position: 'relative' }}>
+        <CompactIcon size={16} style={{ color: isOn ? 'var(--accent-green)' : 'var(--text-secondary)', flexShrink: 0 }} />
+        {showTitle && <span className="flex-1 text-sm truncate" style={{ color: 'var(--text-primary)' }}>{config.title}</span>}
         {!showTitle && <span className="flex-1" />}
         <button onClick={toggle}
           className="relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0 focus:outline-none"

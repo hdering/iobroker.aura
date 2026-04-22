@@ -291,7 +291,7 @@ export function ThermostatWidget({ config, editMode }: WidgetProps) {
   if (layout === 'compact') {
     return (
       <>
-        <div className={`flex items-center gap-2.5 h-full ${wrapperCls}`} style={{ position: 'relative' }} onClick={handleClick}>
+        <div className={`flex items-center gap-2 h-full ${wrapperCls}`} style={{ position: 'relative' }} onClick={handleClick}>
           <Thermometer size={16} style={{ color: accentColor, flexShrink: 0 }} />
           {showTitle && <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{displayTitle}</span>}
           {!showTitle && <span className="flex-1" />}
