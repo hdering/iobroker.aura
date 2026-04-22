@@ -74,11 +74,21 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
         if (!title && entry.name) setTitle(entry.name);
         if (!unit && entry.unit) setUnit(entry.unit);
         if (!typePicked) {
-          const detected = detectWidgetTypeFromRole(entry.role, entry.type);
-          if (detected) {
-            setType(detected);
-            const tpl = findTemplateByRole(entry.role, entry.type);
-            if (tpl) setTemplateId(tpl.id);
+          // If the selected DP is a secondary (e.g. ACTUAL_TEMPERATURE),
+          // upgrade to the primary setpoint DP and set the correct widget type.
+          const upgrade = findMainDpForSecondary(dp, entries);
+          if (upgrade) {
+            setDatapoint(upgrade.mainDpId);
+            setType(upgrade.template.widgetType);
+            setTemplateId(upgrade.template.id);
+            setTypePicked(true);
+          } else {
+            const detected = detectWidgetTypeFromRole(entry.role, entry.type);
+            if (detected) {
+              setType(detected);
+              const tpl = findTemplateByRole(entry.role, entry.type);
+              if (tpl) setTemplateId(tpl.id);
+            }
           }
         }
       } catch { /* ignore */ }
@@ -443,17 +453,6 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
               setDatapoint(id);
               if (!title.trim() && dpName) setTitle(applyDpNameFilter(dpName));
               if (!unit.trim() && dpUnit) setUnit(dpUnit);
-              // If the selected DP is a secondary (e.g. ACTUAL_TEMPERATURE),
-              // redirect to the primary (e.g. SET_TEMPERATURE) and set type explicitly.
-              void ensureDatapointCache().then((entries) => {
-                const upgrade = findMainDpForSecondary(id, entries);
-                if (upgrade) {
-                  setDatapoint(upgrade.mainDpId);
-                  setType(upgrade.template.widgetType);
-                  setTemplateId(upgrade.template.id);
-                  setTypePicked(true);
-                }
-              }).catch(() => {});
             }}
             onClose={() => setShowPicker(false)}
           />
@@ -622,15 +621,6 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
             setDatapoint(id);
             if (!title.trim() && dpName) setTitle(dpName);
             if (!unit.trim() && dpUnit) setUnit(dpUnit);
-            void ensureDatapointCache().then((entries) => {
-              const upgrade = findMainDpForSecondary(id, entries);
-              if (upgrade) {
-                setDatapoint(upgrade.mainDpId);
-                setType(upgrade.template.widgetType);
-                setTemplateId(upgrade.template.id);
-                setTypePicked(true);
-              }
-            }).catch(() => {});
           }}
           onClose={() => setShowPicker(false)}
         />
