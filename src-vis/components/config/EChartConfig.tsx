@@ -52,7 +52,7 @@ export function EChartConfig({ config, onConfigChange }: EChartConfigProps) {
   const echartJsonExtra   = (o.echartJsonExtra   as string  | undefined) ?? '';
   const echartFixedRange  = (o.echartFixedRange  as boolean | undefined) ?? false;
   const echartFixedStart  = (o.echartFixedStart  as string  | undefined) ?? '00:00';
-  const echartFixedEnd    = (o.echartFixedEnd    as string  | undefined) ?? '24:00';
+  const echartFixedEnd    = (o.echartFixedEnd    as string  | undefined) ?? '23:59';
 
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [pickerForSeries, setPickerForSeries] = useState<string | null>(null);
@@ -497,10 +497,9 @@ export function EChartConfig({ config, onConfigChange }: EChartConfigProps) {
             <div className="flex-1">
               <label className="text-[10px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Start</label>
               <input
-                type="text"
+                type="time"
                 value={echartFixedStart}
                 onChange={(e) => setO({ echartFixedStart: e.target.value })}
-                placeholder="00:00"
                 className={inputCls}
                 style={inputStyle}
               />
@@ -508,10 +507,9 @@ export function EChartConfig({ config, onConfigChange }: EChartConfigProps) {
             <div className="flex-1">
               <label className="text-[10px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Ende</label>
               <input
-                type="text"
-                value={echartFixedEnd}
+                type="time"
+                value={echartFixedEnd.replace('24:00', '23:59')}
                 onChange={(e) => setO({ echartFixedEnd: e.target.value })}
-                placeholder="24:00"
                 className={inputCls}
                 style={inputStyle}
               />

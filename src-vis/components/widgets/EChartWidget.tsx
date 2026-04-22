@@ -52,7 +52,7 @@ export function EChartWidget({ config, editMode }: WidgetProps) {
   const echartShowYAxis   = (o.echartShowYAxis   as boolean | undefined) ?? true;
   const echartFixedRange  = (o.echartFixedRange  as boolean | undefined) ?? false;
   const echartFixedStart  = (o.echartFixedStart  as string  | undefined) ?? '00:00';
-  const echartFixedEnd    = (o.echartFixedEnd    as string  | undefined) ?? '24:00';
+  const echartFixedEnd    = (o.echartFixedEnd    as string  | undefined) ?? '23:59';
   const isGauge = config.layout === 'gauge' as string;
 
   const fixedTimeRange = useMemo<FixedTimeRange | undefined>(() => {

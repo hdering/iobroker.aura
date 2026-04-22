@@ -98,9 +98,10 @@ export function useMultiSeriesData(
       }
 
       const range = s.historyRange ?? '24h';
-      const end   = fixedTimeRange ? fixedTimeRange.end   : Date.now();
+      const now   = Date.now();
+      const end   = fixedTimeRange ? Math.min(fixedTimeRange.end, now) : now;
       const start = fixedTimeRange ? fixedTimeRange.start : end - RANGE_MS[range];
-      const step  = fixedTimeRange ? stepForRangeMs(end - start) : RANGE_STEP[range];
+      const step  = fixedTimeRange ? stepForRangeMs(Math.max(end - start, 1)) : RANGE_STEP[range];
 
       getHistoryDirect(s.datapointId, {
         instance: s.historyInstance,
