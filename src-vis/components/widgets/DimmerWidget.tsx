@@ -78,7 +78,7 @@ export function DimmerWidget({ config }: WidgetProps) {
           <input type="range" min={0} max={100} step={1} value={level}
             onChange={(e) => setState(config.datapoint, Number(e.target.value))}
             style={{ accentColor: 'var(--accent-yellow)' }}
-            className="w-full h-1.5 rounded-full appearance-none cursor-pointer" />
+            className="ml-6 h-1.5 rounded-full appearance-none cursor-pointer" />
         )}
         <StatusBadges config={config} />
       </div>
