@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.88",
+    "version": "0.4.89",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.89": {
+        "en": "Feat(tabBar): navigation menu position (left/center/right) configurable in layout settings",
+        "de": "Neu(Tableiste): Menü-Position (links/Mitte/rechts) in den Layout-Einstellungen konfigurierbar",
+        "ru": "Новое(панель вкладок): позиция навигационного меню (слева/по центру/справа) настраивается в настройках макета",
+        "pt": "Novo(barra de abas): posição do menu de navegação (esquerda/centro/direita) configurável nas definições de layout",
+        "nl": "Nieuw(tabbladbalk): positie van het navigatiemenu (links/midden/rechts) configureerbaar in de layoutinstellingen",
+        "fr": "Nouveau(barre d'onglets): position du menu de navigation (gauche/centre/droite) configurable dans les paramètres de mise en page",
+        "it": "Nuovo(barra schede): posizione del menu di navigazione (sinistra/centro/destra) configurabile nelle impostazioni layout",
+        "es": "Nuevo(barra de pestañas): posición del menú de navegación (izquierda/centro/derecha) configurable en los ajustes de diseño",
+        "pl": "Nowe(pasek kart): pozycja menu nawigacyjnego (lewo/środek/prawo) konfigurowalna w ustawieniach układu",
+        "uk": "Нове(панель вкладок): позиція навігаційного меню (зліва/по центру/справа) настроюється в налаштуваннях макету",
+        "zh-cn": "新功能(标签栏)：可在布局设置中配置导航菜单位置（左/中/右）"
+      },
       "0.4.88": {
         "en": "Feat: HTML boot screen shown immediately on page load before JS bundle parses; loading spinner with real-time datapoint counter (direct DOM updates bypass React batching)",
         "de": "Neu: HTML-Ladescreen wird sofort beim Seitenaufruf angezeigt, noch bevor das JS-Bundle geparst ist; Lade-Spinner mit Echtzeit-Datenpunkt-Zähler (direkte DOM-Updates umgehen React-Batching)",
@@ -183,19 +196,6 @@
         "pl": "Nowe(Tab-Wizard): uruchamia się bezpośrednio w selektorze punktów danych; nowy krok przeglądu z wyborem typu widgetu dla każdego DP, edytowalnymi nazwami, usuwaniem DP i wyborem układu; generator układu nie rozciąga już ostatniego widgetu w wierszu",
         "uk": "Нове(Tab-Wizard): запускається прямо у виборі точок даних; новий крок перегляду з вибором типу віджету для кожної точки, редагованими іменами, видаленням точок та вибором макету; генератор макетів більше не розтягує останній віджет у рядку",
         "zh-cn": "新增(标签向导)：直接在数据点选择器中启动；新增审查步骤，支持每个数据点的小部件类型选择、可编辑名称、删除数据点和布局选择；布局生成器不再将行中最后一个小部件拉伸到整行"
-      },
-      "0.4.82": {
-        "en": "Fix: per-layout theme and CSS variables now correctly applied in the frontend (global theme no longer overwrites per-layout settings)",
-        "de": "Fix: Layout-spezifische Theme- und CSS-Variablen werden im Frontend jetzt korrekt angewendet (globales Theme überschreibt nicht mehr die Layout-Einstellungen)",
-        "ru": "Исправление: тема и CSS-переменные для отдельного макета теперь корректно применяются во фронтенде (глобальная тема больше не перезаписывает настройки макета)",
-        "pt": "Fix: tema e variáveis CSS por layout agora aplicados corretamente no frontend (o tema global não sobrescreve mais as configurações do layout)",
-        "nl": "Fix: per-layout thema en CSS-variabelen worden nu correct toegepast in de frontend (globaal thema overschrijft layout-instellingen niet meer)",
-        "fr": "Fix: le thème et les variables CSS par mise en page sont maintenant correctement appliqués dans le frontend (le thème global n'écrase plus les paramètres de la mise en page)",
-        "it": "Fix: tema e variabili CSS per layout ora applicati correttamente nel frontend (il tema globale non sovrascrive più le impostazioni del layout)",
-        "es": "Fix: el tema y las variables CSS por diseño ahora se aplican correctamente en el frontend (el tema global ya no sobreescribe la configuración del diseño)",
-        "pl": "Fix: motyw i zmienne CSS per-layout są teraz poprawnie stosowane we frontendzie (globalny motyw nie nadpisuje już ustawień layoutu)",
-        "uk": "Виправлення: тема та CSS-змінні для окремого макету тепер коректно застосовуються у фронтенді (глобальна тема більше не перезаписує налаштування макету)",
-        "zh-cn": "修复：每个布局的主题和CSS变量现在在前端正确应用（全局主题不再覆盖布局设置）"
       }
     }
   },

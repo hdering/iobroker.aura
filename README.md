@@ -175,6 +175,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.89 (2026-04-22)
+- Feat(tabBar): navigation menu position (left/center/right) configurable in layout settings
+
 ### 0.4.88 (2026-04-22)
 - Feat: HTML boot screen visible immediately on page load (before JS bundle parses)
 - Feat: loading spinner with real-time datapoint counter using direct DOM updates (bypasses React batching)
