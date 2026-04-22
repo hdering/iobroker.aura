@@ -43,10 +43,10 @@ export function EChartWidget({ config, editMode }: WidgetProps) {
   const echartShowLegend = (o.echartShowLegend as boolean | undefined) ?? true;
   const echartLeftUnit = (o.echartLeftUnit as string | undefined) ?? '';
   const echartRightUnit = (o.echartRightUnit as string | undefined) ?? '';
-  const echartLeftMin = o.echartLeftMin as number | undefined;
-  const echartLeftMax = o.echartLeftMax as number | undefined;
-  const echartRightMin = o.echartRightMin as number | undefined;
-  const echartRightMax = o.echartRightMax as number | undefined;
+  const echartLeftMin = o.echartLeftMin as number | string | undefined;
+  const echartLeftMax = o.echartLeftMax as number | string | undefined;
+  const echartRightMin = o.echartRightMin as number | string | undefined;
+  const echartRightMax = o.echartRightMax as number | string | undefined;
   const echartJsonExtra   = (o.echartJsonExtra   as string  | undefined) ?? '';
   const echartShowYAxis   = (o.echartShowYAxis   as boolean | undefined) ?? true;
   const isGauge = config.layout === 'gauge' as string;

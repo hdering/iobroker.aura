@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.85",
+    "version": "0.4.86",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.86": {
+        "en": "Feat: eChartsPreset widget – title overlay, fullscreen button, fixed last-change overlay z-index; EChart – dataMin/dataMax auto option for Y-axis",
+        "de": "Neu: eChartsPreset-Widget – Titel-Overlay, Vollbild-Schaltfläche, z-Index-Fix für Letzte-Änderung-Overlay; EChart – dataMin/dataMax Auto-Option für Y-Achse",
+        "ru": "Новое: виджет eChartsPreset – наложение заголовка, кнопка полного экрана, исправление z-index для наложения последнего изменения; EChart – автоопция dataMin/dataMax для оси Y",
+        "pt": "Novo: widget eChartsPreset – sobreposição de título, botão de tela cheia, correção z-index para sobreposição de última alteração; EChart – opção automática dataMin/dataMax para eixo Y",
+        "nl": "Nieuw: eChartsPreset-widget – titeloverlay, volledig scherm-knop, z-index-fix voor laatste-wijziging-overlay; EChart – automatische optie dataMin/dataMax voor Y-as",
+        "fr": "Nouveau: widget eChartsPreset – superposition de titre, bouton plein écran, correction z-index pour la superposition de dernière modification; EChart – option automatique dataMin/dataMax pour l'axe Y",
+        "it": "Nuovo: widget eChartsPreset – sovrapposizione titolo, pulsante schermo intero, correzione z-index per sovrapposizione ultima modifica; EChart – opzione automatica dataMin/dataMax per asse Y",
+        "es": "Nuevo: widget eChartsPreset – superposición de título, botón de pantalla completa, corrección z-index para superposición de último cambio; EChart – opción automática dataMin/dataMax para el eje Y",
+        "pl": "Nowe: widget eChartsPreset – nakładka tytułu, przycisk pełnego ekranu, poprawka z-index dla nakładki ostatniej zmiany; EChart – opcja automatyczna dataMin/dataMax dla osi Y",
+        "uk": "Нове: віджет eChartsPreset – накладення заголовка, кнопка повноекранного режиму, виправлення z-index для накладення останньої зміни; EChart – автоматична опція dataMin/dataMax для осі Y",
+        "zh-cn": "新功能：eChartsPreset 组件 – 标题叠加、全屏按钮、修复最后更改叠加层的 z-index；EChart – Y 轴 dataMin/dataMax 自动选项"
+      },
       "0.4.85": {
         "en": "Feat: tab bar design settings per layout (height, background, active/inactive color, indicator style: underline/filled/pills, font size); tab bar items (clock, datapoint, static text) with left/center/right positioning; layouts page uses full width",
         "de": "Neu: Tableisten-Design pro Layout einstellbar (Höhe, Hintergrund, Aktiv-/Inaktiv-Farbe, Tab-Stil: Unterstrich/Gefüllt/Pill, Schriftgröße); Tableisten-Elemente (Uhrzeit, Datenpunkt, Text) mit Position links/mitte/rechts; Layouts-Seite nutzt volle Breite",
@@ -183,19 +196,6 @@
         "pl": "Nowe: przeprojektowany kreator zakładek (3-krokowy przepływ: motyw → punkty danych → układ); ulepszone wykrywanie typu widgetu dla rolet, kontaktronów okiennych i czujników binarnych; progi kolorów dla widgetów wartości, ściemniacza, rolety i termostatu",
         "uk": "Нове: перероблений майстер вкладок (3-кроковий потік: тема → точки даних → макет); покращене визначення типу віджету для жалюзі, віконних контактів та бінарних датчиків; кольорові пороги для віджетів значення, диммера, жалюзі та термостата",
         "zh-cn": "新增：重新设计的标签向导（3步流程：主题→数据点→布局）；改进了百叶窗、窗口联系人和二进制传感器的小部件类型检测；为值、调光器、百叶窗和温控器小部件添加颜色阈值"
-      },
-      "0.4.79": {
-        "en": "Fix(camera): stream-timeout default is now 60 s; fixed saving 0 as undefined so timeout can be properly disabled",
-        "de": "Fix(Kamera): Stream-Timeout Standard ist jetzt 60 s; Fehler behoben, der 0 als undefined speicherte, sodass der Timeout nicht deaktiviert werden konnte",
-        "ru": "Fix(камера): таймаут потока по умолчанию теперь 60 с; исправлено сохранение 0 как undefined, из-за чего таймаут нельзя было отключить",
-        "pt": "Fix(câmera): timeout de stream padrão agora é 60 s; corrigido salvamento de 0 como undefined, impedindo desativação do timeout",
-        "nl": "Fix(camera): standaard stream-timeout is nu 60 s; bug opgelost waarbij 0 als undefined werd opgeslagen zodat de timeout niet uitgeschakeld kon worden",
-        "fr": "Fix(caméra): le timeout de flux par défaut est maintenant 60 s; correction de la sauvegarde de 0 en tant que undefined empêchant la désactivation du timeout",
-        "it": "Fix(fotocamera): timeout stream predefinito ora 60 s; corretto salvataggio di 0 come undefined che impediva di disabilitare il timeout",
-        "es": "Fix(cámara): el timeout de stream por defecto es ahora 60 s; corregido el guardado de 0 como undefined que impedía desactivar el timeout",
-        "pl": "Fix(kamera): domyślny timeout strumienia wynosi teraz 60 s; naprawiono zapisywanie 0 jako undefined uniemożliwiające wyłączenie timeout",
-        "uk": "Fix(камера): стандартний таймаут потоку тепер 60 с; виправлено збереження 0 як undefined, через що таймаут не можна було вимкнути",
-        "zh-cn": "修复(摄像头)：流超时默认值现在为60秒；修复了将0保存为undefined导致无法禁用超时的问题"
       }
     }
   },

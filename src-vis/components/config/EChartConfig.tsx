@@ -483,23 +483,53 @@ export function EChartConfig({ config, onConfigChange }: EChartConfigProps) {
               style={inputStyle}
             />
           </div>
-          <div className="flex gap-1.5">
-            <input
-              type="number"
-              value={echartLeftMin}
-              onChange={(e) => setO({ echartLeftMin: e.target.value !== '' ? Number(e.target.value) : undefined })}
-              placeholder={t('echart.min')}
-              className={inputCls + ' flex-1'}
-              style={inputStyle}
-            />
-            <input
-              type="number"
-              value={echartLeftMax}
-              onChange={(e) => setO({ echartLeftMax: e.target.value !== '' ? Number(e.target.value) : undefined })}
-              placeholder={t('echart.max')}
-              className={inputCls + ' flex-1'}
-              style={inputStyle}
-            />
+          <div className="flex flex-col gap-1">
+            <div className="flex gap-1.5 items-center">
+              {echartLeftMin !== 'dataMin' ? (
+                <input
+                  type="number"
+                  value={echartLeftMin}
+                  onChange={(e) => setO({ echartLeftMin: e.target.value !== '' ? Number(e.target.value) : undefined })}
+                  placeholder={t('echart.min')}
+                  className={inputCls + ' flex-1'}
+                  style={inputStyle}
+                />
+              ) : (
+                <div className="flex-1 text-[11px] px-2.5 py-2 rounded-lg font-mono" style={inputStyle}>dataMin</div>
+              )}
+              <button
+                onClick={() => setO({ echartLeftMin: echartLeftMin === 'dataMin' ? undefined : 'dataMin' })}
+                className="text-[10px] px-2 py-1.5 rounded-lg shrink-0"
+                style={{
+                  background: echartLeftMin === 'dataMin' ? 'var(--accent)' : 'var(--app-bg)',
+                  color: echartLeftMin === 'dataMin' ? '#fff' : 'var(--text-secondary)',
+                  border: `1px solid ${echartLeftMin === 'dataMin' ? 'var(--accent)' : 'var(--app-border)'}`,
+                }}
+              >Auto</button>
+            </div>
+            <div className="flex gap-1.5 items-center">
+              {echartLeftMax !== 'dataMax' ? (
+                <input
+                  type="number"
+                  value={echartLeftMax}
+                  onChange={(e) => setO({ echartLeftMax: e.target.value !== '' ? Number(e.target.value) : undefined })}
+                  placeholder={t('echart.max')}
+                  className={inputCls + ' flex-1'}
+                  style={inputStyle}
+                />
+              ) : (
+                <div className="flex-1 text-[11px] px-2.5 py-2 rounded-lg font-mono" style={inputStyle}>dataMax</div>
+              )}
+              <button
+                onClick={() => setO({ echartLeftMax: echartLeftMax === 'dataMax' ? undefined : 'dataMax' })}
+                className="text-[10px] px-2 py-1.5 rounded-lg shrink-0"
+                style={{
+                  background: echartLeftMax === 'dataMax' ? 'var(--accent)' : 'var(--app-bg)',
+                  color: echartLeftMax === 'dataMax' ? '#fff' : 'var(--text-secondary)',
+                  border: `1px solid ${echartLeftMax === 'dataMax' ? 'var(--accent)' : 'var(--app-border)'}`,
+                }}
+              >Auto</button>
+            </div>
           </div>
         </div>
 
@@ -516,23 +546,53 @@ export function EChartConfig({ config, onConfigChange }: EChartConfigProps) {
               style={inputStyle}
             />
           </div>
-          <div className="flex gap-1.5">
-            <input
-              type="number"
-              value={echartRightMin}
-              onChange={(e) => setO({ echartRightMin: e.target.value !== '' ? Number(e.target.value) : undefined })}
-              placeholder={t('echart.min')}
-              className={inputCls + ' flex-1'}
-              style={inputStyle}
-            />
-            <input
-              type="number"
-              value={echartRightMax}
-              onChange={(e) => setO({ echartRightMax: e.target.value !== '' ? Number(e.target.value) : undefined })}
-              placeholder={t('echart.max')}
-              className={inputCls + ' flex-1'}
-              style={inputStyle}
-            />
+          <div className="flex flex-col gap-1">
+            <div className="flex gap-1.5 items-center">
+              {echartRightMin !== 'dataMin' ? (
+                <input
+                  type="number"
+                  value={echartRightMin}
+                  onChange={(e) => setO({ echartRightMin: e.target.value !== '' ? Number(e.target.value) : undefined })}
+                  placeholder={t('echart.min')}
+                  className={inputCls + ' flex-1'}
+                  style={inputStyle}
+                />
+              ) : (
+                <div className="flex-1 text-[11px] px-2.5 py-2 rounded-lg font-mono" style={inputStyle}>dataMin</div>
+              )}
+              <button
+                onClick={() => setO({ echartRightMin: echartRightMin === 'dataMin' ? undefined : 'dataMin' })}
+                className="text-[10px] px-2 py-1.5 rounded-lg shrink-0"
+                style={{
+                  background: echartRightMin === 'dataMin' ? 'var(--accent)' : 'var(--app-bg)',
+                  color: echartRightMin === 'dataMin' ? '#fff' : 'var(--text-secondary)',
+                  border: `1px solid ${echartRightMin === 'dataMin' ? 'var(--accent)' : 'var(--app-border)'}`,
+                }}
+              >Auto</button>
+            </div>
+            <div className="flex gap-1.5 items-center">
+              {echartRightMax !== 'dataMax' ? (
+                <input
+                  type="number"
+                  value={echartRightMax}
+                  onChange={(e) => setO({ echartRightMax: e.target.value !== '' ? Number(e.target.value) : undefined })}
+                  placeholder={t('echart.max')}
+                  className={inputCls + ' flex-1'}
+                  style={inputStyle}
+                />
+              ) : (
+                <div className="flex-1 text-[11px] px-2.5 py-2 rounded-lg font-mono" style={inputStyle}>dataMax</div>
+              )}
+              <button
+                onClick={() => setO({ echartRightMax: echartRightMax === 'dataMax' ? undefined : 'dataMax' })}
+                className="text-[10px] px-2 py-1.5 rounded-lg shrink-0"
+                style={{
+                  background: echartRightMax === 'dataMax' ? 'var(--accent)' : 'var(--app-bg)',
+                  color: echartRightMax === 'dataMax' ? '#fff' : 'var(--text-secondary)',
+                  border: `1px solid ${echartRightMax === 'dataMax' ? 'var(--accent)' : 'var(--app-border)'}`,
+                }}
+              >Auto</button>
+            </div>
           </div>
         </div>
       </div>

@@ -1105,7 +1105,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
         return (
           <div
             className="nodrag pointer-events-none text-[8px] opacity-50 whitespace-nowrap"
-            style={{ ...posStyle, color: 'var(--text-secondary)' }}
+            style={{ ...posStyle, color: 'var(--text-secondary)', zIndex: 2 }}
           >
             {text}
           </div>
@@ -1483,6 +1483,8 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
               ] : config.type === 'chart' ? [
                 { value: 'default', label: t('wf.edit.layout.standard') },
                 { value: 'card',    label: t('wf.edit.layout.card') },
+              ] : config.type === 'echartsPreset' ? [
+                { value: 'default', label: t('wf.edit.layout.standard') },
               ] : [
                 { value: 'default', label: t('wf.edit.layout.standard') },
                 { value: 'card',    label: t('wf.edit.layout.card') },

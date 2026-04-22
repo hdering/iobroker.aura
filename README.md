@@ -175,6 +175,12 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.86 (2026-04-22)
+- Feat(echartsPreset): title overlay on iframe widget, hideable via "Hide Name" toggle
+- Feat(echartsPreset): fullscreen portal button (Escape / click-outside to close)
+- Fix(echartsPreset): last-change timestamp overlay now visible above iframe (z-index fix)
+- Feat(echart): dataMin / dataMax auto option for Y-axis min/max
+
 ### 0.4.85 (2026-04-22)
 - Feat: tab bar design settings per layout – height, background color, active/inactive tab colors, indicator style (underline/filled/pills), font size
 - Feat: tab bar items (clock, datapoint, static text) with left/center/right positioning in the tab bar
