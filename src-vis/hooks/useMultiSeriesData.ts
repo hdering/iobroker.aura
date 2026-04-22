@@ -142,7 +142,7 @@ export function useMultiSeriesData(
             const existing = next.get(s.id);
             let newData: [number, number][];
             if (s.historyInstance && existing) {
-              const cutoff = fixedTimeRange ? fixedTimeRange.start : Date.now() - cutoffMs;
+              const cutoff = Date.now() - cutoffMs;
               const trimmed = existing.data.filter((p) => p[0] >= cutoff);
               if (trimmed.length > 0 && trimmed[trimmed.length - 1][0] === state.ts) {
                 newData = trimmed;
