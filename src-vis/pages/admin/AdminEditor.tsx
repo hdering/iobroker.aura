@@ -441,10 +441,15 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
               if (!title.trim() && dpName) setTitle(applyDpNameFilter(dpName));
               if (!unit.trim() && dpUnit) setUnit(dpUnit);
               // If the selected DP is a secondary (e.g. ACTUAL_TEMPERATURE),
-              // redirect to the primary (e.g. SET_TEMPERATURE) so type detection works.
+              // redirect to the primary (e.g. SET_TEMPERATURE) and set type explicitly.
               void ensureDatapointCache().then((entries) => {
                 const upgrade = findMainDpForSecondary(id, entries);
-                if (upgrade) setDatapoint(upgrade.mainDpId);
+                if (upgrade) {
+                  setDatapoint(upgrade.mainDpId);
+                  setType(upgrade.template.widgetType);
+                  setTemplateId(upgrade.template.id);
+                  setTypePicked(true);
+                }
               }).catch(() => {});
             }}
             onClose={() => setShowPicker(false)}
@@ -616,7 +621,12 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
             if (!unit.trim() && dpUnit) setUnit(dpUnit);
             void ensureDatapointCache().then((entries) => {
               const upgrade = findMainDpForSecondary(id, entries);
-              if (upgrade) setDatapoint(upgrade.mainDpId);
+              if (upgrade) {
+                setDatapoint(upgrade.mainDpId);
+                setType(upgrade.template.widgetType);
+                setTemplateId(upgrade.template.id);
+                setTypePicked(true);
+              }
             }).catch(() => {});
           }}
           onClose={() => setShowPicker(false)}

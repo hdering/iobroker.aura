@@ -163,11 +163,18 @@ export const DP_TEMPLATES: DpTemplate[] = [
     widgetType: 'thermostat',
     category: 'climate',
     primarySiblingNames: [
+      // Homematic classic (HM-CC-RT-DN, HM-TC-IT-WM)
       'SET_TEMPERATURE', 'set_temperature', 'SET_TEMP', 'set_temp',
+      // Homematic IP (HmIP-WTH, HmIP-eTRV, HmIP-BWTH)
+      'SET_POINT_TEMPERATURE', 'SETPOINT_TEMPERATURE', 'set_point_temperature',
+      // German alias
       'SOLLTEMPERATUR', 'solltemperatur', 'Solltemperatur',
+      // Generic / zigbee2mqtt / deconz
       'setpoint', 'SETPOINT', 'Setpoint',
       'target_temperature', 'TARGET_TEMPERATURE', 'targetTemperature', 'TARGET_TEMP',
-      'desired_temperature', 'DESIRED_TEMPERATURE',
+      'occupied_heating_setpoint', 'OCCUPIED_HEATING_SETPOINT',
+      // MAX! / eQ-3
+      'DESIRED_TEMPERATURE', 'desired_temperature',
     ],
     secondaryDps: [
       {
@@ -413,12 +420,17 @@ export interface MainDpUpgrade {
  * template that has a primary sibling (e.g. SET_TEMPERATURE), return upgrade info
  * so the caller can swap the main datapoint and set the correct widget type.
  *
- * Returns null when the selected DP is not recognised as a secondary or no primary
- * sibling exists in the same channel.
+ * Detection is two-stage:
+ * 1. Name-based: last segment of the selected DP matches a secondaryDps siblingName,
+ *    AND a primarySiblingNames match is found in the same channel.
+ * 2. Role-based fallback: selected DP has a read-only temperature role (value.temperature),
+ *    AND a sibling with a writable temperature role (level.temperature) exists.
+ *
+ * Returns null when no upgrade can be determined.
  */
 export function findMainDpForSecondary(
   selectedDpId: string,
-  entries: { id: string }[],
+  entries: Array<{ id: string; role?: string; write?: boolean }>,
 ): MainDpUpgrade | null {
   const lastSeg  = selectedDpId.split('.').pop() ?? '';
   const parent   = selectedDpId.split('.').slice(0, -1).join('.');
@@ -426,20 +438,37 @@ export function findMainDpForSecondary(
   const sibs   = entries.filter((e) => e.id.startsWith(parent + '.') && e.id !== selectedDpId);
   const sibsUp = entries.filter((e) => e.id.startsWith(parentUp + '.'));
 
+  const thermostatTpl = DP_TEMPLATES.find((t) => t.id === 'thermostat')!;
+
+  // ── Stage 1: name-based ──────────────────────────────────────────────────
   for (const tpl of DP_TEMPLATES) {
     if (!tpl.primarySiblingNames?.length) continue;
-
     let matchedOptionKey: string | null = null;
     for (const sdp of tpl.secondaryDps) {
       if (sdp.siblingNames.includes(lastSeg)) { matchedOptionKey = sdp.optionKey; break; }
     }
     if (!matchedOptionKey) continue;
-
     const mainDpId =
       tpl.primarySiblingNames.map((n) => sibs.find((e) => e.id === `${parent}.${n}`)?.id).find(Boolean) ??
       tpl.primarySiblingNames.map((n) => sibsUp.find((e) => e.id === `${parentUp}.0.${n}`)?.id).find(Boolean);
-
     if (mainDpId) return { mainDpId, selectedOptionKey: matchedOptionKey, template: tpl };
   }
+
+  // ── Stage 2: role-based fallback (covers adapters with non-standard DP names) ──
+  const selectedEntry = entries.find((e) => e.id === selectedDpId);
+  const selectedRole  = (selectedEntry?.role ?? '').toLowerCase();
+  const isActualTemp  = selectedRole === 'value.temperature' || selectedRole === 'temperature';
+  if (isActualTemp) {
+    // Look for a writable temperature sibling (the setpoint)
+    const isWritableSetpoint = (e: { role?: string; write?: boolean }) => {
+      const r = (e.role ?? '').toLowerCase();
+      return (r === 'level.temperature' || r.includes('temp.set')) && e.write !== false;
+    };
+    const mainDpId =
+      sibs.find(isWritableSetpoint)?.id ??
+      sibsUp.find(isWritableSetpoint)?.id;
+    if (mainDpId) return { mainDpId, selectedOptionKey: 'actualDatapoint', template: thermostatTpl };
+  }
+
   return null;
 }
