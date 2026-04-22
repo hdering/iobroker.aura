@@ -31,18 +31,52 @@ export function DatapointPicker({ currentValue, onSelect, onClose, multiSelect, 
   const [typeFilter, setTypeFilter] = useState('');
   const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
   const [size, setSize] = useState({ w: 900, h: 600 });
-  const resizeOrigin = useRef<{ x: number; y: number; w: number; h: number } | null>(null);
+  const [pos, setPos] = useState(() => ({
+    x: Math.round((window.innerWidth  - 900) / 2),
+    y: Math.round((window.innerHeight - 600) / 2),
+  }));
+  // Refs hold snapshot values captured at drag/resize start to avoid stale closures.
+  const posRef  = useRef(pos);
+  const sizeRef = useRef(size);
+  const dragOrigin   = useRef<{ mx: number; my: number; px: number; py: number } | null>(null);
+  const resizeOrigin = useRef<{ mx: number; my: number; pw: number; ph: number } | null>(null);
+
+  const onDragMouseDown = useCallback((e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('button')) return;
+    e.preventDefault();
+    dragOrigin.current = { mx: e.clientX, my: e.clientY, px: posRef.current.x, py: posRef.current.y };
+    const onMove = (ev: MouseEvent) => {
+      if (!dragOrigin.current) return;
+      const { mx, my, px, py } = dragOrigin.current;
+      const next = {
+        x: Math.max(0, Math.min(window.innerWidth  - sizeRef.current.w, px + ev.clientX - mx)),
+        y: Math.max(0, Math.min(window.innerHeight - sizeRef.current.h, py + ev.clientY - my)),
+      };
+      posRef.current = next;
+      setPos(next);
+    };
+    const onUp = () => {
+      dragOrigin.current = null;
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  }, []);
 
   const onResizeMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    resizeOrigin.current = { x: e.clientX, y: e.clientY, w: size.w, h: size.h };
+    e.stopPropagation();
+    resizeOrigin.current = { mx: e.clientX, my: e.clientY, pw: sizeRef.current.w, ph: sizeRef.current.h };
     const onMove = (ev: MouseEvent) => {
       if (!resizeOrigin.current) return;
-      const { x, y, w, h } = resizeOrigin.current;
-      setSize({
-        w: Math.max(360, Math.min(window.innerWidth  - 32, w + ev.clientX - x)),
-        h: Math.max(300, Math.min(window.innerHeight - 32, h + ev.clientY - y)),
-      });
+      const { mx, my, pw, ph } = resizeOrigin.current;
+      const next = {
+        w: Math.max(480, Math.min(window.innerWidth  - posRef.current.x - 16, pw + ev.clientX - mx)),
+        h: Math.max(300, Math.min(window.innerHeight - posRef.current.y - 16, ph + ev.clientY - my)),
+      };
+      sizeRef.current = next;
+      setSize(next);
     };
     const onUp = () => {
       resizeOrigin.current = null;
@@ -51,7 +85,7 @@ export function DatapointPicker({ currentValue, onSelect, onClose, multiSelect, 
     };
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseup', onUp);
-  }, [size]);
+  }, []);
 
   // Cancel any drag active in underlying RGL when the picker opens.
   // react-draggable listens on document, not window.
@@ -121,7 +155,7 @@ export function DatapointPicker({ currentValue, onSelect, onClose, multiSelect, 
 
   return createPortal(
     <div
-      className="fixed inset-0 bg-black/70 flex items-center justify-center z-[9999] p-4"
+      className="fixed inset-0 bg-black/70 z-[9999]"
       onMouseDown={(e) => e.stopPropagation()}
       onMouseMove={(e) => e.stopPropagation()}
       onMouseUp={(e) => e.stopPropagation()}
@@ -131,16 +165,19 @@ export function DatapointPicker({ currentValue, onSelect, onClose, multiSelect, 
         style={{
           background: 'linear-gradient(var(--app-surface), var(--app-surface)), var(--app-bg)',
           border: '1px solid var(--app-border)',
+          position: 'fixed',
+          left: pos.x,
+          top: pos.y,
           width: size.w,
           height: size.h,
-          position: 'relative',
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
+        {/* Header – drag handle */}
         <div
           className="flex items-center gap-3 px-5 py-4 shrink-0"
-          style={{ borderBottom: '1px solid var(--app-border)' }}
+          style={{ borderBottom: '1px solid var(--app-border)', cursor: 'move', userSelect: 'none' }}
+          onMouseDown={onDragMouseDown}
         >
           <h2 className="font-bold flex-1 text-sm" style={{ color: 'var(--text-primary)' }}>
             {t('dp.picker.title')}
