@@ -196,10 +196,11 @@ export function DatapointPicker({ currentValue, onSelect, onClose, multiSelect, 
           </button>
         </div>
 
-        {/* Filter bar – single row: search · adapter · room · func · role · type */}
-        <div className="px-5 py-3 shrink-0 flex items-center gap-2" style={{ borderBottom: '1px solid var(--app-border)' }}>
+        {/* Filter bar – row 1: search (full width); row 2: all dropdowns */}
+        <div className="px-5 py-3 shrink-0 space-y-2" style={{ borderBottom: '1px solid var(--app-border)' }}>
+          {/* Row 1 – search */}
           <div
-            className="flex items-center gap-2 flex-1 min-w-0 rounded-lg px-3 py-2"
+            className="flex items-center gap-2 rounded-lg px-3 py-2"
             style={{ background: 'var(--app-bg)', border: '1px solid var(--app-border)' }}
           >
             <Search size={13} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
@@ -217,11 +218,14 @@ export function DatapointPicker({ currentValue, onSelect, onClose, multiSelect, 
               </button>
             )}
           </div>
+          {/* Row 2 – filter dropdowns */}
+          {(adapters.length > 0 || rooms.length > 0 || funcs.length > 0 || roles.length > 0 || types.length > 1 || allowedTypes?.length === 1) && (
+            <div className="flex items-center gap-2 flex-wrap">
           {adapters.length > 0 && (
             <select
               value={adapter}
               onChange={(e) => setAdapter(e.target.value)}
-              className="rounded-lg px-3 py-2 text-xs focus:outline-none shrink-0"
+              className="rounded-lg px-3 py-1.5 text-xs focus:outline-none shrink-0"
               style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
             >
               <option value="">{t('dp.picker.allAdapters')}</option>
@@ -232,7 +236,7 @@ export function DatapointPicker({ currentValue, onSelect, onClose, multiSelect, 
           )}
           {rooms.length > 0 && (
             <select value={room} onChange={(e) => setRoom(e.target.value)}
-              className="rounded-lg px-3 py-2 text-xs focus:outline-none shrink-0"
+              className="rounded-lg px-3 py-1.5 text-xs focus:outline-none shrink-0"
               style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}>
               <option value="">{t('dp.picker.allRooms')}</option>
               {rooms.map((r) => <option key={r} value={r}>{r}</option>)}
@@ -240,7 +244,7 @@ export function DatapointPicker({ currentValue, onSelect, onClose, multiSelect, 
           )}
           {funcs.length > 0 && (
             <select value={func} onChange={(e) => setFunc(e.target.value)}
-              className="rounded-lg px-3 py-2 text-xs focus:outline-none shrink-0"
+              className="rounded-lg px-3 py-1.5 text-xs focus:outline-none shrink-0"
               style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}>
               <option value="">{t('dp.picker.allFuncs')}</option>
               {funcs.map((f) => <option key={f} value={f}>{f}</option>)}
@@ -248,7 +252,7 @@ export function DatapointPicker({ currentValue, onSelect, onClose, multiSelect, 
           )}
           {roles.length > 0 && (
             <select value={role} onChange={(e) => setRole(e.target.value)}
-              className="rounded-lg px-3 py-2 text-xs focus:outline-none shrink-0"
+              className="rounded-lg px-3 py-1.5 text-xs focus:outline-none shrink-0"
               style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}>
               <option value="">{t('dp.picker.allRoles')}</option>
               {roles.map((r) => <option key={r} value={r}>{r}</option>)}
@@ -256,7 +260,7 @@ export function DatapointPicker({ currentValue, onSelect, onClose, multiSelect, 
           )}
           {types.length > 1 && (
             <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
-              className="rounded-lg px-3 py-2 text-xs focus:outline-none shrink-0"
+              className="rounded-lg px-3 py-1.5 text-xs focus:outline-none shrink-0"
               style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}>
               <option value="">{t('dp.picker.allTypes')}</option>
               {types.map((ty) => {
@@ -275,6 +279,8 @@ export function DatapointPicker({ currentValue, onSelect, onClose, multiSelect, 
               </span>
             );
           })()}
+            </div>
+          )}
         </div>
 
         {/* Count + multi-select controls */}
