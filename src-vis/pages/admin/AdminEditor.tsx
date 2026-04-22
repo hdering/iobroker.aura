@@ -62,11 +62,13 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
 
   // Auto-detect type / template / title / unit when the datapoint ID changes
   useEffect(() => {
+    let cancelled = false;
     const dp = datapoint.trim();
-    if (!dp) return;
+    if (!dp) return () => { cancelled = true; };
     void (async () => {
       try {
         const entries = await ensureDatapointCache();
+        if (cancelled) return;
         const entry = entries.find((e) => e.id === dp);
         if (!entry) return;
         if (!title && entry.name) setTitle(entry.name);
@@ -81,6 +83,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
         }
       } catch { /* ignore */ }
     })();
+    return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [datapoint, typePicked]);
 
