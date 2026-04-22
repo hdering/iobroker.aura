@@ -177,9 +177,8 @@ function packFlat(
     const rowH = row.reduce((m, dw) => Math.max(m, heights[dw.type] ?? 5), 0);
     let x = 0;
 
-    row.forEach((dw, j) => {
-      const isLast = j === row.length - 1;
-      const w = isLast ? gridCols - x : preferredW(dw.type, sizeKey, gridCols);
+    row.forEach((dw) => {
+      const w = preferredW(dw.type, sizeKey, gridCols);
       result.push({
         id: `wiz-${sizeKey}-${globalIdx}-${STAMP}`,
         type: dw.type,

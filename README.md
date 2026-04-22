@@ -175,6 +175,11 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.83 (2026-04-22)
+- Feat(tab-wizard): starts directly in datapoint picker; new review step with per-DP widget type selection, editable names, DP removal, and layout choice
+- Fix(tab-wizard): type filter dependency missing in useMemo caused filter to not react
+- Fix(layout-generator): last widget in a row no longer stretched to fill remaining columns
+
 ### 0.4.82 (2026-04-22)
 - Fix: per-layout theme and CSS variables now correctly applied in frontend (global theme no longer overwrites per-layout settings)
 

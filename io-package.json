@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.82",
+    "version": "0.4.83",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.83": {
+        "en": "Feat(tab-wizard): starts directly in datapoint picker; new review step with per-DP widget type selection, editable names, DP removal, and layout choice; layout-generator no longer stretches the last widget in a row",
+        "de": "Neu(Tab-Wizard): startet direkt im Datapicker; neuer Review-Schritt mit Widget-Typ-Auswahl pro Datenpunkt, editierbaren Namen, DP-Entfernen und Layout-Wahl; Layout-Generator streckt das letzte Widget einer Zeile nicht mehr auf volle Breite",
+        "ru": "Новое(Tab-Wizard): запускается прямо в выборе точек данных; новый шаг проверки с выбором типа виджета для каждой точки, редактируемыми именами, удалением точек и выбором макета; генератор макетов больше не растягивает последний виджет в строке",
+        "pt": "Novo(Tab-Wizard): inicia diretamente no seletor de pontos de dados; novo passo de revisão com seleção de tipo de widget por DP, nomes editáveis, remoção de DP e escolha de layout; gerador de layout não estica mais o último widget de uma linha",
+        "nl": "Nieuw(Tab-Wizard): start direct in de datapuntkiezer; nieuwe reviewstap met widget-type-selectie per DP, bewerkbare namen, DP-verwijdering en layout-keuze; layout-generator rekt het laatste widget in een rij niet meer uit",
+        "fr": "Nouveau(Tab-Wizard): démarre directement dans le sélecteur de points de données; nouvelle étape de révision avec sélection de type de widget par DP, noms modifiables, suppression de DP et choix de mise en page; le générateur de mise en page n'étire plus le dernier widget d'une ligne",
+        "it": "Nuovo(Tab-Wizard): si avvia direttamente nel selettore dei punti dati; nuova fase di revisione con selezione del tipo di widget per DP, nomi modificabili, rimozione DP e scelta del layout; il generatore di layout non estende più l'ultimo widget di una riga",
+        "es": "Nuevo(Tab-Wizard): inicia directamente en el selector de puntos de datos; nuevo paso de revisión con selección de tipo de widget por DP, nombres editables, eliminación de DP y elección de diseño; el generador de diseño ya no estira el último widget de una fila",
+        "pl": "Nowe(Tab-Wizard): uruchamia się bezpośrednio w selektorze punktów danych; nowy krok przeglądu z wyborem typu widgetu dla każdego DP, edytowalnymi nazwami, usuwaniem DP i wyborem układu; generator układu nie rozciąga już ostatniego widgetu w wierszu",
+        "uk": "Нове(Tab-Wizard): запускається прямо у виборі точок даних; новий крок перегляду з вибором типу віджету для кожної точки, редагованими іменами, видаленням точок та вибором макету; генератор макетів більше не розтягує останній віджет у рядку",
+        "zh-cn": "新增(标签向导)：直接在数据点选择器中启动；新增审查步骤，支持每个数据点的小部件类型选择、可编辑名称、删除数据点和布局选择；布局生成器不再将行中最后一个小部件拉伸到整行"
+      },
       "0.4.82": {
         "en": "Fix: per-layout theme and CSS variables now correctly applied in the frontend (global theme no longer overwrites per-layout settings)",
         "de": "Fix: Layout-spezifische Theme- und CSS-Variablen werden im Frontend jetzt korrekt angewendet (globales Theme überschreibt nicht mehr die Layout-Einstellungen)",
@@ -183,19 +196,6 @@
         "pl": "Fix: activeTabId zachowane przy synchronizacji konfiguracji, przełączanie zakładek nie oznacza już konfiguracji jako zmienionej, filtr nazw stosowany na każdą część nazwy i w wyborze tytułu widgetu, auto-sync listy dodaje tylko istotne DP",
         "uk": "Виправлення: activeTabId зберігається при синхронізації конфігурації, перемикання вкладок не позначає конфіг як змінений, фільтр імен застосовується до кожної частини імені та в пікері заголовка віджету, автосинхронізація списку додає лише актуальні DP",
         "zh-cn": "修复：配置同步时保留activeTabId，切换标签页不再将配置标记为已修改，名称过滤器应用于名称各部分及小部件标题选择器，列表自动同步仅添加相关DP"
-      },
-      "0.4.73": {
-        "en": "Static & dynamic list: fix hideTitle, showLastChange overlay, icon display, DP name resolution (parentName › stateName), remove status dot",
-        "de": "Statische & dynamische Liste: Fix hideTitle, Letzte-Änderung-Overlay, Icon-Anzeige, DP-Namenauflösung (Elternname › Statusname), Statuspunkt entfernt",
-        "ru": "Статический и динамический список: исправление hideTitle, оверлей последнего изменения, отображение иконки, разрешение имён (родитель › состояние), удалена цветная точка",
-        "pt": "Lista estática e dinâmica: corrige hideTitle, overlay da última alteração, ícone, resolução de nomes (pai › estado), ponto de status removido",
-        "nl": "Statische & dynamische lijst: fix hideTitle, overlay laatste wijziging, icoondisplay, DP-naamresolutie (ouder › toestand), statuspunt verwijderd",
-        "fr": "Liste statique & dynamique: correction hideTitle, overlay dernière modification, affichage icône, résolution des noms (parent › état), point de statut supprimé",
-        "it": "Lista statica & dinamica: fix hideTitle, overlay ultima modifica, icona, risoluzione nomi (genitore › stato), punto di stato rimosso",
-        "es": "Lista estática y dinámica: fix hideTitle, overlay última modificación, icono, resolución de nombres (padre › estado), punto de estado eliminado",
-        "pl": "Lista statyczna i dynamiczna: fix hideTitle, nakładka ostatniej zmiany, ikona, rozwiązywanie nazw (rodzic › stan), usunięto kropkę statusu",
-        "uk": "Статичний та динамічний список: виправлення hideTitle, оверлей останньої зміни, іконка, розпізнавання імен (батько › стан), точку статусу видалено",
-        "zh-cn": "静态和动态列表：修复hideTitle、最后更改覆盖层、图标显示、DP名称解析（父名称›状态名称），移除状态点"
       }
     }
   },

@@ -1,55 +1,35 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
-  Wand2, ChevronRight, ChevronLeft, Layers, Search,
-  Check, X, Zap, Battery, Maximize2,
+  Wand2, ChevronRight, ChevronLeft, Search,
+  Check, X,
 } from 'lucide-react';
-import type { WidgetConfig } from '../../types';
-import { useDatapointList, type DatapointEntry } from '../../hooks/useDatapointList';
+import type { WidgetConfig, WidgetType } from '../../types';
+import { useDatapointList } from '../../hooks/useDatapointList';
 import { useConfigStore } from '../../store/configStore';
 import { detectType, cleanTitle } from '../../utils/widgetDetection';
 import { generateLayouts } from '../../utils/layoutGenerator';
 import { useT } from '../../i18n';
 import { isRelevantDp } from '../../utils/dpRelevance';
+import { applyDpNameFilter } from '../../utils/dpNameFilter';
+import { WIDGET_REGISTRY, WIDGET_BY_TYPE } from '../../widgetRegistry';
 
 // ── types ──────────────────────────────────────────────────────────────────
 
-type ThemeKey = 'all' | 'battery' | 'window' | 'power';
-type Step = 'theme' | 'datapoints' | 'layout';
+type Step = 'datapoints' | 'review';
 
 const MAX_DISPLAY = 250;
 
-// ── theme matching ─────────────────────────────────────────────────────────
-
-function matchesTheme(dp: DatapointEntry, theme: ThemeKey): boolean {
-  if (theme === 'all') return true;
-  const role = (dp.role ?? '').toLowerCase();
-  const id = dp.id.toLowerCase();
-  const name = dp.name.toLowerCase();
-  switch (theme) {
-    case 'battery':
-      return role === 'indicator.lowbat' ||
-             role === 'value.battery' ||
-             role.startsWith('indicator.battery') ||
-             id.includes('lowbat') ||
-             id.includes('.battery') ||
-             name.includes('batterie') || name.includes('battery');
-    case 'window':
-      return role.includes('window') || role.includes('door') ||
-             id.includes('fenster') || id.includes('window') || id.includes('door') ||
-             name.includes('fenster') || name.includes('window');
-    case 'power':
-      return role.includes('power') || role.includes('energy') || role.includes('consumption') ||
-             dp.unit === 'W' || dp.unit === 'kWh' || dp.unit === 'VA' || dp.unit === 'Wh';
-  }
-}
-
-// ── layout preview thumbnails ──────────────────────────────────────────────
+// ── layout options ─────────────────────────────────────────────────────────
 
 const LAYOUT_OPTIONS = [
-  { id: 'compact',  label: 'Kompakt',    desc: 'Mehr Widgets auf einen Blick – kleinere Kacheln', cols: 4, itemH: 3, count: 8 },
-  { id: 'standard', label: 'Standard',   desc: 'Ausgewogene Darstellung mit gut lesbaren Widgets', cols: 2, itemH: 5, count: 4 },
-  { id: 'wide',     label: 'Großzügig',  desc: 'Große Kacheln – ideal für Wandtablets',            cols: 1, itemH: 8, count: 2 },
+  { id: 'compact',  label: 'Kompakt' },
+  { id: 'standard', label: 'Standard' },
+  { id: 'wide',     label: 'Großzügig' },
 ];
+
+// ── widget types selectable per DP ─────────────────────────────────────────
+
+const DP_WIDGET_TYPES = WIDGET_REGISTRY.filter((m) => m.addMode === 'datapoint');
 
 // ── props ──────────────────────────────────────────────────────────────────
 
@@ -63,19 +43,22 @@ interface TabWizardProps {
 export function TabWizard({ onAdd, onClose }: TabWizardProps) {
   const t = useT();
 
-  const [step, setStep]                     = useState<Step>('theme');
-  const [theme, setTheme]                   = useState<ThemeKey>('all');
-  const [tabName, setTabName]               = useState('');
+  const [step, setStep]                         = useState<Step>('datapoints');
+  const [tabName, setTabName]                   = useState('');
   const [selectedLayoutId, setSelectedLayoutId] = useState('standard');
 
-  // DP filter state (used in datapoints step)
-  const [search, setSearch]   = useState('');
-  const [adapter, setAdapter] = useState('');
-  const [room, setRoom]       = useState('');
-  const [func, setFunc]       = useState('');
-  const [role, setRole]       = useState('');
-  const [showAll, setShowAll] = useState(false);
+  // DP filter state
+  const [search, setSearch]         = useState('');
+  const [adapter, setAdapter]       = useState('');
+  const [room, setRoom]             = useState('');
+  const [func, setFunc]             = useState('');
+  const [role, setRole]             = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
   const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
+
+  // per-DP overrides (populated on entering review step)
+  const [widgetTypeOverrides, setWidgetTypeOverrides] = useState<Map<string, WidgetType>>(new Map());
+  const [titleOverrides, setTitleOverrides]           = useState<Map<string, string>>(new Map());
 
   const { datapoints, loading: dpLoading, load } = useDatapointList();
 
@@ -88,7 +71,7 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
 
   useEffect(() => { load(true); }, [load]);
 
-  // ── filter options (always from full DP list) ──────────────────────────
+  // ── filter options ─────────────────────────────────────────────────────
 
   const adapters = useMemo(
     () => Array.from(new Set(datapoints.map((dp) => dp.id.split('.')[0]))).sort(),
@@ -106,142 +89,80 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
     () => Array.from(new Set(datapoints.map((dp) => dp.role).filter(Boolean) as string[])).sort(),
     [datapoints],
   );
+  const types = useMemo(
+    () => Array.from(new Set(datapoints.map((dp) => dp.type).filter(Boolean) as string[])).sort(),
+    [datapoints],
+  );
 
   // ── filtered DP list ───────────────────────────────────────────────────
 
-  const themeFiltered = useMemo(
-    () => datapoints.filter((dp) => showAll || matchesTheme(dp, theme)),
-    [datapoints, theme, showAll],
-  );
-
   const filtered = useMemo(() => {
-    let list = themeFiltered;
-    if (adapter) list = list.filter((dp) => dp.id.startsWith(adapter + '.'));
-    if (room)    list = list.filter((dp) => dp.rooms.includes(room));
-    if (func)    list = list.filter((dp) => dp.funcs.includes(func));
-    if (role)    list = list.filter((dp) => dp.role === role);
+    let list = datapoints;
+    if (adapter)    list = list.filter((dp) => dp.id.startsWith(adapter + '.'));
+    if (room)       list = list.filter((dp) => dp.rooms.includes(room));
+    if (func)       list = list.filter((dp) => dp.funcs.includes(func));
+    if (role)       list = list.filter((dp) => dp.role === role);
+    if (typeFilter) list = list.filter((dp) => dp.type === typeFilter);
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter((dp) => dp.id.toLowerCase().includes(q) || dp.name.toLowerCase().includes(q));
     }
     return list;
-  }, [themeFiltered, adapter, room, func, role, search]);
+  }, [datapoints, adapter, room, func, role, typeFilter, search]);
 
   const shown = useMemo(() => filtered.slice(0, MAX_DISPLAY), [filtered]);
 
-  // ── active widgets (checked DPs → DetectedWidget shape) ──────────────
+  // ── selected DPs in order ──────────────────────────────────────────────
 
-  const activeWidgets = useMemo(
-    () => datapoints
-      .filter((dp) => checkedIds.has(dp.id))
-      .map((dp) => {
-        const { type, unit } = detectType(dp);
-        return { datapoint: dp, type, title: cleanTitle(dp), unit, score: 1 } as const;
-      }),
+  const selectedDps = useMemo(
+    () => datapoints.filter((dp) => checkedIds.has(dp.id)),
     [datapoints, checkedIds],
   );
 
   // ── step transitions ───────────────────────────────────────────────────
 
-  const initCheckedIds = (dps: DatapointEntry[], selectedTheme: ThemeKey) =>
-    new Set(
-      dps
-        .filter((dp) => matchesTheme(dp, selectedTheme) && isRelevantDp(dp.role, dp.type))
-        .map((dp) => dp.id),
-    );
-
-  const enterDatapoints = () => {
-    setSearch(''); setAdapter(''); setRoom(''); setFunc(''); setRole(''); setShowAll(false);
-    setCheckedIds(initCheckedIds(datapoints, theme));
-    setStep('datapoints');
+  const enterReview = () => {
+    const typeMap = new Map<string, WidgetType>();
+    const titleMap = new Map<string, string>();
+    selectedDps.forEach((dp) => {
+      typeMap.set(dp.id, detectType(dp).type);
+      titleMap.set(dp.id, applyDpNameFilter(cleanTitle(dp)));
+    });
+    setWidgetTypeOverrides(typeMap);
+    setTitleOverrides(titleMap);
+    setStep('review');
   };
 
-  const goNext = () => {
-    if (step === 'theme')      enterDatapoints();
-    else if (step === 'datapoints') setStep('layout');
-  };
-
-  const goBack = () => {
-    if (step === 'datapoints') setStep('theme');
-    else if (step === 'layout')     setStep('datapoints');
-  };
-
-  // If DPs finish loading while on the datapoints step and nothing is checked yet, auto-init
-  useEffect(() => {
-    if (step === 'datapoints' && !dpLoading && datapoints.length > 0 && checkedIds.size === 0) {
-      setCheckedIds(initCheckedIds(datapoints, theme));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dpLoading]);
+  const goNext = () => { if (step === 'datapoints') enterReview(); };
+  const goBack = () => { if (step === 'review') setStep('datapoints'); };
 
   // ── create tab ─────────────────────────────────────────────────────────
 
   const handleCreate = () => {
-    if (activeWidgets.length === 0) return;
-    const themeLabel = THEMES.find((th) => th.key === theme)?.label ?? 'Tab';
-    const name = tabName.trim() || themeLabel;
+    if (selectedDps.length === 0) return;
+    const name = tabName.trim() || 'Tab';
     const ts = Date.now();
+    const activeWidgets = selectedDps.map((dp) => {
+      const widgetType = widgetTypeOverrides.get(dp.id) ?? detectType(dp).type;
+      const { unit } = detectType(dp);
+      const title = titleOverrides.get(dp.id) || cleanTitle(dp);
+      return { datapoint: dp, type: widgetType, title, unit, score: 1 } as const;
+    });
     const layouts = generateLayouts(activeWidgets, undefined, { gridCols: effectiveCols });
     const layout = layouts.find((l) => l.id === selectedLayoutId) ?? layouts[0];
     if (!layout) return;
-    const widgets = layout.widgets.map((w, i) => {
-      const base = { ...w, id: `wiz-${ts}-${i}` };
-      if (theme === 'battery') {
-        if (base.type === 'binarysensor') {
-          // lowbat indicator: red when true (low), green when false (OK)
-          return { ...base, options: { ...base.options, sensorType: 'lowbat' } };
-        }
-        if (base.type === 'value') {
-          // battery %: red <20, yellow <50, green ≥50
-          return { ...base, options: { ...base.options, colorThresholds: [[20, 'var(--accent-red, #ef4444)'], [50, '#f59e0b'], [101, 'var(--accent-green)']] } };
-        }
-      }
-      return base;
-    });
+    const widgets = layout.widgets.map((w, i) => ({ ...w, id: `wiz-${ts}-${i}` }));
     onAdd(name, widgets);
   };
 
   // ── step progress ──────────────────────────────────────────────────────
 
-  const steps: Step[] = ['theme', 'datapoints', 'layout'];
+  const steps: Step[] = ['datapoints', 'review'];
   const stepIdx = steps.indexOf(step);
   const isLastStep = stepIdx === steps.length - 1;
 
-  const canNext =
-    step === 'theme' ||
-    (step === 'datapoints' && checkedIds.size > 0) ||
-    step === 'layout';
-  const canCreate = activeWidgets.length > 0;
-
-  // ── theme definitions (translated) ────────────────────────────────────
-
-  const THEMES = useMemo(() => [
-    {
-      key: 'all' as ThemeKey,
-      label: t('wizard.tab.themeAll'),
-      hint: t('wizard.tab.themeAllHint'),
-      icon: <Layers size={24} />,
-    },
-    {
-      key: 'battery' as ThemeKey,
-      label: t('wizard.tab.themeBattery'),
-      hint: t('wizard.tab.themeBatteryHint'),
-      icon: <Battery size={24} />,
-    },
-    {
-      key: 'window' as ThemeKey,
-      label: t('wizard.tab.themeWindow'),
-      hint: t('wizard.tab.themeWindowHint'),
-      icon: <Maximize2 size={24} />,
-    },
-    {
-      key: 'power' as ThemeKey,
-      label: t('wizard.tab.themePower'),
-      hint: t('wizard.tab.themePowerHint'),
-      icon: <Zap size={24} />,
-    },
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  ], [t]);
+  const canNext   = step === 'datapoints' && checkedIds.size > 0;
+  const canCreate = selectedDps.length > 0;
 
   // ── render ─────────────────────────────────────────────────────────────
 
@@ -297,34 +218,6 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
         {/* Content */}
         <div className="aura-scroll flex-1 overflow-y-auto p-6 min-h-0">
 
-          {/* ── STEP: theme ── */}
-          {step === 'theme' && (
-            <div className="space-y-4">
-              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                {t('wizard.tab.selectTheme')}
-              </p>
-              <div className="grid grid-cols-2 gap-4">
-                {THEMES.map((opt) => (
-                  <button
-                    key={opt.key}
-                    onClick={() => setTheme(opt.key)}
-                    className="p-5 rounded-xl text-left transition-all hover:opacity-90"
-                    style={{
-                      background: theme === opt.key ? 'var(--accent)11' : 'var(--app-bg)',
-                      border: `2px solid ${theme === opt.key ? 'var(--accent)' : 'var(--app-border)'}`,
-                    }}
-                  >
-                    <div className="mb-2" style={{ color: theme === opt.key ? 'var(--accent)' : 'var(--text-secondary)' }}>
-                      {opt.icon}
-                    </div>
-                    <p className="font-semibold text-sm mb-1" style={{ color: 'var(--text-primary)' }}>{opt.label}</p>
-                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{opt.hint}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* ── STEP: datapoints ── */}
           {step === 'datapoints' && (
             <div className="space-y-3">
@@ -362,7 +255,7 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
                     </select>
                   )}
                 </div>
-                {(rooms.length > 0 || funcs.length > 0 || roles.length > 0) && (
+                {(rooms.length > 0 || funcs.length > 0 || roles.length > 0 || types.length > 1) && (
                   <div className="flex gap-2 flex-wrap">
                     {rooms.length > 0 && (
                       <select value={room} onChange={(e) => setRoom(e.target.value)}
@@ -388,6 +281,17 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
                         {roles.map((r) => <option key={r} value={r}>{r}</option>)}
                       </select>
                     )}
+                    {types.length > 1 && (
+                      <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
+                        className="rounded-lg px-3 py-1.5 text-xs focus:outline-none"
+                        style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}>
+                        <option value="">{t('dp.picker.allTypes')}</option>
+                        {types.map((ty) => {
+                          const tc = ty === 'boolean' ? '#f59e0b' : ty === 'number' ? '#3b82f6' : ty === 'string' ? '#8b5cf6' : 'var(--text-primary)';
+                          return <option key={ty} value={ty} style={{ color: tc }}>{ty}</option>;
+                        })}
+                      </select>
+                    )}
                   </div>
                 )}
               </div>
@@ -404,15 +308,6 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
                     </span>
                   )}
                 </p>
-                {theme !== 'all' && (
-                  <button
-                    onClick={() => setShowAll((prev) => !prev)}
-                    className="text-[10px] hover:opacity-70 px-2 py-0.5 rounded"
-                    style={{ color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
-                  >
-                    {showAll ? t('wizard.tab.showThemeOnly') : t('wizard.tab.showAllDp')}
-                  </button>
-                )}
                 <div className="flex gap-2">
                   <button
                     onClick={() => setCheckedIds((prev) => {
@@ -509,54 +404,72 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
             </div>
           )}
 
-          {/* ── STEP: layout ── */}
-          {step === 'layout' && (
-            <div className="space-y-4">
-              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                {t('wizard.tab.selectLayout')} – {activeWidgets.length} {activeWidgets.length !== 1 ? t('wizard.tab.widgets') : t('wizard.tab.widget')} ausgewählt
+          {/* ── STEP: review ── */}
+          {step === 'review' && (
+            <div className="space-y-2">
+              <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
+                {selectedDps.length} Datenpunkt{selectedDps.length !== 1 ? 'e' : ''} – Widget-Typ prüfen und ggf. ändern.
               </p>
-              <div className="grid grid-cols-3 gap-4">
-                {LAYOUT_OPTIONS.map((opt) => {
-                  const selected = selectedLayoutId === opt.id;
-                  return (
-                    <button
-                      key={opt.id}
-                      onClick={() => setSelectedLayoutId(opt.id)}
-                      className="p-4 rounded-xl text-left transition-all hover:opacity-90"
-                      style={{
-                        background: selected ? 'var(--accent)11' : 'var(--app-bg)',
-                        border: `2px solid ${selected ? 'var(--accent)' : 'var(--app-border)'}`,
-                      }}
+              {selectedDps.map((dp) => {
+                const currentType = widgetTypeOverrides.get(dp.id) ?? detectType(dp).type;
+                const meta = WIDGET_BY_TYPE[currentType];
+                return (
+                  <div
+                    key={dp.id}
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg"
+                    style={{ background: 'var(--app-bg)', border: '1px solid var(--app-border)' }}
+                  >
+                    {/* Widget type color dot */}
+                    <div
+                      className="w-2.5 h-2.5 rounded-full shrink-0"
+                      style={{ background: meta?.color ?? 'var(--app-border)' }}
+                    />
+                    {/* DP title (editable) + id */}
+                    <div className="flex-1 min-w-0">
+                      <input
+                        value={titleOverrides.get(dp.id) ?? ''}
+                        onChange={(e) => setTitleOverrides((prev) => {
+                          const next = new Map(prev);
+                          next.set(dp.id, e.target.value);
+                          return next;
+                        })}
+                        className="w-full text-xs font-medium rounded px-1.5 py-0.5 focus:outline-none"
+                        style={{
+                          color: 'var(--text-primary)',
+                          background: 'var(--app-surface)',
+                          border: '1px solid var(--app-border)',
+                        }}
+                      />
+                      <p className="text-[10px] font-mono truncate" style={{ color: 'var(--text-secondary)' }}>
+                        {dp.id}
+                      </p>
+                    </div>
+                    {/* Widget type select */}
+                    <select
+                      value={currentType}
+                      onChange={(e) => setWidgetTypeOverrides((prev) => {
+                        const next = new Map(prev);
+                        next.set(dp.id, e.target.value as WidgetType);
+                        return next;
+                      })}
+                      className="rounded-lg px-2 py-1 text-xs focus:outline-none shrink-0"
+                      style={{ background: 'var(--app-surface)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
                     >
-                      {/* Mini grid preview */}
-                      <div
-                        className="mb-3 grid gap-0.5"
-                        style={{ gridTemplateColumns: `repeat(${opt.cols}, 1fr)` }}
-                      >
-                        {Array.from({ length: opt.count }).map((_, i) => (
-                          <div
-                            key={i}
-                            className="rounded-sm"
-                            style={{
-                              height: opt.itemH * 4,
-                              background: selected ? 'var(--accent)33' : 'var(--app-border)',
-                            }}
-                          />
-                        ))}
-                      </div>
-                      <p
-                        className="text-xs font-semibold mb-1"
-                        style={{ color: selected ? 'var(--accent)' : 'var(--text-primary)' }}
-                      >
-                        {opt.label}
-                      </p>
-                      <p className="text-[10px] leading-tight" style={{ color: 'var(--text-secondary)' }}>
-                        {opt.desc}
-                      </p>
+                      {DP_WIDGET_TYPES.map((m) => (
+                        <option key={m.type} value={m.type}>{m.label}</option>
+                      ))}
+                    </select>
+                    {/* Remove button */}
+                    <button
+                      onClick={() => setCheckedIds((prev) => { const next = new Set(prev); next.delete(dp.id); return next; })}
+                      className="hover:opacity-70 shrink-0"
+                      style={{ color: 'var(--text-secondary)' }}
+                    >
+                      <X size={13} />
                     </button>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })}
             </div>
           )}
 
@@ -565,24 +478,44 @@ export function TabWizard({ onAdd, onClose }: TabWizardProps) {
         {/* Footer */}
         <div className="px-6 py-4 shrink-0 flex items-center gap-3" style={{ borderTop: '1px solid var(--app-border)' }}>
           <button
-            onClick={step === 'theme' ? onClose : goBack}
+            onClick={step === 'datapoints' ? onClose : goBack}
             className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm hover:opacity-80"
             style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
           >
-            {step === 'theme'
+            {step === 'datapoints'
               ? <><X size={14} /> {t('wizard.tab.cancel')}</>
               : <><ChevronLeft size={14} /> {t('wizard.tab.back')}</>}
           </button>
 
           {isLastStep && (
-            <input
-              value={tabName}
-              onChange={(e) => setTabName(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter' && canCreate) handleCreate(); }}
-              placeholder={THEMES.find((th) => th.key === theme)?.label ?? 'Tab-Name'}
-              className="flex-1 rounded-xl px-4 py-2.5 text-sm focus:outline-none"
-              style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
-            />
+            <>
+              {/* Layout toggle */}
+              <div className="flex gap-1">
+                {LAYOUT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.id}
+                    onClick={() => setSelectedLayoutId(opt.id)}
+                    className="px-2.5 py-1.5 text-xs rounded-lg transition-colors"
+                    style={{
+                      background: selectedLayoutId === opt.id ? 'var(--accent)' : 'var(--app-bg)',
+                      color: selectedLayoutId === opt.id ? '#fff' : 'var(--text-secondary)',
+                      border: '1px solid var(--app-border)',
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              {/* Tab name */}
+              <input
+                value={tabName}
+                onChange={(e) => setTabName(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && canCreate) handleCreate(); }}
+                placeholder="Tab-Name"
+                className="flex-1 rounded-xl px-4 py-2.5 text-sm focus:outline-none"
+                style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
+              />
+            </>
           )}
 
           {!isLastStep ? (
