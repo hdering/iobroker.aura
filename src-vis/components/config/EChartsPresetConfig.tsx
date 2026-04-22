@@ -18,6 +18,7 @@ export function EChartsPresetConfig({ config, onConfigChange }: Props) {
 
   const presetId = (o.presetId as string) ?? '';
   const darkMode = (o.darkMode as boolean) ?? true;
+  const baseUrl  = (o.baseUrl  as string) ?? '';
 
   const [presets, setPresets]   = useState<string[]>([]);
   const [loading, setLoading]   = useState(false);
@@ -82,6 +83,20 @@ export function EChartsPresetConfig({ config, onConfigChange }: Props) {
             Keine Presets gefunden — ID manuell eingeben
           </p>
         )}
+      </div>
+
+      <div>
+        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
+          Basis-URL <span style={{ opacity: 0.5 }}>(leer = automatisch)</span>
+        </label>
+        <input
+          type="text"
+          value={baseUrl}
+          onChange={(e) => set({ baseUrl: e.target.value || undefined })}
+          placeholder={window.location.origin}
+          className={iCls}
+          style={iSty}
+        />
       </div>
 
       <div className="flex items-center justify-between">
