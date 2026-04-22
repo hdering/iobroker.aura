@@ -175,6 +175,12 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.87 (2026-04-22)
+- Perf: parallel state prefetch on connect – all datapoints loaded before first widget render
+- Perf: widgets initialize from cache synchronously (no null-flash / flicker)
+- Feat: dashboard fades in smoothly after data is ready
+- Fix: dashboard height regression after prefetch wrapper div missing flex-col
+
 ### 0.4.86 (2026-04-22)
 - Feat(echartsPreset): title overlay on iframe widget, hideable via "Hide Name" toggle
 - Feat(echartsPreset): fullscreen portal button (Escape / click-outside to close)

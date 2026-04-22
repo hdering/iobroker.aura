@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Sun, Moon, Settings } from 'lucide-react';
-import { useIoBroker, getStateDirect, setStateDirect, subscribeStateDirect } from './hooks/useIoBroker';
+import { useIoBroker, getStateDirect, setStateDirect, subscribeStateDirect, prefetchStates } from './hooks/useIoBroker';
 import { useConfigSync } from './hooks/useConfigSync';
 import { useConnectionStore } from './store/connectionStore';
 import { useConfigStore } from './store/configStore';
@@ -173,7 +173,29 @@ export default function App() {
   const effectiveCustomVars = useEffectiveCustomVars(layout?.id);
   const currentTheme = getTheme(effectiveThemeId);
 
-  // Local active tab state (frontend only — doesn't affect admin editor)
+  // ── Prefetch + fade-in ────────────────────────────────────────────────────
+  // Collect all main datapoints from all tabs, fetch them in one parallel burst
+  // before widgets mount, so useDatapoint can read from cache synchronously.
+  const [dashboardVisible, setDashboardVisible] = useState(false);
+  const prefetchDone = useRef(false);
+
+  const allDatapoints = useMemo(() => {
+    const ids = new Set<string>();
+    tabs.forEach((tab) => {
+      (tab.widgets ?? []).forEach((w) => {
+        if (w.datapoint) ids.add(w.datapoint);
+      });
+    });
+    return [...ids];
+  }, [tabs]);
+
+  useEffect(() => {
+    if (!connected || prefetchDone.current) return;
+    prefetchDone.current = true;
+    prefetchStates(allDatapoints).then(() => setDashboardVisible(true));
+  }, [connected, allDatapoints]);
+
+  // ── Local active tab state (frontend only — doesn't affect admin editor)
   // URL slug takes priority; fall back to defaultTabId or first tab
   const [activeTabId, setActiveTabId] = useState<string>(() => {
     if (tabSlug && layout?.tabs) {
@@ -390,12 +412,20 @@ export default function App() {
         }}
         layoutUrlBase={layoutUrlBase}
       />
-      <Dashboard
-        readonly
-        viewTabs={tabs}
-        viewActiveTabId={activeTabId}
-        layoutId={layout?.id}
-      />
+      <div
+        className="flex-1 min-h-0 flex flex-col"
+        style={{
+          opacity: dashboardVisible ? 1 : 0,
+          transition: dashboardVisible ? 'opacity 0.25s ease-in' : undefined,
+        }}
+      >
+        <Dashboard
+          readonly
+          viewTabs={tabs}
+          viewActiveTabId={activeTabId}
+          layoutId={layout?.id}
+        />
+      </div>
     </div>
   );
 }

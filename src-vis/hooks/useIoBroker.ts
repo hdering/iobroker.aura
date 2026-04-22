@@ -17,6 +17,31 @@ let socket: IoBrokerSocket | null = null;
 const subscribers = new Map<string, Set<(state: ioBrokerState) => void>>();
 const connectionListeners = new Set<(connected: boolean) => void>();
 
+// Last-known-good state for every ID that was ever fetched or received.
+// Allows useDatapoint to initialize synchronously (no null-flash on mount).
+const stateCache = new Map<string, ioBrokerState>();
+
+export function getStateFromCache(id: string): ioBrokerState | null {
+  return stateCache.get(id) ?? null;
+}
+
+/** Fetch multiple state IDs in parallel and warm the cache. Returns when all have resolved (or 4 s timeout). */
+export function prefetchStates(ids: string[]): Promise<void> {
+  const unique = [...new Set(ids.filter(Boolean))].filter((id) => !stateCache.has(id));
+  if (unique.length === 0) return Promise.resolve();
+  const fetches = unique.map(
+    (id) =>
+      new Promise<void>((resolve) => {
+        getSocket().emit('getState', id, (_err: unknown, state: ioBrokerState | null) => {
+          if (state) stateCache.set(id, state);
+          resolve();
+        });
+      }),
+  );
+  const timeout = new Promise<void>((resolve) => setTimeout(resolve, 4000));
+  return Promise.race([Promise.all(fetches).then(() => undefined), timeout]);
+}
+
 // Determine initial socket URL:
 // - Dev: Vite dev server proxies /socket.io → configured ioBroker (no CORS), use same origin
 // - Prod: read persisted ioBroker URL from localStorage (set by connectionStore)
@@ -72,6 +97,7 @@ function createSocket(url: string): IoBrokerSocket {
   s.on('stateChange', (...args: unknown[]) => {
     const id = args[0] as string;
     const state = args[1] as ioBrokerState;
+    if (state) stateCache.set(id, state);
     subscribers.get(id)?.forEach((fn) => fn(state));
   });
 
@@ -245,7 +271,10 @@ export function subscribeStateDirect(id: string, callback: (state: ioBrokerState
 /** Get the current state of a datapoint without a React hook. */
 export function getStateDirect(id: string): Promise<ioBrokerState | null> {
   return new Promise((resolve) => {
-    getSocket().emit('getState', id, (_err: unknown, state: ioBrokerState | null) => resolve(state ?? null));
+    getSocket().emit('getState', id, (_err: unknown, state: ioBrokerState | null) => {
+      if (state) stateCache.set(id, state);
+      resolve(state ?? null);
+    });
   });
 }
 

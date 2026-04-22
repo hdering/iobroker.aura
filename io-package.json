@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.86",
+    "version": "0.4.87",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.87": {
+        "en": "Perf: state prefetch before first render – all datapoints loaded in parallel on connect; widgets initialize from cache (no null-flash); dashboard fades in after data is ready; fix dashboard height after prefetch wrapper change",
+        "de": "Performance: State-Prefetch vor dem ersten Render – alle Datenpunkte werden beim Verbinden parallel geladen; Widgets initialisieren aus dem Cache (kein Null-Flash); Dashboard blendet sich nach dem Laden ein; Fix für Dashboard-Höhe nach Wrapper-Änderung",
+        "ru": "Производительность: предварительная загрузка состояний перед первым рендером — все точки данных загружаются параллельно при подключении; виджеты инициализируются из кэша (без null-мигания); дашборд плавно появляется после загрузки данных; исправление высоты дашборда",
+        "pt": "Performance: pré-carregamento de estados antes do primeiro render – todos os datapoints carregados em paralelo na conexão; widgets inicializam do cache (sem null-flash); dashboard aparece gradualmente após os dados estarem prontos; correção de altura do dashboard",
+        "nl": "Prestaties: state prefetch voor eerste render – alle datapunten parallel geladen bij verbinding; widgets initialiseren vanuit cache (geen null-flash); dashboard verschijnt na laden van data; fix voor dashboard-hoogte na wrapper-aanpassing",
+        "fr": "Performance: préchargement des états avant le premier rendu – tous les points de données chargés en parallèle à la connexion; les widgets s'initialisent depuis le cache (pas de null-flash); le tableau de bord apparaît progressivement après le chargement; correction de la hauteur du tableau de bord",
+        "it": "Performance: pre-caricamento degli stati prima del primo render – tutti i datapoint caricati in parallelo alla connessione; i widget si inizializzano dalla cache (nessun null-flash); il dashboard appare gradualmente dopo il caricamento dei dati; correzione altezza dashboard",
+        "es": "Rendimiento: precarga de estados antes del primer render – todos los datapoints cargados en paralelo al conectar; los widgets se inicializan desde la caché (sin null-flash); el dashboard aparece gradualmente tras cargar los datos; corrección de altura del dashboard",
+        "pl": "Wydajność: wstępne ładowanie stanów przed pierwszym renderem – wszystkie punkty danych ładowane równolegle przy połączeniu; widgety inicjalizują się z pamięci podręcznej (brak null-flash); dashboard pojawia się stopniowo po załadowaniu danych; poprawka wysokości dashboardu",
+        "uk": "Продуктивність: попереднє завантаження станів перед першим рендером – усі точки даних завантажуються паралельно при підключенні; віджети ініціалізуються з кешу (без null-мерехтіння); дашборд плавно з'являється після завантаження даних; виправлення висоти дашборду",
+        "zh-cn": "性能优化：首次渲染前预加载状态——连接时并行加载所有数据点；组件从缓存初始化（无空值闪烁）；数据准备好后仪表盘淡入显示；修复包装器更改后仪表盘高度问题"
+      },
       "0.4.86": {
         "en": "Feat: eChartsPreset widget – title overlay, fullscreen button, fixed last-change overlay z-index; EChart – dataMin/dataMax auto option for Y-axis",
         "de": "Neu: eChartsPreset-Widget – Titel-Overlay, Vollbild-Schaltfläche, z-Index-Fix für Letzte-Änderung-Overlay; EChart – dataMin/dataMax Auto-Option für Y-Achse",
@@ -183,19 +196,6 @@
         "pl": "Nowe(Układ niestandardowy): komórki z obrazem (URL lub Base64) z trybami contain/cover/fill; opcja przepełnienia tekstu, aby zawartość komórki wychodziła poza sąsiednie puste komórki",
         "uk": "Нове(Власний макет): комірки із зображеннями (URL або Base64) з режимами contain/cover/fill; опція переповнення тексту — вміст комірки може виходити у сусідні порожні комірки",
         "zh-cn": "新增(自定义布局)：图片单元格（URL或Base64）支持contain/cover/fill三种适配模式；文本溢出选项，允许单元格内容延伸到相邻的空单元格"
-      },
-      "0.4.80": {
-        "en": "Feat: reworked tab wizard (3-step flow: theme → datapoints → layout); improved widget-type detection for shutters, window contacts and binary sensors; color thresholds for value, dimmer, shutter and thermostat widgets",
-        "de": "Neu: Tab-Wizard überarbeitet (3-Schritt-Flow: Thema → Datenpunkte → Layout); verbesserte Widget-Typ-Erkennung für Rollladen, Fensterkontakt und Binärsensoren; Farbschwellen für Wert-Anzeige, Dimmer, Rollladen und Thermostat",
-        "ru": "Новое: переработан мастер вкладок (3 шага: тема → точки данных → макет); улучшено определение типа виджета для жалюзи, оконных контактов и бинарных датчиков; цветовые пороги для виджетов значения, диммера, жалюзи и термостата",
-        "pt": "Novo: assistente de abas reformulado (fluxo de 3 etapas: tema → pontos de dados → layout); detecção aprimorada de tipo de widget para estores, contatos de janela e sensores binários; limites de cor para widgets de valor, dimmer, estore e termostato",
-        "nl": "Nieuw: tab-wizard herzien (3-staps flow: thema → datapunten → layout); verbeterde widget-type-detectie voor rolluiken, raamcontacten en binaire sensoren; kleurdrempels voor waarde-, dimmer-, rolluik- en thermostaat-widgets",
-        "fr": "Nouveau: assistant d'onglets remanié (flux en 3 étapes: thème → points de données → mise en page); détection améliorée du type de widget pour volets, contacts de fenêtre et capteurs binaires; seuils de couleur pour les widgets valeur, gradateur, volet et thermostat",
-        "it": "Nuovo: procedura guidata schede rinnovata (flusso in 3 passi: tema → punti dati → layout); rilevamento tipo widget migliorato per tapparelle, contatti finestra e sensori binari; soglie colore per widget valore, dimmer, tapparella e termostato",
-        "es": "Nuevo: asistente de pestañas rediseñado (flujo de 3 pasos: tema → puntos de datos → diseño); detección de tipo de widget mejorada para persianas, contactos de ventana y sensores binarios; umbrales de color para widgets de valor, dimmer, persiana y termostato",
-        "pl": "Nowe: przeprojektowany kreator zakładek (3-krokowy przepływ: motyw → punkty danych → układ); ulepszone wykrywanie typu widgetu dla rolet, kontaktronów okiennych i czujników binarnych; progi kolorów dla widgetów wartości, ściemniacza, rolety i termostatu",
-        "uk": "Нове: перероблений майстер вкладок (3-кроковий потік: тема → точки даних → макет); покращене визначення типу віджету для жалюзі, віконних контактів та бінарних датчиків; кольорові пороги для віджетів значення, диммера, жалюзі та термостата",
-        "zh-cn": "新增：重新设计的标签向导（3步流程：主题→数据点→布局）；改进了百叶窗、窗口联系人和二进制传感器的小部件类型检测；为值、调光器、百叶窗和温控器小部件添加颜色阈值"
       }
     }
   },

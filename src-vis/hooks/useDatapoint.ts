@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useIoBroker } from './useIoBroker';
+import { useIoBroker, getStateFromCache } from './useIoBroker';
 import type { ioBrokerState } from '../types';
 
 /**
@@ -8,7 +8,8 @@ import type { ioBrokerState } from '../types';
  */
 export function useDatapoint(id: string) {
   const { subscribe, setState, getState, connected } = useIoBroker();
-  const [state, setDatapointState] = useState<ioBrokerState | null>(null);
+  // Initialize from prefetch cache so widgets render with real values immediately (no null-flash).
+  const [state, setDatapointState] = useState<ioBrokerState | null>(() => (id ? getStateFromCache(id) : null));
 
   useEffect(() => {
     if (!id || !connected) return;
