@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Camera, BatteryMedium, Thermometer, Shield, Activity, Building2, RefreshCw } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Camera, BatteryMedium, Thermometer, Shield, Activity, Building2, RefreshCw, Maximize2, X } from 'lucide-react';
 import type { WidgetProps } from '../../types';
 import { setStateDirect, subscribeStateDirect } from '../../hooks/useIoBroker';
 import type { ioBrokerState } from '../../types';
@@ -263,6 +264,7 @@ interface StreamViewProps {
   refreshInterval: number;
   title?:          string;
   streamSecondsLeft: number | null;
+  onFullscreen?:   () => void;
 }
 
 function StreamView(p: StreamViewProps) {
@@ -339,7 +341,44 @@ function StreamView(p: StreamViewProps) {
           {p.mode === 'iframe' ? 'HTML' : p.refreshInterval === 0 ? 'LIVE' : 'CAM'}
         </div>
       )}
+
+      {!p.editMode && p.onFullscreen && !hasError && (
+        <button
+          onClick={e => { e.stopPropagation(); p.onFullscreen!(); }}
+          className="absolute top-1 right-1 p-1 rounded opacity-0 hover:opacity-100 transition-opacity"
+          style={{ background: 'rgba(0,0,0,0.5)', border: 'none', cursor: 'pointer', color: '#fff', lineHeight: 0 }}>
+          <Maximize2 size={13} />
+        </button>
+      )}
     </div>
+  );
+}
+
+// ── FullscreenPortal ──────────────────────────────────────────────────────────
+
+function FullscreenPortal({ svProps, onClose }: { svProps: StreamViewProps; onClose: () => void }) {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  return createPortal(
+    <div
+      className="fixed inset-0 flex items-center justify-center"
+      style={{ zIndex: 9999, background: 'rgba(0,0,0,0.95)' }}
+      onClick={onClose}>
+      <button
+        onClick={onClose}
+        className="absolute top-3 right-3 p-2 rounded-full"
+        style={{ background: 'rgba(255,255,255,0.15)', border: 'none', cursor: 'pointer', color: '#fff', lineHeight: 0, zIndex: 1 }}>
+        <X size={22} />
+      </button>
+      <div className="w-full h-full" onClick={e => e.stopPropagation()}>
+        <StreamView {...svProps} onFullscreen={undefined} />
+      </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -437,6 +476,7 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
   // ── Stream state ─────────────────────────────────────────────────────────────
   const [imgSrc,           setImgSrc]           = useState('');
   const [loadError,        setLoadError]        = useState(false);
+  const [fullscreen,       setFullscreen]       = useState(false);
   const [lastRefresh,      setLastRefresh]      = useState<Date | null>(null);
   const [waking,           setWaking]           = useState(false);
   const [streamReady,      setStreamReady]      = useState(false);
@@ -610,53 +650,68 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
     showTimestamp, lastRefresh, editMode, refreshInterval,
     title: config.title,
     streamSecondsLeft,
+    onFullscreen: editMode ? undefined : () => setFullscreen(true),
   };
 
   const scProps: StreamCellProps = {
     ...svProps, wakeUpDp, wakeUpMode, waking, streamReady, stopReason, doWake,
   };
 
+  const portal = fullscreen ? <FullscreenPortal svProps={svProps} onClose={() => setFullscreen(false)} /> : null;
+
   // ── MINIMAL layout ──────────────────────────────────────────────────────────────
   if (layout === 'minimal') {
     if (needsWake && wakeUpMode === 'onClick' && !waking && !streamReady) {
       const isReactivate = stopReason !== 'initial';
       return (
-        <div ref={containerRef} onClick={editMode ? undefined : doWake}
-          className="flex flex-col items-center justify-center h-full gap-2 select-none rounded-[inherit]"
-          style={{ background: 'var(--app-bg)', cursor: editMode ? 'default' : 'pointer' }}>
-          <div className="flex items-center justify-center rounded-full w-10 h-10"
-            style={{ background: isReactivate ? 'rgba(239,68,68,0.15)' : 'var(--accent)', opacity: isReactivate ? 1 : 0.85, border: isReactivate ? '1.5px solid #ef4444' : 'none' }}>
-            {isReactivate ? <RefreshCw size={18} color="#ef4444" /> : <Camera size={20} color="#fff" />}
+        <>
+          <div ref={containerRef} onClick={editMode ? undefined : doWake}
+            className="flex flex-col items-center justify-center h-full gap-2 select-none rounded-[inherit]"
+            style={{ background: 'var(--app-bg)', cursor: editMode ? 'default' : 'pointer' }}>
+            <div className="flex items-center justify-center rounded-full w-10 h-10"
+              style={{ background: isReactivate ? 'rgba(239,68,68,0.15)' : 'var(--accent)', opacity: isReactivate ? 1 : 0.85, border: isReactivate ? '1.5px solid #ef4444' : 'none' }}>
+              {isReactivate ? <RefreshCw size={18} color="#ef4444" /> : <Camera size={20} color="#fff" />}
+            </div>
+            {config.title && <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>}
+            {stopReason === 'timeout' && <p className="text-[10px]" style={{ color: '#ef4444' }}>Stream beendet</p>}
+            {stopReason === 'error'   && <p className="text-[10px]" style={{ color: '#ef4444' }}>Verbindung verloren</p>}
+            {!editMode && <p className="text-[10px] opacity-50" style={{ color: 'var(--text-secondary)' }}>{isReactivate ? 'Tippen zum Reaktivieren' : 'Tippen zum Aktivieren'}</p>}
           </div>
-          {config.title && <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>}
-          {stopReason === 'timeout' && <p className="text-[10px]" style={{ color: '#ef4444' }}>Stream beendet</p>}
-          {stopReason === 'error'   && <p className="text-[10px]" style={{ color: '#ef4444' }}>Verbindung verloren</p>}
-          {!editMode && <p className="text-[10px] opacity-50" style={{ color: 'var(--text-secondary)' }}>{isReactivate ? 'Tippen zum Reaktivieren' : 'Tippen zum Aktivieren'}</p>}
-        </div>
+          {portal}
+        </>
       );
     }
     if (needsWake && wakeUpMode === 'onView' && !waking && !streamReady) {
       return (
-        <div ref={containerRef} className="flex flex-col items-center justify-center h-full gap-2 rounded-[inherit]"
-          style={{ background: 'var(--app-bg)' }}>
-          <Camera size={28} style={{ color: 'var(--text-secondary)' }} />
-          {config.title && <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>}
-        </div>
+        <>
+          <div ref={containerRef} className="flex flex-col items-center justify-center h-full gap-2 rounded-[inherit]"
+            style={{ background: 'var(--app-bg)' }}>
+            <Camera size={28} style={{ color: 'var(--text-secondary)' }} />
+            {config.title && <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>}
+          </div>
+          {portal}
+        </>
       );
     }
     if (waking) {
       return (
-        <div ref={containerRef} className="flex flex-col items-center justify-center h-full gap-2 rounded-[inherit]"
-          style={{ background: 'var(--app-bg)' }}>
-          <Camera size={28} style={{ color: 'var(--accent)' }} />
-          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Kamera wird aktiviert…</p>
-        </div>
+        <>
+          <div ref={containerRef} className="flex flex-col items-center justify-center h-full gap-2 rounded-[inherit]"
+            style={{ background: 'var(--app-bg)' }}>
+            <Camera size={28} style={{ color: 'var(--accent)' }} />
+            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Kamera wird aktiviert…</p>
+          </div>
+          {portal}
+        </>
       );
     }
     return (
-      <div ref={containerRef} className="h-full w-full overflow-hidden rounded-[inherit]">
-        <StreamView {...svProps} />
-      </div>
+      <>
+        <div ref={containerRef} className="h-full w-full overflow-hidden rounded-[inherit]">
+          <StreamView {...svProps} />
+        </div>
+        {portal}
+      </>
     );
   }
 
@@ -664,20 +719,23 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
   if (layout === 'default') {
     const vidH = Math.max(20, Math.min(85, videoRatio));
     return (
-      <div ref={containerRef} className="h-full w-full overflow-hidden rounded-[inherit] flex flex-col"
-        style={{ background: 'var(--widget-bg)' }}>
-        <div style={{ height: `${vidH}%`, flexShrink: 0, overflow: 'hidden' }}>
-          <StreamCell {...scProps} />
+      <>
+        <div ref={containerRef} className="h-full w-full overflow-hidden rounded-[inherit] flex flex-col"
+          style={{ background: 'var(--widget-bg)' }}>
+          <div style={{ height: `${vidH}%`, flexShrink: 0, overflow: 'hidden' }}>
+            <StreamCell {...scProps} />
+          </div>
+          <div style={{ height: `${100 - vidH}%`, overflow: 'hidden auto', display: 'flex', flexDirection: 'column', gap: '2px', padding: '4px' }}>
+            {infoItems.length === 0
+              ? <p className="text-[10px] text-center opacity-40 m-auto" style={{ color: 'var(--text-secondary)' }}>Keine Info-Zeilen konfiguriert</p>
+              : infoItems.map((item, i) => (
+                  <InfoRow key={i} slot={item} value={item.datapoint ? dpValues[item.datapoint] : undefined} />
+                ))
+            }
+          </div>
         </div>
-        <div style={{ height: `${100 - vidH}%`, overflow: 'hidden auto', display: 'flex', flexDirection: 'column', gap: '2px', padding: '4px' }}>
-          {infoItems.length === 0
-            ? <p className="text-[10px] text-center opacity-40 m-auto" style={{ color: 'var(--text-secondary)' }}>Keine Info-Zeilen konfiguriert</p>
-            : infoItems.map((item, i) => (
-                <InfoRow key={i} slot={item} value={item.datapoint ? dpValues[item.datapoint] : undefined} />
-              ))
-          }
-        </div>
-      </div>
+        {portal}
+      </>
     );
   }
 
@@ -686,39 +744,42 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
 
   if (cameraTemplate === 'stream-full') {
     return (
-      <div ref={containerRef} className="relative h-full w-full overflow-hidden rounded-[inherit]">
-        <StreamCell {...scProps} />
-        <div className="absolute bottom-0 left-0 right-0 flex gap-1 p-1.5 flex-wrap justify-start items-end pointer-events-none"
-          style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.55))' }}>
-          {customSlots.map((slot, i) => {
-            if (slot.type === 'empty') return null;
-            const val  = slot.datapoint ? dpValues[slot.datapoint] : undefined;
-            const num  = slotNum(val);
-            const bool = slotBool(val);
-            const lbl  = slot.label ?? DEFAULT_LABELS[slot.type];
-            let display = '–';
-            let color: string | undefined;
-            switch (slot.type) {
-              case 'text': case 'manufacturer': display = slot.value || '–'; break;
-              case 'datapoint': display = val != null ? String(val) : '–'; break;
-              case 'battery':   display = !isNaN(num) ? `${Math.round(num)}%` : '–'; break;
-              case 'temperature': display = !isNaN(num) ? `${num.toFixed(1)}°C` : '–'; break;
-              case 'armed':
-                color = bool ? '#ef4444' : '#22c55e';
-                display = bool ? (slot.trueLabel || 'Scharf') : (slot.falseLabel || 'Aus'); break;
-              case 'motion':
-                if (bool) color = '#f59e0b';
-                display = bool ? (slot.trueLabel || 'Erkannt') : (slot.falseLabel || 'Keine'); break;
-            }
-            return (
-              <span key={i} className="text-[10px] px-1.5 py-0.5 rounded font-medium"
-                style={{ background: 'rgba(0,0,0,0.55)', color: color ?? '#fff' }}>
-                {lbl ? `${lbl}: ${display}` : display}
-              </span>
-            );
-          })}
+      <>
+        <div ref={containerRef} className="relative h-full w-full overflow-hidden rounded-[inherit]">
+          <StreamCell {...scProps} />
+          <div className="absolute bottom-0 left-0 right-0 flex gap-1 p-1.5 flex-wrap justify-start items-end pointer-events-none"
+            style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.55))' }}>
+            {customSlots.map((slot, i) => {
+              if (slot.type === 'empty') return null;
+              const val  = slot.datapoint ? dpValues[slot.datapoint] : undefined;
+              const num  = slotNum(val);
+              const bool = slotBool(val);
+              const lbl  = slot.label ?? DEFAULT_LABELS[slot.type];
+              let display = '–';
+              let color: string | undefined;
+              switch (slot.type) {
+                case 'text': case 'manufacturer': display = slot.value || '–'; break;
+                case 'datapoint': display = val != null ? String(val) : '–'; break;
+                case 'battery':   display = !isNaN(num) ? `${Math.round(num)}%` : '–'; break;
+                case 'temperature': display = !isNaN(num) ? `${num.toFixed(1)}°C` : '–'; break;
+                case 'armed':
+                  color = bool ? '#ef4444' : '#22c55e';
+                  display = bool ? (slot.trueLabel || 'Scharf') : (slot.falseLabel || 'Aus'); break;
+                case 'motion':
+                  if (bool) color = '#f59e0b';
+                  display = bool ? (slot.trueLabel || 'Erkannt') : (slot.falseLabel || 'Keine'); break;
+              }
+              return (
+                <span key={i} className="text-[10px] px-1.5 py-0.5 rounded font-medium"
+                  style={{ background: 'rgba(0,0,0,0.55)', color: color ?? '#fff' }}>
+                  {lbl ? `${lbl}: ${display}` : display}
+                </span>
+              );
+            })}
+          </div>
         </div>
-      </div>
+        {portal}
+      </>
     );
   }
 
@@ -726,28 +787,31 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
   const emptyCount  = Math.max(0, tmpl.slotCount - filledSlots.length);
 
   return (
-    <div ref={containerRef}
-      className="h-full w-full overflow-hidden rounded-[inherit]"
-      style={{
-        display: 'grid',
-        gap: '2px',
-        gridTemplateColumns: tmpl.gridCols,
-        gridTemplateRows: tmpl.gridRows,
-        gridTemplateAreas: tmpl.gridAreas!,
-        background: 'var(--app-bg)',
-      }}>
-      <div style={{ gridArea: 'stream', overflow: 'hidden', borderRadius: '4px' }}>
-        <StreamCell {...scProps} />
-      </div>
-      {filledSlots.map((slot, i) => (
-        <div key={i} style={{ gridArea: `slot${i}`, overflow: 'hidden', borderRadius: '4px' }}>
-          <InfoCell slot={slot} value={slot.datapoint ? dpValues[slot.datapoint] : undefined} />
+    <>
+      <div ref={containerRef}
+        className="h-full w-full overflow-hidden rounded-[inherit]"
+        style={{
+          display: 'grid',
+          gap: '2px',
+          gridTemplateColumns: tmpl.gridCols,
+          gridTemplateRows: tmpl.gridRows,
+          gridTemplateAreas: tmpl.gridAreas!,
+          background: 'var(--app-bg)',
+        }}>
+        <div style={{ gridArea: 'stream', overflow: 'hidden', borderRadius: '4px' }}>
+          <StreamCell {...scProps} />
         </div>
-      ))}
-      {Array.from({ length: emptyCount }, (_, i) => (
-        <div key={`pad-${i}`}
-          style={{ gridArea: `slot${filledSlots.length + i}`, background: 'var(--app-bg)', borderRadius: '4px' }} />
-      ))}
-    </div>
+        {filledSlots.map((slot, i) => (
+          <div key={i} style={{ gridArea: `slot${i}`, overflow: 'hidden', borderRadius: '4px' }}>
+            <InfoCell slot={slot} value={slot.datapoint ? dpValues[slot.datapoint] : undefined} />
+          </div>
+        ))}
+        {Array.from({ length: emptyCount }, (_, i) => (
+          <div key={`pad-${i}`}
+            style={{ gridArea: `slot${filledSlots.length + i}`, background: 'var(--app-bg)', borderRadius: '4px' }} />
+        ))}
+      </div>
+      {portal}
+    </>
   );
 }
