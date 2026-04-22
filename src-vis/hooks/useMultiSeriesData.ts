@@ -48,6 +48,7 @@ export function useMultiSeriesData(
   series: EChartSeriesConfig[],
   connected: boolean,
   subscribe: (id: string, cb: (state: ioBrokerState) => void) => () => void,
+  fixedTimeRange?: FixedTimeRange,
 ): Map<string, SeriesDataResult> {
   const [resultsMap, setResultsMap] = useState<Map<string, SeriesDataResult>>(new Map());
   const mountedRef = useRef(true);
@@ -57,10 +58,10 @@ export function useMultiSeriesData(
     return () => { mountedRef.current = false; };
   }, []);
 
-  // Dep key to detect when series config changes meaningfully
-  const depKey = JSON.stringify(
+  const depKey = JSON.stringify([
     series.map((s) => [s.id, s.datapointId, s.historyInstance, s.historyRange]),
-  );
+    fixedTimeRange ? [fixedTimeRange.start, fixedTimeRange.end] : null,
+  ]);
 
   // Fetch history for all series
   useEffect(() => {
@@ -88,9 +89,11 @@ export function useMultiSeriesData(
       }
 
       const range = s.historyRange ?? '24h';
-      const end   = Date.now();
-      const start = end - RANGE_MS[range];
-      const step  = RANGE_STEP[range];
+      const now   = Date.now();
+      // Fixed range: fetch exact window, no aggregation (avoids issues with non-numeric datapoints)
+      const end   = fixedTimeRange ? Math.min(fixedTimeRange.end, now) : now;
+      const start = fixedTimeRange ? fixedTimeRange.start : end - RANGE_MS[range];
+      const step  = fixedTimeRange ? undefined : RANGE_STEP[range];
 
       getHistoryDirect(s.datapointId, {
         instance: s.historyInstance,
@@ -140,7 +143,7 @@ export function useMultiSeriesData(
             const existing = next.get(s.id);
             let newData: [number, number][];
             if (s.historyInstance && existing) {
-              const cutoff = Date.now() - cutoffMs;
+              const cutoff = fixedTimeRange ? fixedTimeRange.start : Date.now() - cutoffMs;
               const trimmed = existing.data.filter((p) => p[0] >= cutoff);
               if (trimmed.length > 0 && trimmed[trimmed.length - 1][0] === state.ts) {
                 newData = trimmed;

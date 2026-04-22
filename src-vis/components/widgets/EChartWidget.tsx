@@ -67,7 +67,7 @@ export function EChartWidget({ config, editMode }: WidgetProps) {
     return { start: parseHHMM(echartFixedStart), end: parseHHMM(echartFixedEnd) };
   }, [echartFixedRange, echartFixedStart, echartFixedEnd]);
 
-  const seriesDataMap = useMultiSeriesData(echartSeries, connected, subscribe);
+  const seriesDataMap = useMultiSeriesData(echartSeries, connected, subscribe, fixedTimeRange);
 
   if (layout === 'custom') return <CustomGridView config={config} value="" />;
 
@@ -189,10 +189,7 @@ export function EChartWidget({ config, editMode }: WidgetProps) {
     : { show: false };
 
   const seriesList = echartSeries.map((s, idx) => {
-    let data = seriesDataMap.get(s.id)?.data ?? [];
-    if (fixedTimeRange) {
-      data = data.filter(([ts]) => ts >= fixedTimeRange.start && ts <= fixedTimeRange.end);
-    }
+    const data = seriesDataMap.get(s.id)?.data ?? [];
     return {
       name: s.name,
       type: s.chartType === 'area' ? 'line' : s.chartType,
