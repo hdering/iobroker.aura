@@ -266,6 +266,19 @@ export function deleteObjectDirect(id: string): Promise<void> {
   });
 }
 
+/** Returns the configured customUrl from the aura adapter instance, or window.location.origin. */
+export async function getAuraBaseUrl(): Promise<string> {
+  try {
+    const result = await getObjectViewDirect('instance', 'system.adapter.aura.', 'system.adapter.aura.香');
+    const row = result.rows[0];
+    if (row) {
+      const native = (row.value as unknown as { native?: { customUrl?: string } }).native;
+      if (native?.customUrl) return native.customUrl.replace(/\/+$/, '');
+    }
+  } catch { /* ignore */ }
+  return window.location.origin;
+}
+
 // Standalone-Funktion – kein Hook, kein Reconnect-Seiteneffekt
 export function getObjectListDirect(
   startkey: string,

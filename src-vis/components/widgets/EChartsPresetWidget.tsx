@@ -1,10 +1,18 @@
+import { useState, useEffect } from 'react';
 import { BarChart2 } from 'lucide-react';
+import { getAuraBaseUrl } from '../../hooks/useIoBroker';
 import type { WidgetProps } from '../../types';
 
 export function EChartsPresetWidget({ config }: WidgetProps) {
   const opts     = config.options ?? {};
   const presetId = (opts.presetId as string)  ?? '';
   const darkMode = (opts.darkMode as boolean) ?? true;
+  const manualBase = (opts.baseUrl as string | undefined)?.replace(/\/$/, '');
+
+  const [autoBase, setAutoBase] = useState(window.location.origin);
+  useEffect(() => {
+    if (!manualBase) getAuraBaseUrl().then(setAutoBase);
+  }, [manualBase]);
 
   if (!presetId) {
     return (
@@ -16,7 +24,7 @@ export function EChartsPresetWidget({ config }: WidgetProps) {
     );
   }
 
-  const baseUrl = (opts.baseUrl as string | undefined)?.replace(/\/$/, '') ?? window.location.origin;
+  const baseUrl = manualBase ?? autoBase;
   const url = `${baseUrl}/echarts/index.html?preset=${encodeURIComponent(presetId)}${darkMode ? '&theme=dark' : ''}`;
 
   return (

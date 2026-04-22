@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
-import { getObjectViewDirect } from '../../hooks/useIoBroker';
+import { getObjectViewDirect, getAuraBaseUrl } from '../../hooks/useIoBroker';
 import type { WidgetConfig } from '../../types';
 
 interface Props {
@@ -22,6 +22,8 @@ export function EChartsPresetConfig({ config, onConfigChange }: Props) {
 
   const [presets, setPresets]   = useState<string[]>([]);
   const [loading, setLoading]   = useState(false);
+  const [autoBase, setAutoBase] = useState(window.location.origin);
+  useEffect(() => { getAuraBaseUrl().then(setAutoBase); }, []);
 
   const loadPresets = () => {
     setLoading(true);
@@ -93,7 +95,7 @@ export function EChartsPresetConfig({ config, onConfigChange }: Props) {
           type="text"
           value={baseUrl}
           onChange={(e) => set({ baseUrl: e.target.value || undefined })}
-          placeholder={window.location.origin}
+          placeholder={autoBase}
           className={iCls}
           style={iSty}
         />
