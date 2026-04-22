@@ -175,6 +175,11 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.90 (2026-04-22)
+- Fix: consistent icon size (16px) and gap-2 spacing in all compact widget layouts
+- Fix: removed bold title font in switch compact layout
+- Fix: symmetric inner padding in group widgets (scrollbar-gutter: stable both-edges)
+
 ### 0.4.89 (2026-04-22)
 - Feat(tabBar): navigation menu position (left/center/right) configurable in layout settings
 

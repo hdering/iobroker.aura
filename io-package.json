@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.89",
+    "version": "0.4.90",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.90": {
+        "en": "Fix: consistent icon size and spacing in compact widget layouts; removed bold title in switch compact layout; symmetric inner padding in group widgets",
+        "de": "Fix: einheitliche Icon-Größe und Abstände in allen compact-Widget-Layouts; fette Titelschrift im Schalter-compact-Layout entfernt; symmetrischer Innenabstand in Widget-Gruppen",
+        "ru": "Исправление: единый размер иконок и отступы в компактных макетах виджетов; убран жирный шрифт заголовка в компактном макете выключателя; симметричные внутренние отступы в группах виджетов",
+        "pt": "Correção: tamanho de ícone e espaçamento consistentes em layouts compactos de widgets; título em negrito removido no layout compacto do interruptor; espaçamento interno simétrico em grupos de widgets",
+        "nl": "Fix: consistente icoongrootte en -afstand in compacte widget-layouts; vetgedrukte titel verwijderd in compacte schakelaar-layout; symmetrische binnenafstand in widget-groepen",
+        "fr": "Correction: taille d'icône et espacement cohérents dans les mises en page compactes des widgets; titre en gras supprimé dans la mise en page compacte de l'interrupteur; rembourrage interne symétrique dans les groupes de widgets",
+        "it": "Fix: dimensione icona e spaziatura coerenti nei layout compatti dei widget; titolo in grassetto rimosso nel layout compatto dell'interruttore; spaziatura interna simmetrica nei gruppi di widget",
+        "es": "Corrección: tamaño de icono y espaciado consistentes en diseños compactos de widgets; título en negrita eliminado en el diseño compacto del interruptor; relleno interno simétrico en grupos de widgets",
+        "pl": "Poprawka: spójny rozmiar ikony i odstępy w kompaktowych układach widgetów; usunięto pogrubiony tytuł w kompaktowym układzie przełącznika; symetryczne wewnętrzne dopełnienie w grupach widgetów",
+        "uk": "Виправлення: однаковий розмір іконок та відступи у компактних макетах віджетів; прибрано жирний заголовок у компактному макеті вимикача; симетричні внутрішні відступи у групах віджетів",
+        "zh-cn": "修复：所有紧凑型组件布局中图标大小和间距统一；移除开关紧凑布局中的粗体标题；组件组内边距对称"
+      },
       "0.4.89": {
         "en": "Feat(tabBar): navigation menu position (left/center/right) configurable in layout settings",
         "de": "Neu(Tableiste): Menü-Position (links/Mitte/rechts) in den Layout-Einstellungen konfigurierbar",
@@ -183,19 +196,6 @@
         "pl": "Nowe(Tab-Wizard): dodano krok wprowadzający wyjaśniający przepływ kreatora (wybierz punkty danych → sprawdź typy widgetów → utwórz zakładkę)",
         "uk": "Нове(Tab-Wizard): додано вступний крок з поясненням процесу (вибір точок даних → перевірка типів віджетів → створення вкладки)",
         "zh-cn": "新增(标签向导)：添加了介绍步骤，说明向导流程（选择数据点→检查小部件类型→创建标签页）"
-      },
-      "0.4.83": {
-        "en": "Feat(tab-wizard): starts directly in datapoint picker; new review step with per-DP widget type selection, editable names, DP removal, and layout choice; layout-generator no longer stretches the last widget in a row",
-        "de": "Neu(Tab-Wizard): startet direkt im Datapicker; neuer Review-Schritt mit Widget-Typ-Auswahl pro Datenpunkt, editierbaren Namen, DP-Entfernen und Layout-Wahl; Layout-Generator streckt das letzte Widget einer Zeile nicht mehr auf volle Breite",
-        "ru": "Новое(Tab-Wizard): запускается прямо в выборе точек данных; новый шаг проверки с выбором типа виджета для каждой точки, редактируемыми именами, удалением точек и выбором макета; генератор макетов больше не растягивает последний виджет в строке",
-        "pt": "Novo(Tab-Wizard): inicia diretamente no seletor de pontos de dados; novo passo de revisão com seleção de tipo de widget por DP, nomes editáveis, remoção de DP e escolha de layout; gerador de layout não estica mais o último widget de uma linha",
-        "nl": "Nieuw(Tab-Wizard): start direct in de datapuntkiezer; nieuwe reviewstap met widget-type-selectie per DP, bewerkbare namen, DP-verwijdering en layout-keuze; layout-generator rekt het laatste widget in een rij niet meer uit",
-        "fr": "Nouveau(Tab-Wizard): démarre directement dans le sélecteur de points de données; nouvelle étape de révision avec sélection de type de widget par DP, noms modifiables, suppression de DP et choix de mise en page; le générateur de mise en page n'étire plus le dernier widget d'une ligne",
-        "it": "Nuovo(Tab-Wizard): si avvia direttamente nel selettore dei punti dati; nuova fase di revisione con selezione del tipo di widget per DP, nomi modificabili, rimozione DP e scelta del layout; il generatore di layout non estende più l'ultimo widget di una riga",
-        "es": "Nuevo(Tab-Wizard): inicia directamente en el selector de puntos de datos; nuevo paso de revisión con selección de tipo de widget por DP, nombres editables, eliminación de DP y elección de diseño; el generador de diseño ya no estira el último widget de una fila",
-        "pl": "Nowe(Tab-Wizard): uruchamia się bezpośrednio w selektorze punktów danych; nowy krok przeglądu z wyborem typu widgetu dla każdego DP, edytowalnymi nazwami, usuwaniem DP i wyborem układu; generator układu nie rozciąga już ostatniego widgetu w wierszu",
-        "uk": "Нове(Tab-Wizard): запускається прямо у виборі точок даних; новий крок перегляду з вибором типу віджету для кожної точки, редагованими іменами, видаленням точок та вибором макету; генератор макетів більше не розтягує останній віджет у рядку",
-        "zh-cn": "新增(标签向导)：直接在数据点选择器中启动；新增审查步骤，支持每个数据点的小部件类型选择、可编辑名称、删除数据点和布局选择；布局生成器不再将行中最后一个小部件拉伸到整行"
       }
     }
   },
