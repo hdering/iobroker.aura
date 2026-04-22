@@ -24,6 +24,7 @@ interface Props {
 export function StatusBadges({ config }: Props) {
   const opts = config.options ?? {};
   const show = opts.showStatusBadges !== false; // default: visible
+  const alertOnly = opts.statusBadgesAlertOnly === true;
 
   const battDpId    = (opts.batteryDp as string) ?? '';
   const unreachDpId = (opts.unreachDp as string) ?? '';
@@ -41,6 +42,8 @@ export function StatusBadges({ config }: Props) {
   const isBattLow = hasBatt && (battVal === true || battVal === 1 || battVal === '1' || battVal === 'true');
   const isUnreach = hasUnreach && (unreachVal === true || unreachVal === 1 || unreachVal === '1' || unreachVal === 'true');
 
+  if (alertOnly && !isBattLow && !isUnreach) return null;
+
   const green = 'var(--accent-green, #22c55e)';
   const orange = '#f59e0b';
   const red = 'var(--accent-red, #ef4444)';
@@ -49,7 +52,7 @@ export function StatusBadges({ config }: Props) {
 
   return (
     <div
-      className="absolute bottom-1 right-1 flex items-center gap-0.5 pointer-events-none"
+      className="absolute bottom-0 right-0 flex items-center gap-0.5 pointer-events-none"
       style={{ zIndex: 2 }}>
       {hasBatt && (
         <span

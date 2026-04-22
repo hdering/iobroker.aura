@@ -3037,6 +3037,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                 const stInputCls = 'w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none font-mono';
                 const stInputStyle = { background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' };
                 const showBadges = (o.showStatusBadges as boolean) !== false;
+                const alertOnly  = (o.statusBadgesAlertOnly as boolean) === true;
                 const autoFillStatus = async () => {
                   if (!config.datapoint) return;
                   const parts = config.datapoint.split('.');
@@ -3078,6 +3079,16 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                             style={{ background: showBadges ? 'var(--accent)' : 'var(--app-border)' }}>
                             <span className="absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform"
                               style={{ left: showBadges ? '17px' : '2px' }} />
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>Nur bei Alarm</span>
+                          <button
+                            onClick={() => setO({ statusBadgesAlertOnly: !alertOnly })}
+                            className="relative w-8 h-4 rounded-full transition-colors"
+                            style={{ background: alertOnly ? 'var(--accent)' : 'var(--app-border)' }}>
+                            <span className="absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform"
+                              style={{ left: alertOnly ? '17px' : '2px' }} />
                           </button>
                         </div>
                       </div>
