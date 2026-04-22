@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { RefreshCw, Search, Check, X, ChevronDown, Settings2, ChevronRight, ChevronUp } from 'lucide-react';
+import { RefreshCw, Search, Check, X, ChevronDown, Settings2, ChevronRight, ChevronUp, Ban, Plus } from 'lucide-react';
+import { DatapointPicker } from './DatapointPicker';
 import type { WidgetConfig } from '../../types';
 import { discoverDatapoints, loadFilterOptions } from '../widgets/AutoListWidget';
 import type { AutoListOptions, AutoListEntry, DiscoveredDp } from '../widgets/AutoListWidget';
@@ -203,14 +204,16 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
   const [availRoles, setAvailRoles] = useState<string[]>([]);
   const [availRooms, setAvailRooms] = useState<string[]>([]);
   const [availFuncs, setAvailFuncs] = useState<string[]>([]);
+  const [availTypes, setAvailTypes] = useState<string[]>([]);
   const [optLoading, setOptLoading] = useState(true);
   const [resolvedNames, setResolvedNames] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    loadFilterOptions().then(({ roles, rooms, funcs }) => {
+    loadFilterOptions().then(({ roles, rooms, funcs, types }) => {
       setAvailRoles(roles);
       setAvailRooms(rooms);
       setAvailFuncs(funcs);
+      setAvailTypes(types);
       setOptLoading(false);
     });
     ensureDatapointCache().then(cache => {
@@ -224,7 +227,13 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
   const [selRoles, setSelRoles] = useState<string[]>(toArr(opts.filterRoles));
   const [selRooms, setSelRooms] = useState<string[]>(toArr(opts.filterRooms));
   const [selFuncs, setSelFuncs] = useState<string[]>(toArr(opts.filterFuncs));
+  const [selTypes, setSelTypes] = useState<string[]>(toArr(opts.filterTypes));
   const [idPat, setIdPat]       = useState(opts.filterIdPattern ?? '');
+
+  // Exclude state
+  const [excludePats, setExcludePats]       = useState(opts.excludeIdPatterns ?? '');
+  const [excludeIds, setExcludeIds]         = useState<string[]>(opts.excludeIds ?? []);
+  const [showExcludePicker, setShowExcludePicker] = useState(false);
 
   // Search results – reset whenever any filter changes
   const [results, setResults]     = useState<DiscoveredDp[]>([]);
@@ -248,6 +257,9 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
         filterIdPattern: idPat || undefined,
         filterRooms: toCsv(selRooms),
         filterFuncs: toCsv(selFuncs),
+        filterTypes: toCsv(selTypes),
+        excludeIdPatterns: excludePats || undefined,
+        excludeIds: excludeIds.length ? excludeIds : undefined,
       });
       setResults(found);
       setSearched(true);
@@ -275,6 +287,9 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
       filterIdPattern: idPat || undefined,
       filterRooms: toCsv(selRooms),
       filterFuncs: toCsv(selFuncs),
+      filterTypes: toCsv(selTypes),
+      excludeIdPatterns: excludePats || undefined,
+      excludeIds: excludeIds.length ? excludeIds : undefined,
     });
   };
 
@@ -289,7 +304,7 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
 
   const iSty = { background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' } as React.CSSProperties;
   const iCls = 'w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none';
-  const canSearch = selRoles.length > 0 || selRooms.length > 0 || selFuncs.length > 0 || !!idPat;
+  const canSearch = selRoles.length > 0 || selRooms.length > 0 || selFuncs.length > 0 || selTypes.length > 0 || !!idPat;
 
   return (
     <>
@@ -306,6 +321,58 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
           <input className={iCls} style={iSty} placeholder={t('autolist.idPh')} value={idPat}
             onChange={e => { setIdPat(e.target.value); resetSearch(); }}
             onKeyDown={e => e.key === 'Enter' && canSearch && search()} />
+        </div>
+        <div className="col-span-2">
+          <MultiSelect label="Typen" options={availTypes} selected={selTypes}
+            onChange={v => { setSelTypes(v); resetSearch(); }} loading={optLoading} />
+        </div>
+      </div>
+
+      {/* ── Exclude section ── */}
+      <div className="space-y-2 pt-0.5">
+        <div className="flex items-center gap-1.5">
+          <Ban size={10} style={{ color: 'var(--text-secondary)' }} />
+          <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Ausschlüsse</span>
+        </div>
+        <div>
+          <label className="text-[10px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
+            ID-Muster ausschließen <span className="opacity-60">(kommagetrennt)</span>
+          </label>
+          <input
+            className={iCls} style={iSty}
+            placeholder="z.B. .info., .connection, _REMOTE_"
+            value={excludePats}
+            onChange={e => { setExcludePats(e.target.value); resetSearch(); }}
+          />
+        </div>
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>
+              DPs gezielt ausschließen {excludeIds.length > 0 && <span className="opacity-60">({excludeIds.length})</span>}
+            </label>
+            <button
+              type="button"
+              onClick={() => setShowExcludePicker(true)}
+              className="flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded hover:opacity-80"
+              style={{ background: 'var(--app-border)', color: 'var(--text-secondary)' }}>
+              <Plus size={9} /> Auswählen
+            </button>
+          </div>
+          {excludeIds.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {excludeIds.map(id => (
+                <span key={id}
+                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono"
+                  style={{ background: 'color-mix(in srgb, #ef4444 12%, transparent)', color: '#ef4444', border: '1px solid color-mix(in srgb, #ef4444 30%, transparent)' }}>
+                  <span className="max-w-[120px] truncate">{id.split('.').slice(-2).join('.')}</span>
+                  <button onClick={() => { setExcludeIds(prev => prev.filter(x => x !== id)); resetSearch(); }}
+                    className="hover:opacity-70 shrink-0">
+                    <X size={8} />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -506,6 +573,25 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
           </div>
         </div>
       </div>
+
+      {/* ── DatapointPicker for exclude blacklist ── */}
+      {showExcludePicker && (
+        <DatapointPicker
+          currentValue=""
+          onSelect={() => setShowExcludePicker(false)}
+          onClose={() => setShowExcludePicker(false)}
+          multiSelect
+          onMultiSelect={(picks) => {
+            setExcludeIds(prev => {
+              const next = new Set(prev);
+              picks.forEach(p => next.add(p.id));
+              return [...next];
+            });
+            resetSearch();
+            setShowExcludePicker(false);
+          }}
+        />
+      )}
     </>
   );
 }

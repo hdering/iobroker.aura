@@ -31,6 +31,9 @@ export interface AutoListOptions {
   filterIdPattern?: string;
   filterRooms?: string;
   filterFuncs?: string;
+  filterTypes?: string;
+  excludeIdPatterns?: string;
+  excludeIds?: string[];
   syncIntervalMin?: number;
   showRoom?: boolean;
   showId?: boolean;
@@ -68,14 +71,16 @@ export function resolveName(name: string | Record<string, string> | undefined, f
   return name.de ?? name.en ?? Object.values(name)[0] ?? fallback;
 }
 
-export async function loadFilterOptions(): Promise<{ roles: string[]; rooms: string[]; funcs: string[] }> {
+export async function loadFilterOptions(): Promise<{ roles: string[]; rooms: string[]; funcs: string[]; types: string[] }> {
   const [stateResult, enumResult] = await Promise.all([
     getObjectViewDirect('state'),
     getObjectViewDirect('enum', 'enum.', 'enum.\u9999'),
   ]);
   const rolesSet = new Set<string>();
+  const typesSet = new Set<string>();
   for (const { value: obj } of stateResult.rows) {
     if (obj?.common?.role) rolesSet.add(obj.common.role);
+    if (obj?.common?.type) typesSet.add(obj.common.type);
   }
   const rooms: string[] = [];
   const funcs: string[] = [];
@@ -85,11 +90,11 @@ export async function loadFilterOptions(): Promise<{ roles: string[]; rooms: str
     if (obj._id.startsWith('enum.rooms.')) rooms.push(label);
     else if (obj._id.startsWith('enum.functions.')) funcs.push(label);
   }
-  return { roles: Array.from(rolesSet).sort(), rooms: rooms.sort(), funcs: funcs.sort() };
+  return { roles: Array.from(rolesSet).sort(), rooms: rooms.sort(), funcs: funcs.sort(), types: Array.from(typesSet).sort() };
 }
 
 export async function discoverDatapoints(
-  opts: Pick<AutoListOptions, 'filterRoles' | 'filterIdPattern' | 'filterRooms' | 'filterFuncs'>,
+  opts: Pick<AutoListOptions, 'filterRoles' | 'filterIdPattern' | 'filterRooms' | 'filterFuncs' | 'filterTypes' | 'excludeIdPatterns' | 'excludeIds'>,
 ): Promise<DiscoveredDp[]> {
   const [stateResult, channelResult, deviceResult, enumResult] = await Promise.all([
     getObjectViewDirect('state'),
@@ -127,16 +132,24 @@ export async function discoverDatapoints(
   }
 
   // Role filter: exact match (same as DatapointPicker) with OR semantics for multiple values.
-  const roleFilter  = (opts.filterRoles ?? '').split(',').map(s => s.trim()).filter(Boolean);
-  const idPattern   = opts.filterIdPattern?.trim().toLowerCase() ?? '';
-  const roomFilter  = (opts.filterRooms ?? '').split(',').map(s => s.trim()).filter(Boolean);
-  const funcFilter  = (opts.filterFuncs ?? '').split(',').map(s => s.trim()).filter(Boolean);
+  const roleFilter    = (opts.filterRoles ?? '').split(',').map(s => s.trim()).filter(Boolean);
+  const idPattern     = opts.filterIdPattern?.trim().toLowerCase() ?? '';
+  const roomFilter    = (opts.filterRooms ?? '').split(',').map(s => s.trim()).filter(Boolean);
+  const funcFilter    = (opts.filterFuncs ?? '').split(',').map(s => s.trim()).filter(Boolean);
+  const typeFilter    = (opts.filterTypes ?? '').split(',').map(s => s.trim()).filter(Boolean);
+  const excludePats   = (opts.excludeIdPatterns ?? '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+  const excludeIdsSet = new Set<string>(opts.excludeIds ?? []);
 
   return stateResult.rows
     .filter(({ id, value: obj }) => {
       const role = obj.common.role ?? '';
       if (roleFilter.length > 0 && !roleFilter.includes(role)) return false;
       if (idPattern && !id.toLowerCase().includes(idPattern)) return false;
+      const type = (obj.common.type as string | undefined) ?? '';
+      if (typeFilter.length > 0 && !typeFilter.includes(type)) return false;
+      if (excludeIdsSet.has(id)) return false;
+      const idLower = id.toLowerCase();
+      if (excludePats.some(p => idLower.includes(p))) return false;
 
       // Traverse the state ID and all parent paths to find room/func memberships.
       // e.g. for "hm-rpc.0.ABC.1.STATE" check:
@@ -397,7 +410,7 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
   }, [entryKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const runSync = useCallback(async () => {
-    const hasFilter = opts.filterRoles || opts.filterIdPattern || opts.filterRooms || opts.filterFuncs;
+    const hasFilter = opts.filterRoles || opts.filterIdPattern || opts.filterRooms || opts.filterFuncs || opts.filterTypes;
     if (!hasFilter) return;
     setSyncing(true);
     try {
