@@ -267,6 +267,19 @@ export function deleteObjectDirect(id: string): Promise<void> {
 }
 
 // Standalone-Funktion – kein Hook, kein Reconnect-Seiteneffekt
+export function getObjectListDirect(
+  startkey: string,
+  endkey: string,
+): Promise<ObjectViewResult> {
+  return new Promise((resolve) => {
+    getSocket().emit(
+      'getObjectList',
+      { startkey, endkey, include_docs: true },
+      (_err: unknown, result: ObjectViewResult) => resolve(result ?? { rows: [] }),
+    );
+  });
+}
+
 export function getObjectViewDirect(
   type: 'state' | 'channel' | 'device' | 'enum' | 'instance',
   startkey = '',

@@ -52,6 +52,7 @@ import { WindowContactWidget } from '../widgets/WindowContactWidget';
 import { BinarySensorWidget, BINARY_SENSOR_PRESETS } from '../widgets/BinarySensorWidget';
 import { StateImageWidget } from '../widgets/StateImageWidget';
 import { EChartsPresetWidget } from '../widgets/EChartsPresetWidget';
+import { EChartsPresetConfig } from '../config/EChartsPresetConfig';
 import { JsonTableConfig } from '../config/JsonTableConfig';
 import { IconPickerModal } from '../config/IconPickerModal';
 
@@ -2388,36 +2389,9 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
               })()}
 
               {/* ── eCharts Preset config ── */}
-              {config.type === 'echartsPreset' && (() => {
-                const o   = config.options ?? {};
-                const set = (patch: Record<string, unknown>) =>
-                  onConfigChange({ ...config, options: { ...o, ...patch } });
-                const iCls = 'w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none font-mono';
-                const iSty = { background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' };
-                return (
-                  <>
-                    <div>
-                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Preset-ID</label>
-                      <input type="text" value={(o.presetId as string) ?? ''}
-                        onChange={(e) => set({ presetId: e.target.value || undefined })}
-                        placeholder="echarts.0.preset_1"
-                        className={iCls} style={iSty} />
-                      <p className="text-[10px] mt-1" style={{ color: 'var(--text-secondary)', opacity: 0.7 }}>
-                        Objekt-ID des im eCharts-Adapter konfigurierten Presets
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Dark Theme</label>
-                      <button onClick={() => set({ darkMode: !(o.darkMode ?? true) })}
-                        className="relative w-9 h-5 rounded-full transition-colors"
-                        style={{ background: (o.darkMode ?? true) ? 'var(--accent)' : 'var(--app-border)' }}>
-                        <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
-                          style={{ left: (o.darkMode ?? true) ? '18px' : '2px' }} />
-                      </button>
-                    </div>
-                  </>
-                );
-              })()}
+              {config.type === 'echartsPreset' && (
+                <EChartsPresetConfig config={config} onConfigChange={onConfigChange} />
+              )}
 
               {/* ── Fill / Tank config ── */}
               {config.type === 'fill' && (() => {
