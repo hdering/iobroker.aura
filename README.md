@@ -175,6 +175,10 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.88 (2026-04-22)
+- Feat: HTML boot screen visible immediately on page load (before JS bundle parses)
+- Feat: loading spinner with real-time datapoint counter using direct DOM updates (bypasses React batching)
+
 ### 0.4.87 (2026-04-22)
 - Perf: parallel state prefetch on connect – all datapoints loaded before first widget render
 - Perf: widgets initialize from cache synchronously (no null-flash / flicker)

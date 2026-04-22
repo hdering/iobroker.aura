@@ -36,6 +36,13 @@ const router = createHashRouter([
   },
 ]);
 
+// Remove the pre-React boot screen once JS has loaded and React is about to paint.
+const bootEl = document.getElementById('aura-boot');
+if (bootEl) {
+  bootEl.classList.add('hidden');
+  bootEl.addEventListener('transitionend', () => bootEl.remove(), { once: true });
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider>

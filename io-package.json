@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.87",
+    "version": "0.4.88",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.88": {
+        "en": "Feat: HTML boot screen shown immediately on page load before JS bundle parses; loading spinner with real-time datapoint counter (direct DOM updates bypass React batching)",
+        "de": "Neu: HTML-Ladescreen wird sofort beim Seitenaufruf angezeigt, noch bevor das JS-Bundle geparst ist; Lade-Spinner mit Echtzeit-Datenpunkt-Zähler (direkte DOM-Updates umgehen React-Batching)",
+        "ru": "Новое: HTML-экран загрузки отображается сразу при открытии страницы, до разбора JS-бандла; спиннер загрузки с счётчиком точек данных в реальном времени (прямые обновления DOM обходят батчинг React)",
+        "pt": "Novo: tela de carregamento HTML exibida imediatamente ao carregar a página, antes do bundle JS ser analisado; spinner com contador de datapoints em tempo real (atualizações DOM diretas evitam batching do React)",
+        "nl": "Nieuw: HTML-laadscherm direct zichtbaar bij paginaladen vóór JS-bundle parsing; laadspinner met realtime datapuntteller (directe DOM-updates omzeilen React-batching)",
+        "fr": "Nouveau: écran de chargement HTML affiché immédiatement au chargement de la page avant l'analyse du bundle JS; spinner avec compteur de points de données en temps réel (mises à jour DOM directes contournent le batching React)",
+        "it": "Nuovo: schermata di caricamento HTML visualizzata immediatamente al caricamento della pagina prima del parsing del bundle JS; spinner con contatore datapoint in tempo reale (aggiornamenti DOM diretti bypassano il batching React)",
+        "es": "Nuevo: pantalla de carga HTML mostrada inmediatamente al cargar la página antes del análisis del bundle JS; spinner con contador de datapoints en tiempo real (actualizaciones DOM directas evitan el batching de React)",
+        "pl": "Nowe: ekran ładowania HTML wyświetlany natychmiast przy ładowaniu strony przed parsowaniem bundle JS; spinner z licznikiem punktów danych w czasie rzeczywistym (bezpośrednie aktualizacje DOM omijają batching React)",
+        "uk": "Нове: HTML-екран завантаження відображається негайно при завантаженні сторінки до парсингу JS-бандлу; спінер завантаження з лічильником точок даних у реальному часі (прямі оновлення DOM обходять батчинг React)",
+        "zh-cn": "新功能：页面加载时立即显示 HTML 启动屏幕（在 JS 包解析之前）；带有实时数据点计数器的加载动画（直接 DOM 更新绕过 React 批处理）"
+      },
       "0.4.87": {
         "en": "Perf: state prefetch before first render – all datapoints loaded in parallel on connect; widgets initialize from cache (no null-flash); dashboard fades in after data is ready; fix dashboard height after prefetch wrapper change",
         "de": "Performance: State-Prefetch vor dem ersten Render – alle Datenpunkte werden beim Verbinden parallel geladen; Widgets initialisieren aus dem Cache (kein Null-Flash); Dashboard blendet sich nach dem Laden ein; Fix für Dashboard-Höhe nach Wrapper-Änderung",
@@ -183,19 +196,6 @@
         "pl": "Fix: motyw i zmienne CSS per-layout są teraz poprawnie stosowane we frontendzie (globalny motyw nie nadpisuje już ustawień layoutu)",
         "uk": "Виправлення: тема та CSS-змінні для окремого макету тепер коректно застосовуються у фронтенді (глобальна тема більше не перезаписує налаштування макету)",
         "zh-cn": "修复：每个布局的主题和CSS变量现在在前端正确应用（全局主题不再覆盖布局设置）"
-      },
-      "0.4.81": {
-        "en": "Feat(custom-layout): image cells (URL or base64 data URI) with contain/cover/fill fitting; text-overflow option to let cell content spill into adjacent empty cells",
-        "de": "Neu(Custom-Layout): Bild-Zellen (URL oder Base64) mit Einpassen/Ausfüllen/Strecken-Optionen; Text-Überlauf-Option, damit Zellinhalt in benachbarte leere Zellen hineinragt",
-        "ru": "Новое(Custom-Layout): ячейки с изображениями (URL или Base64) с режимами contain/cover/fill; опция переполнения текста — содержимое ячейки может выходить в соседние пустые ячейки",
-        "pt": "Novo(Layout personalizado): células de imagem (URL ou Base64) com modos contain/cover/fill; opção de estouro de texto para que o conteúdo da célula transborde para células vazias adjacentes",
-        "nl": "Nieuw(Custom-Layout): afbeeldingscellen (URL of Base64) met contain/cover/fill-modi; tekst-overflow-optie zodat celinhoud in aangrenzende lege cellen kan overlopen",
-        "fr": "Nouveau(Mise en page personnalisée): cellules image (URL ou Base64) avec modes contain/cover/fill; option de débordement de texte pour que le contenu de la cellule déborde dans les cellules vides adjacentes",
-        "it": "Nuovo(Layout personalizzato): celle immagine (URL o Base64) con modalità contain/cover/fill; opzione overflow testo per far traboccare il contenuto della cella nelle celle vuote adiacenti",
-        "es": "Nuevo(Diseño personalizado): celdas de imagen (URL o Base64) con modos contain/cover/fill; opción de desbordamiento de texto para que el contenido de la celda se desborde en celdas vacías adyacentes",
-        "pl": "Nowe(Układ niestandardowy): komórki z obrazem (URL lub Base64) z trybami contain/cover/fill; opcja przepełnienia tekstu, aby zawartość komórki wychodziła poza sąsiednie puste komórki",
-        "uk": "Нове(Власний макет): комірки із зображеннями (URL або Base64) з режимами contain/cover/fill; опція переповнення тексту — вміст комірки може виходити у сусідні порожні комірки",
-        "zh-cn": "新增(自定义布局)：图片单元格（URL或Base64）支持contain/cover/fill三种适配模式；文本溢出选项，允许单元格内容延伸到相邻的空单元格"
       }
     }
   },

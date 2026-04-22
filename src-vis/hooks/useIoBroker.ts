@@ -26,14 +26,20 @@ export function getStateFromCache(id: string): ioBrokerState | null {
 }
 
 /** Fetch multiple state IDs in parallel and warm the cache. Returns when all have resolved (or 4 s timeout). */
-export function prefetchStates(ids: string[]): Promise<void> {
+export function prefetchStates(
+  ids: string[],
+  onProgress?: (loaded: number, total: number) => void,
+): Promise<void> {
   const unique = [...new Set(ids.filter(Boolean))].filter((id) => !stateCache.has(id));
   if (unique.length === 0) return Promise.resolve();
+  let loaded = 0;
+  const total = unique.length;
   const fetches = unique.map(
     (id) =>
       new Promise<void>((resolve) => {
         getSocket().emit('getState', id, (_err: unknown, state: ioBrokerState | null) => {
           if (state) stateCache.set(id, state);
+          onProgress?.(++loaded, total);
           resolve();
         });
       }),

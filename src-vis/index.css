@@ -12,6 +12,12 @@ html, body, #root {
   50%       { opacity: 0.25; }
 }
 
+@keyframes aura-loadbar {
+  0%   { transform: translateX(-100%) scaleX(0.3); }
+  50%  { transform: translateX(0%)    scaleX(0.7); }
+  100% { transform: translateX(100%) scaleX(0.3); }
+}
+
 /* ── Frontend font scale ─────────────────────────────────────────────────────
    Scales all Tailwind text-* utilities within the frontend app container.
    The --font-scale CSS variable is set by ThemeProvider from configStore.

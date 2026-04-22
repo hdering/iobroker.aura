@@ -177,7 +177,11 @@ export default function App() {
   // Collect all main datapoints from all tabs, fetch them in one parallel burst
   // before widgets mount, so useDatapoint can read from cache synchronously.
   const [dashboardVisible, setDashboardVisible] = useState(false);
+  const [loadTotal, setLoadTotal] = useState(0);
   const prefetchDone = useRef(false);
+  // Direct DOM refs so progress updates bypass React batching and render immediately.
+  const loadBarRef   = useRef<HTMLDivElement>(null);
+  const loadCountRef = useRef<HTMLSpanElement>(null);
 
   const allDatapoints = useMemo(() => {
     const ids = new Set<string>();
@@ -192,7 +196,16 @@ export default function App() {
   useEffect(() => {
     if (!connected || prefetchDone.current) return;
     prefetchDone.current = true;
-    prefetchStates(allDatapoints).then(() => setDashboardVisible(true));
+    const total = allDatapoints.length;
+    if (total === 0) { setDashboardVisible(true); return; }
+    setLoadTotal(total);
+    prefetchStates(allDatapoints, (loaded, t) => {
+      // Update DOM directly to avoid React batching collapsing all updates into one.
+      if (loadBarRef.current)
+        loadBarRef.current.style.width = `${Math.round((loaded / t) * 100)}%`;
+      if (loadCountRef.current)
+        loadCountRef.current.textContent = `${loaded} / ${t} Datenpunkte`;
+    }).then(() => setDashboardVisible(true));
   }, [connected, allDatapoints]);
 
   // ── Local active tab state (frontend only — doesn't affect admin editor)
@@ -412,6 +425,27 @@ export default function App() {
         }}
         layoutUrlBase={layoutUrlBase}
       />
+      {!dashboardVisible && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 pointer-events-none" style={{ zIndex: 50 }}>
+          {/* Progress bar — width updated directly via ref */}
+          <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: 'var(--app-border)' }}>
+            {loadTotal > 0 ? (
+              <div ref={loadBarRef} className="h-full" style={{ background: 'var(--accent)', width: '0%' }} />
+            ) : (
+              <div className="h-full" style={{ background: 'var(--accent)', animation: 'aura-loadbar 1.4s ease-in-out infinite' }} />
+            )}
+          </div>
+          {/* Spinner */}
+          <div
+            className="w-7 h-7 rounded-full border-2 animate-spin"
+            style={{ borderColor: 'var(--accent)', borderTopColor: 'transparent' }}
+          />
+          {/* Counter — textContent updated directly via ref */}
+          <span ref={loadCountRef} className="text-xs tabular-nums" style={{ color: 'var(--text-secondary)' }}>
+            {loadTotal > 0 ? `0 / ${loadTotal} Datenpunkte` : 'Verbinden…'}
+          </span>
+        </div>
+      )}
       <div
         className="flex-1 min-h-0 flex flex-col"
         style={{
