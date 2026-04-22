@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.80",
+    "version": "0.4.81",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.81": {
+        "en": "Feat(custom-layout): image cells (URL or base64 data URI) with contain/cover/fill fitting; text-overflow option to let cell content spill into adjacent empty cells",
+        "de": "Neu(Custom-Layout): Bild-Zellen (URL oder Base64) mit Einpassen/Ausfüllen/Strecken-Optionen; Text-Überlauf-Option, damit Zellinhalt in benachbarte leere Zellen hineinragt",
+        "ru": "Новое(Custom-Layout): ячейки с изображениями (URL или Base64) с режимами contain/cover/fill; опция переполнения текста — содержимое ячейки может выходить в соседние пустые ячейки",
+        "pt": "Novo(Layout personalizado): células de imagem (URL ou Base64) com modos contain/cover/fill; opção de estouro de texto para que o conteúdo da célula transborde para células vazias adjacentes",
+        "nl": "Nieuw(Custom-Layout): afbeeldingscellen (URL of Base64) met contain/cover/fill-modi; tekst-overflow-optie zodat celinhoud in aangrenzende lege cellen kan overlopen",
+        "fr": "Nouveau(Mise en page personnalisée): cellules image (URL ou Base64) avec modes contain/cover/fill; option de débordement de texte pour que le contenu de la cellule déborde dans les cellules vides adjacentes",
+        "it": "Nuovo(Layout personalizzato): celle immagine (URL o Base64) con modalità contain/cover/fill; opzione overflow testo per far traboccare il contenuto della cella nelle celle vuote adiacenti",
+        "es": "Nuevo(Diseño personalizado): celdas de imagen (URL o Base64) con modos contain/cover/fill; opción de desbordamiento de texto para que el contenido de la celda se desborde en celdas vacías adyacentes",
+        "pl": "Nowe(Układ niestandardowy): komórki z obrazem (URL lub Base64) z trybami contain/cover/fill; opcja przepełnienia tekstu, aby zawartość komórki wychodziła poza sąsiednie puste komórki",
+        "uk": "Нове(Власний макет): комірки із зображеннями (URL або Base64) з режимами contain/cover/fill; опція переповнення тексту — вміст комірки може виходити у сусідні порожні комірки",
+        "zh-cn": "新增(自定义布局)：图片单元格（URL或Base64）支持contain/cover/fill三种适配模式；文本溢出选项，允许单元格内容延伸到相邻的空单元格"
+      },
       "0.4.80": {
         "en": "Feat: reworked tab wizard (3-step flow: theme → datapoints → layout); improved widget-type detection for shutters, window contacts and binary sensors; color thresholds for value, dimmer, shutter and thermostat widgets",
         "de": "Neu: Tab-Wizard überarbeitet (3-Schritt-Flow: Thema → Datenpunkte → Layout); verbesserte Widget-Typ-Erkennung für Rollladen, Fensterkontakt und Binärsensoren; Farbschwellen für Wert-Anzeige, Dimmer, Rollladen und Thermostat",
@@ -183,19 +196,6 @@
         "pl": "Fix: błędy lint w etykietach JSX i zależnościach hooków z poprzedniego wydania",
         "uk": "Виправлення: помилки lint в JSX-мітках та залежностях хуків з попереднього релізу",
         "zh-cn": "修复：上个版本中JSX标签和Hook依赖项的lint错误"
-      },
-      "0.4.68": {
-        "en": "Camera widget: stream type auto-detection, wake-up datapoint for battery cameras (3 modes), new layouts (Minimal/Standard/Custom Grid), stream health detection with countdown + error overlay, configurable stream timeout",
-        "de": "Kamera-Widget: automatische Stream-Erkennung, Wake-Up-Datenpunkt für Akku-Kameras (3 Modi), neue Layouts (Minimal/Standard/Custom Grid), Stream-Gesundheitserkennung mit Countdown + Fehler-Overlay, einstellbarer Stream-Timeout",
-        "ru": "Виджет камеры: автоопределение потока, wake-up для аккумуляторных камер (3 режима), новые макеты (минимальный/стандарт/сетка), определение состояния потока с обратным отсчётом и оверлеем ошибки, настраиваемый таймаут",
-        "pt": "Widget câmara: deteção automática de stream, wake-up para câmaras a bateria (3 modos), novos layouts (Minimal/Standard/Custom Grid), deteção de saúde do stream com contagem regressiva + overlay de erro, timeout configurável",
-        "nl": "Camera-widget: automatische streamdetectie, wake-up voor accucamera (3 modi), nieuwe layouts (Minimal/Standaard/Custom Grid), stream-gezondheidsdetectie met aftelling + foutoverlay, instelbare stream-timeout",
-        "fr": "Widget caméra: détection automatique du flux, wake-up pour caméra batterie (3 modes), nouveaux layouts (Minimal/Standard/Custom Grid), détection de santé du flux avec décompte + overlay d'erreur, timeout configurable",
-        "it": "Widget fotocamera: rilevamento automatico stream, wake-up per fotocamere a batteria (3 modalità), nuovi layout (Minimale/Standard/Custom Grid), rilevamento salute stream con conto alla rovescia + overlay errore, timeout configurabile",
-        "es": "Widget cámara: detección automática de stream, wake-up para cámaras de batería (3 modos), nuevos layouts (Minimal/Estándar/Custom Grid), detección de salud del stream con cuenta atrás + overlay de error, timeout configurable",
-        "pl": "Widget kamery: automatyczne wykrywanie strumienia, wybudzanie dla kamer bateryjnych (3 tryby), nowe układy (Minimalny/Standardowy/Custom Grid), wykrywanie zdrowia strumienia z odliczaniem + nakładką błędu, konfigurowalny timeout",
-        "uk": "Віджет камери: автовизначення потоку, wake-up для акумуляторних камер (3 режими), нові макети (Мінімальний/Стандарт/Custom Grid), виявлення стану потоку з відліком + оверлеєм помилки, налаштовуваний тайм-аут",
-        "zh-cn": "摄像头小部件：流类型自动检测，电池摄像头唤醒数据点（3种模式），新布局（最小/标准/自定义网格），流健康检测（倒计时徽章+错误覆盖层），可配置流超时"
       }
     }
   },

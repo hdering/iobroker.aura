@@ -3167,6 +3167,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                             <option value="text">Freitext</option>
                             <option value="dp">Weiterer Datenpunkt</option>
                             <option value="field">Widget-Feld</option>
+                            <option value="image">Bild (URL / Base64)</option>
                           </select>
                         </div>
 
@@ -3181,6 +3182,40 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                               className={inputCls} style={inputSty}
                             />
                           </div>
+                        )}
+
+                        {/* Image URL / base64 */}
+                        {selCell.type === 'image' && (
+                          <>
+                            <div>
+                              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Bild-URL oder Base64</label>
+                              <input
+                                type="text"
+                                value={selCell.imageUrl ?? ''}
+                                onChange={(e) => setCell(sel, { imageUrl: e.target.value || undefined })}
+                                placeholder="https://… oder data:image/png;base64,…"
+                                className={inputCls} style={inputSty}
+                              />
+                              <p className="text-[10px] mt-1" style={{ color: 'var(--text-secondary)' }}>
+                                Tipp: Auch Base64-kodierte Bilder werden unterstützt — z.&nbsp;B. kleine Icons oder Logos ohne externen Server.
+                              </p>
+                            </div>
+                            <div>
+                              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Darstellung</label>
+                              <div className="flex gap-1">
+                                {(['contain', 'cover', 'fill'] as const).map((fit) => {
+                                  const active = (selCell.objectFit ?? 'contain') === fit;
+                                  return (
+                                    <button key={fit} onClick={() => setCell(sel, { objectFit: fit === 'contain' ? undefined : fit })}
+                                      className="flex-1 text-[10px] py-1 rounded"
+                                      style={{ background: active ? 'var(--accent)' : 'var(--app-bg)', color: active ? '#fff' : 'var(--text-secondary)', border: `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}` }}>
+                                      {fit === 'contain' ? 'Einpassen' : fit === 'cover' ? 'Ausfüllen' : 'Strecken'}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </>
                         )}
 
                         {/* Widget field key (for 'field' type) */}
@@ -3423,6 +3458,23 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange }: Widg
                                       className="flex-1 text-[10px] py-1 rounded"
                                       style={{ background: active ? 'var(--accent)' : 'var(--app-bg)', color: active ? '#fff' : 'var(--text-secondary)', border: `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}` }}>
                                       {v === 'top' ? 'Oben' : v === 'middle' ? 'Mitte' : 'Unten'}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+
+                            {/* Text overflow */}
+                            <div>
+                              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Text-Überlauf</label>
+                              <div className="flex gap-1">
+                                {([false, true] as const).map((v) => {
+                                  const active = (selCell.allowOverflow ?? false) === v;
+                                  return (
+                                    <button key={String(v)} onClick={() => setCell(sel, { allowOverflow: v || undefined })}
+                                      className="flex-1 text-[10px] py-1 rounded"
+                                      style={{ background: active ? 'var(--accent)' : 'var(--app-bg)', color: active ? '#fff' : 'var(--text-secondary)', border: `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}` }}>
+                                      {v ? 'Überlaufen' : 'Abschneiden'}
                                     </button>
                                   );
                                 })}

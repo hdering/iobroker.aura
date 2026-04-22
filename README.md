@@ -175,6 +175,10 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.81 (2026-04-22)
+- Feat(custom-layout): image cells – insert any image via URL or base64 data URI; choose between contain, cover and fill fitting
+- Feat(custom-layout): text-overflow option – allow cell text to spill into adjacent empty cells instead of being clipped
+
 ### 0.4.80 (2026-04-21)
 - Feat(wizard): reworked tab wizard with 3-step flow (theme selection → datapoint picker → layout)
 - Feat(wizard): improved widget-type detection for shutters, window contacts and binary sensors

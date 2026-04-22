@@ -28,17 +28,19 @@ function cellTextStyle(cell: CustomCell, defaultColor: string): React.CSSPropert
     fontWeight:   cell.bold   ? 'bold'   : undefined,
     fontStyle:    cell.italic ? 'italic' : undefined,
     color:        cell.color || defaultColor,
-    overflow:     'hidden',
-    textOverflow: 'ellipsis',
+    overflow:     cell.allowOverflow ? 'visible' : 'hidden',
+    textOverflow: cell.allowOverflow ? undefined  : 'ellipsis',
     whiteSpace:   'nowrap',
     lineHeight:   1.15,
+    position:     cell.allowOverflow ? 'relative' : undefined,
+    zIndex:       cell.allowOverflow ? 1           : undefined,
   };
 }
 
 function cellWrapStyle(cell: CustomCell): React.CSSProperties {
   return {
     display:        'flex',
-    overflow:       'hidden',
+    overflow:       cell.allowOverflow ? 'visible' : 'hidden',
     alignItems:     cell.valign === 'top' ? 'flex-start' : cell.valign === 'bottom' ? 'flex-end' : 'center',
     justifyContent: cell.align === 'center' ? 'center' : cell.align === 'right' ? 'flex-end' : 'flex-start',
     padding:        '2px',
@@ -58,6 +60,25 @@ function DpCellView({ cell, index }: { cell: CustomCell; index: number }) {
   return (
     <div className={`aura-custom-cell-${index}`} style={cellWrapStyle(cell)}>
       <span style={cellTextStyle(cell, 'var(--text-primary)')}>{content}</span>
+    </div>
+  );
+}
+
+/** Renders an image from a URL or base64 data URI. */
+function ImageCellView({ cell, index }: { cell: CustomCell; index: number }) {
+  if (!cell.imageUrl) return <div className={`aura-custom-cell-${index}`} />;
+  return (
+    <div className={`aura-custom-cell-${index}`} style={{ ...cellWrapStyle(cell), padding: 0 }}>
+      <img
+        src={cell.imageUrl}
+        alt=""
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: cell.objectFit ?? 'contain',
+          display: 'block',
+        }}
+      />
     </div>
   );
 }
@@ -120,7 +141,9 @@ export function CustomGridView({ config, value, unit, extraFields }: CustomGridV
       {cells.map((cell, i) =>
         cell.type === 'dp'
           ? <DpCellView key={i} cell={cell} index={i} />
-          : <StaticCellView key={i} cell={cell} index={i} title={config.title} value={value} unit={unit} extraFields={extraFields} />
+          : cell.type === 'image'
+            ? <ImageCellView key={i} cell={cell} index={i} />
+            : <StaticCellView key={i} cell={cell} index={i} title={config.title} value={value} unit={unit} extraFields={extraFields} />
       )}
     </div>
   );

@@ -45,7 +45,7 @@ export type WidgetLayout = 'default' | 'card' | 'compact' | 'minimal' | 'agenda'
 
 // ── Custom-Grid layout ────────────────────────────────────────────────────────
 
-export type CustomCellType = 'empty' | 'title' | 'value' | 'unit' | 'text' | 'dp' | 'field';
+export type CustomCellType = 'empty' | 'title' | 'value' | 'unit' | 'text' | 'dp' | 'field' | 'image';
 export type CustomCellAlign  = 'left' | 'center' | 'right';
 export type CustomCellValign = 'top'  | 'middle'  | 'bottom';
 
@@ -60,8 +60,11 @@ export interface CustomCell {
   bold?:     boolean;
   italic?:   boolean;
   color?:    string;            // CSS color; '' / undefined = theme default
-  align?:    CustomCellAlign;   // default: 'left'
-  valign?:   CustomCellValign;  // default: 'middle'
+  align?:         CustomCellAlign;   // default: 'left'
+  valign?:        CustomCellValign;  // default: 'middle'
+  allowOverflow?: boolean;           // allow text to overflow into adjacent cells
+  imageUrl?:      string;            // 'image' type: URL or base64 data URI
+  objectFit?:     'contain' | 'cover' | 'fill';  // 'image' type: CSS object-fit
 }
 
 /** 9-element array, row-major (index = row*3 + col) */
