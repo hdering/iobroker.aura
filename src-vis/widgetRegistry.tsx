@@ -13,7 +13,7 @@
 import {
   Zap, TrendingUp, SlidersHorizontal, Thermometer, BarChart2, List,
   Clock, CalendarDays, Heading2, Layers2, Cloud, Gauge, Camera, ImageIcon, MonitorDot, Droplets, Truck, AlignJustify, Table2,
-  DoorOpen, ShieldAlert, ToggleRight,
+  DoorOpen, ShieldAlert, ToggleRight, LineChart,
   type LucideIcon,
 } from 'lucide-react';
 import type { WidgetType } from './types';
@@ -120,6 +120,14 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 12,           defaultH: 5,
     addMode: 'datapoint',   widgetGroup: 'control',
     mock: { t: 'EChart', v: '' },
+  },
+  {
+    type: 'echartsPreset',
+    label: 'eCharts',       shortLabel: 'eCharts',
+    Icon: LineChart,        iconName: 'LineChart',  color: '#10b981',
+    defaultW: 12,           defaultH: 5,
+    addMode: 'free',        widgetGroup: 'control',
+    mock: { t: 'eCharts', v: '' },
   },
   {
     type: 'list',

@@ -39,7 +39,8 @@ export type WidgetType =
   | 'jsontable'
   | 'windowcontact'
   | 'binarysensor'
-  | 'stateimage';
+  | 'stateimage'
+  | 'echartsPreset';
 
 export type WidgetLayout = 'default' | 'card' | 'compact' | 'minimal' | 'agenda' | 'flow' | 'battery' | 'production' | 'consumption' | 'loadpoints' | 'custom';
 
