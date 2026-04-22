@@ -16,7 +16,12 @@ export function EChartsPresetWidget({ config }: WidgetProps) {
     );
   }
 
-  const url = `${window.location.origin}/echarts/index.html?preset=${encodeURIComponent(presetId)}${darkMode ? '&theme=dark' : ''}`;
+  // Admin serves eCharts at /adapter/echarts/chart/index.html,
+  // web adapter serves it at /echarts/index.html
+  const echartsPath = window.location.pathname.startsWith('/adapter/')
+    ? '/adapter/echarts/chart/index.html'
+    : '/echarts/index.html';
+  const url = `${window.location.origin}${echartsPath}?preset=${encodeURIComponent(presetId)}${darkMode ? '&theme=dark' : ''}`;
 
   return (
     <div className="w-full h-full overflow-hidden" style={{ borderRadius: 'inherit' }}>
