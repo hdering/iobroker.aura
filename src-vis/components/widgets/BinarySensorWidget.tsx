@@ -75,10 +75,10 @@ export function BinarySensorWidget({ config }: WidgetProps) {
   // ── COMPACT ──────────────────────────────────────────────────────────────
   if (layout === 'compact') {
     return (
-      <div className="flex items-center gap-3 h-full" style={{ position: 'relative' }}>
-        <Icon size={18} style={{ color, flexShrink: 0 }} />
+      <div className="flex items-center gap-2 h-full" style={{ position: 'relative' }}>
+        <Icon size={16} style={{ color, flexShrink: 0 }} />
         {showTitle && (
-          <span className="flex-1 text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+          <span className="flex-1 text-sm truncate" style={{ color: 'var(--text-secondary)' }}>
             {config.title}
           </span>
         )}
