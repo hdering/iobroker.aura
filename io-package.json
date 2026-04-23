@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.4.94",
+    "version": "0.4.95",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.4.95": {
+        "en": "Feat(windowcontact): per-state icon/image configuration (icon picker or base64 image, custom color and label for each state: closed/tilted/open)",
+        "de": "Neu(Fensterkontakt): pro-Zustand Icon/Bild-Konfiguration (Icon-Auswahl oder Base64-Bild, eigene Farbe und Beschriftung für jeden Zustand: geschlossen/gekippt/offen)",
+        "ru": "Новое(Оконный контакт): настройка иконки/изображения для каждого состояния (выбор иконки или изображение base64, цвет и подпись для каждого состояния: закрыто/наклонено/открыто)",
+        "pt": "Novo(Contato de janela): configuração de ícone/imagem por estado (seletor de ícones ou imagem base64, cor e rótulo personalizados para cada estado: fechado/inclinado/aberto)",
+        "nl": "Nieuw(Raamcontact): per-staat icoon/afbeelding configuratie (icoonkiezer of base64-afbeelding, aangepaste kleur en label voor elke staat: gesloten/gekanteld/open)",
+        "fr": "Nouveau(Contact fenêtre): configuration d'icône/image par état (sélecteur d'icônes ou image base64, couleur et libellé personnalisés pour chaque état: fermé/incliné/ouvert)",
+        "it": "Nuovo(Contatto finestra): configurazione icona/immagine per stato (selettore icone o immagine base64, colore ed etichetta personalizzati per ogni stato: chiuso/inclinato/aperto)",
+        "es": "Nuevo(Contacto de ventana): configuración de icono/imagen por estado (selector de iconos o imagen base64, color y etiqueta personalizados para cada estado: cerrado/inclinado/abierto)",
+        "pl": "Nowe(Kontakt okienny): konfiguracja ikony/obrazu dla każdego stanu (wybór ikony lub obraz base64, niestandardowy kolor i etykieta dla każdego stanu: zamknięty/uchylony/otwarty)",
+        "uk": "Нове(Контакт вікна): налаштування іконки/зображення для кожного стану (вибір іконки або зображення base64, власний колір та мітка для кожного стану: закрито/нахилено/відкрито)",
+        "zh-cn": "新增（窗/门触点）：每个状态可独立配置图标/图片（图标选择器或 Base64 图片，以及自定义颜色和标签，适用于：关闭/倾斜/打开）"
+      },
       "0.4.94": {
         "en": "Feat(calendar): configurable icon for important appointments (custom icon picker) and option to hide the icon entirely",
         "de": "Neu(Kalender): konfigurierbares Icon für wichtige Termine (Icon-Auswahl) und Option zum vollständigen Ausblenden des Icons",
@@ -183,19 +196,6 @@
         "pl": "Nowe(pasek kart): pozycja menu nawigacyjnego (lewo/środek/prawo) konfigurowalna w ustawieniach układu",
         "uk": "Нове(панель вкладок): позиція навігаційного меню (зліва/по центру/справа) настроюється в налаштуваннях макету",
         "zh-cn": "新功能(标签栏)：可在布局设置中配置导航菜单位置（左/中/右）"
-      },
-      "0.4.88": {
-        "en": "Feat: HTML boot screen shown immediately on page load before JS bundle parses; loading spinner with real-time datapoint counter (direct DOM updates bypass React batching)",
-        "de": "Neu: HTML-Ladescreen wird sofort beim Seitenaufruf angezeigt, noch bevor das JS-Bundle geparst ist; Lade-Spinner mit Echtzeit-Datenpunkt-Zähler (direkte DOM-Updates umgehen React-Batching)",
-        "ru": "Новое: HTML-экран загрузки отображается сразу при открытии страницы, до разбора JS-бандла; спиннер загрузки с счётчиком точек данных в реальном времени (прямые обновления DOM обходят батчинг React)",
-        "pt": "Novo: tela de carregamento HTML exibida imediatamente ao carregar a página, antes do bundle JS ser analisado; spinner com contador de datapoints em tempo real (atualizações DOM diretas evitam batching do React)",
-        "nl": "Nieuw: HTML-laadscherm direct zichtbaar bij paginaladen vóór JS-bundle parsing; laadspinner met realtime datapuntteller (directe DOM-updates omzeilen React-batching)",
-        "fr": "Nouveau: écran de chargement HTML affiché immédiatement au chargement de la page avant l'analyse du bundle JS; spinner avec compteur de points de données en temps réel (mises à jour DOM directes contournent le batching React)",
-        "it": "Nuovo: schermata di caricamento HTML visualizzata immediatamente al caricamento della pagina prima del parsing del bundle JS; spinner con contatore datapoint in tempo reale (aggiornamenti DOM diretti bypassano il batching React)",
-        "es": "Nuevo: pantalla de carga HTML mostrada inmediatamente al cargar la página antes del análisis del bundle JS; spinner con contador de datapoints en tiempo real (actualizaciones DOM directas evitan el batching de React)",
-        "pl": "Nowe: ekran ładowania HTML wyświetlany natychmiast przy ładowaniu strony przed parsowaniem bundle JS; spinner z licznikiem punktów danych w czasie rzeczywistym (bezpośrednie aktualizacje DOM omijają batching React)",
-        "uk": "Нове: HTML-екран завантаження відображається негайно при завантаженні сторінки до парсингу JS-бандлу; спінер завантаження з лічильником точок даних у реальному часі (прямі оновлення DOM обходять батчинг React)",
-        "zh-cn": "新功能：页面加载时立即显示 HTML 启动屏幕（在 JS 包解析之前）；带有实时数据点计数器的加载动画（直接 DOM 更新绕过 React 批处理）"
       }
     }
   },

@@ -175,6 +175,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.4.95 (2026-04-23)
+- Feat(windowcontact): per-state icon/image configuration – icon picker or base64 image, custom color and label for each state (closed/tilted/open)
+
 ### 0.4.94 (2026-04-23)
 - Feat(calendar): configurable icon for important appointments via icon picker; new toggle to hide the icon entirely
 
