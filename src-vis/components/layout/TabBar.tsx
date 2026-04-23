@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Settings, X } from 'lucide-react';
 import { useDashboardStore, useActiveLayout } from '../../store/dashboardStore';
 import type { Tab, TabBarItem, TabBarSettings } from '../../store/dashboardStore';
+import { useConfigStore } from '../../store/configStore';
 import { Icon } from '@iconify/react';
 import { CURATED_ICON_IDS, getWidgetIcon } from '../../utils/widgetIconMap';
 import { useT } from '../../i18n';
@@ -159,6 +160,14 @@ export function TabBar({ readonly = false, viewTabs, viewActiveTabId, onViewTabC
   const centerItems = items.filter((i) => i.position === 'center');
   const rightItems  = items.filter((i) => i.position === 'right');
   const hasExtras   = centerItems.length > 0 || rightItems.length > 0;
+
+  const mobileBreakpoint = useConfigStore((s) => s.frontend.mobileBreakpoint ?? 600);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < mobileBreakpoint);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < mobileBreakpoint);
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, [mobileBreakpoint]);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
@@ -361,7 +370,7 @@ export function TabBar({ readonly = false, viewTabs, viewActiveTabId, onViewTabC
 
   // ── Render ───────────────────────────────────────────────────────────────────
 
-  const tabsAlignment = tbSettings?.tabsAlignment ?? 'left';
+  const tabsAlignment = isMobile ? 'left' : (tbSettings?.tabsAlignment ?? 'left');
   const needsGrid = hasExtras || tabsAlignment !== 'left';
 
   const addTabBtn = !readonly && editMode && (
