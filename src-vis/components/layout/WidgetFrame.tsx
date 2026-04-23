@@ -3443,13 +3443,13 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                   empty: '–', title: 'Titel', value: 'Wert', unit: 'Einheit', text: 'Text', dp: 'DP', field: 'Feld', component: 'Aktion',
                 };
                 const COMPONENT_OPTIONS: Record<string, { key: string; label: string }[]> = {
-                  switch:        [{ key: 'toggle', label: 'Schalter' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }],
-                  dimmer:        [{ key: 'slider', label: 'Dimmer-Slider' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }],
-                  thermostat:    [{ key: 'btn-plus', label: '+ Temperatur' }, { key: 'btn-minus', label: '− Temperatur' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }],
-                  shutter:       [{ key: 'btn-up', label: '▲ Hoch' }, { key: 'btn-stop', label: '■ Stop' }, { key: 'btn-down', label: '▼ Runter' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }],
-                  windowcontact: [{ key: 'icon', label: 'Status-Icon' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'lock-icon', label: 'Schloss-Icon' }],
-                  binarysensor:  [{ key: 'icon', label: 'Status-Icon' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }],
-                  stateimage:    [{ key: 'icon', label: 'Zustands-Icon' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }],
+                  switch:        [{ key: 'toggle', label: 'Schalter' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
+                  dimmer:        [{ key: 'slider', label: 'Dimmer-Slider' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
+                  thermostat:    [{ key: 'btn-plus', label: '+ Temperatur' }, { key: 'btn-minus', label: '− Temperatur' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
+                  shutter:       [{ key: 'btn-up', label: '▲ Hoch' }, { key: 'btn-stop', label: '■ Stop' }, { key: 'btn-down', label: '▼ Runter' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
+                  windowcontact: [{ key: 'icon', label: 'Status-Icon' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'lock-icon', label: 'Schloss-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
+                  binarysensor:  [{ key: 'icon', label: 'Status-Icon' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
+                  stateimage:    [{ key: 'icon', label: 'Zustands-Icon' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
                 };
                 const o   = config.options ?? {};
                 const cells: CustomGrid = (o.customGrid as CustomGrid | undefined) ?? DEFAULT_CUSTOM_GRID;
