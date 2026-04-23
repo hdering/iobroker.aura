@@ -33,6 +33,12 @@ export default [
             '@typescript-eslint/no-explicit-any': 'warn',
             '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
             'no-unused-vars': 'off',
+            // New rules introduced in eslint-plugin-react-hooks v7.x – disabled to preserve existing behaviour
+            'react-hooks/set-state-in-effect': 'off',
+            'react-hooks/static-components': 'off',
+            'react-hooks/refs': 'off',
+            'react-hooks/purity': 'off',
+            'react-hooks/use-memo': 'off',
         },
     },
     {
