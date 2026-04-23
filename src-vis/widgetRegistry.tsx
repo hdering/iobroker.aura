@@ -115,7 +115,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
   },
   {
     type: 'echart',
-    label: 'Diagramm (erweitert)', shortLabel: 'EChart',
+    label: 'Diagramm (erweitert)', shortLabel: 'Diagramm (erw.)',
     Icon: BarChart2,        iconName: 'BarChart2',  color: '#10b981',
     defaultW: 12,           defaultH: 5,
     addMode: 'datapoint',   widgetGroup: 'control',
@@ -259,7 +259,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
   },
   {
     type: 'stateimage',
-    label: 'Zustandsbild',  shortLabel: 'Zustand',
+    label: 'Zustandsbild',  shortLabel: 'Zustandsbild',
     Icon: ToggleRight,      iconName: 'ToggleRight', color: '#22c55e',
     defaultW: 8,            defaultH: 4,
     addMode: 'datapoint',   widgetGroup: 'control',
