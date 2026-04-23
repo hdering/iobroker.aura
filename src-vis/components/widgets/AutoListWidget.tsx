@@ -554,6 +554,25 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
 
   if (layout === 'custom') return <CustomGridView config={config} value="" />;
 
+  // ── ANZAHL (count) — zeigt nur die Anzahl der Einträge ────────────────────
+  if (layout === 'count') {
+    const count = valueFilter === 'all' || editMode ? entries.length : visibleEntries.length;
+    return (
+      <div className="relative flex flex-col items-center justify-center h-full gap-1">
+        {HeaderIcon && <HeaderIcon size={20} style={{ color: 'var(--text-secondary)', opacity: 0.7 }} />}
+        <span className="font-bold tabular-nums leading-none" style={{ fontSize: 48, color: 'var(--text-primary)' }}>
+          {count}
+        </span>
+        {showTitle && config.title && (
+          <span className="text-xs truncate max-w-full px-2 text-center" style={{ color: 'var(--text-secondary)' }}>
+            {config.title}
+          </span>
+        )}
+        {lcOverlay}
+      </div>
+    );
+  }
+
   // ── KACHELN (card) ─────────────────────────────────────────────────────────
   if (layout === 'card') {
     return (

@@ -43,7 +43,7 @@ export type WidgetType =
   | 'echartsPreset'
   | 'html';
 
-export type WidgetLayout = 'default' | 'card' | 'compact' | 'minimal' | 'agenda' | 'flow' | 'battery' | 'production' | 'consumption' | 'loadpoints' | 'custom';
+export type WidgetLayout = 'default' | 'card' | 'compact' | 'minimal' | 'agenda' | 'flow' | 'battery' | 'production' | 'consumption' | 'loadpoints' | 'custom' | 'count';
 
 // ── Custom-Grid layout ────────────────────────────────────────────────────────
 

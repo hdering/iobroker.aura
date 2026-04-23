@@ -1533,6 +1533,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                 { value: 'compact', label: t('wf.edit.layout.compact') },
                 { value: 'minimal', label: t('wf.edit.layout.minimal') },
                 ...(config.type === 'calendar' ? [{ value: 'agenda', label: t('wf.edit.layout.agenda') }] : []),
+                ...(config.type === 'autolist' ? [{ value: 'count', label: 'Anzahl' }] : []),
                 ...(!['iframe', 'jsontable', 'html', 'trash', 'header', 'fill', 'list', 'autolist'].includes(config.type) ? [{ value: 'custom', label: 'Custom' }] : []),
                 ...(config.type === 'evcc' ? [
                   { value: 'flow',        label: 'Nur Fluss' },
