@@ -1,4 +1,4 @@
-import { Power, Lightbulb, ToggleRight } from 'lucide-react';
+import { Power } from 'lucide-react';
 import { useDatapoint } from '../../hooks/useDatapoint';
 import { useIoBroker } from '../../hooks/useIoBroker';
 import type { WidgetProps } from '../../types';
@@ -13,7 +13,7 @@ export function SwitchWidget({ config }: WidgetProps) {
   const isOn = Boolean(value);
   const layout = config.layout ?? 'default';
   const toggle = () => setState(config.datapoint, !isOn);
-  const CompactIcon = getWidgetIcon(config.options?.icon as string | undefined, Power);
+  const WidgetIcon = getWidgetIcon(config.options?.icon as string | undefined, Power);
   const o = config.options ?? {};
   const showTitle = o.showTitle !== false;
   const showLabel = o.showLabel !== false;
@@ -51,9 +51,8 @@ export function SwitchWidget({ config }: WidgetProps) {
           border: `2px solid ${isOn ? 'var(--accent-green)' : 'var(--app-border)'}`,
         }}
       >
-        <Lightbulb
+        <WidgetIcon
           size={36}
-          strokeWidth={1.5}
           style={{ color: isOn ? '#fff' : 'var(--text-secondary)', filter: isOn ? 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' : 'none' }}
         />
         <div className="text-center">
@@ -69,7 +68,7 @@ export function SwitchWidget({ config }: WidgetProps) {
   if (layout === 'compact') {
     return (
       <div className="flex items-center gap-2 h-full" style={{ position: 'relative' }}>
-        <CompactIcon size={16} style={{ color: isOn ? 'var(--accent-green)' : 'var(--text-secondary)', flexShrink: 0 }} />
+        <WidgetIcon size={16} style={{ color: isOn ? 'var(--accent-green)' : 'var(--text-secondary)', flexShrink: 0 }} />
         {showTitle && <span className="flex-1 text-sm truncate" style={{ color: 'var(--text-primary)' }}>{config.title}</span>}
         {!showTitle && <span className="flex-1" />}
         <button onClick={toggle}
@@ -87,14 +86,9 @@ export function SwitchWidget({ config }: WidgetProps) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-2" style={{ position: 'relative' }}>
         <button onClick={toggle} className="focus:outline-none transition-transform active:scale-95">
-          <ToggleRight
+          <WidgetIcon
             size={48}
-            strokeWidth={1.5}
-            style={{
-              color: isOn ? 'var(--accent-green)' : 'var(--text-secondary)',
-              transform: isOn ? 'none' : 'scaleX(-1)',
-              transition: 'all 0.2s',
-            }}
+            style={{ color: isOn ? 'var(--accent-green)' : 'var(--text-secondary)' }}
           />
         </button>
         {showTitle && <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
@@ -113,7 +107,7 @@ export function SwitchWidget({ config }: WidgetProps) {
     <div className={`flex flex-col h-full gap-2 ${posClass}`} style={{ position: 'relative' }}>
       {showTitle && (
         <div className="flex items-center gap-2" style={titleStyle}>
-          <Power size={14} style={{ color: isOn ? 'var(--accent-green)' : 'var(--text-secondary)', flexShrink: 0 }} />
+          <WidgetIcon size={14} style={{ color: isOn ? 'var(--accent-green)' : 'var(--text-secondary)', flexShrink: 0 }} />
           <p className="text-xs" style={{ color: 'var(--text-secondary)', textAlign: titleAlign, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{config.title}</p>
         </div>
       )}
