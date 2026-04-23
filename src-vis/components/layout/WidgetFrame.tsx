@@ -1014,6 +1014,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
   const [wcIconPickerState, setWcIconPickerState] = useState<'closed' | 'tilted' | 'open' | null>(null);
   const [selectedCustomCell,   setSelectedCustomCell]   = useState<number | null>(null);
   const [customCellPickerOpen, setCustomCellPickerOpen] = useState(false);
+  const [draftIconSize, setDraftIconSize] = useState<number | null>(null);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
   const Widget = getWidgetMap()[config.type as keyof ReturnType<typeof getWidgetMap>];
   const currentLayout = config.layout ?? 'default';
@@ -2910,16 +2911,18 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                 };
 
                 const iconSize = (o.iconSize as number) || 36;
+                const displayIconSize = draftIconSize ?? iconSize;
 
                 return (
                   <>
                     <div>
                       <div className="flex items-center justify-between mb-1">
                         <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Größe</label>
-                        <span className="text-[11px] tabular-nums" style={{ color: 'var(--text-primary)' }}>{iconSize} px</span>
+                        <span className="text-[11px] tabular-nums" style={{ color: 'var(--text-primary)' }}>{displayIconSize} px</span>
                       </div>
-                      <input type="range" min={16} max={512} step={4} value={iconSize}
-                        onChange={(e) => setO({ iconSize: Number(e.target.value) })}
+                      <input type="range" min={16} max={512} step={4} value={displayIconSize}
+                        onChange={(e) => setDraftIconSize(Number(e.target.value))}
+                        onPointerUp={(e) => { setO({ iconSize: Number((e.target as HTMLInputElement).value) }); setDraftIconSize(null); }}
                         className="w-full h-1"
                         style={{ accentColor: 'var(--accent)' }} />
                     </div>
@@ -3049,6 +3052,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                 };
 
                 const iconSize = (o.iconSize as number) || 48;
+                const displayIconSize = draftIconSize ?? iconSize;
 
                 return (
                   <>
@@ -3056,10 +3060,11 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                     <div>
                       <div className="flex items-center justify-between mb-1">
                         <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Größe</label>
-                        <span className="text-[11px] tabular-nums" style={{ color: 'var(--text-primary)' }}>{iconSize} px</span>
+                        <span className="text-[11px] tabular-nums" style={{ color: 'var(--text-primary)' }}>{displayIconSize} px</span>
                       </div>
-                      <input type="range" min={16} max={512} step={4} value={iconSize}
-                        onChange={(e) => setO({ iconSize: Number(e.target.value) })}
+                      <input type="range" min={16} max={512} step={4} value={displayIconSize}
+                        onChange={(e) => setDraftIconSize(Number(e.target.value))}
+                        onPointerUp={(e) => { setO({ iconSize: Number((e.target as HTMLInputElement).value) }); setDraftIconSize(null); }}
                         className="w-full h-1"
                         style={{ accentColor: 'var(--accent)' }} />
                     </div>
