@@ -148,7 +148,7 @@ export function ShutterWidget({ config }: WidgetProps) {
       className="w-full h-1.5 rounded-full appearance-none cursor-pointer" />
   );
 
-  const { battery, reach, batteryIcon, reachIcon } = useStatusFields(config);
+  const { battery, reach, batteryIcon, reachIcon, statusBadges } = useStatusFields(config);
 
   if (layout === 'custom') {
     const btnStyle: React.CSSProperties = { background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)', borderRadius: 6, padding: '4px 6px', cursor: 'pointer' };
@@ -164,11 +164,15 @@ export function ShutterWidget({ config }: WidgetProps) {
           reach,
         }}
         extraComponents={{
-          'btn-up':       <button className="nodrag" style={btnStyle} onClick={openFully}><ChevronUp   size={14} /></button>,
-          'btn-stop':     <button className="nodrag" style={btnStyle} onClick={stop}><Square      size={14} /></button>,
-          'btn-down':     <button className="nodrag" style={btnStyle} onClick={closeFully}><ChevronDown size={14} /></button>,
-          'battery-icon': batteryIcon,
-          'reach-icon':   reachIcon,
+          icon: CustomIcon
+            ? <CustomIcon size={20} style={{ color: accentColor, flexShrink: 0 }} />
+            : <ShutterViz closedFrac={closedFrac} accentColor={accentColor} isMoving={isMoving} style={{ width: 20, height: 20, flexShrink: 0 }} />,
+          'btn-up':        <button className="nodrag" style={btnStyle} onClick={openFully}><ChevronUp   size={14} /></button>,
+          'btn-stop':      <button className="nodrag" style={btnStyle} onClick={stop}><Square      size={14} /></button>,
+          'btn-down':      <button className="nodrag" style={btnStyle} onClick={closeFully}><ChevronDown size={14} /></button>,
+          'battery-icon':  batteryIcon,
+          'reach-icon':    reachIcon,
+          'status-badges': statusBadges,
         }}
       />
     );

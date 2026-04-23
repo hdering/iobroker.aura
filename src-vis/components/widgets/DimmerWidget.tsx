@@ -36,7 +36,7 @@ export function DimmerWidget({ config }: WidgetProps) {
       className="w-full h-2 rounded-lg appearance-none cursor-pointer" />
   );
 
-  const { battery, reach, batteryIcon, reachIcon } = useStatusFields(config);
+  const { battery, reach, batteryIcon, reachIcon, statusBadges } = useStatusFields(config);
 
   if (layout === 'custom') return (
     <CustomGridView
@@ -50,8 +50,10 @@ export function DimmerWidget({ config }: WidgetProps) {
         reach,
       }}
       extraComponents={{
-        'battery-icon': batteryIcon,
-        'reach-icon':   reachIcon,
+        icon:            <CompactIcon size={20} style={{ color: level > 0 ? 'var(--accent-yellow)' : 'var(--text-secondary)', flexShrink: 0 }} />,
+        'battery-icon':  batteryIcon,
+        'reach-icon':    reachIcon,
+        'status-badges': statusBadges,
         slider: (
           <input type="range" min={0} max={100} step={1} value={level}
             onChange={(e) => setState(config.datapoint, Number(e.target.value))}

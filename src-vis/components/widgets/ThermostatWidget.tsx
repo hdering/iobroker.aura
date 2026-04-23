@@ -232,7 +232,7 @@ export function ThermostatWidget({ config, editMode }: WidgetProps) {
 
   const layout = config.layout ?? 'default';
   const wrapperCls = `${clickable && !editMode ? 'cursor-pointer' : ''}`;
-  const { battery, reach, batteryIcon, reachIcon } = useStatusFields(config);
+  const { battery, reach, batteryIcon, reachIcon, statusBadges } = useStatusFields(config);
 
   if (layout === 'custom') {
     const btnSty: React.CSSProperties = { background: 'var(--app-border)', color: 'var(--text-primary)', borderRadius: 6, width: 28, height: 28, fontWeight: 'bold', fontSize: 16, cursor: 'pointer', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' };
@@ -248,10 +248,12 @@ export function ThermostatWidget({ config, editMode }: WidgetProps) {
           reach,
         }}
         extraComponents={{
-          'btn-plus':     <button className="nodrag" style={btnSty} onClick={() => setTemp(target + step)}>+</button>,
-          'btn-minus':    <button className="nodrag" style={btnSty} onClick={() => setTemp(target - step)}>−</button>,
-          'battery-icon': batteryIcon,
-          'reach-icon':   reachIcon,
+          icon:            <ThermoIcon size={20} style={{ color: accentColor, flexShrink: 0 }} />,
+          'btn-plus':      <button className="nodrag" style={btnSty} onClick={() => setTemp(target + step)}>+</button>,
+          'btn-minus':     <button className="nodrag" style={btnSty} onClick={() => setTemp(target - step)}>−</button>,
+          'battery-icon':  batteryIcon,
+          'reach-icon':    reachIcon,
+          'status-badges': statusBadges,
         }}
       />
     );
