@@ -2,6 +2,7 @@ import { CheckCircle2, ShieldAlert } from 'lucide-react';
 import { useDatapoint } from '../../hooks/useDatapoint';
 import type { WidgetProps } from '../../types';
 import { contentPositionClass } from '../../utils/widgetUtils';
+import { getWidgetIcon } from '../../utils/widgetIconMap';
 import { StatusBadges } from './StatusBadges';
 import { CustomGridView } from './CustomGridView';
 
@@ -34,7 +35,7 @@ export function BinarySensorWidget({ config }: WidgetProps) {
 
   const label = isActive ? labelOn : labelOff;
   const color = isActive ? colorOn : colorOff;
-  const Icon = isActive ? ShieldAlert : CheckCircle2;
+  const Icon = getWidgetIcon(opts.icon as string | undefined, isActive ? ShieldAlert : CheckCircle2);
   const showTitle = opts.showTitle !== false;
   const showLabel = opts.showLabel !== false;
 
