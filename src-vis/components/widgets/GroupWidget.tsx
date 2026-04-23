@@ -55,23 +55,11 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
-  const prevWidthRef = useRef(0);
-  // Whenever width changes (initial render, scrollbar appears/disappears) RGL fires
-  // onLayoutChange once with potentially compacted positions that differ from saved.
-  // We skip that one reactive call so only user-initiated drags/resizes are saved.
-  const skipNextLayoutRef = useRef(false);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(([e]) => {
-      const newWidth = Math.floor(e.contentRect.width);
-      if (newWidth !== prevWidthRef.current) {
-        prevWidthRef.current = newWidth;
-        skipNextLayoutRef.current = true;
-        setWidth(newWidth);
-      }
-    });
+    const ro = new ResizeObserver(([e]) => setWidth(Math.floor(e.contentRect.width)));
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
@@ -357,27 +345,29 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
             isResizable={editMode}
             compactType={editMode ? 'vertical' : null}
             draggableCancel=".nodrag"
-            onLayoutChange={(newLayout) => {
+            onDragStop={(newLayout) => {
               if (!editMode) return;
-              // Skip the one reactive call that RGL fires after a width change
-              // (initial mount or scrollbar appearing) — only user drag/resize matters.
-              if (skipNextLayoutRef.current) { skipNextLayoutRef.current = false; return; }
-              let hasRealChange = false;
+              let changed = false;
               const updated = children.map((c) => {
                 const pos = newLayout.find((l) => l.i === c.id);
                 if (!pos) return c;
-                // Compare against what we actually passed to RGL (clamped display values).
-                // If RGL just reflected our own clamped values back, nothing really changed —
-                // don't overwrite the stored gridPos and don't trigger a dirty flag.
-                const displayX = Math.min(c.gridPos.x, cols - 1);
-                const displayW = Math.min(c.gridPos.w, cols);
-                if (pos.x === displayX && pos.y === c.gridPos.y && pos.w === displayW && pos.h === c.gridPos.h) {
-                  return c;
-                }
-                hasRealChange = true;
+                if (pos.x === c.gridPos.x && pos.y === c.gridPos.y && pos.w === c.gridPos.w && pos.h === c.gridPos.h) return c;
+                changed = true;
                 return { ...c, gridPos: { x: pos.x, y: pos.y, w: pos.w, h: pos.h } };
               });
-              if (hasRealChange) setChildren(updated);
+              if (changed) setChildren(updated);
+            }}
+            onResizeStop={(newLayout) => {
+              if (!editMode) return;
+              let changed = false;
+              const updated = children.map((c) => {
+                const pos = newLayout.find((l) => l.i === c.id);
+                if (!pos) return c;
+                if (pos.x === c.gridPos.x && pos.y === c.gridPos.y && pos.w === c.gridPos.w && pos.h === c.gridPos.h) return c;
+                changed = true;
+                return { ...c, gridPos: { x: pos.x, y: pos.y, w: pos.w, h: pos.h } };
+              });
+              if (changed) setChildren(updated);
             }}
             margin={[CHILD_MARGIN, CHILD_MARGIN]}
             containerPadding={[0, 0]}
