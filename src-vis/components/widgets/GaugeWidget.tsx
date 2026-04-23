@@ -1,5 +1,7 @@
+import { Gauge } from 'lucide-react';
 import { useDatapoint } from '../../hooks/useDatapoint';
 import type { WidgetProps } from '../../types';
+import { getWidgetIcon } from '../../utils/widgetIconMap';
 
 function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
   const rad = (angleDeg * Math.PI) / 180;
@@ -227,11 +229,16 @@ export function GaugeWidget({ config }: WidgetProps) {
   });
 
   const showTitle = opts.showTitle !== false;
+  const GaugeIcon = getWidgetIcon(opts.icon as string | undefined, Gauge);
+  const hasCustomIcon = !!(opts.icon as string | undefined);
 
   return (
     <div className="flex flex-col h-full">
       {showTitle && config.title && (
-        <p className="text-xs mb-1 truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+        <div className="flex items-center gap-1.5 mb-1 min-w-0">
+          {hasCustomIcon && <GaugeIcon size={13} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />}
+          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+        </div>
       )}
       <div className="flex-1 flex items-center justify-center">
         <GaugeSVG {...gaugeProps} scale={0.95} />

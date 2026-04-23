@@ -2,6 +2,7 @@ import { CheckCircle2, TriangleAlert, XCircle } from 'lucide-react';
 import { useDatapoint } from '../../hooks/useDatapoint';
 import type { WidgetProps } from '../../types';
 import { contentPositionClass } from '../../utils/widgetUtils';
+import { getWidgetIcon } from '../../utils/widgetIconMap';
 import { StatusBadges } from './StatusBadges';
 import { CustomGridView } from './CustomGridView';
 
@@ -37,11 +38,11 @@ const STATE_COLOR: Record<ContactState, string> = {
   open: 'var(--accent-red, #ef4444)',
 };
 
-function StateIcon({ state, size }: { state: ContactState; size: number }) {
+function StateIcon({ state, size, customIcon }: { state: ContactState; size: number; customIcon?: string }) {
   const color = STATE_COLOR[state];
-  if (state === 'closed') return <CheckCircle2 size={size} style={{ color }} />;
-  if (state === 'tilted') return <TriangleAlert size={size} style={{ color }} />;
-  return <XCircle size={size} style={{ color }} />;
+  const fallback = state === 'closed' ? CheckCircle2 : state === 'tilted' ? TriangleAlert : XCircle;
+  const Icon = getWidgetIcon(customIcon, fallback);
+  return <Icon size={size} style={{ color, flexShrink: 0 }} />;
 }
 
 // ─── widget ───────────────────────────────────────────────────────────────────
@@ -56,6 +57,7 @@ export function WindowContactWidget({ config }: WidgetProps) {
   const o = config.options ?? {};
   const showTitle = o.showTitle !== false;
   const showLabel = o.showLabel !== false;
+  const customIcon = o.icon as string | undefined;
 
   if (layout === 'custom') return (
     <CustomGridView
@@ -83,7 +85,7 @@ export function WindowContactWidget({ config }: WidgetProps) {
               : 'linear-gradient(135deg, var(--accent-red, #ef4444), color-mix(in srgb, var(--accent-red, #ef4444) 60%, black))',
           border: `2px solid ${stateColor}`,
         }}>
-        <StateIcon state={state} size={36} />
+        <StateIcon state={state} size={36} customIcon={customIcon} />
         <div className="text-center">
           {showTitle && <p className="font-bold text-sm" style={{ color: '#fff' }}>{config.title}</p>}
           {showLabel && <p className="text-xs opacity-80" style={{ color: '#fff' }}>{label}</p>}
@@ -97,7 +99,7 @@ export function WindowContactWidget({ config }: WidgetProps) {
   if (layout === 'compact') {
     return (
       <div className="flex items-center gap-3 h-full" style={{ position: 'relative' }}>
-        <StateIcon state={state} size={18} />
+        <StateIcon state={state} size={18} customIcon={customIcon} />
         {showTitle && (
           <span className="flex-1 text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
             {config.title}
@@ -119,7 +121,7 @@ export function WindowContactWidget({ config }: WidgetProps) {
   if (layout === 'minimal') {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-1" style={{ position: 'relative' }}>
-        <StateIcon state={state} size={36} />
+        <StateIcon state={state} size={36} customIcon={customIcon} />
         {showLabel && <span className="text-xs font-medium" style={{ color: stateColor }}>{label}</span>}
         {showTitle && <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
         <StatusBadges config={config} />
@@ -134,7 +136,7 @@ export function WindowContactWidget({ config }: WidgetProps) {
     <div className={`flex flex-col h-full gap-2 ${posClass}`} style={{ position: 'relative' }}>
       {showTitle && (
         <div className="flex items-center gap-2">
-          <StateIcon state={state} size={14} />
+          <StateIcon state={state} size={14} customIcon={customIcon} />
           <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
         </div>
       )}

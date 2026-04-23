@@ -5,6 +5,7 @@ import { useDatapoint } from '../../hooks/useDatapoint';
 import { useIoBroker } from '../../hooks/useIoBroker';
 import { lookupDatapointName } from '../../hooks/useDatapointList';
 import type { WidgetProps, WidgetConfig } from '../../types';
+import { getWidgetIcon } from '../../utils/widgetIconMap';
 import { useT } from '../../i18n';
 import { StatusBadges } from './StatusBadges';
 import { CustomGridView } from './CustomGridView';
@@ -181,6 +182,7 @@ export function ThermostatWidget({ config, editMode }: WidgetProps) {
   const showSetpoint   = o.showSetpoint   !== false;
   const showActualTemp = o.showActualTemp !== false;
   const showControls   = o.showControls   !== false;
+  const ThermoIcon = getWidgetIcon(o.icon as string | undefined, Thermometer);
 
   const target = typeof rawTarget === 'number' ? rawTarget : 20;
   const actual = typeof rawActual === 'number' ? rawActual : null;
@@ -292,7 +294,7 @@ export function ThermostatWidget({ config, editMode }: WidgetProps) {
     return (
       <>
         <div className={`flex items-center gap-2 h-full ${wrapperCls}`} style={{ position: 'relative' }} onClick={handleClick}>
-          <Thermometer size={16} style={{ color: accentColor, flexShrink: 0 }} />
+          <ThermoIcon size={16} style={{ color: accentColor, flexShrink: 0 }} />
           {showTitle && <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{displayTitle}</span>}
           {!showTitle && <span className="flex-1" />}
           {showSetpoint && (
@@ -327,7 +329,7 @@ export function ThermostatWidget({ config, editMode }: WidgetProps) {
     return (
       <>
         <div className={`flex flex-col items-center justify-center h-full gap-2 ${wrapperCls}`} style={{ position: 'relative' }} onClick={handleClick}>
-          <Thermometer size={22} style={{ color: accentColor }} />
+          <ThermoIcon size={22} style={{ color: accentColor }} />
           {showSetpoint && (
             <span className="font-black" style={{ fontSize: 'calc(2.5rem * var(--font-scale, 1))', color: valueColor, lineHeight: 1 }}>
               {target.toFixed(1)}°
@@ -361,7 +363,7 @@ export function ThermostatWidget({ config, editMode }: WidgetProps) {
         {showTitle && (
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 min-w-0">
-              <Thermometer size={13} style={{ color: accentColor, flexShrink: 0 }} />
+              <ThermoIcon size={13} style={{ color: accentColor, flexShrink: 0 }} />
               <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{displayTitle}</p>
             </div>
             <StatusIcon />

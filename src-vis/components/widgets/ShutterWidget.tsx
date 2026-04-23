@@ -3,6 +3,7 @@ import { useRef, useMemo } from 'react';
 import { useDatapoint } from '../../hooks/useDatapoint';
 import { useIoBroker } from '../../hooks/useIoBroker';
 import type { WidgetProps } from '../../types';
+import { getWidgetIcon } from '../../utils/widgetIconMap';
 import { StatusBadges } from './StatusBadges';
 import { CustomGridView } from './CustomGridView';
 
@@ -131,6 +132,8 @@ export function ShutterWidget({ config }: WidgetProps) {
   const showValue    = opts.showValue    !== false;
   const showControls = opts.showControls !== false;
   const showSlider   = opts.showSlider   !== false;
+  const customIconName = opts.icon as string | undefined;
+  const CustomIcon = customIconName ? getWidgetIcon(customIconName, Square) : null;
 
   const statusText = isMoving
     ? (movingDir === 'up' ? '▲ Fährt auf' : movingDir === 'down' ? '▼ Fährt zu' : '↕ Fährt...')
@@ -182,8 +185,11 @@ export function ShutterWidget({ config }: WidgetProps) {
   if (layout === 'compact') {
     return (
       <div className="flex items-center gap-2 h-full" style={{ position: 'relative' }}>
-        <ShutterViz closedFrac={closedFrac} accentColor={accentColor} isMoving={isMoving}
-          style={{ width: 22, height: 22, flexShrink: 0 }} />
+        {CustomIcon
+          ? <CustomIcon size={16} style={{ color: accentColor, flexShrink: 0 }} />
+          : <ShutterViz closedFrac={closedFrac} accentColor={accentColor} isMoving={isMoving}
+              style={{ width: 22, height: 22, flexShrink: 0 }} />
+        }
         {showTitle && <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
         {!showTitle && <span className="flex-1" />}
         {showValue && <span className="text-sm font-bold shrink-0" style={{ color: thresholdColor ?? (isMoving ? 'var(--accent-yellow)' : 'var(--text-primary)') }}>{pos}%</span>}
@@ -233,8 +239,11 @@ export function ShutterWidget({ config }: WidgetProps) {
     <div className="flex flex-col h-full gap-2" style={{ position: 'relative' }}>
       {showTitle && (
         <div className="flex items-center justify-between">
-          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
-          {isMoving && <span className="text-[10px] animate-pulse" style={{ color: 'var(--accent-yellow)' }}>
+          <div className="flex items-center gap-1.5 min-w-0">
+            {CustomIcon && <CustomIcon size={13} style={{ color: accentColor, flexShrink: 0 }} />}
+            <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+          </div>
+          {isMoving && <span className="text-[10px] animate-pulse shrink-0" style={{ color: 'var(--accent-yellow)' }}>
             {movingDir === 'up' ? '▲' : movingDir === 'down' ? '▼' : '↕'}
           </span>}
         </div>

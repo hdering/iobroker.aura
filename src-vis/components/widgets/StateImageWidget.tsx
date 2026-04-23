@@ -44,16 +44,17 @@ export function StateImageWidget({ config }: WidgetProps) {
   const showLabel = opts.showLabel !== false;
   const iconSize  = (opts.iconSize as number) || 48;
 
+  const globalIcon = opts.icon as string | undefined;
   const trueCfg: StateCfg = {
     type:   (opts.trueType   as 'icon' | 'base64') ?? 'icon',
-    icon:    opts.trueIcon   as string | undefined,
+    icon:   (opts.trueIcon   as string | undefined) ?? globalIcon,
     color:  (opts.trueColor  as string) || '#22c55e',
     base64:  opts.trueBase64 as string | undefined,
     label:  (opts.trueLabel  as string) || 'Offen',
   };
   const falseCfg: StateCfg = {
     type:   (opts.falseType   as 'icon' | 'base64') ?? 'icon',
-    icon:    opts.falseIcon   as string | undefined,
+    icon:   (opts.falseIcon   as string | undefined) ?? globalIcon,
     color:  (opts.falseColor  as string) || '#6b7280',
     base64:  opts.falseBase64 as string | undefined,
     label:  (opts.falseLabel  as string) || 'Geschlossen',
