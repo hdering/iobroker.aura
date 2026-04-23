@@ -36,7 +36,7 @@ export function DimmerWidget({ config }: WidgetProps) {
       className="w-full h-2 rounded-lg appearance-none cursor-pointer" />
   );
 
-  const { battery, reach } = useStatusFields(config);
+  const { battery, reach, batteryIcon, reachIcon } = useStatusFields(config);
 
   if (layout === 'custom') return (
     <CustomGridView
@@ -50,6 +50,8 @@ export function DimmerWidget({ config }: WidgetProps) {
         reach,
       }}
       extraComponents={{
+        'battery-icon': batteryIcon,
+        'reach-icon':   reachIcon,
         slider: (
           <input type="range" min={0} max={100} step={1} value={level}
             onChange={(e) => setState(config.datapoint, Number(e.target.value))}

@@ -40,7 +40,7 @@ export function BinarySensorWidget({ config }: WidgetProps) {
   const showTitle = opts.showTitle !== false;
   const showLabel = opts.showLabel !== false;
 
-  const { battery, reach } = useStatusFields(config);
+  const { battery, reach, batteryIcon, reachIcon } = useStatusFields(config);
 
   if (layout === 'custom') return (
     <CustomGridView
@@ -55,7 +55,9 @@ export function BinarySensorWidget({ config }: WidgetProps) {
         reach,
       }}
       extraComponents={{
-        icon: <Icon size={20} style={{ color, flexShrink: 0 }} />,
+        icon:           <Icon size={20} style={{ color, flexShrink: 0 }} />,
+        'battery-icon': batteryIcon,
+        'reach-icon':   reachIcon,
       }}
     />
   );

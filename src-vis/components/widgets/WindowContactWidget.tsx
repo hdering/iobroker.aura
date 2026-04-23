@@ -1,10 +1,11 @@
-import { CheckCircle2, TriangleAlert, XCircle } from 'lucide-react';
+import { CheckCircle2, Lock, LockOpen, TriangleAlert, XCircle } from 'lucide-react';
 import { useDatapoint } from '../../hooks/useDatapoint';
 import type { WidgetProps } from '../../types';
 import { contentPositionClass } from '../../utils/widgetUtils';
 import { getWidgetIcon } from '../../utils/widgetIconMap';
 import { StatusBadges } from './StatusBadges';
 import { CustomGridView } from './CustomGridView';
+import { useStatusFields } from '../../hooks/useStatusFields';
 
 // ─── types ────────────────────────────────────────────────────────────────────
 
@@ -126,43 +127,28 @@ export function WindowContactWidget({ config }: WidgetProps) {
   const cfg = getWcCfg(o, state);
   const fb  = WC_FALLBACK[state];
 
-  // Extra DPs for custom layout extraFields – hooks must always run unconditionally
-  const battDpId  = (o.batteryDp as string) ?? '';
-  const lockDpId  = (o.lockDp    as string) ?? '';
-  const reachDpId = (o.unreachDp as string) ?? '';
-  const { value: battRaw  } = useDatapoint(battDpId);
-  const { value: lockRaw  } = useDatapoint(lockDpId);
-  const { value: reachRaw } = useDatapoint(reachDpId);
+  // Extra DPs for custom layout – hooks must always run unconditionally
+  const lockDpId = (o.lockDp as string) ?? '';
+  const { value: lockRaw } = useDatapoint(lockDpId);
+  const { battery, reach, batteryIcon, reachIcon } = useStatusFields(config);
 
-  // Battery string
-  const battMode      = (o.batteryMode as 'percent' | 'boolean') ?? 'boolean';
-  const battInvert    = o.batteryInvert === true;
-  let battStr = '';
-  if (battDpId) {
-    if (battMode === 'percent') {
-      const num = typeof battRaw === 'number' ? battRaw : parseFloat(String(battRaw ?? ''));
-      battStr = isNaN(num) ? '–' : `${Math.round(num)}%`;
-    } else {
-      const low = matchesValues(battRaw, 'true,1');
-      battStr = (battInvert ? !low : low) ? 'Niedrig' : 'OK';
-    }
-  }
-
-  // Lock string
+  // Lock string + icon
   const lockLockedValues = (o.lockLockedValues as string) ?? 'true,1';
-  const lockStr = lockDpId
-    ? matchesValues(lockRaw, lockLockedValues) ? 'Abgeschlossen' : 'Offen'
-    : '';
-
-  // Reach string
-  const reachMode       = (o.reachMode as 'unreachable' | 'available') ?? 'unreachable';
-  const reachTrueValues = (o.reachTrueValues as string) ?? 'true,1';
-  let reachStr = '';
-  if (reachDpId) {
-    const rawBool   = matchesValues(reachRaw, reachTrueValues);
-    const isUnreach = reachMode === 'unreachable' ? rawBool : !rawBool;
-    reachStr = isUnreach ? 'Nicht erreichbar' : 'Erreichbar';
-  }
+  const isLocked  = lockDpId ? matchesValues(lockRaw, lockLockedValues) : null;
+  const lockStr   = isLocked === null ? '' : isLocked ? 'Abgeschlossen' : 'Offen';
+  const blue      = 'var(--accent, #3b82f6)';
+  const green     = 'var(--accent-green, #22c55e)';
+  const lockColor = isLocked ? blue : green;
+  const lockIcon  = lockDpId && isLocked !== null
+    ? (
+      <span className="flex items-center justify-center rounded-full"
+        style={{ width: 18, height: 18, flexShrink: 0, background: `color-mix(in srgb, ${lockColor} 20%, var(--app-surface))`, border: `1px solid color-mix(in srgb, ${lockColor} 50%, transparent)` }}>
+        {isLocked
+          ? <Lock     size={10} style={{ color: lockColor }} />
+          : <LockOpen size={10} style={{ color: lockColor }} />
+        }
+      </span>
+    ) : null;
 
   // ── custom layout ─────────────────────────────────────────────────────────
   if (layout === 'custom') return (
@@ -175,11 +161,14 @@ export function WindowContactWidget({ config }: WidgetProps) {
         tilted:  state === 'tilted' ? 'Ja' : 'Nein',
         closed:  state === 'closed' ? 'Ja' : 'Nein',
         lock:    lockStr,
-        battery: battStr,
-        reach:   reachStr,
+        battery: battery,
+        reach:   reach,
       }}
       extraComponents={{
-        icon: <StateDisplay cfg={cfg} fallback={fb.Icon} size={iconSize} />,
+        icon:           <StateDisplay cfg={cfg} fallback={fb.Icon} size={iconSize} />,
+        'battery-icon': batteryIcon,
+        'reach-icon':   reachIcon,
+        'lock-icon':    lockIcon,
       }}
     />
   );

@@ -19,7 +19,7 @@ export function SwitchWidget({ config }: WidgetProps) {
   const showTitle = o.showTitle !== false;
   const showLabel = o.showLabel !== false;
 
-  const { battery, reach } = useStatusFields(config);
+  const { battery, reach, batteryIcon, reachIcon } = useStatusFields(config);
 
   if (layout === 'custom') return (
     <CustomGridView
@@ -27,6 +27,8 @@ export function SwitchWidget({ config }: WidgetProps) {
       value={isOn ? 'AN' : 'AUS'}
       extraFields={{ battery, reach }}
       extraComponents={{
+        'battery-icon': batteryIcon,
+        'reach-icon':   reachIcon,
         toggle: (
           <button
             onClick={toggle}

@@ -62,7 +62,7 @@ export function StateImageWidget({ config }: WidgetProps) {
 
   const cfg = isActive ? trueCfg : falseCfg;
 
-  const { battery, reach } = useStatusFields(config);
+  const { battery, reach, batteryIcon, reachIcon } = useStatusFields(config);
 
   if (layout === 'custom') return (
     <CustomGridView
@@ -74,7 +74,9 @@ export function StateImageWidget({ config }: WidgetProps) {
         reach,
       }}
       extraComponents={{
-        icon: <StateDisplay cfg={cfg} size={24} />,
+        icon:           <StateDisplay cfg={cfg} size={24} />,
+        'battery-icon': batteryIcon,
+        'reach-icon':   reachIcon,
       }}
     />
   );
