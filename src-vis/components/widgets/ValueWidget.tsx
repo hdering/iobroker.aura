@@ -5,6 +5,8 @@ import type { WidgetProps } from '../../types';
 import { contentPositionClass, titlePositionStyle, titleTextAlign } from '../../utils/widgetUtils';
 import { getWidgetIcon } from '../../utils/widgetIconMap';
 import { CustomGridView } from './CustomGridView';
+import { StatusBadges } from './StatusBadges';
+import { useStatusFields } from '../../hooks/useStatusFields';
 
 export function ValueWidget({ config }: WidgetProps) {
   const { value } = useDatapoint(config.datapoint);
@@ -39,8 +41,23 @@ export function ValueWidget({ config }: WidgetProps) {
   const accentColor = thresholdColor ?? 'var(--accent)';
   const valueColor  = thresholdColor ?? 'var(--text-primary)';
 
+  const { battery, reach, batteryIcon, reachIcon, statusBadges } = useStatusFields(config);
+
   // --- CUSTOM ---
-  if (layout === 'custom') return <CustomGridView config={config} value={displayValue} unit={unit} />;
+  if (layout === 'custom') return (
+    <CustomGridView
+      config={config}
+      value={displayValue}
+      unit={unit}
+      extraFields={{ unit: unit ?? '', battery, reach }}
+      extraComponents={{
+        icon:            <DefaultIcon size={20} style={{ color: accentColor, flexShrink: 0 }} />,
+        'battery-icon':  batteryIcon,
+        'reach-icon':    reachIcon,
+        'status-badges': statusBadges,
+      }}
+    />
+  );
 
   // HTML template mode: replaces the entire widget content
   if (htmlTemplate) {
@@ -56,7 +73,7 @@ export function ValueWidget({ config }: WidgetProps) {
   // --- CARD: Akzent-Leiste links, großer Wert zentriert ---
   if (layout === 'card') {
     return (
-      <div className="flex h-full gap-3">
+      <div className="flex h-full gap-3" style={{ position: 'relative' }}>
         <div className="w-1 rounded-full self-stretch" style={{ background: accentColor }} />
         <div className="flex flex-col justify-between flex-1">
           {showTitle && (
@@ -72,6 +89,7 @@ export function ValueWidget({ config }: WidgetProps) {
             </div>
           )}
         </div>
+        <StatusBadges config={config} />
       </div>
     );
   }
@@ -79,7 +97,7 @@ export function ValueWidget({ config }: WidgetProps) {
   // --- COMPACT: Inline-Darstellung ---
   if (layout === 'compact') {
     return (
-      <div className="flex items-center justify-between h-full gap-2">
+      <div className="flex items-center justify-between h-full gap-2" style={{ position: 'relative' }}>
         {showTitle && (
           <div className="flex items-center gap-2 min-w-0">
             <CompactIcon size={16} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
@@ -91,6 +109,7 @@ export function ValueWidget({ config }: WidgetProps) {
             {displayValue}{showUnit && unit && <span className="text-sm ml-0.5" style={{ color: 'var(--text-secondary)' }}>{unit}</span>}
           </span>
         )}
+        <StatusBadges config={config} />
       </div>
     );
   }
@@ -98,7 +117,7 @@ export function ValueWidget({ config }: WidgetProps) {
   // --- MINIMAL: Nur Zahl, sehr groß ---
   if (layout === 'minimal') {
     return (
-      <div className="flex flex-col items-center justify-center h-full">
+      <div className="flex flex-col items-center justify-center h-full" style={{ position: 'relative' }}>
         {showValue && (
           <div className="flex items-baseline gap-1 leading-none">
             <span className="font-black" style={{ color: accentColor, fontSize: 'calc(clamp(2rem, 4vw, 3.5rem) * var(--font-scale, 1))' }}>{displayValue}</span>
@@ -106,6 +125,7 @@ export function ValueWidget({ config }: WidgetProps) {
           </div>
         )}
         {showTitle && <span className="text-xs mt-2 truncate max-w-full" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
+        <StatusBadges config={config} />
       </div>
     );
   }
@@ -130,6 +150,7 @@ export function ValueWidget({ config }: WidgetProps) {
           {showUnit && unit && <span className="text-sm mb-0.5" style={{ color: 'var(--text-secondary)' }}>{unit}</span>}
         </div>
       )}
+      <StatusBadges config={config} />
     </div>
   );
 }

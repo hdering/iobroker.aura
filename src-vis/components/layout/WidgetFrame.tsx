@@ -3443,6 +3443,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                   empty: '–', title: 'Titel', value: 'Wert', unit: 'Einheit', text: 'Text', dp: 'DP', field: 'Feld', component: 'Aktion',
                 };
                 const COMPONENT_OPTIONS: Record<string, { key: string; label: string }[]> = {
+                  value:         [{ key: 'icon', label: 'Widget-Icon' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
                   switch:        [{ key: 'icon', label: 'Widget-Icon' }, { key: 'toggle', label: 'Schalter' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
                   dimmer:        [{ key: 'icon', label: 'Widget-Icon' }, { key: 'slider', label: 'Dimmer-Slider' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
                   thermostat:    [{ key: 'icon', label: 'Widget-Icon' }, { key: 'btn-plus', label: '+ Temperatur' }, { key: 'btn-minus', label: '− Temperatur' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
@@ -3582,6 +3583,11 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                               { key: 'time',   label: 'Uhrzeit' },
                               { key: 'date',   label: 'Datum' },
                               { key: 'custom', label: 'Benutzerdefiniert' },
+                            ],
+                            value: [
+                              { key: 'unit',    label: 'Einheit' },
+                              { key: 'battery', label: 'Batterie' },
+                              { key: 'reach',   label: 'Erreichbarkeit' },
                             ],
                             switch: [
                               { key: 'battery', label: 'Batterie' },
