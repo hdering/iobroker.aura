@@ -442,6 +442,7 @@ export const de = {
   'wf.history.instance':      'Adapter-Instanz',
   'wf.history.liveData':      '– Live-Daten (kein Verlauf) –',
   'wf.history.timeRange':     'Zeitraum',
+  'wf.history.lockRange':     'Zeitraum sperren (Wechsler im Frontend ausblenden)',
 
   // Calendar config
   'wf.cal.addCalendar':       'Kalender hinzufügen',

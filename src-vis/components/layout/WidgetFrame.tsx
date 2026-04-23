@@ -448,6 +448,16 @@ function ChartHistoryConfig({ config, onConfigChange }: { config: WidgetConfig; 
               ))}
             </div>
           )}
+          {/* Zeitraum im Frontend sperren */}
+          <label className="flex items-center gap-2 mt-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={(o.lockRange as boolean | undefined) ?? false}
+              onChange={(e) => set({ lockRange: e.target.checked })}
+              className="rounded"
+            />
+            <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{t('wf.history.lockRange')}</span>
+          </label>
         </div>
       )}
     </>

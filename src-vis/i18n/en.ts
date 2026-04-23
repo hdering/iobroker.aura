@@ -444,6 +444,7 @@ export const en: Record<TranslationKey, string> = {
   'wf.history.instance': 'Adapter Instance',
   'wf.history.liveData': '– Live Data (no history) –',
   'wf.history.timeRange':'Time Range',
+  'wf.history.lockRange':'Lock time range (hide selector in frontend)',
 
   // Calendar config
   'wf.cal.addCalendar':    'Add Calendar',

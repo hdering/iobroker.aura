@@ -36,6 +36,7 @@ export function ChartWidget({ config }: WidgetProps) {
   const cfgCustomMs     = cfgRange === 'custom'
     ? customVal * (customUnit === 'd' ? 86_400_000 : 3_600_000)
     : undefined;
+  const lockRange       = o.lockRange === true;
   const layout          = config.layout ?? 'default';
 
   // ── Frontend-local range selection (starts from admin config, switchable at runtime) ──
@@ -78,8 +79,8 @@ export function ChartWidget({ config }: WidgetProps) {
   );
 
 
-  // Range selector shown only when a history adapter is configured
-  const rangeSelector = historyInstance ? (
+  // Range selector shown only when a history adapter is configured and not locked
+  const rangeSelector = historyInstance && !lockRange ? (
     <div className="flex gap-1 flex-wrap">
       {PRESET_RANGES.map((r) => {
         const active = activeRange === r;
