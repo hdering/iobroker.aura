@@ -309,13 +309,11 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
   }
 
   // ── Desktop grid layout ────────────────────────────────────────────────────
-  const layout = children.map((c) => ({
-    i: c.id,
-    x: Math.min(c.gridPos.x, cols - 1),
-    y: c.gridPos.y,
-    w: Math.min(c.gridPos.w, cols),
-    h: c.gridPos.h,
-  }));
+  const layout = children.map((c) => {
+    const x = Math.min(c.gridPos.x, cols - 1);
+    const w = Math.min(c.gridPos.w, cols - x);
+    return { i: c.id, x, y: c.gridPos.y, w, h: c.gridPos.h };
+  });
 
   return (
     <div className="relative flex flex-col h-full" {...dragHandlers}>
