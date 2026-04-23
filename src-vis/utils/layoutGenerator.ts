@@ -26,7 +26,7 @@ const ROW_H: Record<string, Record<string, number>> = {
     shutter: 5, gauge: 5, echart: 5, autolist: 5,
     weather: 5, evcc: 6, camera: 5, image: 5,
     trash: 5, fill: 5, iframe: 6, group: 6,
-    jsontable: 5, windowcontact: 4, binarysensor: 4,
+    jsontable: 5, html: 5, windowcontact: 4, binarysensor: 4,
   },
   standard: {
     switch: 5, value: 5, dimmer: 6, thermostat: 6,
@@ -34,7 +34,7 @@ const ROW_H: Record<string, Record<string, number>> = {
     shutter: 6, gauge: 6, echart: 6, autolist: 6,
     weather: 5, evcc: 6, camera: 6, image: 6,
     trash: 5, fill: 6, iframe: 6, group: 6,
-    jsontable: 5, windowcontact: 5, binarysensor: 5,
+    jsontable: 5, html: 5, windowcontact: 5, binarysensor: 5,
   },
   wide: {
     switch: 6, value: 6, dimmer: 7, thermostat: 7,
@@ -42,7 +42,7 @@ const ROW_H: Record<string, Record<string, number>> = {
     shutter: 7, gauge: 7, echart: 7, autolist: 7,
     weather: 6, evcc: 7, camera: 7, image: 7,
     trash: 6, fill: 7, iframe: 7, group: 7,
-    jsontable: 6, windowcontact: 6, binarysensor: 6,
+    jsontable: 6, html: 6, windowcontact: 6, binarysensor: 6,
   },
 };
 

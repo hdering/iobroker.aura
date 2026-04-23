@@ -13,7 +13,7 @@
 import {
   Zap, TrendingUp, SlidersHorizontal, Thermometer, BarChart2, List,
   Clock, CalendarDays, Heading2, Layers2, Cloud, Gauge, Camera, ImageIcon, MonitorDot, Droplets, Truck, AlignJustify, Table2,
-  DoorOpen, ShieldAlert, ToggleRight, LineChart,
+  DoorOpen, ShieldAlert, ToggleRight, LineChart, Code2,
   type LucideIcon,
 } from 'lucide-react';
 import type { WidgetType } from './types';
@@ -264,6 +264,14 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 8,            defaultH: 4,
     addMode: 'datapoint',   widgetGroup: 'control',
     mock: { t: 'Garage', v: 'false' },
+  },
+  {
+    type: 'html',
+    label: 'HTML',          shortLabel: 'HTML',
+    Icon: Code2,            iconName: 'Code2',       color: '#f59e0b',
+    defaultW: 10,           defaultH: 5,
+    addMode: 'free',        widgetGroup: 'special',
+    mock: { t: 'HTML', v: '' },
   },
 ];
 

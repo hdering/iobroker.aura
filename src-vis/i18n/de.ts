@@ -694,6 +694,7 @@ export const de = {
   'widget.trash':         'Müllabfuhr',
   'widget.iframe':        'iFrame',
   'widget.jsontable':     'JSON-Tabelle',
+  'widget.html':          'HTML',
   'widget.header':        'Abschnittstitel',
   'widget.group':         'Gruppe',
 

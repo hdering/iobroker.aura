@@ -56,6 +56,8 @@ import { StateImageWidget } from '../widgets/StateImageWidget';
 import { EChartsPresetWidget } from '../widgets/EChartsPresetWidget';
 import { EChartsPresetConfig } from '../config/EChartsPresetConfig';
 import { JsonTableConfig } from '../config/JsonTableConfig';
+import { HtmlWidget } from '../widgets/HtmlWidget';
+import { HtmlConfig } from '../config/HtmlConfig';
 import { IconPickerModal } from '../config/IconPickerModal';
 
 // Stable empty array – avoids creating a new reference on every render when no conditions are set
@@ -86,6 +88,7 @@ function getWidgetMap() {
     trash:      TrashWidget,
     shutter:       ShutterWidget,
     jsontable:     JsonTableWidget,
+    html:          HtmlWidget,
     windowcontact: WindowContactWidget,
     binarysensor:  BinarySensorWidget,
     stateimage:    StateImageWidget,
@@ -1511,7 +1514,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
             </div>
 
             {/* ── Layout & Sichtbare Felder (kombiniert, eingeklappt) ── */}
-            {config.type !== 'header' && config.type !== 'iframe' && config.type !== 'fill' && config.type !== 'jsontable' && (() => {
+            {config.type !== 'header' && config.type !== 'iframe' && config.type !== 'fill' && config.type !== 'jsontable' && config.type !== 'html' && (() => {
               const activeLayout = config.layout ?? 'default';
               const layouts: { value: string; label: string }[] = config.type === 'camera' ? [
                 { value: 'minimal', label: 'Minimal' },
@@ -1530,7 +1533,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                 { value: 'compact', label: t('wf.edit.layout.compact') },
                 { value: 'minimal', label: t('wf.edit.layout.minimal') },
                 ...(config.type === 'calendar' ? [{ value: 'agenda', label: t('wf.edit.layout.agenda') }] : []),
-                ...(!['iframe', 'jsontable', 'trash', 'header', 'fill', 'list', 'autolist'].includes(config.type) ? [{ value: 'custom', label: 'Custom' }] : []),
+                ...(!['iframe', 'jsontable', 'html', 'trash', 'header', 'fill', 'list', 'autolist'].includes(config.type) ? [{ value: 'custom', label: 'Custom' }] : []),
                 ...(config.type === 'evcc' ? [
                   { value: 'flow',        label: 'Nur Fluss' },
                   { value: 'battery',     label: 'Nur Batterie' },
@@ -2070,6 +2073,14 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
               {config.type === 'jsontable' && (
                 <JsonTableConfig
                   datapoint={config.datapoint ?? ''}
+                  options={config.options ?? {}}
+                  onChange={(patch) => onConfigChange({ ...config, options: { ...(config.options ?? {}), ...patch } })}
+                />
+              )}
+
+              {/* ── HTML config ── */}
+              {config.type === 'html' && (
+                <HtmlConfig
                   options={config.options ?? {}}
                   onChange={(patch) => onConfigChange({ ...config, options: { ...(config.options ?? {}), ...patch } })}
                 />
@@ -3073,7 +3084,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
               })()}
 
               {/* ── Custom-Grid editor (all widgets except excluded) ── */}
-              {!['iframe', 'jsontable', 'trash', 'header', 'fill', 'camera'].includes(config.type) && (config.layout ?? 'default') === 'custom' && (() => {
+              {!['iframe', 'jsontable', 'html', 'trash', 'header', 'fill', 'camera'].includes(config.type) && (config.layout ?? 'default') === 'custom' && (() => {
                 const CELL_LABELS: Record<string, string> = {
                   empty: '–', title: 'Titel', value: 'Wert', unit: 'Einheit', text: 'Text', dp: 'DP', field: 'Feld', component: 'Aktion',
                 };

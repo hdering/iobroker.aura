@@ -40,7 +40,8 @@ export type WidgetType =
   | 'windowcontact'
   | 'binarysensor'
   | 'stateimage'
-  | 'echartsPreset';
+  | 'echartsPreset'
+  | 'html';
 
 export type WidgetLayout = 'default' | 'card' | 'compact' | 'minimal' | 'agenda' | 'flow' | 'battery' | 'production' | 'consumption' | 'loadpoints' | 'custom';
 

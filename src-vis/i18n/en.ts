@@ -696,6 +696,7 @@ export const en: Record<TranslationKey, string> = {
   'widget.trash':         'Waste Collection',
   'widget.iframe':        'iFrame',
   'widget.jsontable':     'JSON Table',
+  'widget.html':          'HTML',
   'widget.header':        'Section Title',
   'widget.group':         'Group',
 
