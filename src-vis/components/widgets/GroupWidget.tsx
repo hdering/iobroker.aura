@@ -332,6 +332,7 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
       <div
         ref={containerRef}
         className="flex-1 overflow-auto min-h-0 p-1"
+        style={editMode ? { overflowY: 'scroll' } : undefined}
         onMouseDown={editMode ? (e) => e.stopPropagation() : undefined}
         onPointerDown={editMode ? (e) => e.stopPropagation() : undefined}
       >
