@@ -334,8 +334,7 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
           intercept drags meant for the inner grid */}
       <div
         ref={containerRef}
-        className="aura-scroll flex-1 overflow-auto min-h-0 p-1"
-        style={{ scrollbarGutter: 'stable both-edges' }}
+        className="flex-1 overflow-auto min-h-0 p-1"
         onMouseDown={editMode ? (e) => e.stopPropagation() : undefined}
         onPointerDown={editMode ? (e) => e.stopPropagation() : undefined}
       >
