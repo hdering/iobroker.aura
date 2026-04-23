@@ -55,14 +55,23 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
+  const prevWidthRef = useRef(0);
+  // Whenever width changes (initial render, scrollbar appears/disappears) RGL fires
+  // onLayoutChange once with potentially compacted positions that differ from saved.
+  // We skip that one reactive call so only user-initiated drags/resizes are saved.
+  const skipNextLayoutRef = useRef(false);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    // Use ResizeObserver for both initial and subsequent measurements so that
-    // contentRect.width (content area only, excludes padding + scrollbar gutter)
-    // is used consistently.
-    const ro = new ResizeObserver(([e]) => setWidth(Math.floor(e.contentRect.width)));
+    const ro = new ResizeObserver(([e]) => {
+      const newWidth = Math.floor(e.contentRect.width);
+      if (newWidth !== prevWidthRef.current) {
+        prevWidthRef.current = newWidth;
+        skipNextLayoutRef.current = true;
+        setWidth(newWidth);
+      }
+    });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
@@ -335,7 +344,6 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
       <div
         ref={containerRef}
         className="flex-1 overflow-auto min-h-0 p-1"
-        style={editMode ? { scrollbarGutter: 'stable' } : undefined}
         onMouseDown={editMode ? (e) => e.stopPropagation() : undefined}
         onPointerDown={editMode ? (e) => e.stopPropagation() : undefined}
       >
@@ -351,6 +359,9 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
             draggableCancel=".nodrag"
             onLayoutChange={(newLayout) => {
               if (!editMode) return;
+              // Skip the one reactive call that RGL fires after a width change
+              // (initial mount or scrollbar appearing) — only user drag/resize matters.
+              if (skipNextLayoutRef.current) { skipNextLayoutRef.current = false; return; }
               let hasRealChange = false;
               const updated = children.map((c) => {
                 const pos = newLayout.find((l) => l.i === c.id);
