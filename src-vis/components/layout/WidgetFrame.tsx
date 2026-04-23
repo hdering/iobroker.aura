@@ -3590,20 +3590,30 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                               { key: 'date',   label: 'Datum' },
                               { key: 'custom', label: 'Benutzerdefiniert' },
                             ],
+                            switch: [
+                              { key: 'battery', label: 'Batterie' },
+                              { key: 'reach',   label: 'Erreichbarkeit' },
+                            ],
                             thermostat: [
                               { key: 'setpoint', label: 'Solltemperatur' },
                               { key: 'actual',   label: 'Isttemperatur' },
                               { key: 'status',   label: 'Heizstatus' },
+                              { key: 'battery',  label: 'Batterie' },
+                              { key: 'reach',    label: 'Erreichbarkeit' },
                             ],
                             shutter: [
                               { key: 'position', label: 'Position (%)' },
                               { key: 'status',   label: 'Status' },
                               { key: 'moving',   label: 'Fährt' },
+                              { key: 'battery',  label: 'Batterie' },
+                              { key: 'reach',    label: 'Erreichbarkeit' },
                             ],
                             dimmer: [
-                              { key: 'level',  label: 'Helligkeit (%)' },
-                              { key: 'status', label: 'Status' },
-                              { key: 'on',     label: 'Ein/Aus' },
+                              { key: 'level',   label: 'Helligkeit (%)' },
+                              { key: 'status',  label: 'Status' },
+                              { key: 'on',      label: 'Ein/Aus' },
+                              { key: 'battery', label: 'Batterie' },
+                              { key: 'reach',   label: 'Erreichbarkeit' },
                             ],
                             gauge: [
                               { key: 'value',   label: 'Wert' },
@@ -3630,6 +3640,13 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                               { key: 'active',   label: 'Aktiv' },
                               { key: 'labelOn',  label: 'Text aktiv' },
                               { key: 'labelOff', label: 'Text inaktiv' },
+                              { key: 'battery',  label: 'Batterie' },
+                              { key: 'reach',    label: 'Erreichbarkeit' },
+                            ],
+                            stateimage: [
+                              { key: 'label',   label: 'Status-Text' },
+                              { key: 'battery', label: 'Batterie' },
+                              { key: 'reach',   label: 'Erreichbarkeit' },
                             ],
                             evcc: [
                               { key: 'pvPower',      label: 'Solar (kW)' },

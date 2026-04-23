@@ -6,6 +6,7 @@ import { contentPositionClass, titlePositionStyle, titleTextAlign } from '../../
 import { getWidgetIcon } from '../../utils/widgetIconMap';
 import { StatusBadges } from './StatusBadges';
 import { CustomGridView } from './CustomGridView';
+import { useStatusFields } from '../../hooks/useStatusFields';
 
 export function SwitchWidget({ config }: WidgetProps) {
   const { value } = useDatapoint(config.datapoint);
@@ -18,10 +19,13 @@ export function SwitchWidget({ config }: WidgetProps) {
   const showTitle = o.showTitle !== false;
   const showLabel = o.showLabel !== false;
 
+  const { battery, reach } = useStatusFields(config);
+
   if (layout === 'custom') return (
     <CustomGridView
       config={config}
       value={isOn ? 'AN' : 'AUS'}
+      extraFields={{ battery, reach }}
       extraComponents={{
         toggle: (
           <button

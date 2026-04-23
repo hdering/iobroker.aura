@@ -7,6 +7,7 @@ import type { WidgetProps } from '../../types';
 import { getWidgetIcon } from '../../utils/widgetIconMap';
 import { StatusBadges } from './StatusBadges';
 import { CustomGridView } from './CustomGridView';
+import { useStatusFields } from '../../hooks/useStatusFields';
 
 // Shutter visual: horizontal slat lines filling from top = how much is closed
 function ShutterViz({
@@ -147,6 +148,8 @@ export function ShutterWidget({ config }: WidgetProps) {
       className="w-full h-1.5 rounded-full appearance-none cursor-pointer" />
   );
 
+  const { battery, reach } = useStatusFields(config);
+
   if (layout === 'custom') {
     const btnStyle: React.CSSProperties = { background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)', borderRadius: 6, padding: '4px 6px', cursor: 'pointer' };
     return (
@@ -157,6 +160,8 @@ export function ShutterWidget({ config }: WidgetProps) {
           position:  `${pos}%`,
           status:    statusText,
           moving:    isMoving ? 'Ja' : 'Nein',
+          battery,
+          reach,
         }}
         extraComponents={{
           'btn-up':   <button className="nodrag" style={btnStyle} onClick={openFully}><ChevronUp   size={14} /></button>,

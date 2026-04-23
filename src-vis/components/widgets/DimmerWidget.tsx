@@ -6,6 +6,7 @@ import type { WidgetProps } from '../../types';
 import { getWidgetIcon } from '../../utils/widgetIconMap';
 import { StatusBadges } from './StatusBadges';
 import { CustomGridView } from './CustomGridView';
+import { useStatusFields } from '../../hooks/useStatusFields';
 
 export function DimmerWidget({ config }: WidgetProps) {
   const { value } = useDatapoint(config.datapoint);
@@ -35,6 +36,8 @@ export function DimmerWidget({ config }: WidgetProps) {
       className="w-full h-2 rounded-lg appearance-none cursor-pointer" />
   );
 
+  const { battery, reach } = useStatusFields(config);
+
   if (layout === 'custom') return (
     <CustomGridView
       config={config}
@@ -43,6 +46,8 @@ export function DimmerWidget({ config }: WidgetProps) {
         level:  `${level}%`,
         status: level === 0 ? 'Aus' : level === 100 ? 'Voll' : `${level}%`,
         on:     level > 0 ? 'Ein' : 'Aus',
+        battery,
+        reach,
       }}
       extraComponents={{
         slider: (

@@ -9,6 +9,7 @@ import { getWidgetIcon } from '../../utils/widgetIconMap';
 import { useT } from '../../i18n';
 import { StatusBadges } from './StatusBadges';
 import { CustomGridView } from './CustomGridView';
+import { useStatusFields } from '../../hooks/useStatusFields';
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
@@ -231,6 +232,7 @@ export function ThermostatWidget({ config, editMode }: WidgetProps) {
 
   const layout = config.layout ?? 'default';
   const wrapperCls = `${clickable && !editMode ? 'cursor-pointer' : ''}`;
+  const { battery, reach } = useStatusFields(config);
 
   if (layout === 'custom') {
     const btnSty: React.CSSProperties = { background: 'var(--app-border)', color: 'var(--text-primary)', borderRadius: 6, width: 28, height: 28, fontWeight: 'bold', fontSize: 16, cursor: 'pointer', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' };
@@ -242,6 +244,8 @@ export function ThermostatWidget({ config, editMode }: WidgetProps) {
           setpoint: typeof rawTarget === 'number' ? rawTarget.toFixed(1) : '–',
           actual:   actual !== null ? actual.toFixed(1) : '–',
           status:   isHeating ? 'Heizend' : isCooling ? 'Kühlend' : 'Inaktiv',
+          battery,
+          reach,
         }}
         extraComponents={{
           'btn-plus':  <button className="nodrag" style={btnSty} onClick={() => setTemp(target + step)}>+</button>,

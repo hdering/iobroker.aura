@@ -5,6 +5,7 @@ import { contentPositionClass } from '../../utils/widgetUtils';
 import { getWidgetIcon } from '../../utils/widgetIconMap';
 import { StatusBadges } from './StatusBadges';
 import { CustomGridView } from './CustomGridView';
+import { useStatusFields } from '../../hooks/useStatusFields';
 
 // Preset configurations per sensor sub-type
 export const BINARY_SENSOR_PRESETS: Record<string, {
@@ -39,6 +40,8 @@ export function BinarySensorWidget({ config }: WidgetProps) {
   const showTitle = opts.showTitle !== false;
   const showLabel = opts.showLabel !== false;
 
+  const { battery, reach } = useStatusFields(config);
+
   if (layout === 'custom') return (
     <CustomGridView
       config={config}
@@ -48,6 +51,8 @@ export function BinarySensorWidget({ config }: WidgetProps) {
         labelOn:  labelOn,
         labelOff: labelOff,
         active:   isActive ? 'Ja' : 'Nein',
+        battery,
+        reach,
       }}
       extraComponents={{
         icon: <Icon size={20} style={{ color, flexShrink: 0 }} />,

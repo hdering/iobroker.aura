@@ -5,6 +5,7 @@ import { getWidgetIcon } from '../../utils/widgetIconMap';
 import { contentPositionClass } from '../../utils/widgetUtils';
 import { StatusBadges } from './StatusBadges';
 import { CustomGridView } from './CustomGridView';
+import { useStatusFields } from '../../hooks/useStatusFields';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -61,10 +62,17 @@ export function StateImageWidget({ config }: WidgetProps) {
 
   const cfg = isActive ? trueCfg : falseCfg;
 
+  const { battery, reach } = useStatusFields(config);
+
   if (layout === 'custom') return (
     <CustomGridView
       config={config}
       value={cfg.label}
+      extraFields={{
+        label: cfg.label,
+        battery,
+        reach,
+      }}
       extraComponents={{
         icon: <StateDisplay cfg={cfg} size={24} />,
       }}
