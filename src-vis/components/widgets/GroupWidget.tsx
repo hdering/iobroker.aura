@@ -13,6 +13,7 @@ import { getDragBridge, setDragBridge } from '../../utils/dragBridge';
 import { useDashboardMobile } from '../../contexts/DashboardMobileContext';
 
 const CHILD_MARGIN = 6;
+const ADD_BAR_HEIGHT = 36; // collapsed addBar height in editMode (px)
 
 function makeChild(type: WidgetType, existing: WidgetConfig[]): WidgetConfig {
   const maxY = existing.reduce((m, c) => Math.max(m, c.gridPos.y + c.gridPos.h), 0);
@@ -318,7 +319,7 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
       <div
         ref={containerRef}
         className="aura-scroll flex-1 overflow-auto min-h-0 p-1"
-        style={{ scrollbarGutter: 'stable both-edges' }}
+        style={{ scrollbarGutter: 'stable both-edges', paddingBottom: editMode ? `${ADD_BAR_HEIGHT + 4}px` : undefined }}
         onMouseDown={editMode ? (e) => e.stopPropagation() : undefined}
         onPointerDown={editMode ? (e) => e.stopPropagation() : undefined}
       >
@@ -330,8 +331,10 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
             width={width}
             isDraggable={editMode}
             isResizable={editMode}
+            compactType={null}
             draggableCancel=".nodrag"
             onLayoutChange={(newLayout) => {
+              if (!editMode) return;
               let hasRealChange = false;
               const updated = children.map((c) => {
                 const pos = newLayout.find((l) => l.i === c.id);
@@ -373,7 +376,11 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
         )}
       </div>
 
-      {addBar}
+      {addBar && (
+        <div className="absolute bottom-0 left-0 right-0" style={{ zIndex: 5, background: 'var(--app-surface)' }}>
+          {addBar}
+        </div>
+      )}
     </div>
   );
 }
