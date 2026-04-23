@@ -12,18 +12,11 @@ import { CustomGridView } from './CustomGridView';
 
 const CHILD_MARGIN = 6;
 
-const DEFAULT_SIZE: Partial<Record<WidgetType, { w: number; h: number }>> = {
-  thermostat: { w: 3, h: 3 },
-  chart:      { w: 4, h: 3 },
-  calendar:   { w: 4, h: 4 },
-  list:       { w: 2, h: 3 },
-  clock:      { w: 2, h: 2 },
-  group:      { w: 4, h: 4 },
-};
-
 function makeChild(type: WidgetType, existing: WidgetConfig[]): WidgetConfig {
   const maxY = existing.reduce((m, c) => Math.max(m, c.gridPos.y + c.gridPos.h), 0);
-  const { w = 2, h = 2 } = DEFAULT_SIZE[type] ?? {};
+  const meta = WIDGET_BY_TYPE[type];
+  const w = meta?.defaultW ?? 2;
+  const h = meta?.defaultH ?? 2;
   return {
     id: `child-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     type,
