@@ -2,7 +2,10 @@ import type { StateStorage } from 'zustand/middleware';
 import { setStateDirect } from '../hooks/useIoBroker';
 
 const IOBROKER_CONFIG_KEY = 'aura.0.config.dashboard';
+const IOBROKER_BACKUP_KEY = 'aura.0.config.dashboard_backup';
 const SYNC_STORE_KEYS = ['aura-dashboard', 'aura-theme', 'aura-groups', 'aura-config', 'aura-global-settings', 'aura-group-defs'] as const;
+
+export const BACKUP_TS_KEY = '_ts';
 
 // All writes from managed stores go here instead of directly to localStorage
 const pending = new Map<string, string>();
@@ -61,6 +64,7 @@ export function revertAll(rehydrateFns: Array<() => void>): void {
  * Write all managed store blobs to ioBroker so any browser connecting to
  * the same ioBroker instance gets the current config.
  * Must be called AFTER saveAll() so localStorage is up-to-date.
+ * Also writes a timestamped backup to aura.0.config.dashboard_backup.
  */
 export function saveToIoBroker(): void {
   const payload: Record<string, unknown> = {};
@@ -71,6 +75,7 @@ export function saveToIoBroker(): void {
   });
   try {
     setStateDirect(IOBROKER_CONFIG_KEY, JSON.stringify(payload, null, 2));
+    setStateDirect(IOBROKER_BACKUP_KEY, JSON.stringify({ ...payload, [BACKUP_TS_KEY]: new Date().toISOString() }, null, 2));
   } catch { /* socket not yet connected – silently skip */ }
 }
 

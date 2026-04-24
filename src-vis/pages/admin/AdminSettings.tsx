@@ -1,12 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { setupPin } from '../../store/authStore';
 import { useActiveLayout, useDashboardStore } from '../../store/dashboardStore';
+import { useThemeStore } from '../../store/themeStore';
 import { useConnectionStore } from '../../store/connectionStore';
 import { useConfigStore } from '../../store/configStore';
 import { useAdminPrefsStore } from '../../store/adminPrefsStore';
 import { useGlobalSettingsStore } from '../../store/globalSettingsStore';
+import { useGroupStore } from '../../store/groupStore';
+import { useGroupDefsStore } from '../../store/groupDefsStore';
 import { reconnectSocket, getObjectViewDirect, getStateDirect, setStateDirect } from '../../hooks/useIoBroker';
-import { Eye, EyeOff, AlertTriangle, RefreshCw, Tablet, Edit3, Check, X, Trash2 } from 'lucide-react';
+import { saveAll, saveToIoBroker, BACKUP_TS_KEY } from '../../store/persistManager';
+import { Eye, EyeOff, AlertTriangle, RefreshCw, Tablet, Edit3, Check, X, Trash2, History } from 'lucide-react';
 import { useT } from '../../i18n';
 import type { LayoutSettings } from '../../store/dashboardStore';
 import type { FrontendSettings } from '../../store/configStore';
@@ -89,6 +93,117 @@ function SliderSetting({
         })}
       </div>
     </div>
+  );
+}
+
+// ── Auto-Backup card ──────────────────────────────────────────────────────────
+
+const BACKUP_SYNC_KEYS = ['aura-dashboard', 'aura-theme', 'aura-groups', 'aura-config', 'aura-global-settings', 'aura-group-defs'] as const;
+
+function AutoBackupCard() {
+  const t = useT();
+  const [ts, setTs] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [confirm, setConfirm] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'restoring' | 'success' | 'error' | 'nodata'>('idle');
+
+  const loadTs = useCallback(async () => {
+    setLoading(true);
+    try {
+      const state = await getStateDirect('aura.0.config.dashboard_backup');
+      if (state?.val) {
+        const parsed = JSON.parse(String(state.val)) as Record<string, unknown>;
+        setTs(parsed[BACKUP_TS_KEY] ? String(parsed[BACKUP_TS_KEY]) : null);
+      } else {
+        setTs(null);
+      }
+    } catch { setTs(null); }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { void loadTs(); }, [loadTs]);
+
+  const doRestore = async () => {
+    setStatus('restoring');
+    setConfirm(false);
+    try {
+      const state = await getStateDirect('aura.0.config.dashboard_backup');
+      if (!state?.val) { setStatus('nodata'); return; }
+      const backup = JSON.parse(String(state.val)) as Record<string, unknown>;
+      let changed = false;
+      BACKUP_SYNC_KEYS.forEach((key) => {
+        const val = backup[key];
+        if (!val) return;
+        const str = typeof val === 'string' ? val : JSON.stringify(val);
+        if (str.length > 2) { localStorage.setItem(key, str); changed = true; }
+      });
+      if (!changed) { setStatus('nodata'); return; }
+      useDashboardStore.persist.rehydrate();
+      useThemeStore.persist.rehydrate();
+      useGroupStore.persist.rehydrate();
+      useConfigStore.persist.rehydrate();
+      useGroupDefsStore.persist.rehydrate();
+      useGlobalSettingsStore.persist.rehydrate();
+      // Persist restored state back to main config + new backup
+      try { saveAll(); saveToIoBroker(); } catch { /* quota – non-fatal */ }
+      setStatus('success');
+    } catch { setStatus('error'); }
+  };
+
+  const fmtTs = (iso: string) => {
+    try {
+      return new Intl.DateTimeFormat(undefined, { dateStyle: 'short', timeStyle: 'medium' }).format(new Date(iso));
+    } catch { return iso; }
+  };
+
+  return (
+    <Card title={t('settings.autobackup.title')}>
+      <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{t('settings.autobackup.description')}</p>
+
+      <div className="flex items-center gap-2 py-1">
+        <History size={13} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
+        <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{t('settings.autobackup.lastBackup')}:</span>
+        <span className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
+          {loading ? '…' : ts ? fmtTs(ts) : t('settings.autobackup.noBackup')}
+        </span>
+        <button onClick={loadTs} disabled={loading} className="ml-auto flex items-center justify-center w-6 h-6 rounded hover:opacity-80 disabled:opacity-40" style={{ color: 'var(--text-secondary)' }}>
+          <RefreshCw size={12} className={loading ? 'animate-spin' : ''} />
+        </button>
+      </div>
+
+      {status === 'success' && (
+        <p className="text-xs font-medium" style={{ color: 'var(--accent-green)' }}>{t('settings.autobackup.success')}</p>
+      )}
+      {(status === 'error' || status === 'nodata') && (
+        <p className="text-xs font-medium" style={{ color: 'var(--accent-red)' }}>
+          {status === 'nodata' ? t('settings.autobackup.noData') : t('settings.autobackup.error')}
+        </p>
+      )}
+
+      {!confirm ? (
+        <button
+          onClick={() => { setConfirm(true); setStatus('idle'); }}
+          disabled={!ts || status === 'restoring'}
+          className="px-3 py-1.5 rounded-lg text-xs font-medium hover:opacity-80 disabled:opacity-40"
+          style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+        >
+          {status === 'restoring' ? t('settings.autobackup.restoring') : t('settings.autobackup.restore')}
+        </button>
+      ) : (
+        <div className="flex gap-2">
+          <button onClick={doRestore}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium text-white hover:opacity-80"
+            style={{ background: 'var(--accent)' }}>
+            {t('settings.autobackup.restoreConfirm')}
+          </button>
+          <button onClick={() => setConfirm(false)}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium hover:opacity-80"
+            style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+            {t('common.cancel')}
+          </button>
+        </div>
+      )}
+    </Card>
   );
 }
 
@@ -931,6 +1046,11 @@ export function AdminSettings() {
         <ClientsCard />
         <ExpertSettings />
         <DpNameFilterCard />
+      </div>
+
+      {/* Row 3: Auto-Backup */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <AutoBackupCard />
       </div>
 
       {/* Reset */}

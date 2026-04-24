@@ -217,6 +217,20 @@ class Aura extends utils.Adapter {
       native: {},
     });
 
+    // Automatisches Backup – wird nach jedem Speichern geschrieben
+    await this.setObjectNotExistsAsync('config.dashboard_backup', {
+      type: 'state',
+      common: {
+        name: 'Dashboard configuration backup',
+        type: 'string',
+        role: 'json',
+        read: true,
+        write: false,
+        def: '',
+      },
+      native: {},
+    });
+
     // Navigation-Datenpunkt
     await this.setObjectNotExistsAsync('navigate.url', {
       type: 'state',

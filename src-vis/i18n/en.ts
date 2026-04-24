@@ -144,6 +144,17 @@ export const en: Record<TranslationKey, string> = {
   'settings.backup.import':      'Import Backup',
   'settings.backup.invalidFile': 'Invalid backup file',
 
+  'settings.autobackup.title':          'Automatic Backup',
+  'settings.autobackup.description':    'Written to ioBroker on every save (aura.0.config.dashboard_backup).',
+  'settings.autobackup.lastBackup':     'Last backup',
+  'settings.autobackup.noBackup':       'No backup yet',
+  'settings.autobackup.restore':        'Restore from backup',
+  'settings.autobackup.restoreConfirm': 'Restore now?',
+  'settings.autobackup.restoring':      'Restoring …',
+  'settings.autobackup.success':        'Restored',
+  'settings.autobackup.error':          'Restore failed',
+  'settings.autobackup.noData':         'Backup contains no data',
+
   'settings.expert.title':    'Expert',
   'settings.expert.locked':   'Access with Admin PIN',
   'settings.expert.unlocked': 'Unlocked',

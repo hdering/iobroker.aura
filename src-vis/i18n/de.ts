@@ -142,6 +142,17 @@ export const de = {
   'settings.backup.import':      'Backup importieren',
   'settings.backup.invalidFile': 'Ungültige Backup-Datei',
 
+  'settings.autobackup.title':          'Automatisches Backup',
+  'settings.autobackup.description':    'Wird bei jedem Speichern in ioBroker geschrieben (aura.0.config.dashboard_backup).',
+  'settings.autobackup.lastBackup':     'Letztes Backup',
+  'settings.autobackup.noBackup':       'Noch kein Backup vorhanden',
+  'settings.autobackup.restore':        'Aus Backup wiederherstellen',
+  'settings.autobackup.restoreConfirm': 'Jetzt wiederherstellen?',
+  'settings.autobackup.restoring':      'Wird wiederhergestellt …',
+  'settings.autobackup.success':        'Wiederhergestellt',
+  'settings.autobackup.error':          'Fehler beim Wiederherstellen',
+  'settings.autobackup.noData':         'Backup enthält keine Daten',
+
   'settings.expert.title':    'Experten',
   'settings.expert.locked':   'Zugang mit Admin-PIN',
   'settings.expert.unlocked': 'Entsperrt',
