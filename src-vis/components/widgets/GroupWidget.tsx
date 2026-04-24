@@ -11,6 +11,7 @@ import { useT, type TranslationKey } from '../../i18n';
 import { CustomGridView } from './CustomGridView';
 import { getDragBridge, setDragBridge } from '../../utils/dragBridge';
 import { useDashboardMobile } from '../../contexts/DashboardMobileContext';
+import { useGroupDefsStore, newGroupDefId } from '../../store/groupDefsStore';
 
 const CHILD_MARGIN = 6;
 
@@ -41,7 +42,22 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
   const t = useT();
   const configLayout = config.layout ?? 'default';
 
-  const children = (config.options?.children as WidgetConfig[] | undefined) ?? [];
+  // ── defId initialisation ───────────────────────────────────────────────────
+  // Stable temp defId used between mount and the first onConfigChange round-trip
+  const tempDefIdRef = useRef<string | null>(null);
+  const defId = (config.options?.defId as string | undefined) ?? (() => {
+    if (!tempDefIdRef.current) tempDefIdRef.current = newGroupDefId();
+    return tempDefIdRef.current;
+  })();
+
+  // Persist the defId to aura-dashboard on first render if it wasn't saved yet
+  useEffect(() => {
+    if (!config.options?.defId) {
+      onConfigChange({ ...config, options: { ...config.options, defId } });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const children = useGroupDefsStore((s) => s.defs[defId] ?? []);
   const transparent = !!(config.options?.transparent);
   const cellSize = useConfigStore((s) => s.frontend.gridRowHeight ?? 80);
   const dashboardIsMobile = useDashboardMobile();
@@ -73,7 +89,7 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
     : 4;
 
   const setChildren = (next: WidgetConfig[]) =>
-    onConfigChange({ ...config, options: { ...config.options, children: next } });
+    useGroupDefsStore.getState().setDef(defId, next);
 
   const updateChild = (updated: WidgetConfig) =>
     setChildren(children.map((c) => (c.id === updated.id ? updated : c)));

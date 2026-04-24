@@ -11,25 +11,39 @@ import { isDirty, saveAll, revertAll, subscribeDirty, saveToIoBroker } from '../
 import { useDashboardStore, useActiveLayout } from '../../store/dashboardStore';
 import { useGroupStore } from '../../store/groupStore';
 import { useConfigStore } from '../../store/configStore';
+import { useGroupDefsStore } from '../../store/groupDefsStore';
 import { useAdminPrefsStore } from '../../store/adminPrefsStore';
 import { useIoBroker, getStateDirect } from '../../hooks/useIoBroker';
 import { useT } from '../../i18n';
 
 function useSaveState() {
   const [dirty, setDirty] = useState(isDirty);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => subscribeDirty(() => setDirty(isDirty())), []);
 
-  const save = () => { saveAll(); saveToIoBroker(); };
-  const revert = () =>
+  const save = () => {
+    setSaveError(null);
+    try {
+      saveAll();
+      saveToIoBroker();
+    } catch {
+      setSaveError('Speichern fehlgeschlagen: localStorage-Speicher voll');
+    }
+  };
+
+  const revert = () => {
+    setSaveError(null);
     revertAll([
       () => useDashboardStore.persist.rehydrate(),
       () => useThemeStore.persist.rehydrate(),
       () => useGroupStore.persist.rehydrate(),
       () => useConfigStore.persist.rehydrate(),
+      () => useGroupDefsStore.persist.rehydrate(),
     ]);
+  };
 
-  return { dirty, save, revert };
+  return { dirty, save, revert, saveError };
 }
 
 function useFrontendUrl(): string {
@@ -50,7 +64,7 @@ function useFrontendUrl(): string {
 export function AdminLayout() {
   const t = useT();
   const { sessionActive } = useAuthStore();
-  const { dirty, save, revert } = useSaveState();
+  const { dirty, save, revert, saveError } = useSaveState();
   const { adminThemeId, setAdminTheme } = useThemeStore();
   const frontendUrl = useFrontendUrl();
   const { connected } = useIoBroker();
@@ -212,6 +226,11 @@ export function AdminLayout() {
             minHeight: '44px',
           }}
         >
+          {saveError && !dirty && (
+            <span className="text-xs mr-auto" style={{ color: 'var(--accent-red)' }}>
+              {saveError}
+            </span>
+          )}
           {dirty ? (
             <>
               <span className="text-xs mr-auto" style={{ color: 'var(--accent)' }}>

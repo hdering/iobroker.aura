@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { managedStorage, flushKey } from './persistManager';
+import { useGroupDefsStore, newGroupDefId, cloneGroupDef } from './groupDefsStore';
 import { slugify } from '../utils/slugify';
 import type { WidgetConfig } from '../types';
 import type { ThemeVars } from '../themes';
@@ -126,6 +127,30 @@ function uniqueTabSlug(base: string, tabs: Tab[]): string {
   return slug;
 }
 
+// ── GROUP widget helpers ──────────────────────────────────────────────────────
+
+/** Deep-clone a widget: GROUP widgets get a fresh defId with cloned children. */
+function cloneWidgetDef(w: WidgetConfig): WidgetConfig {
+  if (w.type === 'group' && w.options?.defId) {
+    return { ...w, options: { ...w.options, defId: cloneGroupDef(w.options.defId as string) } };
+  }
+  return w;
+}
+
+/**
+ * Migrate a GROUP widget from the old format (options.children) to the new
+ * format (options.defId + groupDefsStore). Handles nested GROUP widgets.
+ */
+function migrateGroupWidget(w: WidgetConfig): WidgetConfig {
+  if (w.type !== 'group') return w;
+  if (w.options?.defId && !w.options?.children) return w; // already migrated
+  const children = ((w.options?.children ?? []) as WidgetConfig[]).map(migrateGroupWidget);
+  const defId = newGroupDefId();
+  useGroupDefsStore.getState().setDef(defId, children);
+  const { children: _removed, ...restOptions } = (w.options ?? {}) as Record<string, unknown>;
+  return { ...w, options: { ...restOptions, defId } };
+}
+
 // ── state ─────────────────────────────────────────────────────────────────────
 
 interface DashboardState {
@@ -206,12 +231,14 @@ export const useDashboardStore = create<DashboardState>()(
         set((s) => {
           const src = s.layouts.find((l) => l.id === id);
           if (!src) return {};
-          const dup: DashboardLayout = {
-            ...JSON.parse(JSON.stringify(src)),  // deep clone
-            id: newId,
-            name: newName,
-            slug: uniqueLayoutSlug(slugify(newName), s.layouts),
-          };
+          const dup: DashboardLayout = JSON.parse(JSON.stringify(src));
+          dup.id = newId;
+          dup.name = newName;
+          dup.slug = uniqueLayoutSlug(slugify(newName), s.layouts);
+          dup.tabs = dup.tabs.map((tab) => ({
+            ...tab,
+            widgets: tab.widgets.map(cloneWidgetDef),
+          }));
           return { layouts: [...s.layouts, dup], activeLayoutId: newId };
         });
       },
@@ -443,6 +470,17 @@ export const useDashboardStore = create<DashboardState>()(
           p.layouts = (p.layouts as DashboardLayout[]).map((l) => ({
             ...l,
             tabs: ensureSlugs(l.tabs ?? []),
+          }));
+        }
+
+        // Migrate GROUP widgets: move options.children → groupDefsStore (defId ref)
+        if (Array.isArray(p.layouts)) {
+          p.layouts = (p.layouts as DashboardLayout[]).map((l) => ({
+            ...l,
+            tabs: l.tabs.map((tab) => ({
+              ...tab,
+              widgets: tab.widgets.map(migrateGroupWidget),
+            })),
           }));
         }
 

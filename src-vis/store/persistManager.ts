@@ -2,7 +2,7 @@ import type { StateStorage } from 'zustand/middleware';
 import { setStateDirect } from '../hooks/useIoBroker';
 
 const IOBROKER_CONFIG_KEY = 'aura.0.config.dashboard';
-const SYNC_STORE_KEYS = ['aura-dashboard', 'aura-theme', 'aura-groups', 'aura-config', 'aura-global-settings'] as const;
+const SYNC_STORE_KEYS = ['aura-dashboard', 'aura-theme', 'aura-groups', 'aura-config', 'aura-global-settings', 'aura-group-defs'] as const;
 
 // All writes from managed stores go here instead of directly to localStorage
 const pending = new Map<string, string>();
@@ -33,9 +33,20 @@ export function flushKey(key: string): void {
 
 /** Flush buffered writes to localStorage */
 export function saveAll(): void {
-  pending.forEach((val, key) => localStorage.setItem(key, val));
+  const errors: string[] = [];
+  pending.forEach((val, key) => {
+    try {
+      localStorage.setItem(key, val);
+    } catch {
+      errors.push(key);
+      console.error('[persistManager] localStorage quota exceeded for key:', key);
+    }
+  });
   pending.clear();
   notify();
+  if (errors.length > 0) {
+    throw new Error(`localStorage quota exceeded for: ${errors.join(', ')}`);
+  }
 }
 
 /** Discard buffered writes and restore in-memory store state from localStorage.

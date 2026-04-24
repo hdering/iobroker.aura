@@ -4,10 +4,11 @@ import { useDashboardStore } from '../store/dashboardStore';
 import { useThemeStore } from '../store/themeStore';
 import { useGroupStore } from '../store/groupStore';
 import { useConfigStore } from '../store/configStore';
+import { useGroupDefsStore } from '../store/groupDefsStore';
 import { isDirty } from '../store/persistManager';
 
 const IOBROKER_CONFIG_KEY = 'aura.0.config.dashboard';
-const SYNC_STORE_KEYS = ['aura-dashboard', 'aura-theme', 'aura-groups', 'aura-config'] as const;
+const SYNC_STORE_KEYS = ['aura-dashboard', 'aura-theme', 'aura-groups', 'aura-config', 'aura-group-defs'] as const;
 
 /**
  * Subscribes to aura.0.config.dashboard and polls every 10 s.
@@ -64,6 +65,7 @@ export function useConfigSync(connected: boolean, configLoaded: React.MutableRef
         useThemeStore.persist.rehydrate();
         useGroupStore.persist.rehydrate();
         useConfigStore.persist.rehydrate();
+        useGroupDefsStore.persist.rehydrate();
       }
     } catch { /* ignore malformed JSON */ }
   }, []);

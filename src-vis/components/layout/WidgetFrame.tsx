@@ -8,6 +8,7 @@ import { exportWidget } from '../../utils/widgetExportImport';
 import { getWidgetIcon } from '../../utils/widgetIconMap';
 import { applyDpNameFilter } from '../../utils/dpNameFilter';
 import { useDashboardStore, useActiveLayout } from '../../store/dashboardStore';
+import { cloneGroupDef } from '../../store/groupDefsStore';
 import { useActiveLayoutId } from '../../contexts/ActiveLayoutContext';
 import { useEffectiveSettings } from '../../hooks/useEffectiveSettings';
 import type { WidgetConfig, WidgetCondition, CustomCell, CustomGrid } from '../../types';
@@ -994,6 +995,14 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
   // Stable reference: never create a new [] on every render (would cause infinite effect loop)
   const conditions = (config.options?.conditions as WidgetCondition[] | undefined) ?? NO_CONDITIONS;
 
+  // GROUP widgets: create a fresh defId + clone children so copies are independent
+  function copyConfig(src: WidgetConfig): WidgetConfig {
+    if (src.type === 'group' && src.options?.defId) {
+      return { ...src, options: { ...src.options, defId: cloneGroupDef(src.options.defId as string) } };
+    }
+    return src;
+  }
+
   // Evaluate conditions against live ioBroker values
   const conditionResult = useConditionStyle(conditions);
 
@@ -1260,7 +1269,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                   if (moveTargets.length === 0) {
                     // No other tabs – duplicate directly on same tab
                     addWidgetToLayoutTab(activeLayoutId, activeTabId, {
-                      ...config,
+                      ...copyConfig(config),
                       id: `w-${Date.now()}`,
                       gridPos: { ...config.gridPos, y: 9999 },
                     });
@@ -1286,7 +1295,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                 <button
                   onClick={() => {
                     addWidgetToLayoutTab(activeLayoutId, activeTabId, {
-                      ...config,
+                      ...copyConfig(config),
                       id: `w-${Date.now()}`,
                       gridPos: { ...config.gridPos, y: 9999 },
                     });
@@ -1314,7 +1323,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                           key={m.tabId}
                           onClick={() => {
                             addWidgetToLayoutTab(m.layoutId, m.tabId, {
-                              ...config,
+                              ...copyConfig(config),
                               id: `w-${Date.now()}`,
                               gridPos: { ...config.gridPos, y: 9999 },
                             });
