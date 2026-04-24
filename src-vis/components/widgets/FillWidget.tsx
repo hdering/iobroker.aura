@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import { Droplets } from 'lucide-react';
+import { Droplets } from 'lucide-react'; // used in no-datapoint placeholder
 import { useDatapoint } from '../../hooks/useDatapoint';
 import type { WidgetProps } from '../../types';
 import { CustomGridView } from './CustomGridView';
@@ -233,6 +233,176 @@ function TankHorizontal({
   );
 }
 
+// ── LED Segments ──────────────────────────────────────────────────────────
+function SegmentsViz({
+  pct, value, unit, decimals, fillColor, zones, colorZones, showValue,
+}: Pick<TankProps, 'pct' | 'value' | 'unit' | 'decimals' | 'fillColor' | 'zones' | 'colorZones' | 'showValue'>) {
+  const SEGS = 12;
+  const gap = 3;
+  const totalW = 240;
+  const segH = 46;
+  const segW = (totalW - (SEGS - 1) * gap) / SEGS;
+  const lit = Math.round((pct / 100) * SEGS);
+
+  const displayVal = isNaN(value) ? '–'
+    : decimals === 0 ? String(Math.round(value))
+    : value.toFixed(decimals);
+
+  const segColor = (i: number) => {
+    if (i >= lit) return undefined;
+    if (colorZones && zones.length > 0) return fillColor;
+    const segPct = ((i + 1) / SEGS) * 100;
+    return segPct <= 25 ? '#ef4444' : segPct <= 58 ? '#f59e0b' : '#22c55e';
+  };
+
+  return (
+    <svg viewBox="0 0 280 70" style={{ width: '100%', height: '100%' }}>
+      {Array.from({ length: SEGS }, (_, i) => {
+        const x = i * (segW + gap);
+        const color = segColor(i);
+        return (
+          <rect key={i} x={x} y={4} width={segW} height={segH} rx={3}
+            fill={color ?? 'var(--app-border)'}
+            opacity={color ? 1 : 0.25}
+          />
+        );
+      })}
+      {showValue && (
+        <text x={totalW + 14} y={4 + segH / 2 + 6} fontSize={16} fontWeight="bold"
+          textAnchor="start" fill={colorZones ? fillColor : (pct <= 25 ? '#ef4444' : pct <= 58 ? '#f59e0b' : '#22c55e')}>
+          {displayVal}
+          {unit && <tspan fontSize={10} dx={2} fill="var(--text-secondary)">{unit}</tspan>}
+        </text>
+      )}
+    </svg>
+  );
+}
+
+// ── Arc gauge ──────────────────────────────────────────────────────────────
+function ArcViz({
+  pct, value, min, max, unit, decimals, fillColor, colorZones, showValue,
+}: Pick<TankProps, 'pct' | 'value' | 'min' | 'max' | 'unit' | 'decimals' | 'fillColor' | 'colorZones' | 'showValue'>) {
+  const cx = 60, cy = 60, r = 46, sw = 10;
+  const circ = 2 * Math.PI * r;
+  const arcLen = circ * 0.75; // 270°
+  const filled = arcLen * (pct / 100);
+  const rotation = 135; // start at 7:30
+
+  const displayVal = isNaN(value) ? '–'
+    : decimals === 0 ? String(Math.round(value))
+    : value.toFixed(decimals);
+
+  const arcColor = colorZones ? fillColor
+    : pct <= 25 ? '#ef4444' : pct <= 58 ? '#f59e0b' : '#22c55e';
+
+  return (
+    <svg viewBox="0 0 120 115" style={{ width: '100%', height: '100%' }}>
+      {/* Track */}
+      <circle cx={cx} cy={cy} r={r} fill="none"
+        stroke="var(--app-border)" strokeWidth={sw}
+        strokeDasharray={`${arcLen} ${circ}`}
+        strokeLinecap="round"
+        transform={`rotate(${rotation}, ${cx}, ${cy})`}
+        opacity={0.3}
+      />
+      {/* Fill */}
+      {pct > 0 && (
+        <circle cx={cx} cy={cy} r={r} fill="none"
+          stroke={arcColor} strokeWidth={sw}
+          strokeDasharray={`${filled} ${circ}`}
+          strokeLinecap="round"
+          transform={`rotate(${rotation}, ${cx}, ${cy})`}
+        />
+      )}
+      {/* Min/max labels */}
+      <text x={cx - r + 2} y={cy + r + 12} fontSize={7} textAnchor="middle"
+        fill="var(--text-secondary)" opacity={0.7}>
+        {decimals === 0 ? Math.round(min) : min.toFixed(1)}
+      </text>
+      <text x={cx + r - 2} y={cy + r + 12} fontSize={7} textAnchor="middle"
+        fill="var(--text-secondary)" opacity={0.7}>
+        {decimals === 0 ? Math.round(max) : max.toFixed(1)}
+      </text>
+      {/* Value centered */}
+      {showValue && (
+        <>
+          <text x={cx} y={cy + 6} fontSize={18} fontWeight="bold"
+            textAnchor="middle" fill={arcColor}>
+            {displayVal}
+          </text>
+          {unit && (
+            <text x={cx} y={cy + 18} fontSize={9}
+              textAnchor="middle" fill="var(--text-secondary)">
+              {unit}
+            </text>
+          )}
+        </>
+      )}
+    </svg>
+  );
+}
+
+// ── Wave ───────────────────────────────────────────────────────────────────
+function WaveViz({
+  pct, value, unit, decimals, fillColor, colorZones, showValue, uid,
+}: Pick<TankProps, 'pct' | 'value' | 'unit' | 'decimals' | 'fillColor' | 'colorZones' | 'showValue' | 'uid'>) {
+  const clipId = `wave-${uid}`;
+  const fillY  = 100 - pct;
+  const amp = 5;
+  const waveColor = colorZones ? fillColor
+    : pct <= 25 ? '#ef4444' : pct <= 58 ? '#f59e0b' : '#22c55e';
+  const textOnFill = pct > 50;
+
+  const displayVal = isNaN(value) ? '–'
+    : decimals === 0 ? String(Math.round(value))
+    : value.toFixed(decimals);
+
+  // Two sine periods across 200 units so animation looks seamless
+  const wavePath = `M0,${fillY} `
+    + `C25,${fillY - amp} 25,${fillY + amp} 50,${fillY} `
+    + `C75,${fillY - amp} 75,${fillY + amp} 100,${fillY} `
+    + `C125,${fillY - amp} 125,${fillY + amp} 150,${fillY} `
+    + `C175,${fillY - amp} 175,${fillY + amp} 200,${fillY} `
+    + `L200,100 L0,100 Z`;
+
+  return (
+    <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%' }}>
+      <defs>
+        <clipPath id={clipId}>
+          <rect x={0} y={0} width={100} height={100} rx={8} />
+        </clipPath>
+      </defs>
+
+      {/* Background */}
+      <rect x={0} y={0} width={100} height={100} rx={8}
+        fill="var(--widget-bg)" stroke="var(--app-border)" strokeWidth={1.5} />
+
+      {/* Animated wave fill */}
+      {pct > 0 && (
+        <g clipPath={`url(#${clipId})`}>
+          <path d={wavePath} fill={waveColor} opacity={0.85}>
+            <animateTransform attributeName="transform" type="translate"
+              from="0,0" to="-100,0" dur="3s" repeatCount="indefinite" />
+          </path>
+        </g>
+      )}
+
+      {/* Border on top */}
+      <rect x={0} y={0} width={100} height={100} rx={8}
+        fill="none" stroke="var(--app-border)" strokeWidth={1.5} />
+
+      {/* Value */}
+      {showValue && (
+        <text x={50} y={55} fontSize={18} fontWeight="bold"
+          textAnchor="middle" fill={textOnFill ? '#fff' : waveColor}>
+          {displayVal}
+          {unit && <tspan fontSize={10} dx={2} fill={textOnFill ? 'rgba(255,255,255,0.75)' : 'var(--text-secondary)'}>{unit}</tspan>}
+        </text>
+      )}
+    </svg>
+  );
+}
+
 // ── Battery layout ─────────────────────────────────────────────────────────
 function BatteryViz({
   pct, value, unit, decimals, fillColor, showValue, uid,
@@ -371,20 +541,57 @@ export function FillWidget({ config }: WidgetProps) {
     );
   }
 
-  if (layout === 'compact') {
-    const displayVal = decimals === 0 ? String(Math.round(safeVal)) : safeVal.toFixed(decimals);
+  if (layout === 'segments') {
     return (
-      <div className="flex items-center justify-between h-full gap-2">
-        {showTitle && (
-          <div className="flex items-center gap-2 min-w-0">
-            <Droplets size={14} style={{ color: fillColor, flexShrink: 0 }} />
-            <span className="text-sm truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>
-          </div>
+      <div className="flex flex-col h-full">
+        {showTitle && config.title && (
+          <p className="text-xs mb-1 truncate shrink-0" style={{ color: 'var(--text-secondary)' }}>
+            {config.title}
+          </p>
         )}
-        <span className="text-xl font-bold shrink-0 tabular-nums" style={{ color: fillColor }}>
-          {displayVal}
-          <span className="text-sm ml-0.5 font-normal" style={{ color: 'var(--text-secondary)' }}>{unit}</span>
-        </span>
+        <div className="flex-1 flex items-center justify-center min-h-0 min-w-0">
+          <SegmentsViz
+            pct={pct} value={safeVal} unit={unit} decimals={decimals}
+            fillColor={fillColor} zones={zones} colorZones={colorZones}
+            showValue={showValue}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (layout === 'arc') {
+    return (
+      <div className="flex flex-col h-full">
+        {showTitle && config.title && (
+          <p className="text-xs mb-1 truncate shrink-0" style={{ color: 'var(--text-secondary)' }}>
+            {config.title}
+          </p>
+        )}
+        <div className="flex-1 flex items-center justify-center min-h-0 min-w-0">
+          <ArcViz
+            pct={pct} value={safeVal} min={min} max={max} unit={unit} decimals={decimals}
+            fillColor={fillColor} colorZones={colorZones} showValue={showValue}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (layout === 'wave') {
+    return (
+      <div className="flex flex-col h-full">
+        {showTitle && config.title && (
+          <p className="text-xs mb-1 truncate shrink-0" style={{ color: 'var(--text-secondary)' }}>
+            {config.title}
+          </p>
+        )}
+        <div className="flex-1 flex items-center justify-center min-h-0 min-w-0">
+          <WaveViz
+            pct={pct} value={safeVal} unit={unit} decimals={decimals}
+            fillColor={fillColor} colorZones={colorZones} showValue={showValue} uid={uid}
+          />
+        </div>
       </div>
     );
   }
