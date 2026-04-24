@@ -12,6 +12,7 @@ import { useDashboardStore, useActiveLayout } from '../../store/dashboardStore';
 import { useGroupStore } from '../../store/groupStore';
 import { useConfigStore } from '../../store/configStore';
 import { useGroupDefsStore } from '../../store/groupDefsStore';
+import { useGlobalSettingsStore } from '../../store/globalSettingsStore';
 import { useAdminPrefsStore } from '../../store/adminPrefsStore';
 import { useIoBroker, getStateDirect } from '../../hooks/useIoBroker';
 import { useT } from '../../i18n';
@@ -70,10 +71,16 @@ export function AdminLayout() {
   const { connected } = useIoBroker();
   const { autoSave, autoSaveDelay } = useAdminPrefsStore();
 
-  // Auto-push localStorage config to ioBroker on first connect.
-  // Loads ioBroker first – only pushes localStorage if ioBroker is empty
-  // or if there are unsaved local changes, preventing a stale/empty
-  // localStorage from overwriting a valid remote config.
+  // Auto-sync on first connect: three cases
+  //   1. Remote has data, local is empty  → apply remote immediately (avoids 10 s poll wait)
+  //   2. Remote is empty, local has data  → push local to ioBroker (initial setup / recovery)
+  //   3. Both have data or both empty     → nothing to do here; useConfigSync handles ongoing sync
+  //
+  // NOTE: isDirty() must NOT be used here. When localStorage is empty, Zustand
+  // persist writes the default initial state via managedStorage.setItem(), which
+  // spuriously sets isDirty()=true. Using it would cause saveToIoBroker() to run
+  // with an empty localStorage and overwrite ioBroker with null values.
+  const ADMIN_SYNC_KEYS = ['aura-dashboard', 'aura-theme', 'aura-groups', 'aura-config', 'aura-global-settings', 'aura-group-defs'] as const;
   const autoSyncedRef = useRef(false);
   const adminConfigLoadedRef = useRef(false);
   useEffect(() => {
@@ -82,18 +89,48 @@ export function AdminLayout() {
     void getStateDirect('aura.0.config.dashboard').then((state) => {
       adminConfigLoadedRef.current = true;
       const remoteRaw = state?.val ? String(state.val) : '';
+
+      let remotePayload: Record<string, unknown> = {};
       let remoteHasData = false;
       try {
-        const parsed = JSON.parse(remoteRaw) as Record<string, unknown>;
-        remoteHasData = Object.values(parsed).some(
+        remotePayload = JSON.parse(remoteRaw) as Record<string, unknown>;
+        remoteHasData = Object.values(remotePayload).some(
           v => v && typeof v === 'string' && v !== '{}' && v.length > 10,
         );
       } catch { /* ignore */ }
-      // Push localStorage → ioBroker only when ioBroker is empty or local
-      // edits are pending; otherwise let useConfigSync pull the remote config.
-      if (!remoteHasData || isDirty()) saveToIoBroker();
+
+      const localHasData = ADMIN_SYNC_KEYS.some((key) => {
+        const raw = localStorage.getItem(key);
+        return raw !== null && raw.length > 10;
+      });
+
+      if (remoteHasData && !localHasData) {
+        // Case 1: fresh browser / cleared cache – apply remote config immediately
+        let changed = false;
+        ADMIN_SYNC_KEYS.forEach((key) => {
+          const val = remotePayload[key];
+          if (!val) return;
+          const str = typeof val === 'string' ? val : JSON.stringify(val);
+          if (str.length > 2 && str !== localStorage.getItem(key)) {
+            localStorage.setItem(key, str);
+            changed = true;
+          }
+        });
+        if (changed) {
+          useDashboardStore.persist.rehydrate();
+          useThemeStore.persist.rehydrate();
+          useGroupStore.persist.rehydrate();
+          useConfigStore.persist.rehydrate();
+          useGroupDefsStore.persist.rehydrate();
+          useGlobalSettingsStore.persist.rehydrate();
+        }
+      } else if (!remoteHasData && localHasData) {
+        // Case 2: ioBroker is empty – push local config to ioBroker
+        saveToIoBroker();
+      }
+      // Case 3: both have data or both empty – useConfigSync handles ongoing sync
     });
-  }, [connected]);
+  }, [connected]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // React to external changes on aura.0.config.dashboard (subscription + polling)
   useConfigSync(connected, adminConfigLoadedRef);
