@@ -587,11 +587,13 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
 
   useEffect(() => {
     if (!wakeUpDp || !streamUrl) { setStreamReady(true); return; }
-    if (wakeUpMode !== 'auto') return;
+    // Wake-up DP is configured → never auto-start; explicitly clear any stale streamReady=true
+    // that may have been set during an earlier render when wakeUpDp/streamUrl were not yet loaded.
+    if (wakeUpMode !== 'auto') { setStreamReady(false); return; }
     doWake();
     return () => doSleep();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wakeUpDp, streamUrl, wakeUpDelay, wakeUpMode]);
+  }, [wakeUpDp, streamUrl, wakeUpMode]);
 
   useEffect(() => {
     if (!wakeUpDp || !streamUrl || wakeUpMode !== 'onClick') return;
