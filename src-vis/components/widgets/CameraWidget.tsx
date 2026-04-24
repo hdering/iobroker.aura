@@ -463,7 +463,7 @@ export function CameraWidget({ config, editMode }: WidgetProps) {
   const showTimestamp   = (opts.showTimestamp   as boolean)             ?? true;
   const wakeUpDp        = (opts.wakeUpDp        as string)              ?? '';
   const wakeUpDelay     = (opts.wakeUpDelay     as number)              ?? 3;
-  const wakeUpMode      = (opts.wakeUpMode      as WakeUpMode)          ?? 'auto';
+  const wakeUpMode      = (opts.wakeUpMode      as WakeUpMode)          ?? 'onClick';
   const streamTimeout   = (opts.streamTimeout   as number)              ?? 60;
   const videoRatio      = (opts.videoRatio      as number)              ?? 60;
   const infoItems       = (opts.infoItems       as CameraSlot[])        ?? [];
