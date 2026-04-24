@@ -2515,7 +2515,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                 return (
                   <>
                     {hdr('Anzeige')}
-                    {(config.layout ?? 'default') === 'default' && (<>
+                    {(['default', 'battery', 'segments'] as string[]).includes(config.layout ?? 'default') && (
                     <div className="flex items-center justify-between">
                       <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Orientierung</label>
                       <div className="flex rounded-lg overflow-hidden" style={{ border: '1px solid var(--app-border)' }}>
@@ -2532,6 +2532,8 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                         ))}
                       </div>
                     </div>
+                    )}
+                    {(config.layout ?? 'default') === 'default' && (
                     <div>
                       <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
                         Balkenbreite/-höhe <span style={{ opacity: 0.6 }}>(% des Widgets)</span>
@@ -2540,7 +2542,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                         onChange={(e) => set({ barSize: Number(e.target.value) })}
                         className={fCls} style={fSty} />
                     </div>
-                    </>)}
+                    )}
                     <div className="flex items-center justify-between">
                       <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Skala anzeigen</label>
                       <button onClick={() => set({ showTicks: !(o.showTicks ?? true) })}

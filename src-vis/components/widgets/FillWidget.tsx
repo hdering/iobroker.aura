@@ -235,46 +235,76 @@ function TankHorizontal({
 
 // ── LED Segments ──────────────────────────────────────────────────────────
 function SegmentsViz({
-  pct, value, min, max, unit, decimals, fillColor, zones, colorZones, showValue,
-}: Pick<TankProps, 'pct' | 'value' | 'min' | 'max' | 'unit' | 'decimals' | 'fillColor' | 'zones' | 'colorZones' | 'showValue'>) {
+  pct, value, min, max, unit, decimals, fillColor, zones, colorZones, showValue, orientation,
+}: Pick<TankProps, 'pct' | 'value' | 'min' | 'max' | 'unit' | 'decimals' | 'fillColor' | 'zones' | 'colorZones' | 'showValue'> & { orientation: Orientation }) {
   const SEGS = 12;
-  const gap = 3;
-  const totalW = 240;
-  const segH = 46;
-  const segW = (totalW - (SEGS - 1) * gap) / SEGS;
-  const lit = Math.round((pct / 100) * SEGS);
+  const gap  = 3;
+  const lit  = Math.round((pct / 100) * SEGS);
 
   const displayVal = isNaN(value) ? '–'
     : decimals === 0 ? String(Math.round(value))
     : value.toFixed(decimals);
 
-  const segColor = (i: number) => {
-    if (i >= lit) return undefined;
+  const zoneColor = (frac: number) => {
     if (colorZones && zones.length > 0) {
-      const segVal = min + ((i + 0.5) / SEGS) * (max - min);
-      const match = zones.find(z => segVal <= z.max);
+      const segVal = min + frac * (max - min);
+      const match  = zones.find(z => segVal <= z.max);
       return match ? match.color : zones[zones.length - 1].color;
     }
     return fillColor;
   };
 
+  if (orientation === 'vertical') {
+    const totalH = 220;
+    const segW   = 56;
+    const segH   = (totalH - (SEGS - 1) * gap) / SEGS;
+    return (
+      <svg viewBox="0 0 80 270" style={{ width: '100%', height: '100%' }}>
+        {Array.from({ length: SEGS }, (_, i) => {
+          // i=0 top, i=11 bottom; bottom segments = low values → lit first
+          const isLit = i >= SEGS - lit;
+          const frac  = (SEGS - 1 - i + 0.5) / SEGS; // bottom segment → low fraction
+          const color = isLit ? zoneColor(frac) : undefined;
+          return (
+            <rect key={i} x={12} y={4 + i * (segH + gap)} width={segW} height={segH} rx={3}
+              fill={color ?? 'var(--app-border)'}
+              opacity={color ? 1 : 0.25}
+            />
+          );
+        })}
+        {showValue && (
+          <text x={40} y={4 + totalH + 18} fontSize={13} fontWeight="bold"
+            textAnchor="middle" fill={fillColor}>
+            {displayVal}
+            {unit && <tspan fontSize={9} dx={1} fill="var(--text-secondary)">{unit}</tspan>}
+          </text>
+        )}
+      </svg>
+    );
+  }
+
+  // ── horizontal ────────────────────────────────────────────────────────────
+  const totalW = 220;
+  const segH   = 44;
+  const segW   = (totalW - (SEGS - 1) * gap) / SEGS;
   return (
-    <svg viewBox="0 0 280 70" style={{ width: '100%', height: '100%' }}>
+    <svg viewBox="0 0 220 70" style={{ width: '100%', height: '100%' }}>
       {Array.from({ length: SEGS }, (_, i) => {
-        const x = i * (segW + gap);
-        const color = segColor(i);
+        const isLit = i < lit;
+        const frac  = (i + 0.5) / SEGS;
+        const color = isLit ? zoneColor(frac) : undefined;
         return (
-          <rect key={i} x={x} y={4} width={segW} height={segH} rx={3}
+          <rect key={i} x={i * (segW + gap)} y={4} width={segW} height={segH} rx={3}
             fill={color ?? 'var(--app-border)'}
             opacity={color ? 1 : 0.25}
           />
         );
       })}
       {showValue && (
-        <text x={totalW + 14} y={4 + segH / 2 + 6} fontSize={16} fontWeight="bold"
-          textAnchor="start" fill={fillColor}>
+        <text x={totalW / 2} y={segH + 18} fontSize={14} fontWeight="bold"
+          textAnchor="middle" fill={fillColor}>
           {displayVal}
-          {unit && <tspan fontSize={10} dx={2} fill="var(--text-secondary)">{unit}</tspan>}
+          {unit && <tspan fontSize={9} dx={1} fill="var(--text-secondary)">{unit}</tspan>}
         </text>
       )}
     </svg>
@@ -343,20 +373,58 @@ function WaveViz({
 
 // ── Battery layout ─────────────────────────────────────────────────────────
 function BatteryViz({
-  pct, value, unit, decimals, fillColor, showValue, uid,
-}: Pick<TankProps, 'pct' | 'value' | 'unit' | 'decimals' | 'fillColor' | 'showValue' | 'uid'>) {
-  const bx = 5, by = 12, bw = 218, bh = 66, br = 9;
-  const nubW = 12, nubH = 30;
-  const fillW  = Math.max(0, (pct / 100) * bw);
-  const clipId = `bat-${uid}`;
-
+  pct, value, unit, decimals, fillColor, showValue, uid, orientation,
+}: Pick<TankProps, 'pct' | 'value' | 'unit' | 'decimals' | 'fillColor' | 'showValue' | 'uid'> & { orientation: Orientation }) {
   const displayVal = isNaN(value) ? '–'
     : decimals === 0 ? String(Math.round(value))
     : value.toFixed(decimals);
 
-  // When fill covers more than 40% of the body the text sits on the fill – use white
-  const textOnFill = fillW > bw * 0.4;
+  if (orientation === 'vertical') {
+    const bx = 12, by = 22, bw = 66, bh = 218, br = 9;
+    const nubW = 30, nubH = 12;
+    const fillH  = Math.max(0, (pct / 100) * bh);
+    const clipId = `bat-v-${uid}`;
+    const textOnFill = fillH > bh * 0.4;
+    return (
+      <svg viewBox="0 0 90 260" style={{ width: '100%', height: '100%' }}>
+        <defs>
+          <clipPath id={clipId}>
+            <rect x={bx} y={by} width={bw} height={bh} rx={br} />
+          </clipPath>
+        </defs>
+        <rect x={bx + (bw - nubW) / 2} y={by - nubH - 3} width={nubW} height={nubH} rx={5}
+          fill="var(--app-border)" />
+        <rect x={bx} y={by} width={bw} height={bh} rx={br}
+          fill="var(--widget-bg)" stroke="var(--app-border)" strokeWidth={2} />
+        {fillH > 0 && (
+          <rect x={bx} y={by + bh - fillH} width={bw} height={fillH}
+            fill={fillColor} clipPath={`url(#${clipId})`} />
+        )}
+        {[0.25, 0.5, 0.75].map((t, i) => (
+          <line key={i}
+            x1={bx} y1={by + bh * (1 - t)} x2={bx + bw} y2={by + bh * (1 - t)}
+            stroke="var(--app-bg)" strokeWidth={2.5} clipPath={`url(#${clipId})`} />
+        ))}
+        <rect x={bx} y={by} width={bw} height={bh} rx={br}
+          fill="none" stroke="var(--app-border)" strokeWidth={2} />
+        {showValue && (
+          <text x={bx + bw / 2} y={by + bh / 2 + 6}
+            fontSize={18} fontWeight="bold" textAnchor="middle"
+            fill={textOnFill ? '#fff' : fillColor}>
+            {displayVal}
+            {unit && <tspan fontSize={10} dx={2} fill={textOnFill ? 'rgba(255,255,255,0.8)' : 'var(--text-secondary)'}>{unit}</tspan>}
+          </text>
+        )}
+      </svg>
+    );
+  }
 
+  // ── horizontal ────────────────────────────────────────────────────────────
+  const bx = 5, by = 12, bw = 218, bh = 66, br = 9;
+  const nubW = 12, nubH = 30;
+  const fillW  = Math.max(0, (pct / 100) * bw);
+  const clipId = `bat-h-${uid}`;
+  const textOnFill = fillW > bw * 0.4;
   return (
     <svg viewBox="0 0 260 90" style={{ width: '100%', height: '100%' }}>
       <defs>
@@ -364,33 +432,21 @@ function BatteryViz({
           <rect x={bx} y={by} width={bw} height={bh} rx={br} />
         </clipPath>
       </defs>
-
-      {/* Body background */}
       <rect x={bx} y={by} width={bw} height={bh} rx={br}
         fill="var(--widget-bg)" stroke="var(--app-border)" strokeWidth={2} />
-
-      {/* Positive terminal nub */}
       <rect x={bx + bw + 3} y={by + (bh - nubH) / 2} width={nubW} height={nubH} rx={5}
         fill="var(--app-border)" />
-
-      {/* Fill */}
       {fillW > 0 && (
         <rect x={bx} y={by} width={fillW} height={bh}
           fill={fillColor} clipPath={`url(#${clipId})`} />
       )}
-
-      {/* Segment dividers at 25 / 50 / 75 % */}
       {[0.25, 0.5, 0.75].map((t, i) => (
         <line key={i}
           x1={bx + t * bw} y1={by} x2={bx + t * bw} y2={by + bh}
           stroke="var(--app-bg)" strokeWidth={2.5} clipPath={`url(#${clipId})`} />
       ))}
-
-      {/* Border on top of fill */}
       <rect x={bx} y={by} width={bw} height={bh} rx={br}
         fill="none" stroke="var(--app-border)" strokeWidth={2} />
-
-      {/* Value label centered in body */}
       {showValue && (
         <text x={bx + bw / 2} y={by + bh / 2 + 6}
           fontSize={20} fontWeight="bold" textAnchor="middle"
@@ -467,6 +523,7 @@ export function FillWidget({ config }: WidgetProps) {
           <BatteryViz
             pct={pct} value={safeVal} unit={unit} decimals={decimals}
             fillColor={fillColor} showValue={showValue} uid={uid}
+            orientation={orientation}
           />
         </div>
       </div>
@@ -485,7 +542,7 @@ export function FillWidget({ config }: WidgetProps) {
           <SegmentsViz
             pct={pct} value={safeVal} min={min} max={max} unit={unit} decimals={decimals}
             fillColor={fillColor} zones={zones} colorZones={colorZones}
-            showValue={showValue}
+            showValue={showValue} orientation={orientation}
           />
         </div>
       </div>
