@@ -55,3 +55,38 @@ jobs:
           build: 'true'
           build-command: 'npm run build:adapter'
           install-command: 'npm ci --legacy-peer-deps'
+
+      # ioBroker/testing-action-deploy@v1 always publishes with tag "latest",
+      # ignoring the GitHub release prerelease flag. This step fixes npm tags:
+      # - prerelease → move to "beta", restore "latest" to last stable
+      # - stable     → already on "latest" (correct, nothing to do)
+      - name: Fix npm dist-tag for prerelease
+        if: github.event.release.prerelease == true
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Move prerelease from latest → beta
+        if: github.event.release.prerelease == true
+        run: |
+          VERSION="${{ github.event.release.tag_name }}"
+          VERSION="${VERSION#v}"
+          # Tag the new version as beta
+          npm dist-tag add iobroker.aura@${VERSION} beta
+          # Find the last stable version (highest non-prerelease on npm) and restore latest
+          STABLE=$(npm view iobroker.aura versions --json | node -e "
+            const v=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
+            const stable=v.filter(x=>!x.includes('-')).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+            const current='${VERSION}';
+            const prev=stable.filter(x=>x!==current).pop();
+            console.log(prev||'');
+          ")
+          if [ -n "$STABLE" ] && [ "$STABLE" != "$VERSION" ]; then
+            npm dist-tag add iobroker.aura@${STABLE} latest
+            echo "Restored latest → $STABLE, set beta → $VERSION"
+          else
+            echo "No previous stable version found, beta → $VERSION only"
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
