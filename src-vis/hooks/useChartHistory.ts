@@ -95,13 +95,16 @@ export function useChartHistory(
     const end   = Date.now();
     const start = end - rangeMs;
     const step  = getStep(rangeMs);
-    getHistoryDirect(datapointId, {
-      instance:  historyInstance,
-      start,
-      end,
-      step,
-      aggregate: step ? 'average' : 'none',
-      count:     1000,
+    getObjectDirect(datapointId).then((obj) => {
+      const isNumeric = obj?.common?.type !== 'string';
+      return getHistoryDirect(datapointId, {
+        instance:  historyInstance,
+        start,
+        end,
+        step,
+        aggregate: step && isNumeric ? 'average' : 'none',
+        count:     1000,
+      });
     }).then((data: HistoryEntry[]) => {
       if (!mountedRef.current) return;
       const points: ChartDataPoint[] = data

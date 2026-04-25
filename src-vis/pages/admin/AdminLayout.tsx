@@ -129,8 +129,13 @@ export function AdminLayout() {
       } else if (!remoteHasData && localHasData) {
         // Case 2: ioBroker is empty – push local config to ioBroker
         saveToIoBroker();
+      } else if (remoteHasData && localHasData) {
+        // Case 3: both have data – push local to ioBroker without backup.
+        // Ensures ioBroker is never stale (e.g. after a previous session where
+        // quota errors prevented saveToIoBroker from running).
+        saveToIoBroker({ backup: false });
       }
-      // Case 3: both have data or both empty – useConfigSync handles ongoing sync
+      // else both empty – nothing to do
     });
   }, [connected]); // eslint-disable-line react-hooks/exhaustive-deps
 

@@ -59,7 +59,7 @@ export function IframeWidget({ config }: WidgetProps) {
   const iframeKey = keepAlive ? `ka-${url}` : `${url}-${tick}`;
 
   const sandboxAttr = sandboxEnabled
-    ? 'allow-scripts allow-same-origin allow-forms allow-popups allow-presentation'
+    ? 'allow-scripts allow-forms allow-popups allow-presentation'
     : undefined;
 
   const showTitle = config.title && !config.options?.hideTitle;

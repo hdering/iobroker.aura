@@ -285,8 +285,8 @@ export function getStateDirect(id: string): Promise<ioBrokerState | null> {
 }
 
 /** Set a state value without a React hook. */
-export function setStateDirect(id: string, val: boolean | number | string): void {
-  getSocket().emit('setState', id, { val, ack: false });
+export function setStateDirect(id: string, val: boolean | number | string, ack = false): void {
+  getSocket().emit('setState', id, { val, ack });
 }
 
 /** Create or update an ioBroker object definition without a React hook. */

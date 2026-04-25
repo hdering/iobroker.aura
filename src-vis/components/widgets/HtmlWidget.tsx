@@ -46,7 +46,7 @@ export function HtmlWidget({ config }: WidgetProps) {
       )}
       <iframe
         srcDoc={html}
-        sandbox="allow-scripts allow-same-origin"
+        sandbox="allow-scripts"
         title={config.title || 'HTML'}
         className="flex-1 min-h-0 w-full block"
         style={{ border: 'none' }}

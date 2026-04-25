@@ -4,8 +4,9 @@ import { useDashboardStore } from '../store/dashboardStore';
 import { useThemeStore } from '../store/themeStore';
 import { useGroupStore } from '../store/groupStore';
 import { useConfigStore } from '../store/configStore';
-import { useGroupDefsStore } from '../store/groupDefsStore';
-import { isDirty } from '../store/persistManager';
+import { useGroupDefsStore, type GroupDefsState } from '../store/groupDefsStore';
+import { isDirty, isSavingRecently } from '../store/persistManager';
+import type { WidgetConfig } from '../types';
 
 const IOBROKER_CONFIG_KEY = 'aura.0.config.dashboard';
 const SYNC_STORE_KEYS = ['aura-dashboard', 'aura-theme', 'aura-groups', 'aura-config', 'aura-group-defs'] as const;
@@ -22,11 +23,14 @@ const SYNC_STORE_KEYS = ['aura-dashboard', 'aura-theme', 'aura-groups', 'aura-co
  */
 export function useConfigSync(connected: boolean, configLoaded: React.MutableRefObject<boolean>): void {
   const applyRemoteConfigRaw = useCallback((raw: string) => {
-    // Don't overwrite pending local changes – user is still editing
-    if (isDirty()) return;
+    // Don't overwrite pending local changes, and don't overwrite immediately
+    // after a save — ioBroker needs a moment to propagate the new value.
+    if (isDirty() || isSavingRecently()) return;
     try {
       const remote = JSON.parse(raw) as Record<string, unknown>;
       let changed = false;
+      // Keys that exceeded localStorage quota — applied directly to stores below
+      const quotaFailed = new Set<string>();
       SYNC_STORE_KEYS.forEach((key) => {
         const remoteVal = remote[key];
         if (!remoteVal) return;
@@ -56,7 +60,12 @@ export function useConfigSync(connected: boolean, configLoaded: React.MutableRef
         }
 
         if (remoteStr && remoteStr !== localStorage.getItem(key)) {
-          localStorage.setItem(key, remoteStr);
+          try {
+            localStorage.setItem(key, remoteStr);
+          } catch {
+            // localStorage quota exceeded — keep remoteStr for direct store hydration below
+            quotaFailed.add(key);
+          }
           changed = true;
         }
       });
@@ -65,7 +74,17 @@ export function useConfigSync(connected: boolean, configLoaded: React.MutableRef
         useThemeStore.persist.rehydrate();
         useGroupStore.persist.rehydrate();
         useConfigStore.persist.rehydrate();
-        useGroupDefsStore.persist.rehydrate();
+        if (quotaFailed.has('aura-group-defs')) {
+          // localStorage is full — hydrate group-defs directly from remote JSON
+          try {
+            const remoteVal = remote['aura-group-defs'];
+            const remoteStr = typeof remoteVal === 'string' ? remoteVal : JSON.stringify(remoteVal);
+            const parsed = JSON.parse(remoteStr) as { state?: { defs?: Record<string, WidgetConfig[]> } };
+            if (parsed?.state?.defs !== undefined) useGroupDefsStore.setState(parsed.state as GroupDefsState);
+          } catch { /* ignore */ }
+        } else {
+          useGroupDefsStore.persist.rehydrate();
+        }
       }
     } catch { /* ignore malformed JSON */ }
   }, []);

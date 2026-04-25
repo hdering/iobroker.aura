@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.5.3",
+    "version": "0.5.4",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.5.4": {
+        "en": "Fix: admin save no longer freezes UI (backup excluded aura-group-defs); changes no longer revert after save; advanced chart no longer blank; getHistory error for string datapoints fixed; iframe sandbox escape vector removed; widget ID copy to clipboard",
+        "de": "Fix: Speichern friert UI nicht mehr ein (Backup ohne aura-group-defs); Änderungen werden nach dem Speichern nicht mehr zurückgesetzt; erweitertes Diagramm nicht mehr leer; getHistory-Fehler bei String-Datenpunkten behoben; iframe-Sandbox-Sicherheitslücke geschlossen; Widget-ID per Klick in Zwischenablage kopieren",
+        "ru": "Исправление: сохранение в админе больше не зависает (backup без aura-group-defs); изменения больше не откатываются после сохранения; расширенный график больше не пустой; ошибка getHistory для строковых датапоинтов исправлена; уязвимость sandbox iframe устранена; копирование ID виджета в буфер обмена",
+        "pt": "Correção: salvar no admin não congela mais a UI (backup sem aura-group-defs); alterações não revertem mais após salvar; gráfico avançado não fica mais em branco; erro getHistory para datapoints string corrigido; vulnerabilidade sandbox iframe removida; copiar ID do widget para área de transferência",
+        "nl": "Fix: opslaan in admin bevriest UI niet meer (backup zonder aura-group-defs); wijzigingen keren niet meer terug na opslaan; geavanceerde grafiek niet meer leeg; getHistory-fout voor string-datapunten opgelost; iframe sandbox beveiligingslek verwijderd; widget-ID naar klembord kopiëren",
+        "fr": "Correction: la sauvegarde dans l'admin ne gèle plus l'UI (backup sans aura-group-defs); les modifications ne reviennent plus après la sauvegarde; le graphique avancé n'est plus vide; erreur getHistory pour les datapoints string corrigée; faille sandbox iframe supprimée; copie de l'ID du widget dans le presse-papiers",
+        "it": "Fix: il salvataggio nell'admin non blocca più l'UI (backup senza aura-group-defs); le modifiche non vengono più annullate dopo il salvataggio; il grafico avanzato non è più vuoto; errore getHistory per datapoint string corretto; vulnerabilità sandbox iframe rimossa; copia ID widget negli appunti",
+        "es": "Corrección: guardar en admin ya no congela la UI (backup sin aura-group-defs); los cambios ya no revierten tras guardar; el gráfico avanzado ya no queda en blanco; error getHistory para datapoints string corregido; vulnerabilidad sandbox iframe eliminada; copiar ID del widget al portapapeles",
+        "pl": "Poprawka: zapisywanie w adminie nie zawiesza już UI (backup bez aura-group-defs); zmiany nie są już cofane po zapisaniu; zaawansowany wykres nie jest już pusty; błąd getHistory dla datapointów string naprawiony; luka bezpieczeństwa sandbox iframe usunięta; kopiowanie ID widżetu do schowka",
+        "uk": "Виправлення: збереження в адміні більше не заморожує UI (backup без aura-group-defs); зміни більше не скасовуються після збереження; розширений графік більше не порожній; помилка getHistory для рядкових датапоінтів виправлена; вразливість sandbox iframe усунута; копіювання ID віджета в буфер обміну",
+        "zh-cn": "修复：后台保存不再冻结UI（备份排除aura-group-defs）；保存后更改不再回滚；高级图表不再空白；字符串数据点的getHistory错误已修复；iframe沙箱安全漏洞已移除；点击复制组件ID到剪贴板"
+      },
       "0.5.3": {
         "en": "Perf: faster tab switches, faster DP value display after reload; fix: chart widgets no longer warn about 0-size on inactive tabs; fix: admin grid no longer repositions widgets when opened in a small window; feat: collapsible admin sidebar for narrow windows",
         "de": "Perf: schnellere Tab-Wechsel, schnellere DP-Wertanzeige nach Reload; Fix: Chart-Widgets warnen nicht mehr über 0-Größe bei inaktiven Tabs; Fix: Admin-Grid verschiebt Widgets nicht mehr bei kleinem Fenster; Neu: einklappbare Admin-Sidebar bei schmalen Fenstern",
@@ -183,19 +196,6 @@
         "pl": "Poprawka(lint): nieeskejpowane cudzysłowy w ciągach JSX zastąpione encjami HTML",
         "uk": "Виправлення(lint): неекрановані лапки в рядках JSX замінені HTML-сутностями",
         "zh-cn": "修复(lint)：JSX标签字符串中未转义的引号替换为HTML实体"
-      },
-      "0.4.97": {
-        "en": "WindowContact: flexible state mapping & lock DP; custom grid: widget icon, battery/reach as text or icon, combined status-badges; value widget custom grid support; fix: icon size flicker",
-        "de": "Fensterkontakt: flexibles Wertemapping & Schloss-DP; Custom-Raster: Widget-Icon, Batterie/Erreichbarkeit als Text oder Icon, kombinierte Status-Badges; Wert-Widget Custom-Raster; Fix: Icon-Größen-Flimmern",
-        "ru": "Оконный контакт: гибкое сопоставление значений и DP замка; пользовательская сетка: иконка виджета, батарея/доступность как текст или иконка, объединённые статус-значки; поддержка Custom-Grid в виджете значений; исправлено мерцание при изменении размера иконки",
-        "pt": "Contato de janela: mapeamento flexível de estados e DP de bloqueio; grade personalizada: ícone de widget, bateria/alcance como texto ou ícone, status-badges combinados; suporte à grade personalizada no widget de valor; correção: tremulação do tamanho do ícone",
-        "nl": "Raamcontact: flexibele waardemapping & slot-DP; aangepast raster: widget-icoon, batterij/bereik als tekst of icoon, gecombineerde statusbadges; waarde-widget ondersteuning voor aangepast raster; fix: flikkering icoongrootte",
-        "fr": "Contact de fenêtre: mappage d'état flexible et DP de verrou; grille personnalisée: icône de widget, batterie/portée en texte ou icône, status-badges combinés; support de la grille personnalisée pour le widget valeur; correction: scintillement de la taille d'icône",
-        "it": "Contatto finestra: mappatura flessibile degli stati e DP blocco; griglia personalizzata: icona widget, batteria/portata come testo o icona, status-badges combinati; supporto griglia personalizzata widget valore; fix: sfarfallio dimensione icona",
-        "es": "Contacto de ventana: mapeo flexible de estados y DP de cerradura; cuadrícula personalizada: icono de widget, batería/alcance como texto o icono, status-badges combinados; soporte de cuadrícula personalizada en widget de valor; corrección: parpadeo del tamaño del icono",
-        "pl": "Kontakt okienny: elastyczne mapowanie wartości i DP zamka; siatka niestandardowa: ikona widgetu, bateria/zasięg jako tekst lub ikona, połączone odznaki statusu; obsługa niestandardowej siatki w widgecie wartości; poprawka: migotanie rozmiaru ikony",
-        "uk": "Контакт вікна: гнучке зіставлення значень і DP замка; власна сітка: іконка віджета, батарея/доступність як текст або іконка, об'єднані значки статусу; підтримка власної сітки у віджеті значень; виправлено мерехтіння розміру іконки",
-        "zh-cn": "窗户接触器：灵活状态映射和锁定DP；自定义网格：组件图标、电池/可达性作为文本或图标、组合状态徽章；数值组件完整自定义网格支持；修复：图标大小闪烁"
       }
     }
   },

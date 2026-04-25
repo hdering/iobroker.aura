@@ -175,6 +175,16 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.5.4 (2026-04-25)
+- Fix(save): admin save no longer freezes the UI for 8–10 s (backup JSON with aura-group-defs could reach 50 MB; now excluded from backup entries and discarded on migration)
+- Fix(save): changes no longer revert after saving (useConfigSync blocked for 5 s after save; ioBroker state pushed on admin startup)
+- Fix(chart): advanced chart (ECharts) no longer shows blank after loading (containerRef always mounted; loader/no-data shown as overlay)
+- Fix(history): getHistory no longer errors with "unsupported mean iterator type" for string datapoints (aggregate set to "none" for non-numeric types)
+- Fix(security): iframe sandbox no longer combines allow-scripts + allow-same-origin (sandbox escape vector removed)
+- Fix(backup): backup state written with ack:true to avoid ioBroker read-only warning
+- Fix(sync): localStorage quota errors no longer silently swallow rehydrate calls; quota-exceeded keys hydrated directly from ioBroker remote data
+- Feat(widget): click widget ID in edit dialog to copy to clipboard
+
 ### 0.5.3 (2026-04-25)
 - Perf: faster tab switches (async localStorage flush), faster DP value display after hard reload (expanded prefetch + skip redundant socket calls)
 - Fix(chart): recharts and ECharts no longer warn about 0-size container on inactive tabs (bidirectional hasSize guard)

@@ -54,64 +54,34 @@ export function EChartWidget({ config, editMode }: WidgetProps) {
 
   const seriesDataMap = useMultiSeriesData(echartSeries, connected, subscribe);
 
-  // Delay ECharts init until the container has non-zero dimensions.
-  // Widgets on inactive tabs have display:none → clientWidth/Height = 0 → ECharts warning.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const chartRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [hasSize, setHasSize] = useState(false);
+  // Single ResizeObserver handles both initial sizing and tab-switch resize.
+  // Avoids the two-effect race where the first effect returns early on visible
+  // mount and the second effect never fires when switching to a hidden tab.
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    if (el.clientWidth > 0 && el.clientHeight > 0) { setHasSize(true); return; }
-    const ro = new ResizeObserver(() => {
-      if ((containerRef.current?.clientWidth ?? 0) > 0 && (containerRef.current?.clientHeight ?? 0) > 0)
+    const check = () => {
+      const w = containerRef.current?.clientWidth ?? 0;
+      const h = containerRef.current?.clientHeight ?? 0;
+      if (w > 0 && h > 0) {
         setHasSize(true);
-    });
+        chartRef.current?.getEchartsInstance?.()?.resize?.();
+      }
+    };
+    check();
+    const ro = new ResizeObserver(check);
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  // Resize chart when container becomes visible again (tab switch back from display:none).
-  // Guard: skip resize when dimensions are 0 (tab is being hidden) to avoid ECharts warning.
-  useEffect(() => {
-    if (!hasSize) return;
-    const el = containerRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(() => {
-      const w = containerRef.current?.clientWidth ?? 0;
-      const h = containerRef.current?.clientHeight ?? 0;
-      if (w > 0 && h > 0) chartRef.current?.getEchartsInstance?.()?.resize?.();
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [hasSize]);
 
   if (layout === 'custom') return <CustomGridView config={config} value="" />;
 
   const allLoading = echartSeries.length > 0 && echartSeries.every((s) => seriesDataMap.get(s.id)?.loading);
   const hasAnyData = echartSeries.some((s) => (seriesDataMap.get(s.id)?.data.length ?? 0) > 0);
-
-  if (allLoading) {
-    return (
-      <div className="flex items-center justify-center h-full" style={{ color: 'var(--text-secondary)' }}>
-        <Loader size={20} className="animate-spin" />
-      </div>
-    );
-  }
-
-  if (echartSeries.length === 0 || !hasAnyData) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full gap-2" style={{ color: 'var(--text-secondary)' }}>
-        <BarChart2 size={28} strokeWidth={1.5} />
-        <span className="text-xs">Keine Daten</span>
-        {editMode && showTitle && config.title && (
-          <span className="absolute top-1 left-2 text-[10px] font-medium" style={{ color: 'var(--text-secondary)' }}>
-            {config.title}
-          </span>
-        )}
-      </div>
-    );
-  }
 
   // Gauge mode: show first series' current value as a gauge
   if (isGauge) {
@@ -285,13 +255,24 @@ export function EChartWidget({ config, editMode }: WidgetProps) {
           {config.title}
         </span>
       )}
-      {hasSize && (
-      <ReactECharts
-        ref={chartRef}
-        option={merged}
-        style={{ width: '100%', height: '100%' }}
-        opts={{ renderer: 'canvas' }}
-      />
+      {allLoading && (
+        <div className="absolute inset-0 flex items-center justify-center" style={{ color: 'var(--text-secondary)' }}>
+          <Loader size={20} className="animate-spin" />
+        </div>
+      )}
+      {!allLoading && (echartSeries.length === 0 || !hasAnyData) && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2" style={{ color: 'var(--text-secondary)' }}>
+          <BarChart2 size={28} strokeWidth={1.5} />
+          <span className="text-xs">Keine Daten</span>
+        </div>
+      )}
+      {hasSize && hasAnyData && (
+        <ReactECharts
+          ref={chartRef}
+          option={merged}
+          style={{ width: '100%', height: '100%' }}
+          opts={{ renderer: 'canvas' }}
+        />
       )}
     </div>
   );

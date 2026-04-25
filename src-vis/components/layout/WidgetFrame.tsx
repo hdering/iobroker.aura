@@ -981,6 +981,7 @@ function CameraSlotEditorRow({ slot, idx, label, cCls, cSty, onChange, onRemove,
 export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDuplicate }: WidgetFrameProps) {
   const t = useT();
   const [openPanel, setOpenPanel] = useState<'menu' | 'edit' | 'conditions' | null>(null);
+  const [idCopied, setIdCopied] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [showMoveMenu, setShowMoveMenu] = useState(false);
   const [showCopyMenu, setShowCopyMenu] = useState(false);
@@ -1441,7 +1442,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
       {/* Edit Modal */}
       {openPanel === 'edit' && (
         <CenteredModal
-          title={<>{t('wf.edit.title')} <span className="text-[10px] font-mono opacity-40 ml-1 font-normal">({config.id})</span></>}
+          title={<>{t('wf.edit.title')} <span className="relative inline-flex items-center"><span className="text-[10px] font-mono opacity-40 ml-1 font-normal cursor-pointer hover:opacity-70 active:opacity-50 select-none" title="ID kopieren" onClick={() => { navigator.clipboard.writeText(config.id); setIdCopied(true); setTimeout(() => setIdCopied(false), 1500); }}>({config.id})</span>{idCopied && <span className="absolute left-full ml-1 whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-sans font-normal" style={{ background: 'var(--accent)', color: '#fff', opacity: 1 }}>Kopiert!</span>}</span></>}
           wide={config.type === 'echart' || config.type === 'autolist' || config.type === 'list' || config.type === 'trash'}
           onClose={() => openPanelFor(null)}
         >
