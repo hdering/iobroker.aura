@@ -3,7 +3,7 @@ import { useConfigSync } from '../../hooks/useConfigSync';
 import { version as appVersion } from '../../../package.json';
 import { PortalTargetContext } from '../../contexts/PortalTargetContext';
 import { Navigate, Outlet, NavLink } from 'react-router-dom';
-import { LayoutDashboard, Palette, Settings, LogOut, PenSquare, Save, Undo2, Layers, Layers2, Sun, Moon, ExternalLink } from 'lucide-react';
+import { LayoutDashboard, Palette, Settings, LogOut, PenSquare, Save, Undo2, Layers, Layers2, Sun, Moon, ExternalLink, Menu, X } from 'lucide-react';
 import { useAuthStore, logout } from '../../store/authStore';
 import { useThemeStore } from '../../store/themeStore';
 import { getTheme, ADMIN_DARK_THEME } from '../../themes';
@@ -188,6 +188,20 @@ export function AdminLayout() {
 
   const [portalTarget, setPortalTarget] = useState<HTMLDivElement | null>(null);
 
+  // ── Collapsible sidebar for narrow windows ─────────────────────────────
+  const SIDEBAR_BP = 768;
+  const [isNarrow, setIsNarrow] = useState(() => window.innerWidth < SIDEBAR_BP);
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= SIDEBAR_BP);
+  useEffect(() => {
+    const handler = () => {
+      const narrow = window.innerWidth < SIDEBAR_BP;
+      setIsNarrow(narrow);
+      if (!narrow) setSidebarOpen(true);
+    };
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
   const NAV = [
     { to: '/admin', label: t('admin.nav.overview'), icon: LayoutDashboard, end: true },
     { to: '/admin/editor', label: t('admin.nav.editor'), icon: PenSquare },
@@ -207,21 +221,47 @@ export function AdminLayout() {
       background: adminTheme.vars['--app-bg'],
       color: adminTheme.vars['--text-primary'],
     }}>
-      <aside className="aura-scroll w-56 shrink-0 flex flex-col h-screen sticky top-0 overflow-y-auto" style={{ background: 'var(--app-surface)', borderRight: '1px solid var(--app-border)' }}>
+      {/* Backdrop for overlay sidebar on narrow screens */}
+      {isNarrow && sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40"
+          style={{ background: 'rgba(0,0,0,0.45)' }}
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      <aside
+        className={`aura-scroll flex flex-col h-screen overflow-y-auto transition-transform duration-200 ${
+          isNarrow
+            ? `fixed top-0 left-0 z-50 w-56 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`
+            : 'w-56 shrink-0 sticky top-0'
+        }`}
+        style={{ background: 'var(--app-surface)', borderRight: '1px solid var(--app-border)' }}
+      >
         <div className="px-5 py-5 border-b shrink-0 flex items-center justify-between" style={{ borderColor: 'var(--app-border)' }}>
           <div title="Adaptive Unified Room Automation">
             <p className="text-xs font-semibold uppercase tracking-widest mb-0.5" style={{ color: 'var(--text-secondary)' }}>Aura</p>
             <p className="font-bold text-lg leading-none" style={{ color: 'var(--text-primary)' }}>Admin</p>
             <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>v{appVersion}</p>
           </div>
-          <button
-            onClick={() => setAdminTheme(adminTheme.dark ? 'light' : 'dark')}
-            className="w-8 h-8 flex items-center justify-center rounded-lg hover:opacity-80 transition-opacity"
-            style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
-            title={adminTheme.dark ? t('admin.nav.lightMode') : t('admin.nav.darkMode')}
-          >
-            {adminTheme.dark ? <Sun size={15} /> : <Moon size={15} />}
-          </button>
+          <div className="flex items-center gap-1">
+            {isNarrow && (
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg hover:opacity-80 transition-opacity"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                <X size={15} />
+              </button>
+            )}
+            <button
+              onClick={() => setAdminTheme(adminTheme.dark ? 'light' : 'dark')}
+              className="w-8 h-8 flex items-center justify-center rounded-lg hover:opacity-80 transition-opacity"
+              style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+              title={adminTheme.dark ? t('admin.nav.lightMode') : t('admin.nav.darkMode')}
+            >
+              {adminTheme.dark ? <Sun size={15} /> : <Moon size={15} />}
+            </button>
+          </div>
         </div>
 
         <nav className="flex-1 p-3 space-y-1">
@@ -258,13 +298,22 @@ export function AdminLayout() {
       <div className="flex-1 flex flex-col overflow-hidden" style={{ background: 'var(--app-bg)' }}>
         {/* Save bar */}
         <div
-          className="shrink-0 flex items-center justify-end gap-2 px-4 py-2 transition-all"
+          className="shrink-0 flex items-center gap-2 px-4 py-2 transition-all"
           style={{
             background: dirty ? 'var(--accent)11' : 'var(--app-surface)',
             borderBottom: `1px solid ${dirty ? 'var(--accent)44' : 'var(--app-border)'}`,
             minHeight: '44px',
           }}
         >
+          {isNarrow && (
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="flex items-center justify-center w-8 h-8 rounded-lg hover:opacity-80 transition-opacity shrink-0"
+              style={{ color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+            >
+              <Menu size={16} />
+            </button>
+          )}
           {saveError && !dirty && (
             <span className="text-xs mr-auto" style={{ color: 'var(--accent-red)' }}>
               {saveError}
@@ -293,7 +342,7 @@ export function AdminLayout() {
               </button>
             </>
           ) : (
-            <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{t('admin.save.saved')}</span>
+            <span className="text-xs ml-auto" style={{ color: 'var(--text-secondary)' }}>{t('admin.save.saved')}</span>
           )}
         </div>
 
