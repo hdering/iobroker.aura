@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.5.5",
+    "version": "0.5.6",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.5.6": {
+        "en": "Perf: dashboard now visible immediately after connect (no loading bar); only active tab datapoints prefetched on start; other tabs loaded in background. Feat: config split into separate ioBroker states per store key; automatic migration from old blob format",
+        "de": "Perf: Dashboard erscheint sofort nach Verbindung (kein Ladebalken mehr); nur aktiver Tab wird beim Start vorgeladen, andere Tabs im Hintergrund. Neu: Konfiguration auf separate ioBroker-States aufgeteilt; automatische Migration vom alten Format",
+        "ru": "Производительность: дашборд отображается сразу после подключения (без полосы загрузки); только активная вкладка загружается при старте, остальные — в фоне. Новое: конфигурация разделена на отдельные состояния ioBroker с автомиграцией",
+        "pt": "Perf: dashboard visível imediatamente após conexão (sem barra de carregamento); apenas a aba ativa é pré-carregada; outras abas carregadas em segundo plano. Novo: config dividida em estados ioBroker separados com migração automática",
+        "nl": "Perf: dashboard direct zichtbaar na verbinding (geen laadbalk meer); alleen actieve tab voorgeladen bij start, andere tabs op achtergrond. Nieuw: config gesplitst in aparte ioBroker-states met automatische migratie",
+        "fr": "Perf: tableau de bord visible immédiatement après connexion (sans barre de chargement); seul l'onglet actif est préchargé au démarrage, les autres en arrière-plan. Nouveau: config divisée en états ioBroker séparés avec migration automatique",
+        "it": "Perf: dashboard visibile subito dopo la connessione (nessuna barra di caricamento); solo la scheda attiva viene precaricata all'avvio, le altre in background. Nuovo: config suddivisa in stati ioBroker separati con migrazione automatica",
+        "es": "Perf: dashboard visible inmediatamente tras conexión (sin barra de carga); solo pestaña activa precargada al inicio, otras en segundo plano. Nuevo: config dividida en estados ioBroker separados con migración automática",
+        "pl": "Perf: dashboard widoczny natychmiast po połączeniu (bez paska ładowania); tylko aktywna karta ładowana przy starcie, pozostałe w tle. Nowe: konfiguracja podzielona na osobne stany ioBroker z automatyczną migracją",
+        "uk": "Продуктивність: дашборд відображається одразу після з'єднання (без смуги завантаження); лише активна вкладка завантажується при старті, інші — у фоні. Нове: конфігурація розділена на окремі стани ioBroker з автоміграцією",
+        "zh-cn": "性能：连接后立即显示仪表板（无加载条）；启动时仅预加载活动标签页，其他标签页后台加载。新功能：配置拆分为独立的ioBroker状态，自动从旧格式迁移"
+      },
       "0.5.5": {
         "en": "Feat(chart): configurable line/area and average line colors; fixed icon in card and default layout; unit color defaults to black",
         "de": "Neu(Diagramm): einstellbare Linien-/Flächenfarbe und Durchschnittslinienfarbe; Icon in Karten- und Standard-Layout korrigiert; Einheitenfarbe standardmäßig schwarz",
@@ -183,19 +196,6 @@
         "pl": "Poprawka: brakujące pole statusBadges w hooku useStatusFields powodowało błędy kompilacji TypeScript w CI",
         "uk": "Виправлення: відсутнє поле statusBadges у хуку useStatusFields спричиняло помилки збірки TypeScript у CI",
         "zh-cn": "修复：useStatusFields hook 中缺少 statusBadges 字段导致 CI 中 TypeScript 构建错误"
-      },
-      "0.4.99": {
-        "en": "Fix: disable new eslint-plugin-react-hooks v7.x rules (set-state-in-effect, static-components, refs, purity, use-memo) that were not present in v4.x",
-        "de": "Fix: neue eslint-plugin-react-hooks v7.x Regeln deaktiviert, die in v4.x nicht vorhanden waren",
-        "ru": "Исправление: отключены новые правила eslint-plugin-react-hooks v7.x, отсутствовавшие в v4.x",
-        "pt": "Correção: novas regras do eslint-plugin-react-hooks v7.x desativadas (ausentes na v4.x)",
-        "nl": "Fix: nieuwe eslint-plugin-react-hooks v7.x regels uitgeschakeld die niet aanwezig waren in v4.x",
-        "fr": "Correction: nouvelles règles eslint-plugin-react-hooks v7.x désactivées (absentes en v4.x)",
-        "it": "Fix: nuove regole eslint-plugin-react-hooks v7.x disabilitate (assenti in v4.x)",
-        "es": "Corrección: nuevas reglas de eslint-plugin-react-hooks v7.x desactivadas (ausentes en v4.x)",
-        "pl": "Poprawka: nowe reguły eslint-plugin-react-hooks v7.x wyłączone (nieobecne w v4.x)",
-        "uk": "Виправлення: нові правила eslint-plugin-react-hooks v7.x відключені (відсутні в v4.x)",
-        "zh-cn": "修复：禁用 eslint-plugin-react-hooks v7.x 中新增的规则（v4.x 中不存在）"
       }
     }
   },

@@ -217,6 +217,22 @@ class Aura extends utils.Adapter {
       native: {},
     });
 
+    // Separate config states (one per store key — avoids single-blob quota issues)
+    const configStates = [
+      { id: 'config.theme',           name: 'Theme configuration' },
+      { id: 'config.groups',          name: 'Group configuration' },
+      { id: 'config.app-config',      name: 'App configuration' },
+      { id: 'config.global-settings', name: 'Global settings' },
+      { id: 'config.group-defs',      name: 'Group widget definitions' },
+    ];
+    for (const s of configStates) {
+      await this.setObjectNotExistsAsync(s.id, {
+        type: 'state',
+        common: { name: s.name, type: 'string', role: 'json', read: true, write: true, def: '' },
+        native: {},
+      });
+    }
+
     // Automatisches Backup – wird nach jedem Speichern geschrieben
     await this.setObjectNotExistsAsync('config.dashboard_backup', {
       type: 'state',

@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { setupPin } from '../../store/authStore';
 import { useActiveLayout, useDashboardStore } from '../../store/dashboardStore';
-import { useThemeStore } from '../../store/themeStore';
+
 import { useConnectionStore } from '../../store/connectionStore';
 import { useConfigStore } from '../../store/configStore';
 import { useAdminPrefsStore } from '../../store/adminPrefsStore';
 import { useGlobalSettingsStore } from '../../store/globalSettingsStore';
-import { useGroupStore } from '../../store/groupStore';
-import { useGroupDefsStore } from '../../store/groupDefsStore';
+
+import { applyRaw, rehydrateAll } from '../../utils/configLoader';
 import { reconnectSocket, getObjectViewDirect, getStateDirect, setStateDirect } from '../../hooks/useIoBroker';
 import { saveAll, saveToIoBroker, BACKUP_TS_KEY } from '../../store/persistManager';
 import { Eye, EyeOff, AlertTriangle, RefreshCw, Tablet, Edit3, Check, X, Trash2, History } from 'lucide-react';
@@ -113,15 +113,12 @@ function applyBackupEntry(entry: BackupEntry): boolean {
     const val = entry.payload[key];
     if (!val) return;
     const str = typeof val === 'string' ? val : JSON.stringify(val);
-    if (str.length > 2) { localStorage.setItem(key, str); changed = true; }
+    if (str.length < 3) return;
+    applyRaw(key as Parameters<typeof applyRaw>[0], str);
+    changed = true;
   });
   if (!changed) return false;
-  useDashboardStore.persist.rehydrate();
-  useThemeStore.persist.rehydrate();
-  useGroupStore.persist.rehydrate();
-  useConfigStore.persist.rehydrate();
-  useGroupDefsStore.persist.rehydrate();
-  useGlobalSettingsStore.persist.rehydrate();
+  rehydrateAll(true);
   try { saveAll(); saveToIoBroker(); } catch { /* quota – non-fatal */ }
   return true;
 }

@@ -11,10 +11,9 @@ import { isDirty, saveAll, revertAll, subscribeDirty, saveToIoBroker, configureB
 import { useDashboardStore, useActiveLayout } from '../../store/dashboardStore';
 import { useGroupStore } from '../../store/groupStore';
 import { useConfigStore } from '../../store/configStore';
-import { useGroupDefsStore } from '../../store/groupDefsStore';
-import { useGlobalSettingsStore } from '../../store/globalSettingsStore';
+import { loadConfigFromIoBroker, applyRaw } from '../../utils/configLoader';
 import { useAdminPrefsStore } from '../../store/adminPrefsStore';
-import { useIoBroker, getStateDirect } from '../../hooks/useIoBroker';
+import { useIoBroker } from '../../hooks/useIoBroker';
 import { useT } from '../../i18n';
 
 function useSaveState() {
@@ -40,7 +39,7 @@ function useSaveState() {
       () => useThemeStore.persist.rehydrate(),
       () => useGroupStore.persist.rehydrate(),
       () => useConfigStore.persist.rehydrate(),
-      () => useGroupDefsStore.persist.rehydrate(),
+      () => { const v = localStorage.getItem('aura-group-defs'); if (v) applyRaw('aura-group-defs', v); },
     ]);
   };
 
@@ -82,60 +81,23 @@ export function AdminLayout() {
   // persist writes the default initial state via managedStorage.setItem(), which
   // spuriously sets isDirty()=true. Using it would cause saveToIoBroker() to run
   // with an empty localStorage and overwrite ioBroker with null values.
-  const ADMIN_SYNC_KEYS = ['aura-dashboard', 'aura-theme', 'aura-groups', 'aura-config', 'aura-global-settings', 'aura-group-defs'] as const;
   const autoSyncedRef = useRef(false);
   const adminConfigLoadedRef = useRef(false);
   useEffect(() => {
     if (!connected || autoSyncedRef.current) return;
     autoSyncedRef.current = true;
-    void getStateDirect('aura.0.config.dashboard').then((state) => {
+    loadConfigFromIoBroker(true).then((remoteHasData) => {
       adminConfigLoadedRef.current = true;
-      const remoteRaw = state?.val ? String(state.val) : '';
-
-      let remotePayload: Record<string, unknown> = {};
-      let remoteHasData = false;
-      try {
-        remotePayload = JSON.parse(remoteRaw) as Record<string, unknown>;
-        remoteHasData = Object.values(remotePayload).some(
-          v => v && typeof v === 'string' && v !== '{}' && v.length > 10,
-        );
-      } catch { /* ignore */ }
-
-      const localHasData = ADMIN_SYNC_KEYS.some((key) => {
-        const raw = localStorage.getItem(key);
-        return raw !== null && raw.length > 10;
-      });
-
-      if (remoteHasData && !localHasData) {
-        // Case 1: fresh browser / cleared cache – apply remote config immediately
-        let changed = false;
-        ADMIN_SYNC_KEYS.forEach((key) => {
-          const val = remotePayload[key];
-          if (!val) return;
-          const str = typeof val === 'string' ? val : JSON.stringify(val);
-          if (str.length > 2 && str !== localStorage.getItem(key)) {
-            localStorage.setItem(key, str);
-            changed = true;
-          }
-        });
-        if (changed) {
-          useDashboardStore.persist.rehydrate();
-          useThemeStore.persist.rehydrate();
-          useGroupStore.persist.rehydrate();
-          useConfigStore.persist.rehydrate();
-          useGroupDefsStore.persist.rehydrate();
-          useGlobalSettingsStore.persist.rehydrate();
-        }
-      } else if (!remoteHasData && localHasData) {
-        // Case 2: ioBroker is empty – push local config to ioBroker
+      const localHasData = ['aura-dashboard', 'aura-theme', 'aura-groups', 'aura-config', 'aura-global-settings'].some(
+        (key) => { const v = localStorage.getItem(key); return v !== null && v.length > 10; },
+      );
+      if (!remoteHasData && localHasData) {
+        // ioBroker is empty – push local config to ioBroker
         saveToIoBroker();
       } else if (remoteHasData && localHasData) {
-        // Case 3: both have data – push local to ioBroker without backup.
-        // Ensures ioBroker is never stale (e.g. after a previous session where
-        // quota errors prevented saveToIoBroker from running).
+        // Both have data – push local to ioBroker to ensure it's current
         saveToIoBroker({ backup: false });
       }
-      // else both empty – nothing to do
     });
   }, [connected]); // eslint-disable-line react-hooks/exhaustive-deps
 

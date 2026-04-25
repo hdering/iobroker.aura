@@ -175,6 +175,12 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.5.6 (2026-04-25)
+- Perf: dashboard now visible immediately after socket connect — no loading bar, no blocking on datapoint prefetch
+- Perf: only active tab datapoints prefetched on start; other tabs prefetched silently in background; per-tab prefetch on first visit
+- Feat: config split into separate ioBroker states (`config.theme`, `config.groups`, `config.app-config`, `config.global-settings`, `config.group-defs`); automatic one-time migration from old single-blob format
+- Feat: `useConfigSync` subscribes to each state individually; polling interval increased to 30 s; `group-defs` excluded from polling
+
 ### 0.5.5 (2026-04-25)
 - Feat(chart): configurable line/area color and average line color; icon now shown in both card and default layout (uses configured icon, falls back to TrendingUp); unit color defaults to black
 

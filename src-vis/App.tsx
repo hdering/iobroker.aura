@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Sun, Moon, Settings } from 'lucide-react';
-import { useIoBroker, getStateDirect, setStateDirect, subscribeStateDirect, prefetchStates } from './hooks/useIoBroker';
+import { useIoBroker, setStateDirect, subscribeStateDirect, prefetchStates } from './hooks/useIoBroker';
 import { useConfigSync } from './hooks/useConfigSync';
 import { useConnectionStore } from './store/connectionStore';
 import { useConfigStore } from './store/configStore';
@@ -9,7 +9,7 @@ import { useDashboardStore, useLayoutBySlug } from './store/dashboardStore';
 import { useThemeStore } from './store/themeStore';
 import { getTheme } from './themes';
 import { useGroupStore } from './store/groupStore';
-import { useGroupDefsStore } from './store/groupDefsStore';
+import { loadConfigFromIoBroker } from './utils/configLoader';
 import { Dashboard } from './components/layout/Dashboard';
 import { TabBar } from './components/layout/TabBar';
 import { useIframeStore } from './store/iframeStore';
@@ -19,15 +19,14 @@ import { applyCustomFormat, fmtTime, fmtDate } from './utils/clockUtils';
 import type { Tab } from './store/dashboardStore';
 import type { FrontendSettings } from './store/configStore';
 
-const IOBROKER_CONFIG_KEY = 'aura.0.config.dashboard';
-const SYNC_STORE_KEYS = ['aura-dashboard', 'aura-theme', 'aura-groups', 'aura-config', 'aura-group-defs'] as const;
+import { applyRaw } from './utils/configLoader';
 
 const STORE_REHYDRATORS: Record<string, () => void> = {
   'aura-dashboard':  () => useDashboardStore.persist.rehydrate(),
   'aura-theme':      () => useThemeStore.persist.rehydrate(),
   'aura-groups':     () => useGroupStore.persist.rehydrate(),
   'aura-config':     () => useConfigStore.persist.rehydrate(),
-  'aura-group-defs': () => useGroupDefsStore.persist.rehydrate(),
+  'aura-group-defs': () => { const v = localStorage.getItem('aura-group-defs'); if (v) applyRaw('aura-group-defs', v); },
 };
 
 // ── HeaderClock ────────────────────────────────────────────────────────────
@@ -192,41 +191,22 @@ export default function App() {
   const effectiveCustomVars = useEffectiveCustomVars(layout?.id);
   const currentTheme = getTheme(effectiveThemeId);
 
-  // ── Prefetch + fade-in ────────────────────────────────────────────────────
-  // Collect all main datapoints from all tabs, fetch them in one parallel burst
-  // before widgets mount, so useDatapoint can read from cache synchronously.
-  const [dashboardVisible, setDashboardVisible] = useState(false);
-  const [loadTotal, setLoadTotal] = useState(0);
-  const prefetchDone = useRef(false);
-  // Direct DOM refs so progress updates bypass React batching and render immediately.
-  const loadBarRef   = useRef<HTMLDivElement>(null);
-  const loadCountRef = useRef<HTMLSpanElement>(null);
+  // ── Prefetch (silent, background) ────────────────────────────────────────
+  // Warm the state cache for the active tab before widgets mount so they render
+  // with real values immediately. Other tabs are prefetched silently in the
+  // background after the active tab is ready — no loading screen, no blocking.
+  const prefetchDoneRef = useRef(false);
 
-  const allDatapoints = useMemo(() => {
+  const datapointsForTab = useCallback((tabId: string): string[] => {
+    const tab = tabs.find((t) => t.id === tabId);
+    if (!tab) return [];
     const ids = new Set<string>();
-    tabs.forEach((tab) => {
-      (tab.widgets ?? []).forEach((w) => {
-        if (w.datapoint) ids.add(w.datapoint);
-        if (w.options) collectOptionDps(w.options, ids);
-      });
+    (tab.widgets ?? []).forEach((w) => {
+      if (w.datapoint) ids.add(w.datapoint);
+      if (w.options) collectOptionDps(w.options, ids);
     });
     return [...ids];
   }, [tabs]);
-
-  useEffect(() => {
-    if (!connected || prefetchDone.current) return;
-    prefetchDone.current = true;
-    const total = allDatapoints.length;
-    if (total === 0) { setDashboardVisible(true); return; }
-    setLoadTotal(total);
-    prefetchStates(allDatapoints, (loaded, t) => {
-      // Update DOM directly to avoid React batching collapsing all updates into one.
-      if (loadBarRef.current)
-        loadBarRef.current.style.width = `${Math.round((loaded / t) * 100)}%`;
-      if (loadCountRef.current)
-        loadCountRef.current.textContent = `${loaded} / ${t} Datenpunkte`;
-    }).then(() => setDashboardVisible(true));
-  }, [connected, allDatapoints]);
 
   // ── Local active tab state (frontend only — doesn't affect admin editor)
   // URL slug takes priority; fall back to defaultTabId or first tab
@@ -237,6 +217,21 @@ export default function App() {
     }
     return layout?.defaultTabId ?? layout?.activeTabId ?? tabs[0]?.id ?? '';
   });
+
+  // Prefetch active tab on connect, then background-prefetch remaining tabs.
+  // Dashboard is always visible immediately — no blocking on prefetch completion.
+  useEffect(() => {
+    if (!connected || prefetchDoneRef.current || !activeTabId) return;
+    prefetchDoneRef.current = true;
+    const activeIds = datapointsForTab(activeTabId);
+    prefetchStates(activeIds).then(() => {
+      // After active tab is warm, silently prefetch remaining tabs
+      const otherIds = tabs
+        .filter((t) => t.id !== activeTabId)
+        .flatMap((t) => datapointsForTab(t.id));
+      if (otherIds.length > 0) void prefetchStates(otherIds);
+    });
+  }, [connected, activeTabId, datapointsForTab, tabs]);
 
   // Reset active tab when layout changes (e.g. after ioBroker config rehydration)
   // Always respect URL slug first so F5 stays on the correct tab
@@ -250,12 +245,19 @@ export default function App() {
   }, [layout?.id]);
 
   // Clear iFrame fullscreen overlay whenever the active tab changes.
-  // The overlay (position: fixed) covers the full viewport; tab switches must always reset it.
   const setIframeFullscreen = useIframeStore((s) => s.setFullscreen);
   useEffect(() => {
     setIframeFullscreen(null);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTabId]);
+
+  // Silently warm cache for newly-visited tabs (background, non-blocking)
+  useEffect(() => {
+    if (!connected || !activeTabId) return;
+    const ids = datapointsForTab(activeTabId);
+    if (ids.length > 0) void prefetchStates(ids);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTabId, connected]);
 
   // Sync cross-tab localStorage changes (admin panel → frontend)
   useEffect(() => {
@@ -303,40 +305,12 @@ export default function App() {
     layoutThemeRef.current.textContent = `[data-aura-app="frontend"] {\n${declarations}${fontScaleDecl}\n}`;
   }, [layout?.id, layout?.settings, currentTheme, effectiveCustomVars]);
 
-  // ── Load config from ioBroker on first connect ─────────────────────────────
-  // localStorage is browser-local; ioBroker holds the authoritative config so
-  // any browser (Firefox, Edge, mobile) gets the same dashboard as Chrome.
+  // ── Load config from ioBroker on first connect ────────────────────────────
   const ioBrokerConfigLoaded = useRef(false);
   useEffect(() => {
     if (!connected || ioBrokerConfigLoaded.current) return;
     ioBrokerConfigLoaded.current = true;
-
-    getStateDirect(IOBROKER_CONFIG_KEY).then((state) => {
-      if (!state?.val) return;
-      const raw = String(state.val);
-      if (raw === '{"widgets":[]}' || raw === '{}') return; // factory default – nothing to load
-      try {
-        const remote = JSON.parse(raw) as Record<string, unknown>;
-        let changed = false;
-        SYNC_STORE_KEYS.forEach((key) => {
-          const remoteVal = remote[key];
-          if (!remoteVal) return;
-          // Support both old format (pre-serialized string) and new format (parsed object)
-          const remoteStr = typeof remoteVal === 'string' ? remoteVal : JSON.stringify(remoteVal);
-          if (remoteStr && remoteStr !== localStorage.getItem(key)) {
-            localStorage.setItem(key, remoteStr);
-            changed = true;
-          }
-        });
-        if (changed) {
-          useDashboardStore.persist.rehydrate();
-          useThemeStore.persist.rehydrate();
-          useGroupStore.persist.rehydrate();
-          useConfigStore.persist.rehydrate();
-          useGroupDefsStore.persist.rehydrate();
-        }
-      } catch { /* ignore malformed JSON */ }
-    });
+    void loadConfigFromIoBroker();
   }, [connected]);
 
   // React to external changes on aura.0.config.dashboard (subscription + polling)
@@ -451,34 +425,7 @@ export default function App() {
         }}
         layoutUrlBase={layoutUrlBase}
       />
-      {!dashboardVisible && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 pointer-events-none" style={{ zIndex: 50 }}>
-          {/* Progress bar — width updated directly via ref */}
-          <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: 'var(--app-border)' }}>
-            {loadTotal > 0 ? (
-              <div ref={loadBarRef} className="h-full" style={{ background: 'var(--accent)', width: '0%' }} />
-            ) : (
-              <div className="h-full" style={{ background: 'var(--accent)', animation: 'aura-loadbar 1.4s ease-in-out infinite' }} />
-            )}
-          </div>
-          {/* Spinner */}
-          <div
-            className="w-7 h-7 rounded-full border-2 animate-spin"
-            style={{ borderColor: 'var(--accent)', borderTopColor: 'transparent' }}
-          />
-          {/* Counter — textContent updated directly via ref */}
-          <span ref={loadCountRef} className="text-xs tabular-nums" style={{ color: 'var(--text-secondary)' }}>
-            {loadTotal > 0 ? `0 / ${loadTotal} Datenpunkte` : 'Verbinden…'}
-          </span>
-        </div>
-      )}
-      <div
-        className="flex-1 min-h-0 flex flex-col"
-        style={{
-          opacity: dashboardVisible ? 1 : 0,
-          transition: dashboardVisible ? 'opacity 0.25s ease-in' : undefined,
-        }}
-      >
+      <div className="flex-1 min-h-0 flex flex-col">
         <Dashboard
           readonly
           viewTabs={tabs}

@@ -1,117 +1,93 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { getStateDirect, subscribeStateDirect } from './useIoBroker';
 import { useDashboardStore } from '../store/dashboardStore';
-import { useThemeStore } from '../store/themeStore';
-import { useGroupStore } from '../store/groupStore';
-import { useConfigStore } from '../store/configStore';
-import { useGroupDefsStore, type GroupDefsState } from '../store/groupDefsStore';
-import { isDirty, isSavingRecently } from '../store/persistManager';
-import type { WidgetConfig } from '../types';
+import { hydrateGroupDefs } from '../store/groupDefsStore';
+import { isDirty, isSavingRecently, discardPending, IOBROKER_STATE_MAP, type SyncStoreKey } from '../store/persistManager';
+import { applyRaw, rehydrateAll } from '../utils/configLoader';
 
-const IOBROKER_CONFIG_KEY = 'aura.0.config.dashboard';
-const SYNC_STORE_KEYS = ['aura-dashboard', 'aura-theme', 'aura-groups', 'aura-config', 'aura-group-defs'] as const;
+/** Apply one state value received from ioBroker to localStorage + stores. */
+function applyOneState(key: SyncStoreKey, raw: string): boolean {
+  if (!raw || raw.length < 3) return false;
+
+  if (key === 'aura-group-defs') {
+    hydrateGroupDefs(raw);
+    return true;
+  }
+
+  // Preserve in-memory activeTabId/activeLayoutId for the dashboard key —
+  // navigation state is flushed directly to localStorage and must not be
+  // overwritten by a slightly stale remote copy.
+  let remoteStr = raw;
+  if (key === 'aura-dashboard') {
+    try {
+      const parsed = JSON.parse(remoteStr) as Record<string, unknown>;
+      const current = useDashboardStore.getState();
+      if (parsed.state && typeof parsed.state === 'object') {
+        const state = parsed.state as Record<string, unknown>;
+        state.activeLayoutId = current.activeLayoutId;
+        if (Array.isArray(state.layouts)) {
+          state.layouts = (state.layouts as Array<Record<string, unknown>>).map((l) => {
+            const cur = current.layouts.find((cl) => cl.id === (l as { id: string }).id);
+            return cur ? { ...l, activeTabId: cur.activeTabId } : l;
+          });
+        }
+        parsed.state = state;
+        remoteStr = JSON.stringify(parsed);
+      }
+    } catch { /* leave remoteStr unchanged */ }
+  }
+
+  if (remoteStr === localStorage.getItem(key)) return false;
+  applyRaw(key, remoteStr);
+  return true;
+}
 
 /**
- * Subscribes to aura.0.config.dashboard and polls every 10 s.
- * Rehydrates all stores when the remote value differs from localStorage.
- * Safe to call in both the frontend App and the admin AdminLayout.
- *
- * @param connected  Current socket connected state (from useIoBroker).
- * @param configLoaded  Ref that is set to true once the initial ioBroker
- *                      config has been loaded (prevents processing before
- *                      the first load completes).
+ * Subscribes to each config state individually and polls every 30 s as fallback.
+ * With separate ioBroker states, each store reacts only to its own state change
+ * — no parsing of a large blob on every update.
  */
 export function useConfigSync(connected: boolean, configLoaded: React.MutableRefObject<boolean>): void {
-  const applyRemoteConfigRaw = useCallback((raw: string) => {
-    // Don't overwrite pending local changes, and don't overwrite immediately
-    // after a save — ioBroker needs a moment to propagate the new value.
-    if (isDirty() || isSavingRecently()) return;
-    try {
-      const remote = JSON.parse(raw) as Record<string, unknown>;
-      let changed = false;
-      // Keys that exceeded localStorage quota — applied directly to stores below
-      const quotaFailed = new Set<string>();
-      SYNC_STORE_KEYS.forEach((key) => {
-        const remoteVal = remote[key];
-        if (!remoteVal) return;
-        let remoteStr = typeof remoteVal === 'string' ? remoteVal : JSON.stringify(remoteVal);
 
-        // Preserve in-memory activeTabId/activeLayoutId – these are UI navigation
-        // state that is flushed directly to localStorage (not via ioBroker sync),
-        // so the remote copy may lag behind and must not overwrite the local value.
-        if (key === 'aura-dashboard') {
-          try {
-            const parsed = JSON.parse(remoteStr) as Record<string, unknown>;
-            const current = useDashboardStore.getState();
-            if (parsed.state && typeof parsed.state === 'object') {
-              const state = parsed.state as Record<string, unknown>;
-              state.activeLayoutId = current.activeLayoutId;
-              if (Array.isArray(state.layouts)) {
-                const currentLayouts = current.layouts;
-                state.layouts = (state.layouts as Array<Record<string, unknown>>).map((l) => {
-                  const cur = currentLayouts.find((cl) => cl.id === l.id);
-                  return cur ? { ...l, activeTabId: cur.activeTabId } : l;
-                });
-              }
-              parsed.state = state;
-              remoteStr = JSON.stringify(parsed);
-            }
-          } catch { /* leave remoteStr unchanged */ }
-        }
-
-        if (remoteStr && remoteStr !== localStorage.getItem(key)) {
-          try {
-            localStorage.setItem(key, remoteStr);
-          } catch {
-            // localStorage quota exceeded — keep remoteStr for direct store hydration below
-            quotaFailed.add(key);
-          }
-          changed = true;
-        }
-      });
-      if (changed) {
-        useDashboardStore.persist.rehydrate();
-        useThemeStore.persist.rehydrate();
-        useGroupStore.persist.rehydrate();
-        useConfigStore.persist.rehydrate();
-        if (quotaFailed.has('aura-group-defs')) {
-          // localStorage is full — hydrate group-defs directly from remote JSON
-          try {
-            const remoteVal = remote['aura-group-defs'];
-            const remoteStr = typeof remoteVal === 'string' ? remoteVal : JSON.stringify(remoteVal);
-            const parsed = JSON.parse(remoteStr) as { state?: { defs?: Record<string, WidgetConfig[]> } };
-            if (parsed?.state?.defs !== undefined) useGroupDefsStore.setState(parsed.state as GroupDefsState);
-          } catch { /* ignore */ }
-        } else {
-          useGroupDefsStore.persist.rehydrate();
-        }
-      }
-    } catch { /* ignore malformed JSON */ }
-  }, []);
-
-  // 1. Subscription – immediate push when stateChange arrives
+  // 1. Subscribe to each state — immediate push on stateChange
   useEffect(() => {
-    return subscribeStateDirect(IOBROKER_CONFIG_KEY, (state) => {
-      if (!state?.val || !configLoaded.current) return;
-      applyRemoteConfigRaw(String(state.val));
-    });
+    const unsubs = (Object.entries(IOBROKER_STATE_MAP) as [SyncStoreKey, string][]).map(
+      ([key, stateId]) =>
+        subscribeStateDirect(stateId, (state) => {
+          if (!state?.val || !configLoaded.current) return;
+          if (isDirty() || isSavingRecently()) return;
+          if (applyOneState(key, String(state.val))) {
+            rehydrateAll(false);
+            discardPending();
+          }
+        }),
+    );
+    return () => unsubs.forEach((u) => u());
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 2. Polling every 10 s – fallback for HTTPS/proxy setups where push
-  //    events may not arrive reliably
+  // 2. Polling every 30 s — fallback for HTTPS/proxy setups.
+  //    group-defs excluded from polling (large, RAM-only, subscription is sufficient).
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const poll = useCallback(() => {
+    if (!configLoaded.current || isDirty() || isSavingRecently()) return;
+    const pollKeys = (Object.keys(IOBROKER_STATE_MAP) as SyncStoreKey[]).filter((k) => k !== 'aura-group-defs');
+    Promise.all(
+      pollKeys.map((key) =>
+        getStateDirect(IOBROKER_STATE_MAP[key]).then((state) => {
+          if (!state?.val) return false;
+          return applyOneState(key, String(state.val));
+        }),
+      ),
+    ).then((results) => {
+      if (results.some(Boolean)) { rehydrateAll(false); discardPending(); }
+    });
+  }, []);
+
   useEffect(() => {
     if (pollingRef.current) clearInterval(pollingRef.current);
     if (!connected) { pollingRef.current = null; return; }
-    pollingRef.current = setInterval(() => {
-      if (!configLoaded.current) return;
-      void getStateDirect(IOBROKER_CONFIG_KEY).then((state) => {
-        if (state?.val) applyRemoteConfigRaw(String(state.val));
-      });
-    }, 10_000);
-    return () => {
-      if (pollingRef.current) { clearInterval(pollingRef.current); pollingRef.current = null; }
-    };
-  }, [connected, applyRemoteConfigRaw]); // eslint-disable-line react-hooks/exhaustive-deps -- configLoaded is a ref, intentionally excluded
+    pollingRef.current = setInterval(poll, 30_000);
+    return () => { if (pollingRef.current) { clearInterval(pollingRef.current); pollingRef.current = null; } };
+  }, [connected, poll]);
 }
