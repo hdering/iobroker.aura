@@ -175,6 +175,12 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.5.3 (2026-04-25)
+- Perf: faster tab switches (async localStorage flush), faster DP value display after hard reload (expanded prefetch + skip redundant socket calls)
+- Fix(chart): recharts and ECharts no longer warn about 0-size container on inactive tabs (bidirectional hasSize guard)
+- Fix(admin): grid no longer repositions widgets when the admin window is opened in a small window
+- Feat(admin): collapsible sidebar for narrow windows (<768px) — hamburger button opens it as an overlay
+
 ### 0.5.2 (2026-04-24)
 - Fix(group): copying GROUP widgets no longer causes QuotaExceededError or stuck save button (children moved to separate `aura-group-defs` store)
 - Fix(dashboard): switching layouts no longer spuriously activates the save button
