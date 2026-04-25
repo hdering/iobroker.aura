@@ -257,7 +257,7 @@ export const useDashboardStore = create<DashboardState>()(
       setLayoutSlug: (id, slug) =>
         set((s) => ({ layouts: patchLayout(s.layouts, id, (l) => ({ ...l, slug })) })),
 
-      setActiveLayout: (id) => { set({ activeLayoutId: id }); flushKey('aura-dashboard'); },
+      setActiveLayout: (id) => { set({ activeLayoutId: id }); setTimeout(() => flushKey('aura-dashboard'), 0); },
 
       // ── Tab CRUD ───────────────────────────────────────────────────────────
 
@@ -305,7 +305,7 @@ export const useDashboardStore = create<DashboardState>()(
         set((s) =>
           ({ layouts: patchLayout(s.layouts, s.activeLayoutId, (l) => ({ ...l, activeTabId: id })) })
         );
-        flushKey('aura-dashboard');
+        setTimeout(() => flushKey('aura-dashboard'), 0);
       },
 
       reorderTabs: (fromIndex, toIndex) =>

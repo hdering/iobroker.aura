@@ -96,9 +96,12 @@ async function writeBackup(payload: Record<string, unknown>): Promise<void> {
  * Write all managed store blobs to ioBroker so any browser connecting to
  * the same ioBroker instance gets the current config.
  * Must be called AFTER saveAll() so localStorage is up-to-date.
- * Also appends a timestamped entry to the rolling backup list.
+ *
+ * @param backup  When true (default), also appends a timestamped backup entry.
+ *                Pass false for auto-saves to avoid reading/writing the full
+ *                backup array (potentially MBs) on every auto-save tick.
  */
-export function saveToIoBroker(): void {
+export function saveToIoBroker({ backup = true }: { backup?: boolean } = {}): void {
   const payload: Record<string, unknown> = {};
   SYNC_STORE_KEYS.forEach((key) => {
     const raw = localStorage.getItem(key);
@@ -106,8 +109,8 @@ export function saveToIoBroker(): void {
     catch { payload[key] = raw; }
   });
   try {
-    setStateDirect(IOBROKER_CONFIG_KEY, JSON.stringify(payload, null, 2));
-    void writeBackup(payload);
+    setStateDirect(IOBROKER_CONFIG_KEY, JSON.stringify(payload));
+    if (backup) void writeBackup(payload);
   } catch { /* socket not yet connected – silently skip */ }
 }
 

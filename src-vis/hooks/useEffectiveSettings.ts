@@ -24,8 +24,12 @@ const LAYOUT_FRONTEND_KEYS: (keyof LayoutSettings & keyof FrontendSettings)[] = 
 /** Merged global + per-layout FrontendSettings. */
 export function useEffectiveSettings(layoutId?: string): FrontendSettings {
   const global = useConfigStore((s) => s.frontend);
-  const layouts = useDashboardStore((s) => s.layouts);
-  const ls = layoutId ? layouts.find((l) => l.id === layoutId)?.settings : undefined;
+  // Narrow selector: only re-renders when the specific layout's settings object changes.
+  // patchLayout preserves the settings reference on widget-only mutations, so this
+  // stays stable across widget edits.
+  const ls = useDashboardStore(
+    (s) => layoutId ? s.layouts.find((l) => l.id === layoutId)?.settings : undefined,
+  );
   if (!ls) return global;
 
   const patch: Partial<FrontendSettings> = {};
@@ -39,15 +43,17 @@ export function useEffectiveSettings(layoutId?: string): FrontendSettings {
 /** Effective theme ID for a layout (falls back to global). */
 export function useEffectiveThemeId(layoutId?: string): string {
   const globalId = useThemeStore((s) => s.themeId);
-  const layouts = useDashboardStore((s) => s.layouts);
-  const ls = layoutId ? layouts.find((l) => l.id === layoutId)?.settings : undefined;
+  const ls = useDashboardStore(
+    (s) => layoutId ? s.layouts.find((l) => l.id === layoutId)?.settings : undefined,
+  );
   return ls?.themeId ?? globalId;
 }
 
 /** Effective custom theme vars for a layout (falls back to global). */
 export function useEffectiveCustomVars(layoutId?: string): Partial<ThemeVars> {
   const globalVars = useThemeStore((s) => s.customVars);
-  const layouts = useDashboardStore((s) => s.layouts);
-  const ls = layoutId ? layouts.find((l) => l.id === layoutId)?.settings : undefined;
+  const ls = useDashboardStore(
+    (s) => layoutId ? s.layouts.find((l) => l.id === layoutId)?.settings : undefined,
+  );
   return ls?.customVars ?? globalVars;
 }

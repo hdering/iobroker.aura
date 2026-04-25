@@ -172,7 +172,7 @@ export function AdminLayout() {
         clearInterval(autoSaveTimerRef.current!);
         autoSaveTimerRef.current = null;
         setCountdown(null);
-        if (isDirty()) { saveAll(); saveToIoBroker(); }
+        if (isDirty()) { saveAll(); saveToIoBroker({ backup: false }); }
       } else {
         setCountdown(remaining);
       }

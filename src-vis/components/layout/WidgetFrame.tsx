@@ -983,14 +983,30 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [showMoveMenu, setShowMoveMenu] = useState(false);
   const [showCopyMenu, setShowCopyMenu] = useState(false);
-  const { addWidgetToLayoutTab, removeWidgetFromLayoutTab, layouts, activeLayoutId } = useDashboardStore();
+  const { addWidgetToLayoutTab, removeWidgetFromLayoutTab } = useDashboardStore();
+  const activeLayoutId = useDashboardStore((s) => s.activeLayoutId);
   const { activeTabId, tabs: activeTabs } = useActiveLayout();
-  // All layout→tab combos except the current tab
-  const moveTargets = layouts.flatMap((l) =>
-    l.tabs
-      .filter((t) => !(l.id === activeLayoutId && t.id === activeTabId))
-      .map((t) => ({ layoutId: l.id, layoutName: l.name, tabId: t.id, tabName: t.name })),
+  // Stable across widget-only mutations: only changes when tabs/layouts are added, removed, or renamed.
+  const moveTargets = useDashboardStore(
+    (s) => {
+      const aid = s.activeLayoutId;
+      const atid = s.layouts.find((l) => l.id === aid)?.activeTabId;
+      return s.layouts.flatMap((l) =>
+        l.tabs
+          .filter((t) => !(l.id === aid && t.id === atid))
+          .map((t) => ({ layoutId: l.id, layoutName: l.name, tabId: t.id, tabName: t.name })),
+      );
+    },
+    (a, b) =>
+      a.length === b.length &&
+      a.every((ai, i) =>
+        ai.layoutId === b[i].layoutId &&
+        ai.tabId === b[i].tabId &&
+        ai.layoutName === b[i].layoutName &&
+        ai.tabName === b[i].tabName
+      ),
   );
+  const moveLayoutCount = new Set(moveTargets.map((m) => m.layoutId)).size;
 
   // Stable reference: never create a new [] on every render (would cause infinite effect loop)
   const conditions = (config.options?.conditions as WidgetCondition[] | undefined) ?? NO_CONDITIONS;
@@ -1306,16 +1322,15 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                 >
                   {t('wf.menu.copyHere')}
                 </button>
-                {/* Other tabs */}
-                {layouts.map((layout) => {
-                  const targets = moveTargets.filter((m) => m.layoutId === layout.id);
-                  if (targets.length === 0) return null;
+                {/* Other tabs – grouped by layout, derived from moveTargets (no layouts subscription needed) */}
+                {[...new Map(moveTargets.map((m) => [m.layoutId, m.layoutName])).entries()].map(([layoutId, layoutName]) => {
+                  const targets = moveTargets.filter((m) => m.layoutId === layoutId);
                   return (
-                    <div key={layout.id}>
-                      {layouts.length > 1 && (
+                    <div key={layoutId}>
+                      {moveLayoutCount > 1 && (
                         <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider"
                           style={{ background: 'var(--app-surface)', color: 'var(--text-secondary)', borderBottom: '1px solid var(--app-border)' }}>
-                          {layout.name}
+                          {layoutName}
                         </p>
                       )}
                       {targets.map((m) => (
@@ -1355,15 +1370,14 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                 </button>
                 {showMoveMenu && (
                   <div className="mx-1 mb-0.5 rounded-md overflow-hidden" style={{ border: '1px solid var(--app-border)' }}>
-                    {layouts.map((layout) => {
-                      const targets = moveTargets.filter((m) => m.layoutId === layout.id);
-                      if (targets.length === 0) return null;
+                    {[...new Map(moveTargets.map((m) => [m.layoutId, m.layoutName])).entries()].map(([layoutId, layoutName]) => {
+                      const targets = moveTargets.filter((m) => m.layoutId === layoutId);
                       return (
-                        <div key={layout.id}>
-                          {layouts.length > 1 && (
+                        <div key={layoutId}>
+                          {moveLayoutCount > 1 && (
                             <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider"
                               style={{ background: 'var(--app-surface)', color: 'var(--text-secondary)', borderBottom: '1px solid var(--app-border)' }}>
-                              {layout.name}
+                              {layoutName}
                             </p>
                           )}
                           {targets.map((m) => (
