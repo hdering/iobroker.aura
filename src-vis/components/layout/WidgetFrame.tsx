@@ -8,6 +8,7 @@ import { exportWidget } from '../../utils/widgetExportImport';
 import { getWidgetIcon } from '../../utils/widgetIconMap';
 import { applyDpNameFilter } from '../../utils/dpNameFilter';
 import { useDashboardStore, useActiveLayout } from '../../store/dashboardStore';
+import { useStoreWithEqualityFn } from 'zustand/traditional';
 import { cloneGroupDef } from '../../store/groupDefsStore';
 import { useActiveLayoutId } from '../../contexts/ActiveLayoutContext';
 import { useEffectiveSettings } from '../../hooks/useEffectiveSettings';
@@ -987,7 +988,8 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
   const activeLayoutId = useDashboardStore((s) => s.activeLayoutId);
   const { activeTabId, tabs: activeTabs } = useActiveLayout();
   // Stable across widget-only mutations: only changes when tabs/layouts are added, removed, or renamed.
-  const moveTargets = useDashboardStore(
+  const moveTargets = useStoreWithEqualityFn(
+    useDashboardStore,
     (s) => {
       const aid = s.activeLayoutId;
       const atid = s.layouts.find((l) => l.id === aid)?.activeTabId;

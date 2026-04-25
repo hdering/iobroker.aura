@@ -1,4 +1,5 @@
 import ReactECharts from 'echarts-for-react';
+import { useRef, useState, useEffect } from 'react';
 import { BarChart2, Loader } from 'lucide-react';
 import { useIoBroker } from '../../hooks/useIoBroker';
 import { useMultiSeriesData, type EChartSeriesConfig } from '../../hooks/useMultiSeriesData';
@@ -52,6 +53,33 @@ export function EChartWidget({ config, editMode }: WidgetProps) {
   const isGauge = config.layout === 'gauge' as string;
 
   const seriesDataMap = useMultiSeriesData(echartSeries, connected, subscribe);
+
+  // Delay ECharts init until the container has non-zero dimensions.
+  // Widgets on inactive tabs have display:none → clientWidth/Height = 0 → ECharts warning.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const chartRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [hasSize, setHasSize] = useState(false);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    if (el.clientWidth > 0 && el.clientHeight > 0) { setHasSize(true); return; }
+    const ro = new ResizeObserver(() => {
+      if ((containerRef.current?.clientWidth ?? 0) > 0 && (containerRef.current?.clientHeight ?? 0) > 0)
+        setHasSize(true);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  // Keep chart sized correctly when container transitions from display:none to visible (tab switch).
+  useEffect(() => {
+    if (!hasSize) return;
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => { chartRef.current?.getEchartsInstance?.()?.resize?.(); });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [hasSize]);
 
   if (layout === 'custom') return <CustomGridView config={config} value="" />;
 
@@ -123,17 +151,20 @@ export function EChartWidget({ config, editMode }: WidgetProps) {
     }
 
     return (
-      <div className="relative w-full h-full">
+      <div ref={containerRef} className="relative w-full h-full">
         {editMode && showTitle && config.title && (
           <span className="absolute top-1 left-2 text-[10px] font-medium z-10" style={{ color: 'var(--text-secondary)' }}>
             {config.title}
           </span>
         )}
-        <ReactECharts
-          option={mergedGauge}
-          style={{ width: '100%', height: '100%' }}
-          opts={{ renderer: 'canvas' }}
-        />
+        {hasSize && (
+          <ReactECharts
+            ref={chartRef}
+            option={mergedGauge}
+            style={{ width: '100%', height: '100%' }}
+            opts={{ renderer: 'canvas' }}
+          />
+        )}
       </div>
     );
   }
@@ -243,17 +274,20 @@ export function EChartWidget({ config, editMode }: WidgetProps) {
   }
 
   return (
-    <div className="relative w-full h-full">
+    <div ref={containerRef} className="relative w-full h-full">
       {editMode && config.title && (
         <span className="absolute top-1 left-2 text-[10px] font-medium z-10" style={{ color: 'var(--text-secondary)' }}>
           {config.title}
         </span>
       )}
+      {hasSize && (
       <ReactECharts
+        ref={chartRef}
         option={merged}
         style={{ width: '100%', height: '100%' }}
         opts={{ renderer: 'canvas' }}
       />
+      )}
     </div>
   );
 }
