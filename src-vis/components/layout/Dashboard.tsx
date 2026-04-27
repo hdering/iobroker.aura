@@ -253,7 +253,7 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
                 x: Math.min(w.gridPos.x ?? 0, effectiveCols - 1),
                 y: w.gridPos.y ?? 9999,
                 w: Math.min(w.gridPos.w ?? 2, effectiveCols),
-                h: w.gridPos.h ?? 2,
+                h: Math.max(w.gridPos.h ?? 2, minH),
                 minH,
               };
             });
