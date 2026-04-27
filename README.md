@@ -175,6 +175,11 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.5.15 (2026-04-27)
+- Fix(admin editor): tab switch no longer causes save bar to flash "unsaved changes" — synchronous localStorage flush prevents dirty-state from briefly becoming true
+- Fix(admin editor): tab menu no longer flickers on tab switch — TabBar extracted as isolated memoized component with narrow Zustand selectors so AdminEditor does not re-render on tab switch
+- Fix(admin editor): react-grid-layout CSS transitions disabled when not dragging via `:has(.react-draggable-dragging)` selector
+
 ### 0.5.14 (2026-04-27)
 - Feat(iframe): server-side proxy to bypass X-Frame-Options — enable 'Use Proxy' toggle in iframe widget settings
 - Fix(iframe-proxy): add proxy route to Vite dev server; remove `<base>` injection that caused `origin:null` CORS errors

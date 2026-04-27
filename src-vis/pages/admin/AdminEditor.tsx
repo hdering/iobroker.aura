@@ -1,5 +1,6 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect, memo } from 'react';
 import { createPortal } from 'react-dom';
+import { shallow } from 'zustand/shallow';
 import { Plus, Trash2, Edit3, Check, Database, Wand2, Smartphone, GripVertical, Upload, Settings, X, Ruler } from 'lucide-react';
 import { ImportWidgetDialog } from '../../components/config/ImportWidgetDialog';
 import { Icon } from '@iconify/react';
@@ -637,10 +638,11 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
 
 // TYPE_LABELS are now resolved via useT() inside components
 
-function MobileOrderPanel({ layoutId, tabId }: { layoutId: string; tabId: string }) {
+function MobileOrderPanel({ layoutId }: { layoutId: string }) {
   const t = useT();
   const { layouts, updateWidgetInTab } = useDashboardStore();
-  const tab = layouts.find((l) => l.id === layoutId)?.tabs.find((t) => t.id === tabId);
+  const activeTabId = useDashboardStore((s) => (s.layouts.find((l) => l.id === layoutId) ?? s.layouts[0])?.activeTabId ?? '');
+  const tab = layouts.find((l) => l.id === layoutId)?.tabs.find((t) => t.id === activeTabId);
 
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [overIdx, setOverIdx] = useState<number | null>(null);
@@ -734,18 +736,21 @@ function MobileOrderPanel({ layoutId, tabId }: { layoutId: string; tabId: string
   );
 }
 
-export function AdminEditor() {
+// ── TabBar ─────────────────────────────────────────────────────────────────────
+// Isolated component so AdminEditor does NOT re-render on tab switch.
+// Key insight: patchLayout does { ...l, activeTabId: id } which preserves the
+// l.tabs array reference — so the `tabs` selector returns the same reference and
+// does not trigger a re-render. Only `activeTabId` changes on each switch.
+const TabBar = memo(function TabBar() {
   const t = useT();
-  const { layouts, activeLayoutId, setActiveLayout, addWidget, addTab, setActiveTab, renameTab, removeTab, setTabSlug, updateTab, reorderTabs } = useDashboardStore();
-  const activeLayout = layouts.find((l) => l.id === activeLayoutId) ?? layouts[0];
-  const tabs = activeLayout.tabs;
-  const activeTabId = activeLayout.activeTabId;
-  const [showTabWizard, setShowTabWizard] = useState(false);
-  const [showManual, setShowManual] = useState(false);
-  const [showImport, setShowImport] = useState(false);
-  const [showMobileOrder, setShowMobileOrder] = useState(false);
-  const { frontend, updateFrontend } = useConfigStore();
-  const guidelinesEnabled = frontend.guidelinesEnabled ?? false;
+
+  const tabs = useDashboardStore((s) => (s.layouts.find((l) => l.id === s.activeLayoutId) ?? s.layouts[0]).tabs);
+  const activeTabId = useDashboardStore((s) => (s.layouts.find((l) => l.id === s.activeLayoutId) ?? s.layouts[0]).activeTabId);
+  const { addTab, setActiveTab, renameTab, removeTab, setTabSlug, updateTab, reorderTabs } = useDashboardStore(
+    (s) => ({ addTab: s.addTab, setActiveTab: s.setActiveTab, renameTab: s.renameTab, removeTab: s.removeTab, setTabSlug: s.setTabSlug, updateTab: s.updateTab, reorderTabs: s.reorderTabs }),
+    shallow,
+  );
+
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renamingValue, setRenamingValue] = useState('');
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
@@ -772,7 +777,7 @@ export function AdminEditor() {
     const btn = settingsBtnRefs.current.get(tabId);
     if (!btn) return;
     const rect = btn.getBoundingClientRect();
-    const panelW = 256; // w-64
+    const panelW = 256;
     const left = Math.min(rect.left, window.innerWidth - panelW - 12);
     setPanelPos({ top: rect.bottom + 6, left: Math.max(8, left) });
     setSettingsTabId((prev) => (prev === tabId ? null : tabId));
@@ -781,65 +786,7 @@ export function AdminEditor() {
   const settingsTab = tabs.find((t) => t.id === settingsTabId);
 
   return (
-    <div className="flex flex-col h-screen">
-      {/* Toolbar */}
-      <div className="flex items-center gap-3 px-6 py-3 shrink-0 flex-wrap"
-        style={{ background: 'var(--app-surface)', borderBottom: '1px solid var(--app-border)' }}>
-        <h2 className="font-semibold text-sm mr-2 shrink-0" style={{ color: 'var(--text-primary)' }}>{t('admin.nav.editor')}</h2>
-        {/* Layout selector */}
-        <select
-          value={activeLayoutId}
-          onChange={(e) => setActiveLayout(e.target.value)}
-          className="text-xs rounded-lg px-2.5 py-1.5 focus:outline-none"
-          style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
-        >
-          {layouts.map((l) => (
-            <option key={l.id} value={l.id}>{l.name}</option>
-          ))}
-        </select>
-        <div className="flex-1" />
-        <button onClick={() => setShowManual(true)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:opacity-80"
-          style={{ background: 'var(--accent)' }}>
-          <Plus size={15} /> Neues Widget
-        </button>
-        <button onClick={() => setShowTabWizard(true)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:opacity-80"
-          style={{ background: 'var(--accent-purple, #8b5cf6)' }}>
-          <Wand2 size={15} /> {t('editor.tab.addTab')}
-        </button>
-        <button onClick={() => setShowImport(true)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium hover:opacity-80"
-          style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}>
-          <Upload size={15} /> {t('widgets.import')}
-        </button>
-        <button
-          onClick={() => setShowMobileOrder(!showMobileOrder)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium hover:opacity-80"
-          style={{
-            background: showMobileOrder ? 'var(--accent)22' : 'var(--app-bg)',
-            color: showMobileOrder ? 'var(--accent)' : 'var(--text-secondary)',
-            border: `1px solid ${showMobileOrder ? 'var(--accent)' : 'var(--app-border)'}`,
-          }}
-          title={t('editor.mobile.title')}
-        >
-          <Smartphone size={15} />
-        </button>
-        <button
-          onClick={() => updateFrontend({ guidelinesEnabled: !guidelinesEnabled })}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium hover:opacity-80"
-          style={{
-            background: guidelinesEnabled ? 'rgba(239,68,68,0.12)' : 'var(--app-bg)',
-            color: guidelinesEnabled ? 'rgb(239,68,68)' : 'var(--text-secondary)',
-            border: `1px solid ${guidelinesEnabled ? 'rgb(239,68,68)' : 'var(--app-border)'}`,
-          }}
-          title="Hilfslinien ein-/ausblenden"
-        >
-          <Ruler size={15} />
-        </button>
-      </div>
-
-      {/* Tab-Verwaltung */}
+    <>
       <div className="flex items-center gap-2 px-6 py-2 shrink-0 flex-wrap"
         style={{ background: 'var(--app-bg)', borderBottom: '1px solid var(--app-border)' }}>
         {tabs.map((tab, idx) => {
@@ -897,7 +844,6 @@ export function AdminEditor() {
                     >
                       <GripVertical size={11} />
                     </span>
-                    {/* Tab icon */}
                     {tab.icon && (() => {
                       const TabIcon = getWidgetIcon(tab.icon, null as never);
                       return <TabIcon size={11} style={{ color: isActive ? 'var(--accent)' : 'var(--text-secondary)', flexShrink: 0 }} />;
@@ -949,44 +895,6 @@ export function AdminEditor() {
         </button>
       </div>
 
-
-      {/* Dashboard-Vorschau mit Edit-Modus */}
-      <div className="flex-1 flex overflow-hidden" style={{ background: 'var(--app-bg)' }}>
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Dashboard editMode={true} />
-        </div>
-        {showMobileOrder && (
-          <MobileOrderPanel layoutId={activeLayoutId} tabId={activeTabId} />
-        )}
-      </div>
-
-      {showTabWizard && (
-        <TabWizard
-          onAdd={(name, widgets) => {
-            addTab(name);
-            widgets.forEach(addWidget);
-            setShowTabWizard(false);
-          }}
-          onClose={() => setShowTabWizard(false)}
-        />
-      )}
-      {showManual && (
-        <ManualWidgetDialog onAdd={addWidget} onClose={() => setShowManual(false)} />
-      )}
-      {showImport && (
-        <ImportWidgetDialog
-          tabs={tabs}
-          onAdd={(widget, tabId) => {
-            if (tabId && tabId !== activeTabId) {
-              useDashboardStore.getState().setActiveTab(tabId);
-            }
-            addWidget(widget);
-          }}
-          onClose={() => setShowImport(false)}
-        />
-      )}
-
-      {/* Tab settings portal */}
       {settingsTabId && settingsTab && createPortal(
         <>
           <div className="fixed inset-0 z-[998]" onClick={() => setSettingsTabId(null)} />
@@ -1000,7 +908,6 @@ export function AdminEditor() {
                 <X size={12} style={{ color: 'var(--text-secondary)' }} />
               </button>
             </div>
-            {/* Name */}
             <div>
               <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('editor.tabMgmt.name')}</label>
               <input
@@ -1019,7 +926,6 @@ export function AdminEditor() {
                 style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
               />
             </div>
-            {/* URL-Slug */}
             <div>
               <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('editor.tabMgmt.slug')}</label>
               <div className="flex items-center gap-1">
@@ -1036,7 +942,6 @@ export function AdminEditor() {
                 />
               </div>
             </div>
-            {/* Hide label */}
             <div className="flex items-center justify-between">
               <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{t('editor.tabMgmt.hideLabel')}</label>
               <button
@@ -1048,7 +953,6 @@ export function AdminEditor() {
                   style={{ left: settingsTab.hideLabel ? '18px' : '2px' }} />
               </button>
             </div>
-            {/* Icon picker */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{t('editor.tabMgmt.icon')}</label>
@@ -1080,6 +984,131 @@ export function AdminEditor() {
           </div>
         </>,
         document.body,
+      )}
+    </>
+  );
+});
+
+export function AdminEditor() {
+  const t = useT();
+
+  // Narrow subscriptions — none of these change on tab switch, so AdminEditor
+  // itself does NOT re-render when the user clicks a different tab.
+  const activeLayoutId = useDashboardStore((s) => s.activeLayoutId);
+  const layoutOptions = useDashboardStore(
+    (s) => s.layouts.map((l) => ({ id: l.id, name: l.name })),
+    (a, b) => a.length === b.length && a.every((l, i) => l.id === b[i].id && l.name === b[i].name),
+  );
+  // tabs reference is stable on tab switch (patchLayout spreads { ...l, activeTabId }
+  // which preserves the l.tabs array reference) — needed only for ImportWidgetDialog
+  const tabs = useDashboardStore((s) => (s.layouts.find((l) => l.id === s.activeLayoutId) ?? s.layouts[0]).tabs);
+  // Stable action references — never cause re-renders
+  const setActiveLayout = useDashboardStore((s) => s.setActiveLayout);
+  const addWidget = useDashboardStore((s) => s.addWidget);
+  const addTab = useDashboardStore((s) => s.addTab);
+
+  const { frontend, updateFrontend } = useConfigStore();
+  const guidelinesEnabled = frontend.guidelinesEnabled ?? false;
+  const [showTabWizard, setShowTabWizard] = useState(false);
+  const [showManual, setShowManual] = useState(false);
+  const [showImport, setShowImport] = useState(false);
+  const [showMobileOrder, setShowMobileOrder] = useState(false);
+
+  return (
+    <div className="flex flex-col h-screen">
+      {/* Toolbar */}
+      <div className="flex items-center gap-3 px-6 py-3 shrink-0 flex-wrap"
+        style={{ background: 'var(--app-surface)', borderBottom: '1px solid var(--app-border)' }}>
+        <h2 className="font-semibold text-sm mr-2 shrink-0" style={{ color: 'var(--text-primary)' }}>{t('admin.nav.editor')}</h2>
+        <select
+          value={activeLayoutId}
+          onChange={(e) => setActiveLayout(e.target.value)}
+          className="text-xs rounded-lg px-2.5 py-1.5 focus:outline-none"
+          style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
+        >
+          {layoutOptions.map((l) => (
+            <option key={l.id} value={l.id}>{l.name}</option>
+          ))}
+        </select>
+        <div className="flex-1" />
+        <button onClick={() => setShowManual(true)}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:opacity-80"
+          style={{ background: 'var(--accent)' }}>
+          <Plus size={15} /> Neues Widget
+        </button>
+        <button onClick={() => setShowTabWizard(true)}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:opacity-80"
+          style={{ background: 'var(--accent-purple, #8b5cf6)' }}>
+          <Wand2 size={15} /> {t('editor.tab.addTab')}
+        </button>
+        <button onClick={() => setShowImport(true)}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium hover:opacity-80"
+          style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}>
+          <Upload size={15} /> {t('widgets.import')}
+        </button>
+        <button
+          onClick={() => setShowMobileOrder(!showMobileOrder)}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium hover:opacity-80"
+          style={{
+            background: showMobileOrder ? 'var(--accent)22' : 'var(--app-bg)',
+            color: showMobileOrder ? 'var(--accent)' : 'var(--text-secondary)',
+            border: `1px solid ${showMobileOrder ? 'var(--accent)' : 'var(--app-border)'}`,
+          }}
+          title={t('editor.mobile.title')}
+        >
+          <Smartphone size={15} />
+        </button>
+        <button
+          onClick={() => updateFrontend({ guidelinesEnabled: !guidelinesEnabled })}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium hover:opacity-80"
+          style={{
+            background: guidelinesEnabled ? 'rgba(239,68,68,0.12)' : 'var(--app-bg)',
+            color: guidelinesEnabled ? 'rgb(239,68,68)' : 'var(--text-secondary)',
+            border: `1px solid ${guidelinesEnabled ? 'rgb(239,68,68)' : 'var(--app-border)'}`,
+          }}
+          title="Hilfslinien ein-/ausblenden"
+        >
+          <Ruler size={15} />
+        </button>
+      </div>
+
+      {/* Tab bar — isolated memoized component, does not cause AdminEditor to re-render on tab switch */}
+      <TabBar />
+
+      {/* Dashboard preview with edit mode */}
+      <div className="flex-1 flex overflow-hidden" style={{ background: 'var(--app-bg)' }}>
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Dashboard editMode={true} />
+        </div>
+        {showMobileOrder && (
+          <MobileOrderPanel layoutId={activeLayoutId} />
+        )}
+      </div>
+
+      {showTabWizard && (
+        <TabWizard
+          onAdd={(name, widgets) => {
+            addTab(name);
+            widgets.forEach(addWidget);
+            setShowTabWizard(false);
+          }}
+          onClose={() => setShowTabWizard(false)}
+        />
+      )}
+      {showManual && (
+        <ManualWidgetDialog onAdd={addWidget} onClose={() => setShowManual(false)} />
+      )}
+      {showImport && (
+        <ImportWidgetDialog
+          tabs={tabs}
+          onAdd={(widget, tabId) => {
+            const state = useDashboardStore.getState();
+            const activeLayout = state.layouts.find((l) => l.id === state.activeLayoutId) ?? state.layouts[0];
+            if (tabId && tabId !== activeLayout?.activeTabId) state.setActiveTab(tabId);
+            addWidget(widget);
+          }}
+          onClose={() => setShowImport(false)}
+        />
       )}
     </div>
   );
