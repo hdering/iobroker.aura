@@ -196,7 +196,7 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
           intercept drags meant for the inner grid */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-auto min-h-0 px-1 pt-1"
+        className="flex-1 overflow-auto min-h-0 p-1"
         onMouseDown={editMode ? (e) => e.stopPropagation() : undefined}
         onPointerDown={editMode ? (e) => e.stopPropagation() : undefined}
       >
