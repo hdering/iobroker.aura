@@ -76,7 +76,7 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
     const maxBottom = Math.max(...next.map((c) => c.gridPos.y + c.gridPos.h));
     const innerH = maxBottom * (cellSize + gridGap) - gridGap;
     const titleBarH = config.title ? 28 : 0;
-    const newH = Math.ceil((titleBarH + innerH + 8 + gridGap) / (cellSize + gridGap));
+    const newH = Math.ceil((titleBarH + innerH + gridGap) / (cellSize + gridGap));
     if (newH > config.gridPos.h) {
       onConfigChange({ ...config, gridPos: { ...config.gridPos, h: newH } });
     }
@@ -196,7 +196,7 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
           intercept drags meant for the inner grid */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-auto min-h-0 p-1"
+        className="flex-1 overflow-auto min-h-0 px-1 pt-1"
         onMouseDown={editMode ? (e) => e.stopPropagation() : undefined}
         onPointerDown={editMode ? (e) => e.stopPropagation() : undefined}
       >
