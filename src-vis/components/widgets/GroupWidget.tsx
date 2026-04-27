@@ -12,6 +12,23 @@ import { getDragBridge, setDragBridge } from '../../utils/dragBridge';
 import { useDashboardMobile } from '../../contexts/DashboardMobileContext';
 import { useGroupDefsStore, newGroupDefId } from '../../store/groupDefsStore';
 
+function verticalCompact(items: WidgetConfig[]): WidgetConfig[] {
+  const sorted = [...items].sort((a, b) =>
+    a.gridPos.y !== b.gridPos.y ? a.gridPos.y - b.gridPos.y : a.gridPos.x - b.gridPos.x
+  );
+  const placed: WidgetConfig[] = [];
+  for (const item of sorted) {
+    let newY = 0;
+    while (placed.some((p) => {
+      const { x: px, y: py, w: pw, h: ph } = p.gridPos;
+      const { x: ix, w: iw, h: ih } = item.gridPos;
+      return px < ix + iw && px + pw > ix && py < newY + ih && py + ph > newY;
+    })) newY++;
+    placed.push({ ...item, gridPos: { ...item.gridPos, y: newY } });
+  }
+  return placed;
+}
+
 function mobileSort(children: WidgetConfig[]): WidgetConfig[] {
   return [...children].sort((a, b) => {
     const oa = a.mobileOrder ?? (a.gridPos.y * 1000 + a.gridPos.x);
@@ -48,7 +65,6 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
-  const pendingDeleteRef = useRef(false);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -72,24 +88,37 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
   const updateChild = (updated: WidgetConfig) =>
     setChildren(children.map((c) => (c.id === updated.id ? updated : c)));
 
-  const fitHeightToChildren = (next: WidgetConfig[]) => {
-    if (next.length === 0) return;
+  const computeH = (next: WidgetConfig[]) => {
+    if (next.length === 0) return config.gridPos.h;
     const maxBottom = Math.max(...next.map((c) => c.gridPos.y + c.gridPos.h));
     const innerH = maxBottom * (cellSize + gridGap) - gridGap;
     const titleBarH = config.title ? 28 : 0;
-    const newH = Math.ceil((titleBarH + innerH + 8 + gridGap) / (cellSize + gridGap));
+    return Math.ceil((titleBarH + innerH + 8 + gridGap) / (cellSize + gridGap));
+  };
+
+  const fitHeightToChildren = (next: WidgetConfig[]) => {
+    const newH = computeH(next);
     if (newH > config.gridPos.h) {
+      onConfigChange({ ...config, gridPos: { ...config.gridPos, h: newH } });
+    }
+  };
+
+  const shrinkToFit = (next: WidgetConfig[]) => {
+    const newH = computeH(next);
+    if (newH !== config.gridPos.h) {
       onConfigChange({ ...config, gridPos: { ...config.gridPos, h: newH } });
     }
   };
 
   const duplicateChild = (child: WidgetConfig) => {
     const maxY = children.reduce((m, c) => Math.max(m, c.gridPos.y + c.gridPos.h), 0);
-    setChildren([...children, {
+    const next = [...children, {
       ...child,
       id: `child-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       gridPos: { ...child.gridPos, x: 0, y: maxY },
-    }]);
+    }];
+    setChildren(next);
+    fitHeightToChildren(next);
   };
 
   const handleGroupDrop = (e: React.DragEvent) => {
@@ -115,8 +144,9 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
 
   // ── Shared remove + configChange handlers ──────────────────────────────────
   const onRemove = (id: string) => {
-    pendingDeleteRef.current = true;
-    setChildren(children.filter((c) => c.id !== id));
+    const next = verticalCompact(children.filter((c) => c.id !== id));
+    setChildren(next);
+    shrinkToFit(next);
   };
 
   // ── Title bar (always shown in editMode as outer-grid drag handle) ─────────
@@ -237,26 +267,6 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
                 return { ...c, gridPos: { x: pos.x, y: pos.y, w: pos.w, h: pos.h } };
               });
               if (changed) setChildren(updated);
-            }}
-            onLayoutChange={(newLayout) => {
-              if (!editMode || !pendingDeleteRef.current) return;
-              pendingDeleteRef.current = false;
-              // Sync compacted positions to store (RGL already compacted upward)
-              const fresh = useGroupDefsStore.getState().defs[defId] ?? [];
-              const updated = fresh.map((c) => {
-                const pos = newLayout.find((l) => l.i === c.id);
-                if (!pos) return c;
-                return { ...c, gridPos: { x: pos.x, y: pos.y, w: pos.w, h: pos.h } };
-              });
-              setChildren(updated);
-              if (updated.length === 0) return;
-              const maxBottom = Math.max(...updated.map((c) => c.gridPos.y + c.gridPos.h));
-              const innerH = maxBottom * (cellSize + gridGap) - gridGap;
-              const titleBarH = config.title ? 28 : 0;
-              const newH = Math.ceil((titleBarH + innerH + 8 + gridGap) / (cellSize + gridGap));
-              if (newH !== config.gridPos.h) {
-                onConfigChange({ ...config, gridPos: { ...config.gridPos, h: newH } });
-              }
             }}
             margin={[gridGap, gridGap]}
             containerPadding={[0, 0]}
