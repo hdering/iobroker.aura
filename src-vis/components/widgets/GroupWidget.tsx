@@ -254,7 +254,7 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
                 changed = true;
                 return { ...c, gridPos: { x: pos.x, y: pos.y, w: pos.w, h: pos.h } };
               });
-              if (changed) setChildren(updated);
+              if (changed) { setChildren(updated); shrinkToFit(updated); }
             }}
             onResizeStop={(newLayout) => {
               if (!editMode) return;
@@ -266,7 +266,7 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
                 changed = true;
                 return { ...c, gridPos: { x: pos.x, y: pos.y, w: pos.w, h: pos.h } };
               });
-              if (changed) setChildren(updated);
+              if (changed) { setChildren(updated); shrinkToFit(updated); }
             }}
             margin={[gridGap, gridGap]}
             containerPadding={[0, 0]}
