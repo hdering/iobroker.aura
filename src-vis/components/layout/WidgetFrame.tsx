@@ -1326,6 +1326,16 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
           >
             <Layers2 size={12} />
           </div>
+          {isGroup && (
+            <button
+              onClick={fitGroupHeight}
+              className="w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-80"
+              title={t('group.fitHeight')}
+              style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+            >
+              <Minimize2 size={12} />
+            </button>
+          )}
           <button
             ref={menuBtnRef}
             onClick={() => { openPanelFor(openPanel === 'menu' ? null : 'menu'); setConfirmDelete(false); }}
@@ -1452,14 +1462,6 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                     })}
                   </div>
                 )}
-                <button
-                  onClick={() => { fitGroupHeight(); openPanelFor(null); }}
-                  className="flex items-center gap-2.5 px-3 py-2 text-sm rounded-md text-left hover:opacity-80 transition-opacity w-full"
-                  style={{ color: 'var(--text-primary)' }}
-                >
-                  <Minimize2 size={13} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
-                  {t('group.fitHeight')}
-                </button>
                 <button
                   onClick={() => openPanelFor('group-mobile-order')}
                   className="flex items-center gap-2.5 px-3 py-2 text-sm rounded-md text-left hover:opacity-80 transition-opacity w-full"
