@@ -1234,7 +1234,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
     if (!groupDefId || groupChildren.length === 0) return;
     const maxBottom = Math.max(...groupChildren.map((c) => c.gridPos.y + c.gridPos.h));
     const innerH = maxBottom * (groupCellSize + groupGridGap) - groupGridGap;
-    const titleBarH = config.title ? 28 : 0;
+    const titleBarH = config.title ? 36 : 0;
     const newH = Math.ceil((titleBarH + innerH + 8 + groupGridGap) / (groupCellSize + groupGridGap));
     onConfigChange({ ...config, gridPos: { ...config.gridPos, h: newH } });
   };
@@ -1254,7 +1254,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
     // auto-fit height using compacted positions
     const maxBottom = Math.max(...next.map((c) => c.gridPos.y + c.gridPos.h));
     const innerH = maxBottom * (groupCellSize + groupGridGap) - groupGridGap;
-    const titleBarH = config.title ? 28 : 0;
+    const titleBarH = config.title ? 36 : 0;
     const newH = Math.ceil((titleBarH + innerH + 8 + groupGridGap) / (groupCellSize + groupGridGap));
     onConfigChange({ ...config, gridPos: { ...config.gridPos, h: newH } });
     setShowGroupTypePicker(false);

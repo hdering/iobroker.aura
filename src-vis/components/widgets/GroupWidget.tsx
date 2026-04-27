@@ -76,7 +76,7 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
     if (next.length === 0) return config.gridPos.h;
     const maxBottom = Math.max(...next.map((c) => c.gridPos.y + c.gridPos.h));
     const innerH = maxBottom * (cellSize + gridGap) - gridGap;
-    const titleBarH = config.title ? 28 : 0;
+    const titleBarH = config.title ? 36 : 0;
     return Math.ceil((titleBarH + innerH + 8 + gridGap) / (cellSize + gridGap));
   };
 
@@ -136,11 +136,11 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
   // ── Title bar (always shown in editMode as outer-grid drag handle) ─────────
   const titleBar = (config.title || editMode) ? (
     <div
-      className="shrink-0 px-3 py-1.5 text-xs font-semibold truncate"
+      className="shrink-0 px-3 py-2.5 text-xs font-semibold truncate"
       style={{
         color: 'var(--text-secondary)',
         borderBottom: transparent ? 'none' : '1px solid var(--widget-border)',
-        minHeight: editMode && !config.title ? '18px' : undefined,
+        minHeight: editMode && !config.title ? '36px' : undefined,
       }}
     >
       {config.title}
