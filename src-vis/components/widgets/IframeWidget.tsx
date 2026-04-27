@@ -7,7 +7,9 @@ const LOAD_TIMEOUT_MS = 8000;
 
 export function IframeWidget({ config }: WidgetProps) {
   const opts             = config.options ?? {};
-  const url              = (opts.iframeUrl        as string)  ?? '';
+  const rawUrl           = (opts.iframeUrl        as string)  ?? '';
+  const useProxy         = !!(opts.useProxy        as boolean);
+  const url              = useProxy && rawUrl ? `/aura/proxy?url=${encodeURIComponent(rawUrl)}` : rawUrl;
   const keepAlive        = (opts.keepAlive         as boolean) ?? false;
   const allowInteraction = !!(opts.allowInteraction ?? true);
   const refreshSeconds   = (opts.refreshInterval   as number)  ?? 0;

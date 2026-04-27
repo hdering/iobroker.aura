@@ -54,7 +54,7 @@
     "tier": 3,
     "connectionType": "local",
     "dataSource": "push",
-    "webExtension": "www/",
+    "webExtension": "lib/webExtension.js",
     "noIntro": true,
     "singleton": true,
     "platform": "Javascript/Node.js",

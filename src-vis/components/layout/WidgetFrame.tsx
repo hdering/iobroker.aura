@@ -2726,6 +2726,18 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                         placeholder="https://…"
                         className={iCls} style={iSty} />
                     </div>
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Proxy nutzen</label>
+                        <p className="text-[10px]" style={{ color: 'var(--text-secondary)', opacity: 0.6 }}>Umgeht X-Frame-Options des Zielservers</p>
+                      </div>
+                      <button onClick={() => set({ useProxy: !(o.useProxy ?? false) })}
+                        className="relative w-9 h-5 rounded-full transition-colors shrink-0"
+                        style={{ background: (o.useProxy ?? false) ? 'var(--accent)' : 'var(--app-border)' }}>
+                        <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                          style={{ left: (o.useProxy ?? false) ? '18px' : '2px' }} />
+                      </button>
+                    </div>
                     <div className="flex items-center justify-between">
                       <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Aufrechterhalten (kein Reload)</label>
                       <button onClick={() => set({ keepAlive: !(o.keepAlive ?? false) })}
