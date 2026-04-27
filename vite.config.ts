@@ -24,6 +24,58 @@ function ioBrokerDevPlugin(): Plugin {
     name: 'iobroker-dev-proxy',
     configureServer(server) {
 
+      // Server-side iframe proxy – strips X-Frame-Options so pages can be embedded
+      server.middlewares.use('/aura/proxy', (req, res) => {
+        const rawUrl = new URL(req.url ?? '', 'http://localhost').searchParams.get('url');
+        if (!rawUrl) { res.writeHead(400); res.end('Missing url parameter'); return; }
+        try {
+          const target = new URL(rawUrl);
+          if (!['http:', 'https:'].includes(target.protocol)) { res.writeHead(400); res.end('Only http/https'); return; }
+          const lib = target.protocol === 'https:' ? https : http;
+          const stripHeaders = new Set([
+            'x-frame-options', 'content-security-policy', 'x-content-type-options',
+            'x-xss-protection', 'cross-origin-resource-policy',
+            'cross-origin-embedder-policy', 'cross-origin-opener-policy',
+          ]);
+          const proxyReq = lib.request({
+            hostname: target.hostname,
+            port: target.port || (target.protocol === 'https:' ? 443 : 80),
+            path: target.pathname + target.search,
+            method: 'GET',
+            timeout: 15000,
+            headers: {
+              'Accept': 'text/html,*/*',
+              'Accept-Language': 'en',
+              'User-Agent': 'Mozilla/5.0 (ioBroker-Aura)',
+            },
+            rejectUnauthorized: false,
+          } as http.RequestOptions, (proxyRes) => {
+            if ((proxyRes.statusCode === 301 || proxyRes.statusCode === 302) && proxyRes.headers.location) {
+              const abs = new URL(proxyRes.headers.location, rawUrl).toString();
+              const rh: Record<string, string | string[]> = {};
+              for (const [k, v] of Object.entries(proxyRes.headers)) {
+                if (!stripHeaders.has(k.toLowerCase()) && v !== undefined) rh[k] = v as string | string[];
+              }
+              rh['location'] = `/aura/proxy?url=${encodeURIComponent(abs)}`;
+              res.writeHead(proxyRes.statusCode!, rh);
+              res.end();
+              return;
+            }
+            const outHeaders: Record<string, string | string[]> = {};
+            for (const [k, v] of Object.entries(proxyRes.headers)) {
+              if (!stripHeaders.has(k.toLowerCase()) && v !== undefined) outHeaders[k] = v as string | string[];
+            }
+            res.writeHead(proxyRes.statusCode ?? 200, outHeaders);
+            proxyRes.pipe(res, { end: true });
+          });
+          proxyReq.on('timeout', () => { proxyReq.destroy(); if (!res.headersSent) { res.writeHead(504); res.end('Proxy timeout'); } });
+          proxyReq.on('error', (e) => { if (!res.headersSent) { res.writeHead(502); res.end(e.message); } });
+          proxyReq.end();
+        } catch {
+          res.writeHead(400); res.end('Invalid URL');
+        }
+      });
+
       // Server-side iCal proxy – avoids CORS restrictions in the browser
       server.middlewares.use('/proxy/ical', (req, res) => {
         const rawUrl = new URL(req.url ?? '', 'http://localhost').searchParams.get('url');
