@@ -13,7 +13,7 @@ export function DimmerWidget({ config }: WidgetProps) {
   const { setState } = useIoBroker();
   const level = typeof value === 'number' ? Math.round(value) : 0;
   const layout = config.layout ?? 'default';
-  const CompactIcon = getWidgetIcon(config.options?.icon as string | undefined, SunDim);
+  const CompactIcon = useMemo(() => getWidgetIcon(config.options?.icon as string | undefined, SunDim), [config.options?.icon]);
   const o = config.options ?? {};
   const showTitle      = o.showTitle      !== false;
   const showValue      = o.showValue      !== false;
