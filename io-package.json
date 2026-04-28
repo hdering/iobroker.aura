@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.5.31",
+    "version": "0.5.32",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.5.32": {
+        "en": "Fix(proxy): replace history.replaceState('/') with <base href='/'>  injection — replaceState in same-origin iframe fired popstate on parent Aura window causing widget flash",
+        "de": "Fix(Proxy): history.replaceState('/') durch <base href='/'> ersetzt — replaceState im same-origin iframe hat popstate im parent Aura-Fenster ausgelöst und Widget-Flackern verursacht",
+        "ru": "Исправление(прокси): замена history.replaceState('/') на инъекцию <base href='/'>",
+        "pt": "Correção(proxy): substituir history.replaceState('/') por injeção de <base href='/'>",
+        "nl": "Fix(proxy): history.replaceState('/') vervangen door <base href='/'> injectie",
+        "fr": "Correction(proxy): remplacer history.replaceState('/') par injection de <base href='/'>",
+        "it": "Fix(proxy): sostituire history.replaceState('/') con iniezione di <base href='/'>",
+        "es": "Corrección(proxy): reemplazar history.replaceState('/') con inyección de <base href='/'>",
+        "pl": "Poprawka(proxy): zastąpienie history.replaceState('/') przez wstrzyknięcie <base href='/'>",
+        "uk": "Виправлення(проксі): заміна history.replaceState('/') на ін'єкцію <base href='/'>",
+        "zh-cn": "修复(代理)：用注入<base href='/'>替换history.replaceState('/')——同源iframe中的replaceState在父Aura窗口触发popstate导致组件闪烁"
+      },
       "0.5.31": {
         "en": "Fix(proxy): MutationObserver rewrites dynamically set src= attributes — Angular [src] bindings (thumbnails, images) now route through the proxy",
         "de": "Fix(Proxy): MutationObserver schreibt dynamisch gesetzte src=-Attribute um — Angular [src]-Bindings (Thumbnails, Bilder) werden jetzt durch den Proxy geleitet",
