@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.5.45",
+    "version": "0.5.46",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,10 @@
       }
     ],
     "news": {
+      "0.5.46": {
+        "en": "Feat(config): dedicated web instance selector — default is now empty (proxy disabled); select a specific web instance to avoid restarting VIS/Material on aura stop",
+        "de": "Neu(Konfig): Dedizierte Web-Instanz auswählbar — Standard ist jetzt leer (Proxy deaktiviert); eine Web-Instanz auswählen damit VIS/Material beim Stoppen von aura nicht neustartet"
+      },
       "0.5.41": {
         "en": "Warn on adapter start if iobroker.web needs a restart to load the webExtension",
         "de": "Warnung beim Adapterstart wenn iobroker.web neu gestartet werden muss um die webExtension zu laden",
