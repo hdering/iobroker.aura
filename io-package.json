@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.5.33",
+    "version": "0.5.34",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.5.34": {
+        "en": "Fix(proxy): restore history.replaceState('/') so apps see pathname='/' not '/aura/proxy'; narrow rw() guard to /aura/proxy only; WS guard uses startsWith",
+        "de": "Fix(Proxy): history.replaceState('/') zurück damit Apps pathname='/' statt '/aura/proxy' sehen; rw()-Guard auf /aura/proxy eingegrenzt; WS-Guard nutzt startsWith",
+        "ru": "Исправление(прокси): возврат history.replaceState('/'), сужение guard в rw() до /aura/proxy, WS guard использует startsWith",
+        "pt": "Correção(proxy): restaurar history.replaceState('/'), restringir guard rw() a /aura/proxy, guard WS usa startsWith",
+        "nl": "Fix(proxy): history.replaceState('/') hersteld; rw() guard beperkt tot /aura/proxy; WS guard gebruikt startsWith",
+        "fr": "Correction(proxy): restaurer history.replaceState('/'); guard rw() limité à /aura/proxy; guard WS utilise startsWith",
+        "it": "Fix(proxy): ripristino history.replaceState('/'); guard rw() ristretto a /aura/proxy; guard WS usa startsWith",
+        "es": "Corrección(proxy): restaurar history.replaceState('/'); guard rw() restringido a /aura/proxy; guard WS usa startsWith",
+        "pl": "Poprawka(proxy): przywrócenie history.replaceState('/'); guard rw() ograniczony do /aura/proxy; guard WS używa startsWith",
+        "uk": "Виправлення(проксі): відновлення history.replaceState('/'); guard rw() звужено до /aura/proxy; WS guard використовує startsWith",
+        "zh-cn": "修复(代理)：恢复history.replaceState('/')使应用看到pathname='/'；将rw()保护范围缩小到/aura/proxy；WS保护使用startsWith"
+      },
       "0.5.33": {
         "en": "Fix(proxy): restore missing 'let out' declaration dropped in v0.5.32 refactoring — caused 502 on all proxied pages",
         "de": "Fix(Proxy): fehlende 'let out'-Deklaration wiederhergestellt, die beim v0.5.32-Refactoring verloren ging — verursachte 502 auf allen Proxy-Seiten",
