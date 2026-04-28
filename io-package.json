@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.5.23",
+    "version": "0.5.24",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.5.24": {
+        "en": "Fix(proxy): use actual target path for history.replaceState instead of '/' — prevents post-login redirect landing on web-adapter root",
+        "de": "Fix(Proxy): echten Zielpfad für history.replaceState nutzen statt '/' — verhindert, dass nach dem Login auf der Web-Adapter-Startseite gelandet wird",
+        "ru": "Исправление(прокси): использовать реальный путь для history.replaceState вместо '/' — предотвращает попадание на стартовую страницу после входа",
+        "pt": "Correção(proxy): usar caminho real para history.replaceState em vez de '/' — evita aterrar na raiz do web-adapter após login",
+        "nl": "Fix(proxy): echte doelpad gebruiken voor history.replaceState in plaats van '/' — voorkomt landen op web-adapter root na inloggen",
+        "fr": "Correction(proxy): utiliser le chemin réel pour history.replaceState au lieu de '/' — évite d'atterrir sur la racine du web-adapter après connexion",
+        "it": "Fix(proxy): usare il percorso reale per history.replaceState invece di '/' — evita di atterrare sulla root del web-adapter dopo il login",
+        "es": "Corrección(proxy): usar ruta real para history.replaceState en lugar de '/' — evita aterrizar en la raíz del web-adapter tras el login",
+        "pl": "Poprawka(proxy): używaj rzeczywistej ścieżki dla history.replaceState zamiast '/' — zapobiega lądowaniu na stronie głównej web-adaptera po logowaniu",
+        "uk": "Виправлення(проксі): використовувати реальний шлях для history.replaceState замість '/'",
+        "zh-cn": "修复(代理)：使用真实目标路径进行history.replaceState而非'/'——防止登录后跳转到web-adapter根页面"
+      },
       "0.5.23": {
         "en": "Fix(proxy): intercept location.href, location.assign/replace and dynamic link clicks so logout and other direct navigations are routed through the proxy",
         "de": "Fix(Proxy): location.href, location.assign/replace und dynamische Link-Klicks abfangen, damit Logout und direkte Navigationen über den Proxy geleitet werden",
