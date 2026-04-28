@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.5.28",
+    "version": "0.5.29",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.5.29": {
+        "en": "Fix(proxy): always use history.replaceState('/') — using the actual target path confused Angular into building wrong API URLs like /dashboardapi/saved_views/",
+        "de": "Fix(Proxy): immer history.replaceState('/') nutzen — der echte Zielpfad hat Angular verwirrt und falsche API-URLs wie /dashboardapi/saved_views/ erzeugt",
+        "ru": "Исправление(прокси): всегда использовать history.replaceState('/') — реальный путь сбивал Angular с построением неверных API URL",
+        "pt": "Correção(proxy): sempre usar history.replaceState('/') — o caminho real confundia Angular gerando URLs erradas",
+        "nl": "Fix(proxy): altijd history.replaceState('/') gebruiken — het echte doelpad verward Angular met verkeerde API URLs",
+        "fr": "Correction(proxy): toujours utiliser history.replaceState('/') — le chemin réel perturbait Angular produisant de mauvaises URL API",
+        "it": "Fix(proxy): usare sempre history.replaceState('/') — il percorso reale confondeva Angular generando URL API errate",
+        "es": "Corrección(proxy): usar siempre history.replaceState('/') — la ruta real confundía Angular generando URLs API incorrectas",
+        "pl": "Poprawka(proxy): zawsze używaj history.replaceState('/') — rzeczywista ścieżka myliła Angular generując błędne URL API",
+        "uk": "Виправлення(проксі): завжди використовувати history.replaceState('/') — реальний шлях плутав Angular при побудові URL API",
+        "zh-cn": "修复(代理)：始终使用history.replaceState('/')——使用实际目标路径导致Angular构建错误的API URL如/dashboardapi/saved_views/"
+      },
       "0.5.28": {
         "en": "Fix(proxy): rewrite src= in script/style opening tags while leaving inline content untouched — v0.5.26 accidentally skipped script src attributes causing 404 for JS bundles",
         "de": "Fix(Proxy): src= in script/style-Öffnungs-Tags umschreiben, Inline-Inhalt unberührt lassen — v0.5.26 hat versehentlich script-src-Attribute übersprungen was 404 für JS-Bundles verursachte",
