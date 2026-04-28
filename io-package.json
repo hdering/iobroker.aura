@@ -1,588 +1,587 @@
 {
-  "common": {
-    "name": "aura",
-    "version": "0.5.36",
-    "titleLang": {
-      "en": "Aura",
-      "de": "Aura",
-      "ru": "Aura",
-      "pt": "Aura",
-      "nl": "Aura",
-      "fr": "Aura",
-      "it": "Aura",
-      "es": "Aura",
-      "pl": "Aura",
-      "uk": "Aura",
-      "zh-cn": "Aura"
-    },
-    "desc": {
-      "en": "Modern visualization dashboard for ioBroker",
-      "de": "Modernes Visualisierungs-Dashboard für ioBroker",
-      "ru": "Современная панель визуализации для ioBroker",
-      "pt": "Painel de visualização moderno para ioBroker",
-      "nl": "Modern visualisatiedashboard voor ioBroker",
-      "fr": "Tableau de bord de visualisation moderne pour ioBroker",
-      "it": "Dashboard di visualizzazione moderna per ioBroker",
-      "es": "Panel de visualización moderno para ioBroker",
-      "pl": "Nowoczesny panel wizualizacji dla ioBroker",
-      "uk": "Сучасна панель візуалізації для ioBroker",
-      "zh-cn": "ioBroker 的现代可视化仪表板"
-    },
-    "authors": [
-      "Hermann Dering <aura@dering-online.de>"
-    ],
-    "keywords": [
-      "visualization",
-      "dashboard",
-      "vis",
-      "tablet",
-      "ical",
-      "calendar",
-      "evcc",
-      "gauge",
-      "chart"
-    ],
-    "icon": "aura.png",
-    "extIcon": "https://raw.githubusercontent.com/hdering/ioBroker.aura/master/admin/aura.png",
-    "type": "visualization",
-    "licenseInformation": {
-      "license": "MIT",
-      "type": "free"
-    },
-    "mode": "daemon",
-    "compact": false,
-    "tier": 3,
-    "connectionType": "local",
-    "dataSource": "push",
-    "webExtension": "lib/webExtension.js",
-    "noIntro": true,
-    "singleton": true,
-    "platform": "Javascript/Node.js",
-    "adminUI": {
-      "config": "json"
-    },
-    "localLinks": {
-      "frontend": {
-        "link": "%protocol%://%ip%:8082/aura/",
-        "name": {
-          "en": "Aura Frontend",
-          "de": "Aura Frontend",
-          "ru": "Aura Frontend",
-          "pt": "Aura Frontend",
-          "nl": "Aura Frontend",
-          "fr": "Aura Frontend",
-          "it": "Aura Frontend",
-          "es": "Aura Frontend",
-          "pl": "Aura Frontend",
-          "uk": "Aura Frontend",
-          "zh-cn": "Aura Frontend"
+    "common": {
+        "name": "aura",
+        "version": "0.5.37",
+        "titleLang": {
+            "en": "Aura",
+            "de": "Aura",
+            "ru": "Aura",
+            "pt": "Aura",
+            "nl": "Aura",
+            "fr": "Aura",
+            "it": "Aura",
+            "es": "Aura",
+            "pl": "Aura",
+            "uk": "Aura",
+            "zh-cn": "Aura"
+        },
+        "desc": {
+            "en": "Modern visualization dashboard for ioBroker",
+            "de": "Modernes Visualisierungs-Dashboard für ioBroker",
+            "ru": "Современная панель визуализации для ioBroker",
+            "pt": "Painel de visualização moderno para ioBroker",
+            "nl": "Modern visualisatiedashboard voor ioBroker",
+            "fr": "Tableau de bord de visualisation moderne pour ioBroker",
+            "it": "Dashboard di visualizzazione moderna per ioBroker",
+            "es": "Panel de visualización moderno para ioBroker",
+            "pl": "Nowoczesny panel wizualizacji dla ioBroker",
+            "uk": "Сучасна панель візуалізації для ioBroker",
+            "zh-cn": "ioBroker 的现代可视化仪表板"
+        },
+        "authors": [
+            "Hermann Dering <aura@dering-online.de>"
+        ],
+        "keywords": [
+            "visualization",
+            "dashboard",
+            "vis",
+            "tablet",
+            "ical",
+            "calendar",
+            "evcc",
+            "gauge",
+            "chart"
+        ],
+        "icon": "aura.png",
+        "extIcon": "https://raw.githubusercontent.com/hdering/ioBroker.aura/master/admin/aura.png",
+        "type": "visualization",
+        "licenseInformation": {
+            "license": "MIT",
+            "type": "free"
+        },
+        "mode": "daemon",
+        "compact": false,
+        "tier": 3,
+        "connectionType": "local",
+        "dataSource": "push",
+        "webExtension": "lib/webExtension.js",
+        "noIntro": true,
+        "singleton": true,
+        "platform": "Javascript/Node.js",
+        "adminUI": {
+            "config": "json"
+        },
+        "localLinks": {
+            "frontend": {
+                "link": "%protocol%://%ip%:8082/aura/",
+                "name": {
+                    "en": "Aura Frontend",
+                    "de": "Aura Frontend",
+                    "ru": "Aura Frontend",
+                    "pt": "Aura Frontend",
+                    "nl": "Aura Frontend",
+                    "fr": "Aura Frontend",
+                    "it": "Aura Frontend",
+                    "es": "Aura Frontend",
+                    "pl": "Aura Frontend",
+                    "uk": "Aura Frontend",
+                    "zh-cn": "Aura Frontend"
+                }
+            },
+            "backend": {
+                "link": "%protocol%://%ip%:8082/aura/#/admin",
+                "name": {
+                    "en": "Aura Backend",
+                    "de": "Aura Backend",
+                    "ru": "Aura Backend",
+                    "pt": "Aura Backend",
+                    "nl": "Aura Backend",
+                    "fr": "Aura Backend",
+                    "it": "Aura Backend",
+                    "es": "Aura Backend",
+                    "pl": "Aura Backend",
+                    "uk": "Aura Backend",
+                    "zh-cn": "Aura Backend"
+                }
+            }
+        },
+        "dependencies": [
+            {
+                "js-controller": ">=6.0.11"
+            }
+        ],
+        "globalDependencies": [
+            {
+                "admin": ">=7.6.20"
+            }
+        ],
+        "news": {
+            "0.5.36": {
+                "en": "Revert proxy script to v0.5.31 baseline: history.replaceState('/'), no <base href> injection, original segment rewriter",
+                "de": "Proxy-Script auf v0.5.31-Baseline zurückgesetzt: history.replaceState('/'), keine <base href> Injection, originaler Segment-Rewriter",
+                "ru": "Возврат скрипта прокси к базовой версии v0.5.31",
+                "pt": "Reverter script proxy para baseline v0.5.31",
+                "nl": "Proxy script terugzetten naar v0.5.31 baseline",
+                "fr": "Retour du script proxy à la baseline v0.5.31",
+                "it": "Ripristino script proxy a baseline v0.5.31",
+                "es": "Revertir script proxy a baseline v0.5.31",
+                "pl": "Przywrócenie skryptu proxy do wersji bazowej v0.5.31",
+                "uk": "Повернення скрипта проксі до базової версії v0.5.31",
+                "zh-cn": "将代理脚本还原到v0.5.31基线版本"
+            },
+            "0.5.35": {
+                "en": "Revert proxy script to v0.5.32/v0.5.33 baseline: <base href='/'> injection, no history.replaceState, original rw() and WS guards",
+                "de": "Proxy-Script auf v0.5.32/v0.5.33-Baseline zurückgesetzt: <base href='/'> Injection, kein history.replaceState, ursprüngliche rw()- und WS-Guards",
+                "ru": "Возврат скрипта прокси к базовой версии v0.5.32/v0.5.33",
+                "pt": "Reverter script proxy para baseline v0.5.32/v0.5.33",
+                "nl": "Proxy script terugzetten naar v0.5.32/v0.5.33 baseline",
+                "fr": "Retour du script proxy à la baseline v0.5.32/v0.5.33",
+                "it": "Ripristino script proxy a baseline v0.5.32/v0.5.33",
+                "es": "Revertir script proxy a baseline v0.5.32/v0.5.33",
+                "pl": "Przywrócenie skryptu proxy do wersji bazowej v0.5.32/v0.5.33",
+                "uk": "Повернення скрипта проксі до базової версії v0.5.32/v0.5.33",
+                "zh-cn": "将代理脚本还原到v0.5.32/v0.5.33基线版本"
+            },
+            "0.5.34": {
+                "en": "Fix(proxy): restore history.replaceState('/') so apps see pathname='/' not '/aura/proxy'; narrow rw() guard to /aura/proxy only; WS guard uses startsWith",
+                "de": "Fix(Proxy): history.replaceState('/') zurück damit Apps pathname='/' statt '/aura/proxy' sehen; rw()-Guard auf /aura/proxy eingegrenzt; WS-Guard nutzt startsWith",
+                "ru": "Исправление(прокси): возврат history.replaceState('/'), сужение guard в rw() до /aura/proxy, WS guard использует startsWith",
+                "pt": "Correção(proxy): restaurar history.replaceState('/'), restringir guard rw() a /aura/proxy, guard WS usa startsWith",
+                "nl": "Fix(proxy): history.replaceState('/') hersteld; rw() guard beperkt tot /aura/proxy; WS guard gebruikt startsWith",
+                "fr": "Correction(proxy): restaurer history.replaceState('/'); guard rw() limité à /aura/proxy; guard WS utilise startsWith",
+                "it": "Fix(proxy): ripristino history.replaceState('/'); guard rw() ristretto a /aura/proxy; guard WS usa startsWith",
+                "es": "Corrección(proxy): restaurar history.replaceState('/'); guard rw() restringido a /aura/proxy; guard WS usa startsWith",
+                "pl": "Poprawka(proxy): przywrócenie history.replaceState('/'); guard rw() ograniczony do /aura/proxy; guard WS używa startsWith",
+                "uk": "Виправлення(проксі): відновлення history.replaceState('/'); guard rw() звужено до /aura/proxy; WS guard використовує startsWith",
+                "zh-cn": "修复(代理)：恢复history.replaceState('/')使应用看到pathname='/'；将rw()保护范围缩小到/aura/proxy；WS保护使用startsWith"
+            },
+            "0.5.33": {
+                "en": "Fix(proxy): restore missing 'let out' declaration dropped in v0.5.32 refactoring — caused 502 on all proxied pages",
+                "de": "Fix(Proxy): fehlende 'let out'-Deklaration wiederhergestellt, die beim v0.5.32-Refactoring verloren ging — verursachte 502 auf allen Proxy-Seiten",
+                "ru": "Исправление(прокси): восстановлена отсутствующая декларация 'let out'",
+                "pt": "Correção(proxy): restaurada declaração 'let out' ausente",
+                "nl": "Fix(proxy): ontbrekende 'let out' declaratie hersteld",
+                "fr": "Correction(proxy): déclaration 'let out' manquante restaurée",
+                "it": "Fix(proxy): ripristinata dichiarazione 'let out' mancante",
+                "es": "Corrección(proxy): restaurada declaración 'let out' faltante",
+                "pl": "Poprawka(proxy): przywrócono brakującą deklarację 'let out'",
+                "uk": "Виправлення(проксі): відновлено відсутню декларацію 'let out'",
+                "zh-cn": "修复(代理)：恢复v0.5.32重构中丢失的'let out'声明"
+            },
+            "0.5.32": {
+                "en": "Fix(proxy): replace history.replaceState('/') with <base href='/'>  injection — replaceState in same-origin iframe fired popstate on parent Aura window causing widget flash",
+                "de": "Fix(Proxy): history.replaceState('/') durch <base href='/'> ersetzt — replaceState im same-origin iframe hat popstate im parent Aura-Fenster ausgelöst und Widget-Flackern verursacht",
+                "ru": "Исправление(прокси): замена history.replaceState('/') на инъекцию <base href='/'>",
+                "pt": "Correção(proxy): substituir history.replaceState('/') por injeção de <base href='/'>",
+                "nl": "Fix(proxy): history.replaceState('/') vervangen door <base href='/'> injectie",
+                "fr": "Correction(proxy): remplacer history.replaceState('/') par injection de <base href='/'>",
+                "it": "Fix(proxy): sostituire history.replaceState('/') con iniezione di <base href='/'>",
+                "es": "Corrección(proxy): reemplazar history.replaceState('/') con inyección de <base href='/'>",
+                "pl": "Poprawka(proxy): zastąpienie history.replaceState('/') przez wstrzyknięcie <base href='/'>",
+                "uk": "Виправлення(проксі): заміна history.replaceState('/') на ін'єкцію <base href='/'>",
+                "zh-cn": "修复(代理)：用注入<base href='/'>替换history.replaceState('/')——同源iframe中的replaceState在父Aura窗口触发popstate导致组件闪烁"
+            },
+            "0.5.31": {
+                "en": "Fix(proxy): MutationObserver rewrites dynamically set src= attributes — Angular [src] bindings (thumbnails, images) now route through the proxy",
+                "de": "Fix(Proxy): MutationObserver schreibt dynamisch gesetzte src=-Attribute um — Angular [src]-Bindings (Thumbnails, Bilder) werden jetzt durch den Proxy geleitet",
+                "ru": "Исправление(прокси): MutationObserver перезаписывает динамически установленные атрибуты src= — привязки Angular [src] теперь проходят через прокси",
+                "pt": "Correção(proxy): MutationObserver reescreve atributos src= definidos dinamicamente — bindings Angular [src] agora roteiam pelo proxy",
+                "nl": "Fix(proxy): MutationObserver herschrijft dynamisch ingestelde src=-attributen — Angular [src]-bindingen worden nu via de proxy gerouteerd",
+                "fr": "Correction(proxy): MutationObserver réécrit les attributs src= définis dynamiquement — les liaisons Angular [src] passent maintenant par le proxy",
+                "it": "Fix(proxy): MutationObserver riscrive attributi src= impostati dinamicamente — i binding Angular [src] ora passano attraverso il proxy",
+                "es": "Corrección(proxy): MutationObserver reescribe atributos src= establecidos dinámicamente — los bindings Angular [src] ahora se enrutan por el proxy",
+                "pl": "Poprawka(proxy): MutationObserver przepisuje dynamicznie ustawiane atrybuty src= — wiązania Angular [src] teraz są kierowane przez proxy",
+                "uk": "Виправлення(проксі): MutationObserver перезаписує динамічно встановлені атрибути src= — прив'язки Angular [src] тепер маршрутизуються через проксі",
+                "zh-cn": "修复(代理)：MutationObserver重写动态设置的src=属性——Angular [src]绑定(缩略图、图片)现在通过代理路由"
+            },
+            "0.5.30": {
+                "en": "Fix(proxy): click interceptor uses bubble phase + checks defaultPrevented — Angular RouterLink now handles internal SPA navigation without full-page reload flicker",
+                "de": "Fix(Proxy): Click-Interceptor nutzt Bubble-Phase + prüft defaultPrevented — Angular RouterLink behandelt interne SPA-Navigation jetzt ohne Flackern durch Full-Page-Reload",
+                "ru": "Исправление(прокси): обработчик кликов использует фазу всплытия + проверяет defaultPrevented — Angular RouterLink теперь обрабатывает SPA-навигацию без перезагрузки",
+                "pt": "Correção(proxy): interceptor de cliques usa fase bubble + verifica defaultPrevented — Angular RouterLink trata navegação SPA sem reload",
+                "nl": "Fix(proxy): klik-interceptor gebruikt bubble-fase + controleert defaultPrevented — Angular RouterLink verwerkt SPA-navigatie zonder volledig herladen",
+                "fr": "Correction(proxy): l'intercepteur de clics utilise la phase bubble + vérifie defaultPrevented — Angular RouterLink gère la navigation SPA sans rechargement",
+                "it": "Fix(proxy): l'interceptor click usa la fase bubble + verifica defaultPrevented — Angular RouterLink gestisce la navigazione SPA senza ricaricamento",
+                "es": "Corrección(proxy): interceptor de clics usa fase bubble + comprueba defaultPrevented — Angular RouterLink gestiona navegación SPA sin recarga",
+                "pl": "Poprawka(proxy): interceptor kliknięć używa fazy bubble + sprawdza defaultPrevented — Angular RouterLink obsługuje nawigację SPA bez przeładowania",
+                "uk": "Виправлення(проксі): перехоплювач кліків використовує фазу bubble + перевіряє defaultPrevented — Angular RouterLink обробляє SPA-навігацію без перезавантаження",
+                "zh-cn": "修复(代理)：点击拦截器使用冒泡阶段+检查defaultPrevented——Angular RouterLink现在无需整页重载即可处理SPA内部导航"
+            },
+            "0.5.29": {
+                "en": "Fix(proxy): always use history.replaceState('/') — using the actual target path confused Angular into building wrong API URLs like /dashboardapi/saved_views/",
+                "de": "Fix(Proxy): immer history.replaceState('/') nutzen — der echte Zielpfad hat Angular verwirrt und falsche API-URLs wie /dashboardapi/saved_views/ erzeugt",
+                "ru": "Исправление(прокси): всегда использовать history.replaceState('/') — реальный путь сбивал Angular с построением неверных API URL",
+                "pt": "Correção(proxy): sempre usar history.replaceState('/') — o caminho real confundia Angular gerando URLs erradas",
+                "nl": "Fix(proxy): altijd history.replaceState('/') gebruiken — het echte doelpad verward Angular met verkeerde API URLs",
+                "fr": "Correction(proxy): toujours utiliser history.replaceState('/') — le chemin réel perturbait Angular produisant de mauvaises URL API",
+                "it": "Fix(proxy): usare sempre history.replaceState('/') — il percorso reale confondeva Angular generando URL API errate",
+                "es": "Corrección(proxy): usar siempre history.replaceState('/') — la ruta real confundía Angular generando URLs API incorrectas",
+                "pl": "Poprawka(proxy): zawsze używaj history.replaceState('/') — rzeczywista ścieżka myliła Angular generując błędne URL API",
+                "uk": "Виправлення(проксі): завжди використовувати history.replaceState('/') — реальний шлях плутав Angular при побудові URL API",
+                "zh-cn": "修复(代理)：始终使用history.replaceState('/')——使用实际目标路径导致Angular构建错误的API URL如/dashboardapi/saved_views/"
+            },
+            "0.5.28": {
+                "en": "Fix(proxy): rewrite src= in script/style opening tags while leaving inline content untouched — v0.5.26 accidentally skipped script src attributes causing 404 for JS bundles",
+                "de": "Fix(Proxy): src= in script/style-Öffnungs-Tags umschreiben, Inline-Inhalt unberührt lassen — v0.5.26 hat versehentlich script-src-Attribute übersprungen was 404 für JS-Bundles verursachte",
+                "ru": "Исправление(прокси): перезапись src= в открывающих тегах script/style при сохранении inline-содержимого",
+                "pt": "Correção(proxy): reescrever src= em tags de abertura script/style mantendo conteúdo inline intacto",
+                "nl": "Fix(proxy): src= herschrijven in openingstags script/style terwijl inline-inhoud ongewijzigd blijft",
+                "fr": "Correction(proxy): réécrire src= dans les balises ouvrantes script/style en laissant le contenu inline intact",
+                "it": "Fix(proxy): riscrivere src= nei tag di apertura script/style lasciando il contenuto inline invariato",
+                "es": "Corrección(proxy): reescribir src= en etiquetas de apertura script/style manteniendo el contenido inline intacto",
+                "pl": "Poprawka(proxy): przepisywanie src= w otwierających tagach script/style z zachowaniem treści inline",
+                "uk": "Виправлення(проксі): перезапис src= у відкриваючих тегах script/style зі збереженням inline-вмісту",
+                "zh-cn": "修复(代理)：重写script/style开标签中的src=同时保留内联内容不变——v0.5.26意外跳过了script src属性导致JS包404"
+            },
+            "0.5.27": {
+                "en": "Fix(proxy): restore missing targetOrigin variable dropped during v0.5.26 refactoring — caused 502 on all proxied pages",
+                "de": "Fix(Proxy): fehlende targetOrigin-Variable wiederhergestellt, die beim v0.5.26-Refactoring verloren ging — verursachte 502 auf allen Proxy-Seiten",
+                "ru": "Исправление(прокси): восстановлена переменная targetOrigin, потерянная при рефакторинге v0.5.26",
+                "pt": "Correção(proxy): restaurada variável targetOrigin perdida no refactoring v0.5.26 — causava 502",
+                "nl": "Fix(proxy): ontbrekende targetOrigin-variabele hersteld verloren bij v0.5.26-refactoring",
+                "fr": "Correction(proxy): variable targetOrigin manquante restaurée perdue lors du refactoring v0.5.26",
+                "it": "Fix(proxy): ripristinata variabile targetOrigin persa durante il refactoring v0.5.26",
+                "es": "Corrección(proxy): restaurada variable targetOrigin perdida en refactoring v0.5.26",
+                "pl": "Poprawka(proxy): przywrócono zmienną targetOrigin utraconą podczas refaktoringu v0.5.26",
+                "uk": "Виправлення(проксі): відновлено змінну targetOrigin втрачену під час рефакторингу v0.5.26",
+                "zh-cn": "修复(代理)：恢复v0.5.26重构中丢失的targetOrigin变量——导致所有代理页面502错误"
+            },
+            "0.5.26": {
+                "en": "Fix(proxy): protect <script>/<style> content from URL rewriting; rw() resolves absolute paths directly against target without location.href interference",
+                "de": "Fix(Proxy): <script>/<style>-Inhalte vor URL-Umschreibung schützen; rw() löst absolute Pfade direkt gegen Target auf ohne location.href-Interferenz",
+                "ru": "Исправление(прокси): защита содержимого <script>/<style> от перезаписи URL; rw() разрешает абсолютные пути напрямую",
+                "pt": "Correção(proxy): proteger conteúdo de <script>/<style> de reescrita de URL; rw() resolve caminhos absolutos diretamente",
+                "nl": "Fix(proxy): <script>/<style>-inhoud beschermen tegen URL-herschrijving; rw() lost absolute paden direct op",
+                "fr": "Correction(proxy): protéger le contenu <script>/<style> de la réécriture d'URL; rw() résout les chemins absolus directement",
+                "it": "Fix(proxy): proteggere il contenuto <script>/<style> dalla riscrittura URL; rw() risolve i percorsi assoluti direttamente",
+                "es": "Corrección(proxy): proteger contenido <script>/<style> de reescritura de URL; rw() resuelve rutas absolutas directamente",
+                "pl": "Poprawka(proxy): ochrona zawartości <script>/<style> przed przepisywaniem URL; rw() rozwiązuje ścieżki bezwzględne bezpośrednio",
+                "uk": "Виправлення(проксі): захист вмісту <script>/<style> від перезапису URL; rw() вирішує абсолютні шляхи напряму",
+                "zh-cn": "修复(代理)：保护<script>/<style>内容不被URL重写；rw()直接对目标解析绝对路径而不受location.href干扰"
+            },
+            "0.5.25": {
+                "en": "Fix(proxy): add action attribute to forms without one and intercept form submit events — fixes login POST 404 when Django template has no form action",
+                "de": "Fix(Proxy): action-Attribut zu Forms ohne eines hinzufügen und Form-Submit abfangen — behebt Login-POST-404 wenn Django-Template kein Form-Action hat",
+                "ru": "Исправление(прокси): добавить action к формам без атрибута и перехватить submit — исправляет 404 при входе",
+                "pt": "Correção(proxy): adicionar action a formulários sem atributo e interceptar submit — corrige POST 404 no login",
+                "nl": "Fix(proxy): action toevoegen aan formulieren zonder attribuut en form submit onderscheppen — verhelpt login POST 404",
+                "fr": "Correction(proxy): ajouter action aux formulaires sans attribut et intercepter submit — corrige le POST 404 lors du login",
+                "it": "Fix(proxy): aggiungere action ai form senza attributo e intercettare submit — corregge il POST 404 al login",
+                "es": "Corrección(proxy): añadir action a formularios sin atributo e interceptar submit — corrige POST 404 en login",
+                "pl": "Poprawka(proxy): dodaj action do formularzy bez atrybutu i przechwytuj submit — naprawia POST 404 przy logowaniu",
+                "uk": "Виправлення(проксі): додати action до форм без атрибута та перехопити submit — виправляє POST 404 при вході",
+                "zh-cn": "修复(代理)：为无action属性的表单添加action并拦截submit事件——修复Django模板无form action时的登录POST 404"
+            },
+            "0.5.24": {
+                "en": "Fix(proxy): use actual target path for history.replaceState instead of '/' — prevents post-login redirect landing on web-adapter root",
+                "de": "Fix(Proxy): echten Zielpfad für history.replaceState nutzen statt '/' — verhindert, dass nach dem Login auf der Web-Adapter-Startseite gelandet wird",
+                "ru": "Исправление(прокси): использовать реальный путь для history.replaceState вместо '/' — предотвращает попадание на стартовую страницу после входа",
+                "pt": "Correção(proxy): usar caminho real para history.replaceState em vez de '/' — evita aterrar na raiz do web-adapter após login",
+                "nl": "Fix(proxy): echte doelpad gebruiken voor history.replaceState in plaats van '/' — voorkomt landen op web-adapter root na inloggen",
+                "fr": "Correction(proxy): utiliser le chemin réel pour history.replaceState au lieu de '/' — évite d'atterrir sur la racine du web-adapter après connexion",
+                "it": "Fix(proxy): usare il percorso reale per history.replaceState invece di '/' — evita di atterrare sulla root del web-adapter dopo il login",
+                "es": "Corrección(proxy): usar ruta real para history.replaceState en lugar de '/' — evita aterrizar en la raíz del web-adapter tras el login",
+                "pl": "Poprawka(proxy): używaj rzeczywistej ścieżki dla history.replaceState zamiast '/' — zapobiega lądowaniu na stronie głównej web-adaptera po logowaniu",
+                "uk": "Виправлення(проксі): використовувати реальний шлях для history.replaceState замість '/'",
+                "zh-cn": "修复(代理)：使用真实目标路径进行history.replaceState而非'/'——防止登录后跳转到web-adapter根页面"
+            },
+            "0.5.23": {
+                "en": "Fix(proxy): intercept location.href, location.assign/replace and dynamic link clicks so logout and other direct navigations are routed through the proxy",
+                "de": "Fix(Proxy): location.href, location.assign/replace und dynamische Link-Klicks abfangen, damit Logout und direkte Navigationen über den Proxy geleitet werden",
+                "ru": "Исправление(прокси): перехват location.href, location.assign/replace и кликов по динамическим ссылкам",
+                "pt": "Correção(proxy): interceptar location.href, location.assign/replace e cliques em links dinâmicos",
+                "nl": "Fix(proxy): location.href, location.assign/replace en dynamische linkklikken onderscheppen",
+                "fr": "Correction(proxy): intercepter location.href, location.assign/replace et les clics sur les liens dynamiques",
+                "it": "Fix(proxy): intercettare location.href, location.assign/replace e click su link dinamici",
+                "es": "Corrección(proxy): interceptar location.href, location.assign/replace y clics en enlaces dinámicos",
+                "pl": "Poprawka(proxy): przechwytywanie location.href, location.assign/replace i kliknięć dynamicznych linków",
+                "uk": "Виправлення(проксі): перехоплення location.href, location.assign/replace та кліків на динамічних посиланнях",
+                "zh-cn": "修复(代理)：拦截location.href、location.assign/replace和动态链接点击，使注销和直接导航通过代理路由"
+            },
+            "0.5.22": {
+                "en": "Fix(proxy): inject history.replaceState('/') so SPA routers see '/' instead of '/aura/proxy' — prevents Angular/Vue/React 404 on initial load",
+                "de": "Fix(Proxy): history.replaceState('/') injizieren, damit SPA-Router '/' statt '/aura/proxy' sehen — verhindert Angular/Vue/React-404 beim ersten Laden",
+                "ru": "Исправление(прокси): инъекция history.replaceState('/') чтобы SPA-роутеры видели '/' вместо '/aura/proxy'",
+                "pt": "Correção(proxy): injetar history.replaceState('/') para SPA routers verem '/' em vez de '/aura/proxy'",
+                "nl": "Fix(proxy): history.replaceState('/') injecteren zodat SPA-routers '/' zien in plaats van '/aura/proxy'",
+                "fr": "Correction(proxy): injecter history.replaceState('/') pour que les routeurs SPA voient '/' au lieu de '/aura/proxy'",
+                "it": "Fix(proxy): iniettare history.replaceState('/') affinché i router SPA vedano '/' invece di '/aura/proxy'",
+                "es": "Corrección(proxy): inyectar history.replaceState('/') para que los routers SPA vean '/' en lugar de '/aura/proxy'",
+                "pl": "Poprawka(proxy): wstrzyknięcie history.replaceState('/') aby routery SPA widziały '/' zamiast '/aura/proxy'",
+                "uk": "Виправлення(проксі): ін'єкція history.replaceState('/') щоб SPA-роутери бачили '/' замість '/aura/proxy'",
+                "zh-cn": "修复(代理)：注入history.replaceState('/')使SPA路由器看到'/'而非'/aura/proxy'，防止Angular/Vue/React初始加载时出现404"
+            },
+            "0.5.21": {
+                "en": "Fix(proxy): intercept XHR and fetch in proxied pages so API calls are routed through the proxy instead of failing with HTML 404",
+                "de": "Fix(Proxy): XHR und fetch in Proxy-Seiten abfangen, damit API-Aufrufe über den Proxy geleitet werden statt mit HTML-404 zu scheitern",
+                "ru": "Исправление(прокси): перехват XHR и fetch в проксированных страницах для маршрутизации API-вызовов через прокси",
+                "pt": "Correção(proxy): interceptar XHR e fetch em páginas proxy para rotear chamadas API pelo proxy",
+                "nl": "Fix(proxy): XHR en fetch onderscheppen in proxy-pagina's zodat API-aanroepen via de proxy worden gerouteerd",
+                "fr": "Correction(proxy): intercepter XHR et fetch dans les pages proxy pour router les appels API via le proxy",
+                "it": "Fix(proxy): intercettare XHR e fetch nelle pagine proxy per instradare le chiamate API tramite il proxy",
+                "es": "Corrección(proxy): interceptar XHR y fetch en páginas proxy para enrutar llamadas API a través del proxy",
+                "pl": "Poprawka(proxy): przechwytywanie XHR i fetch w stronach proxy aby przekierowywać wywołania API przez proxy",
+                "uk": "Виправлення(проксі): перехоплення XHR та fetch у проксованих сторінках для маршрутизації API-викликів через проксі",
+                "zh-cn": "修复(代理)：在代理页面中拦截XHR和fetch，使API调用通过代理路由而不是返回HTML 404"
+            },
+            "0.5.20": {
+                "en": "Fix(proxy): WebSocket proxy at /aura/proxyws + JS interceptor injected into HTML; fix CSRF 403 by overriding Referer and forwarding X-CSRFToken",
+                "de": "Fix(Proxy): WebSocket-Proxy unter /aura/proxyws + JS-Interceptor in HTML injiziert; CSRF-403-Fix durch Referer-Override und X-CSRFToken-Weiterleitung",
+                "ru": "Исправление(прокси): WebSocket-прокси /aura/proxyws + JS-перехватчик в HTML; исправление CSRF 403 через замену Referer и передачу X-CSRFToken",
+                "pt": "Correção(proxy): proxy WebSocket em /aura/proxyws + interceptor JS injetado no HTML; correção CSRF 403 via Referer override e encaminhamento de X-CSRFToken",
+                "nl": "Fix(proxy): WebSocket-proxy op /aura/proxyws + JS-interceptor in HTML geïnjecteerd; CSRF-403-fix via Referer-override en X-CSRFToken-forwarding",
+                "fr": "Correction(proxy): proxy WebSocket /aura/proxyws + intercepteur JS injecté dans HTML; correction CSRF 403 via override Referer et transfert X-CSRFToken",
+                "it": "Fix(proxy): proxy WebSocket /aura/proxyws + interceptor JS iniettato nell'HTML; fix CSRF 403 tramite override Referer e inoltro X-CSRFToken",
+                "es": "Corrección(proxy): proxy WebSocket en /aura/proxyws + interceptor JS inyectado en HTML; corrección CSRF 403 via override Referer y reenvío X-CSRFToken",
+                "pl": "Poprawka(proxy): proxy WebSocket /aura/proxyws + interceptor JS wstrzyknięty do HTML; naprawa CSRF 403 przez override Referer i przekazywanie X-CSRFToken",
+                "uk": "Виправлення(проксі): WebSocket-проксі /aura/proxyws + JS-перехоплювач у HTML; виправлення CSRF 403 через заміну Referer та передачу X-CSRFToken",
+                "zh-cn": "修复(代理)：WebSocket代理/aura/proxyws+向HTML注入JS拦截器；通过覆盖Referer和转发X-CSRFToken修复CSRF 403"
+            },
+            "0.5.19": {
+                "en": "Fix(proxy): rewrite HTML/CSS URLs so static assets and links are routed through the proxy instead of loading directly from the internal host",
+                "de": "Fix(Proxy): HTML/CSS-URLs umschreiben, damit statische Ressourcen und Links über den Proxy geleitet werden statt direkt vom internen Host zu laden",
+                "ru": "Исправление(прокси): перезапись URL в HTML/CSS — статические ресурсы теперь маршрутизируются через прокси",
+                "pt": "Correção(proxy): reescrever URLs em HTML/CSS para que assets estáticos sejam roteados pelo proxy",
+                "nl": "Fix(proxy): HTML/CSS-URL's herschrijven zodat statische bestanden via de proxy worden geladen",
+                "fr": "Correction(proxy): réécriture des URL HTML/CSS pour que les ressources statiques passent par le proxy",
+                "it": "Fix(proxy): riscrittura URL HTML/CSS per instradare risorse statiche attraverso il proxy",
+                "es": "Corrección(proxy): reescritura de URLs HTML/CSS para que los recursos estáticos pasen por el proxy",
+                "pl": "Poprawka(proxy): przepisywanie URL w HTML/CSS aby zasoby statyczne były ładowane przez proxy",
+                "uk": "Виправлення(проксі): перезапис URL у HTML/CSS щоб статичні ресурси завантажувались через проксі",
+                "zh-cn": "修复(代理)：重写HTML/CSS中的URL，使静态资源通过代理路由而非直接从内部主机加载"
+            },
+            "0.5.18": {
+                "en": "Fix(proxy): support POST and all HTTP methods — login forms now work through the iframe proxy",
+                "de": "Fix(Proxy): POST und alle HTTP-Methoden unterstützt — Login-Formulare funktionieren jetzt durch den iFrame-Proxy",
+                "ru": "Исправление(прокси): поддержка POST и всех HTTP-методов — формы входа теперь работают через прокси",
+                "pt": "Correção(proxy): suporte a POST e todos os métodos HTTP — formulários de login funcionam agora pelo proxy",
+                "nl": "Fix(proxy): POST en alle HTTP-methoden ondersteund — loginformulieren werken nu via de iframe-proxy",
+                "fr": "Correction(proxy): support POST et toutes les méthodes HTTP — les formulaires de connexion fonctionnent via le proxy",
+                "it": "Fix(proxy): supporto POST e tutti i metodi HTTP — i moduli di login ora funzionano tramite il proxy",
+                "es": "Corrección(proxy): soporte POST y todos los métodos HTTP — los formularios de inicio de sesión funcionan ahora a través del proxy",
+                "pl": "Poprawka(proxy): obsługa POST i wszystkich metod HTTP — formularze logowania działają teraz przez proxy",
+                "uk": "Виправлення(проксі): підтримка POST і всіх HTTP-методів — форми входу тепер працюють через проксі",
+                "zh-cn": "修复(代理)：支持POST和所有HTTP方法——登录表单现在可以通过iframe代理工作"
+            },
+            "0.5.17": {
+                "en": "Fix: set webInstance=* in native so iobroker.web loads the proxy extension; auto-migrate existing instances on adapter start",
+                "de": "Fix: webInstance=* in native gesetzt damit iobroker.web die Proxy-Extension lädt; bestehende Instanzen werden beim Adapterstart automatisch migriert",
+                "ru": "Исправление: webInstance=* задан в native для загрузки прокси-расширения; существующие экземпляры мигрируются при старте адаптера",
+                "pt": "Correção: webInstance=* definido em native para iobroker.web carregar a extensão proxy; instâncias existentes são migradas automaticamente na inicialização",
+                "nl": "Fix: webInstance=* ingesteld in native zodat iobroker.web de proxy-extensie laadt; bestaande instanties worden automatisch gemigreerd bij adapter-start",
+                "fr": "Correction: webInstance=* défini dans native pour que iobroker.web charge l'extension proxy; les instances existantes sont migrées automatiquement au démarrage",
+                "it": "Fix: webInstance=* impostato in native affinché iobroker.web carichi l'estensione proxy; le istanze esistenti vengono migrate automaticamente all'avvio",
+                "es": "Corrección: webInstance=* establecido en native para que iobroker.web cargue la extensión proxy; las instancias existentes se migran automáticamente al iniciar",
+                "pl": "Poprawka: webInstance=* ustawiony w native aby iobroker.web załadował rozszerzenie proxy; istniejące instancje są migrowane automatycznie przy starcie",
+                "uk": "Виправлення: webInstance=* встановлено в native щоб iobroker.web завантажував proxy-розширення; існуючі екземпляри мігруються автоматично при старті",
+                "zh-cn": "修复：在native中设置webInstance=*使iobroker.web加载代理扩展；现有实例在适配器启动时自动迁移"
+            },
+            "0.5.16": {
+                "en": "Fix: add lib/ to npm package files — lib/webExtension.js (iframe proxy) was missing from the published package",
+                "de": "Fix: lib/ zu npm-Paketdateien hinzugefügt — lib/webExtension.js (iFrame-Proxy) fehlte im veröffentlichten Paket",
+                "ru": "Исправление: lib/ добавлен в файлы npm-пакета — lib/webExtension.js (iframe-прокси) отсутствовал в опубликованном пакете",
+                "pt": "Correção: lib/ adicionado aos arquivos do pacote npm — lib/webExtension.js (proxy iframe) estava ausente do pacote publicado",
+                "nl": "Fix: lib/ toegevoegd aan npm-pakketbestanden — lib/webExtension.js (iframe-proxy) ontbrak in het gepubliceerde pakket",
+                "fr": "Correction: lib/ ajouté aux fichiers du paquet npm — lib/webExtension.js (proxy iframe) était absent du paquet publié",
+                "it": "Fix: lib/ aggiunto ai file del pacchetto npm — lib/webExtension.js (proxy iframe) mancava nel pacchetto pubblicato",
+                "es": "Corrección: lib/ añadido a los archivos del paquete npm — lib/webExtension.js (proxy iframe) faltaba en el paquete publicado",
+                "pl": "Poprawka: lib/ dodano do plików pakietu npm — lib/webExtension.js (proxy iframe) brakowało w opublikowanym pakiecie",
+                "uk": "Виправлення: lib/ додано до файлів npm-пакету — lib/webExtension.js (iframe-проксі) був відсутній у опублікованому пакеті",
+                "zh-cn": "修复：将lib/添加到npm包文件中——lib/webExtension.js（iframe代理）在发布的包中缺失"
+            },
+            "0.5.15": {
+                "en": "Fix(admin editor): tab switch no longer causes save bar to flash 'unsaved changes'; tab menu no longer flickers — TabBar extracted as isolated memoized component with narrow Zustand selectors; react-grid-layout transitions disabled when not dragging",
+                "de": "Fix(Admin-Editor): Tab-Wechsel lässt die Speicherleiste nicht mehr 'Ungespeicherte Änderungen' aufblitzen; Tab-Menü flackert nicht mehr — TabBar als isolierte, memoisierte Komponente mit schmalen Zustand-Selektoren extrahiert; react-grid-layout Übergänge deaktiviert wenn nicht gezogen wird",
+                "ru": "Fix(редактор): переключение вкладок больше не вызывает мигание строки сохранения; меню вкладок больше не мерцает — TabBar вынесен в изолированный мемоизированный компонент с узкими селекторами; переходы react-grid-layout отключены когда нет перетаскивания",
+                "pt": "Fix(editor): troca de aba não causa mais flash 'alterações não salvas'; menu de abas não pisca mais — TabBar extraído como componente memoizado isolado com seletores estreitos; transições react-grid-layout desativadas quando não há arrasto",
+                "nl": "Fix(editor): wisselen van tabblad veroorzaakt geen flash 'niet-opgeslagen wijzigingen' meer; tabbladmenu flikkert niet meer — TabBar geëxtraheerd als geïsoleerde gememoriseerde component met smalle selectors; react-grid-layout overgangen uitgeschakeld als er niet gesleept wordt",
+                "fr": "Fix(éditeur): changer d'onglet ne cause plus de flash 'modifications non enregistrées'; le menu d'onglets ne scintille plus — TabBar extrait comme composant mémoïsé isolé avec des sélecteurs étroits; transitions react-grid-layout désactivées hors glisser-déposer",
+                "it": "Fix(editor): cambiare scheda non causa più il flash 'modifiche non salvate'; il menu schede non lampeggia più — TabBar estratto come componente memoizzato isolato con selettori stretti; transizioni react-grid-layout disabilitate quando non si trascina",
+                "es": "Fix(editor): cambiar de pestaña ya no causa flash 'cambios no guardados'; el menú de pestañas ya no parpadea — TabBar extraído como componente memoizado aislado con selectores estrechos; transiciones react-grid-layout desactivadas cuando no se arrastra",
+                "pl": "Fix(edytor): przełączanie kart nie powoduje już migotania 'niezapisane zmiany'; menu kart nie migocze — TabBar wyodrębniony jako izolowany spamiętany komponent z wąskimi selektorami; przejścia react-grid-layout wyłączone gdy brak przeciągania",
+                "uk": "Fix(редактор): перемикання вкладок більше не викликає мигання рядка збереження; меню вкладок більше не мерехтить — TabBar виділено в ізольований мемоізований компонент з вузькими селекторами; переходи react-grid-layout вимкнено без перетягування",
+                "zh-cn": "修复(管理编辑器)：切换标签页不再导致保存栏闪现'未保存更改'；标签菜单不再闪烁——TabBar提取为带窄选择器的隔离记忆化组件；未拖动时禁用react-grid-layout过渡动画"
+            },
+            "0.5.14": {
+                "en": "Feat(iframe): server-side proxy to bypass X-Frame-Options — enable 'Use Proxy' toggle in iframe widget settings; fix: add proxy route to Vite dev server and remove <base> injection that caused origin:null CORS errors",
+                "de": "Neu(iFrame): serverseitiger Proxy zum Umgehen von X-Frame-Options — 'Proxy nutzen'-Schalter in den iFrame-Widget-Einstellungen aktivieren; Fix: Proxy-Route im Vite-Dev-Server ergänzt und <base>-Injektion entfernt, die origin:null CORS-Fehler verursachte",
+                "ru": "Новое(iFrame): серверный прокси для обхода X-Frame-Options — включите 'Использовать прокси' в настройках виджета iFrame; исправление: добавлен маршрут прокси в Vite dev-сервер, удалена инъекция <base>, вызывавшая ошибки CORS",
+                "pt": "Novo(iFrame): proxy server-side para contornar X-Frame-Options — ative 'Usar Proxy' nas configurações do widget iFrame; correção: rota proxy adicionada ao Vite dev server, injeção <base> removida",
+                "nl": "Nieuw(iFrame): server-side proxy om X-Frame-Options te omzeilen — schakel 'Proxy gebruiken' in de iFrame-widget-instellingen in; fix: proxy-route toegevoegd aan Vite dev-server, <base>-injectie verwijderd",
+                "fr": "Nouveau(iFrame): proxy côté serveur pour contourner X-Frame-Options — activez 'Utiliser le proxy' dans les paramètres du widget iFrame; correction: route proxy ajoutée au serveur Vite dev, injection <base> supprimée",
+                "it": "Nuovo(iFrame): proxy lato server per aggirare X-Frame-Options — attiva 'Usa proxy' nelle impostazioni del widget iFrame; fix: route proxy aggiunta al server Vite dev, rimossa iniezione <base>",
+                "es": "Nuevo(iFrame): proxy del lado servidor para eludir X-Frame-Options — activa 'Usar proxy' en la configuración del widget iFrame; corrección: ruta proxy añadida al servidor Vite dev, eliminada inyección <base>",
+                "pl": "Nowe(iFrame): proxy po stronie serwera do ominięcia X-Frame-Options — włącz 'Użyj proxy' w ustawieniach widgetu iFrame; poprawka: dodano trasę proxy do serwera Vite dev, usunięto iniekcję <base>",
+                "uk": "Нове(iFrame): серверний проксі для обходу X-Frame-Options — увімкніть 'Використати проксі' у налаштуваннях віджета iFrame; виправлення: додано маршрут проксі до Vite dev-сервера, видалено ін'єкцію <base>",
+                "zh-cn": "新功能(iFrame)：服务端代理绕过X-Frame-Options——在iFrame组件设置中启用'使用代理'开关；修复：为Vite开发服务器添加代理路由，移除导致origin:null CORS错误的<base>注入"
+            },
+            "0.5.13": {
+                "en": "Fix(tab bar): icons no longer flicker when switching views — placeholder reserves space and Icon component reference is stable",
+                "de": "Fix(Tab-Leiste): Icons flackern beim Wechseln zwischen Ansichten nicht mehr — Platzhalter reserviert den Platz und die Icon-Komponente ist stabil",
+                "ru": "Исправление(панель вкладок): иконки больше не мигают при переключении видов — заполнитель резервирует место, ссылка на компонент иконки стабильна",
+                "pt": "Correção(barra de abas): ícones não piscam mais ao trocar de vista — espaço reservado pelo placeholder e referência do componente de ícone estável",
+                "nl": "Fix(tabbalk): pictogrammen flikkeren niet meer bij het wisselen van weergave — placeholder reserveert de ruimte en de Icon-componentreferentie is stabiel",
+                "fr": "Correction(barre d'onglets): les icônes ne clignotent plus lors du changement de vue — l'espace est réservé et la référence du composant Icon est stable",
+                "it": "Fix(barra schede): le icone non lampeggiano più quando si cambia vista — il segnaposto riserva lo spazio e il riferimento del componente Icon è stabile",
+                "es": "Corrección(barra de pestañas): los iconos ya no parpadean al cambiar de vista — el marcador reserva el espacio y la referencia del componente Icon es estable",
+                "pl": "Poprawka(pasek zakładek): ikony nie migają już przy przełączaniu widoków — placeholder rezerwuje miejsce, a referencja komponentu Icon jest stabilna",
+                "uk": "Виправлення(панель вкладок): іконки більше не мигають при перемиканні видів — заповнювач резервує місце, посилання на компонент іконки стабільне",
+                "zh-cn": "修复(标签栏)：切换视图时图标不再闪烁——占位符保留空间，图标组件引用稳定"
+            },
+            "0.5.12": {
+                "en": "Fix(group): auto-expand on add/duplicate, auto-compact and shrink on delete, correct height after drag/resize; fit-height button moved to toolbar",
+                "de": "Fix(Gruppe): automatische Vergrößerung beim Hinzufügen/Duplizieren, automatische Kompaktierung und Verkleinerung beim Löschen, korrekte Höhe nach Drag/Resize; Höhe-anpassen-Button in die Toolbar verschoben",
+                "ru": "Fix(группа): авто-расширение при добавлении/дублировании, авто-компактирование и сжатие при удалении, корректная высота после перемещения/изменения размера; кнопка подгонки высоты перемещена на панель",
+                "pt": "Fix(grupo): expansão automática ao adicionar/duplicar, compactação e redução automáticas ao excluir, altura correta após arrastar/redimensionar; botão de ajuste de altura movido para barra de ferramentas",
+                "nl": "Fix(groep): automatisch uitbreiden bij toevoegen/dupliceren, automatisch comprimeren en verkleinen bij verwijderen, correcte hoogte na slepen/vergroten; hoogte-aanpassen-knop verplaatst naar werkbalk",
+                "fr": "Fix(groupe): expansion automatique à l'ajout/duplication, compactage et réduction automatiques à la suppression, hauteur correcte après glisser/redimensionner; bouton d'ajustement de hauteur déplacé dans la barre d'outils",
+                "it": "Fix(gruppo): espansione automatica all'aggiunta/duplicazione, compattamento e riduzione automatici all'eliminazione, altezza corretta dopo trascinamento/ridimensionamento; pulsante regola-altezza spostato nella barra degli strumenti",
+                "es": "Fix(grupo): expansión automática al añadir/duplicar, compactación y reducción automáticas al eliminar, altura correcta tras arrastrar/redimensionar; botón ajustar-altura movido a la barra de herramientas",
+                "pl": "Fix(grupa): automatyczne rozszerzanie przy dodawaniu/duplikowaniu, automatyczne kompaktowanie i zmniejszanie przy usuwaniu, poprawna wysokość po przeciąganiu/zmianie rozmiaru; przycisk dopasowania wysokości przeniesiony do paska narzędzi",
+                "uk": "Fix(група): авто-розширення при додаванні/дублюванні, авто-компактування та зменшення при видаленні, коректна висота після переміщення/зміни розміру; кнопку підгонки висоти перенесено на панель",
+                "zh-cn": "修复(组)：添加/复制时自动扩展，删除时自动压缩和缩小，拖动/调整大小后高度正确；适应高度按钮移至工具栏"
+            },
+            "0.5.11": {
+                "en": "CI: npm beta tag now set automatically and correctly via GitHub releases; no manual dist-tag needed after beta releases",
+                "de": "CI: npm Beta-Tag wird jetzt automatisch und korrekt über GitHub Releases gesetzt; kein manuelles dist-tag nach Beta-Releases nötig",
+                "ru": "CI: npm beta-тег теперь устанавливается автоматически и корректно через GitHub Releases",
+                "pt": "CI: tag beta npm agora definida automaticamente via GitHub Releases",
+                "nl": "CI: npm beta-tag wordt nu automatisch correct ingesteld via GitHub Releases",
+                "fr": "CI: le tag beta npm est maintenant défini automatiquement via GitHub Releases",
+                "it": "CI: il tag beta npm ora viene impostato automaticamente tramite GitHub Releases",
+                "es": "CI: la etiqueta beta de npm ahora se establece automáticamente via GitHub Releases",
+                "pl": "CI: tag beta npm jest teraz ustawiany automatycznie przez GitHub Releases",
+                "uk": "CI: npm beta-тег тепер встановлюється автоматично через GitHub Releases",
+                "zh-cn": "CI：npm beta标签现在通过GitHub Releases自动正确设置"
+            },
+            "0.5.10": {
+                "en": "Fix: clipboard copy (widget ID, URL) now works over HTTP (non-secure context fallback); feat(switch): momentary/pulse mode — sends true then false after configurable delay",
+                "de": "Fix: Zwischenablage-Kopieren (Widget-ID, URL) funktioniert jetzt auch über HTTP; Neu(Schalter): Taster-Modus — sendet true, danach nach konfigurierbarer Zeit false",
+                "ru": "Исправление: копирование в буфер обмена (ID виджета, URL) теперь работает по HTTP; новое(переключатель): режим тактовой кнопки — отправляет true, затем false после настраиваемой задержки",
+                "pt": "Correção: copiar para área de transferência (ID do widget, URL) agora funciona via HTTP; novo(interruptor): modo momentâneo — envia true depois false após delay configurável",
+                "nl": "Fix: klembord kopiëren (widget-ID, URL) werkt nu ook via HTTP; nieuw(schakelaar): drukknop-modus — stuurt true dan false na instelbare vertraging",
+                "fr": "Correction: copie dans le presse-papiers (ID widget, URL) fonctionne maintenant via HTTP; nouveau(interrupteur): mode impulsionnel — envoie true puis false après délai configurable",
+                "it": "Fix: copia negli appunti (ID widget, URL) ora funziona via HTTP; nuovo(interruttore): modalità impulso — invia true poi false dopo ritardo configurabile",
+                "es": "Corrección: copiar al portapapeles (ID widget, URL) ahora funciona vía HTTP; nuevo(interruptor): modo pulsador — envía true luego false tras retardo configurable",
+                "pl": "Poprawka: kopiowanie do schowka (ID widgetu, URL) działa teraz przez HTTP; nowe(przełącznik): tryb przycisku chwilowego — wysyła true potem false po konfigurowalnym opóźnieniu",
+                "uk": "Виправлення: копіювання в буфер обміну (ID віджета, URL) тепер працює через HTTP; нове(перемикач): режим кнопки-тактора — надсилає true потім false після налаштованої затримки",
+                "zh-cn": "修复：剪贴板复制（组件ID、URL）现在通过HTTP也能工作；新功能(开关)：点动模式——发送true后在可配置延迟后发送false"
+            }
         }
-      },
-      "backend": {
-        "link": "%protocol%://%ip%:8082/aura/#/admin",
-        "name": {
-          "en": "Aura Backend",
-          "de": "Aura Backend",
-          "ru": "Aura Backend",
-          "pt": "Aura Backend",
-          "nl": "Aura Backend",
-          "fr": "Aura Backend",
-          "it": "Aura Backend",
-          "es": "Aura Backend",
-          "pl": "Aura Backend",
-          "uk": "Aura Backend",
-          "zh-cn": "Aura Backend"
+    },
+    "native": {
+        "customUrl": "",
+        "webInstance": "*"
+    },
+    "objects": [],
+    "instanceObjects": [
+        {
+            "_id": "info",
+            "type": "channel",
+            "common": {
+                "name": "Information"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.connection",
+            "type": "state",
+            "common": {
+                "name": "If adapter connected to ioBroker",
+                "type": "boolean",
+                "role": "indicator.connected",
+                "read": true,
+                "write": false,
+                "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "config",
+            "type": "channel",
+            "common": {
+                "name": "Configuration"
+            },
+            "native": {}
+        },
+        {
+            "_id": "config.dashboard",
+            "type": "state",
+            "common": {
+                "name": "Dashboard configuration",
+                "type": "string",
+                "role": "json",
+                "read": true,
+                "write": true,
+                "def": "{\"widgets\":[]}"
+            },
+            "native": {}
+        },
+        {
+            "_id": "navigate",
+            "type": "channel",
+            "common": {
+                "name": "Navigation"
+            },
+            "native": {}
+        },
+        {
+            "_id": "navigate.url",
+            "type": "state",
+            "common": {
+                "name": "Navigate to URL or tab slug",
+                "type": "string",
+                "role": "url",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "admin",
+            "type": "channel",
+            "common": {
+                "name": "Admin access"
+            },
+            "native": {}
+        },
+        {
+            "_id": "admin.pinHash",
+            "type": "state",
+            "common": {
+                "name": "Admin PIN hash (FNV-1a, managed by frontend)",
+                "type": "string",
+                "role": "text",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "calendar",
+            "type": "channel",
+            "common": {
+                "name": "Calendar fetch relay"
+            },
+            "native": {}
+        },
+        {
+            "_id": "calendar.request",
+            "type": "state",
+            "common": {
+                "name": "Calendar fetch request (JSON: {id, url})",
+                "type": "string",
+                "role": "json",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "calendar.response",
+            "type": "state",
+            "common": {
+                "name": "Calendar fetch response (JSON: {id, content|error})",
+                "type": "string",
+                "role": "json",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
         }
-      }
-    },
-    "dependencies": [
-      {
-        "js-controller": ">=6.0.11"
-      }
-    ],
-    "globalDependencies": [
-      {
-        "admin": ">=7.6.20"
-      }
-    ],
-    "news": {
-      "0.5.36": {
-        "en": "Revert proxy script to v0.5.31 baseline: history.replaceState('/'), no <base href> injection, original segment rewriter",
-        "de": "Proxy-Script auf v0.5.31-Baseline zurückgesetzt: history.replaceState('/'), keine <base href> Injection, originaler Segment-Rewriter",
-        "ru": "Возврат скрипта прокси к базовой версии v0.5.31",
-        "pt": "Reverter script proxy para baseline v0.5.31",
-        "nl": "Proxy script terugzetten naar v0.5.31 baseline",
-        "fr": "Retour du script proxy à la baseline v0.5.31",
-        "it": "Ripristino script proxy a baseline v0.5.31",
-        "es": "Revertir script proxy a baseline v0.5.31",
-        "pl": "Przywrócenie skryptu proxy do wersji bazowej v0.5.31",
-        "uk": "Повернення скрипта проксі до базової версії v0.5.31",
-        "zh-cn": "将代理脚本还原到v0.5.31基线版本"
-      },
-      "0.5.35": {
-        "en": "Revert proxy script to v0.5.32/v0.5.33 baseline: <base href='/'> injection, no history.replaceState, original rw() and WS guards",
-        "de": "Proxy-Script auf v0.5.32/v0.5.33-Baseline zurückgesetzt: <base href='/'> Injection, kein history.replaceState, ursprüngliche rw()- und WS-Guards",
-        "ru": "Возврат скрипта прокси к базовой версии v0.5.32/v0.5.33",
-        "pt": "Reverter script proxy para baseline v0.5.32/v0.5.33",
-        "nl": "Proxy script terugzetten naar v0.5.32/v0.5.33 baseline",
-        "fr": "Retour du script proxy à la baseline v0.5.32/v0.5.33",
-        "it": "Ripristino script proxy a baseline v0.5.32/v0.5.33",
-        "es": "Revertir script proxy a baseline v0.5.32/v0.5.33",
-        "pl": "Przywrócenie skryptu proxy do wersji bazowej v0.5.32/v0.5.33",
-        "uk": "Повернення скрипта проксі до базової версії v0.5.32/v0.5.33",
-        "zh-cn": "将代理脚本还原到v0.5.32/v0.5.33基线版本"
-      },
-      "0.5.34": {
-        "en": "Fix(proxy): restore history.replaceState('/') so apps see pathname='/' not '/aura/proxy'; narrow rw() guard to /aura/proxy only; WS guard uses startsWith",
-        "de": "Fix(Proxy): history.replaceState('/') zurück damit Apps pathname='/' statt '/aura/proxy' sehen; rw()-Guard auf /aura/proxy eingegrenzt; WS-Guard nutzt startsWith",
-        "ru": "Исправление(прокси): возврат history.replaceState('/'), сужение guard в rw() до /aura/proxy, WS guard использует startsWith",
-        "pt": "Correção(proxy): restaurar history.replaceState('/'), restringir guard rw() a /aura/proxy, guard WS usa startsWith",
-        "nl": "Fix(proxy): history.replaceState('/') hersteld; rw() guard beperkt tot /aura/proxy; WS guard gebruikt startsWith",
-        "fr": "Correction(proxy): restaurer history.replaceState('/'); guard rw() limité à /aura/proxy; guard WS utilise startsWith",
-        "it": "Fix(proxy): ripristino history.replaceState('/'); guard rw() ristretto a /aura/proxy; guard WS usa startsWith",
-        "es": "Corrección(proxy): restaurar history.replaceState('/'); guard rw() restringido a /aura/proxy; guard WS usa startsWith",
-        "pl": "Poprawka(proxy): przywrócenie history.replaceState('/'); guard rw() ograniczony do /aura/proxy; guard WS używa startsWith",
-        "uk": "Виправлення(проксі): відновлення history.replaceState('/'); guard rw() звужено до /aura/proxy; WS guard використовує startsWith",
-        "zh-cn": "修复(代理)：恢复history.replaceState('/')使应用看到pathname='/'；将rw()保护范围缩小到/aura/proxy；WS保护使用startsWith"
-      },
-      "0.5.33": {
-        "en": "Fix(proxy): restore missing 'let out' declaration dropped in v0.5.32 refactoring — caused 502 on all proxied pages",
-        "de": "Fix(Proxy): fehlende 'let out'-Deklaration wiederhergestellt, die beim v0.5.32-Refactoring verloren ging — verursachte 502 auf allen Proxy-Seiten",
-        "ru": "Исправление(прокси): восстановлена отсутствующая декларация 'let out'",
-        "pt": "Correção(proxy): restaurada declaração 'let out' ausente",
-        "nl": "Fix(proxy): ontbrekende 'let out' declaratie hersteld",
-        "fr": "Correction(proxy): déclaration 'let out' manquante restaurée",
-        "it": "Fix(proxy): ripristinata dichiarazione 'let out' mancante",
-        "es": "Corrección(proxy): restaurada declaración 'let out' faltante",
-        "pl": "Poprawka(proxy): przywrócono brakującą deklarację 'let out'",
-        "uk": "Виправлення(проксі): відновлено відсутню декларацію 'let out'",
-        "zh-cn": "修复(代理)：恢复v0.5.32重构中丢失的'let out'声明"
-      },
-      "0.5.32": {
-        "en": "Fix(proxy): replace history.replaceState('/') with <base href='/'>  injection — replaceState in same-origin iframe fired popstate on parent Aura window causing widget flash",
-        "de": "Fix(Proxy): history.replaceState('/') durch <base href='/'> ersetzt — replaceState im same-origin iframe hat popstate im parent Aura-Fenster ausgelöst und Widget-Flackern verursacht",
-        "ru": "Исправление(прокси): замена history.replaceState('/') на инъекцию <base href='/'>",
-        "pt": "Correção(proxy): substituir history.replaceState('/') por injeção de <base href='/'>",
-        "nl": "Fix(proxy): history.replaceState('/') vervangen door <base href='/'> injectie",
-        "fr": "Correction(proxy): remplacer history.replaceState('/') par injection de <base href='/'>",
-        "it": "Fix(proxy): sostituire history.replaceState('/') con iniezione di <base href='/'>",
-        "es": "Corrección(proxy): reemplazar history.replaceState('/') con inyección de <base href='/'>",
-        "pl": "Poprawka(proxy): zastąpienie history.replaceState('/') przez wstrzyknięcie <base href='/'>",
-        "uk": "Виправлення(проксі): заміна history.replaceState('/') на ін'єкцію <base href='/'>",
-        "zh-cn": "修复(代理)：用注入<base href='/'>替换history.replaceState('/')——同源iframe中的replaceState在父Aura窗口触发popstate导致组件闪烁"
-      },
-      "0.5.31": {
-        "en": "Fix(proxy): MutationObserver rewrites dynamically set src= attributes — Angular [src] bindings (thumbnails, images) now route through the proxy",
-        "de": "Fix(Proxy): MutationObserver schreibt dynamisch gesetzte src=-Attribute um — Angular [src]-Bindings (Thumbnails, Bilder) werden jetzt durch den Proxy geleitet",
-        "ru": "Исправление(прокси): MutationObserver перезаписывает динамически установленные атрибуты src= — привязки Angular [src] теперь проходят через прокси",
-        "pt": "Correção(proxy): MutationObserver reescreve atributos src= definidos dinamicamente — bindings Angular [src] agora roteiam pelo proxy",
-        "nl": "Fix(proxy): MutationObserver herschrijft dynamisch ingestelde src=-attributen — Angular [src]-bindingen worden nu via de proxy gerouteerd",
-        "fr": "Correction(proxy): MutationObserver réécrit les attributs src= définis dynamiquement — les liaisons Angular [src] passent maintenant par le proxy",
-        "it": "Fix(proxy): MutationObserver riscrive attributi src= impostati dinamicamente — i binding Angular [src] ora passano attraverso il proxy",
-        "es": "Corrección(proxy): MutationObserver reescribe atributos src= establecidos dinámicamente — los bindings Angular [src] ahora se enrutan por el proxy",
-        "pl": "Poprawka(proxy): MutationObserver przepisuje dynamicznie ustawiane atrybuty src= — wiązania Angular [src] teraz są kierowane przez proxy",
-        "uk": "Виправлення(проксі): MutationObserver перезаписує динамічно встановлені атрибути src= — прив'язки Angular [src] тепер маршрутизуються через проксі",
-        "zh-cn": "修复(代理)：MutationObserver重写动态设置的src=属性——Angular [src]绑定(缩略图、图片)现在通过代理路由"
-      },
-      "0.5.30": {
-        "en": "Fix(proxy): click interceptor uses bubble phase + checks defaultPrevented — Angular RouterLink now handles internal SPA navigation without full-page reload flicker",
-        "de": "Fix(Proxy): Click-Interceptor nutzt Bubble-Phase + prüft defaultPrevented — Angular RouterLink behandelt interne SPA-Navigation jetzt ohne Flackern durch Full-Page-Reload",
-        "ru": "Исправление(прокси): обработчик кликов использует фазу всплытия + проверяет defaultPrevented — Angular RouterLink теперь обрабатывает SPA-навигацию без перезагрузки",
-        "pt": "Correção(proxy): interceptor de cliques usa fase bubble + verifica defaultPrevented — Angular RouterLink trata navegação SPA sem reload",
-        "nl": "Fix(proxy): klik-interceptor gebruikt bubble-fase + controleert defaultPrevented — Angular RouterLink verwerkt SPA-navigatie zonder volledig herladen",
-        "fr": "Correction(proxy): l'intercepteur de clics utilise la phase bubble + vérifie defaultPrevented — Angular RouterLink gère la navigation SPA sans rechargement",
-        "it": "Fix(proxy): l'interceptor click usa la fase bubble + verifica defaultPrevented — Angular RouterLink gestisce la navigazione SPA senza ricaricamento",
-        "es": "Corrección(proxy): interceptor de clics usa fase bubble + comprueba defaultPrevented — Angular RouterLink gestiona navegación SPA sin recarga",
-        "pl": "Poprawka(proxy): interceptor kliknięć używa fazy bubble + sprawdza defaultPrevented — Angular RouterLink obsługuje nawigację SPA bez przeładowania",
-        "uk": "Виправлення(проксі): перехоплювач кліків використовує фазу bubble + перевіряє defaultPrevented — Angular RouterLink обробляє SPA-навігацію без перезавантаження",
-        "zh-cn": "修复(代理)：点击拦截器使用冒泡阶段+检查defaultPrevented——Angular RouterLink现在无需整页重载即可处理SPA内部导航"
-      },
-      "0.5.29": {
-        "en": "Fix(proxy): always use history.replaceState('/') — using the actual target path confused Angular into building wrong API URLs like /dashboardapi/saved_views/",
-        "de": "Fix(Proxy): immer history.replaceState('/') nutzen — der echte Zielpfad hat Angular verwirrt und falsche API-URLs wie /dashboardapi/saved_views/ erzeugt",
-        "ru": "Исправление(прокси): всегда использовать history.replaceState('/') — реальный путь сбивал Angular с построением неверных API URL",
-        "pt": "Correção(proxy): sempre usar history.replaceState('/') — o caminho real confundia Angular gerando URLs erradas",
-        "nl": "Fix(proxy): altijd history.replaceState('/') gebruiken — het echte doelpad verward Angular met verkeerde API URLs",
-        "fr": "Correction(proxy): toujours utiliser history.replaceState('/') — le chemin réel perturbait Angular produisant de mauvaises URL API",
-        "it": "Fix(proxy): usare sempre history.replaceState('/') — il percorso reale confondeva Angular generando URL API errate",
-        "es": "Corrección(proxy): usar siempre history.replaceState('/') — la ruta real confundía Angular generando URLs API incorrectas",
-        "pl": "Poprawka(proxy): zawsze używaj history.replaceState('/') — rzeczywista ścieżka myliła Angular generując błędne URL API",
-        "uk": "Виправлення(проксі): завжди використовувати history.replaceState('/') — реальний шлях плутав Angular при побудові URL API",
-        "zh-cn": "修复(代理)：始终使用history.replaceState('/')——使用实际目标路径导致Angular构建错误的API URL如/dashboardapi/saved_views/"
-      },
-      "0.5.28": {
-        "en": "Fix(proxy): rewrite src= in script/style opening tags while leaving inline content untouched — v0.5.26 accidentally skipped script src attributes causing 404 for JS bundles",
-        "de": "Fix(Proxy): src= in script/style-Öffnungs-Tags umschreiben, Inline-Inhalt unberührt lassen — v0.5.26 hat versehentlich script-src-Attribute übersprungen was 404 für JS-Bundles verursachte",
-        "ru": "Исправление(прокси): перезапись src= в открывающих тегах script/style при сохранении inline-содержимого",
-        "pt": "Correção(proxy): reescrever src= em tags de abertura script/style mantendo conteúdo inline intacto",
-        "nl": "Fix(proxy): src= herschrijven in openingstags script/style terwijl inline-inhoud ongewijzigd blijft",
-        "fr": "Correction(proxy): réécrire src= dans les balises ouvrantes script/style en laissant le contenu inline intact",
-        "it": "Fix(proxy): riscrivere src= nei tag di apertura script/style lasciando il contenuto inline invariato",
-        "es": "Corrección(proxy): reescribir src= en etiquetas de apertura script/style manteniendo el contenido inline intacto",
-        "pl": "Poprawka(proxy): przepisywanie src= w otwierających tagach script/style z zachowaniem treści inline",
-        "uk": "Виправлення(проксі): перезапис src= у відкриваючих тегах script/style зі збереженням inline-вмісту",
-        "zh-cn": "修复(代理)：重写script/style开标签中的src=同时保留内联内容不变——v0.5.26意外跳过了script src属性导致JS包404"
-      },
-      "0.5.27": {
-        "en": "Fix(proxy): restore missing targetOrigin variable dropped during v0.5.26 refactoring — caused 502 on all proxied pages",
-        "de": "Fix(Proxy): fehlende targetOrigin-Variable wiederhergestellt, die beim v0.5.26-Refactoring verloren ging — verursachte 502 auf allen Proxy-Seiten",
-        "ru": "Исправление(прокси): восстановлена переменная targetOrigin, потерянная при рефакторинге v0.5.26",
-        "pt": "Correção(proxy): restaurada variável targetOrigin perdida no refactoring v0.5.26 — causava 502",
-        "nl": "Fix(proxy): ontbrekende targetOrigin-variabele hersteld verloren bij v0.5.26-refactoring",
-        "fr": "Correction(proxy): variable targetOrigin manquante restaurée perdue lors du refactoring v0.5.26",
-        "it": "Fix(proxy): ripristinata variabile targetOrigin persa durante il refactoring v0.5.26",
-        "es": "Corrección(proxy): restaurada variable targetOrigin perdida en refactoring v0.5.26",
-        "pl": "Poprawka(proxy): przywrócono zmienną targetOrigin utraconą podczas refaktoringu v0.5.26",
-        "uk": "Виправлення(проксі): відновлено змінну targetOrigin втрачену під час рефакторингу v0.5.26",
-        "zh-cn": "修复(代理)：恢复v0.5.26重构中丢失的targetOrigin变量——导致所有代理页面502错误"
-      },
-      "0.5.26": {
-        "en": "Fix(proxy): protect <script>/<style> content from URL rewriting; rw() resolves absolute paths directly against target without location.href interference",
-        "de": "Fix(Proxy): <script>/<style>-Inhalte vor URL-Umschreibung schützen; rw() löst absolute Pfade direkt gegen Target auf ohne location.href-Interferenz",
-        "ru": "Исправление(прокси): защита содержимого <script>/<style> от перезаписи URL; rw() разрешает абсолютные пути напрямую",
-        "pt": "Correção(proxy): proteger conteúdo de <script>/<style> de reescrita de URL; rw() resolve caminhos absolutos diretamente",
-        "nl": "Fix(proxy): <script>/<style>-inhoud beschermen tegen URL-herschrijving; rw() lost absolute paden direct op",
-        "fr": "Correction(proxy): protéger le contenu <script>/<style> de la réécriture d'URL; rw() résout les chemins absolus directement",
-        "it": "Fix(proxy): proteggere il contenuto <script>/<style> dalla riscrittura URL; rw() risolve i percorsi assoluti direttamente",
-        "es": "Corrección(proxy): proteger contenido <script>/<style> de reescritura de URL; rw() resuelve rutas absolutas directamente",
-        "pl": "Poprawka(proxy): ochrona zawartości <script>/<style> przed przepisywaniem URL; rw() rozwiązuje ścieżki bezwzględne bezpośrednio",
-        "uk": "Виправлення(проксі): захист вмісту <script>/<style> від перезапису URL; rw() вирішує абсолютні шляхи напряму",
-        "zh-cn": "修复(代理)：保护<script>/<style>内容不被URL重写；rw()直接对目标解析绝对路径而不受location.href干扰"
-      },
-      "0.5.25": {
-        "en": "Fix(proxy): add action attribute to forms without one and intercept form submit events — fixes login POST 404 when Django template has no form action",
-        "de": "Fix(Proxy): action-Attribut zu Forms ohne eines hinzufügen und Form-Submit abfangen — behebt Login-POST-404 wenn Django-Template kein Form-Action hat",
-        "ru": "Исправление(прокси): добавить action к формам без атрибута и перехватить submit — исправляет 404 при входе",
-        "pt": "Correção(proxy): adicionar action a formulários sem atributo e interceptar submit — corrige POST 404 no login",
-        "nl": "Fix(proxy): action toevoegen aan formulieren zonder attribuut en form submit onderscheppen — verhelpt login POST 404",
-        "fr": "Correction(proxy): ajouter action aux formulaires sans attribut et intercepter submit — corrige le POST 404 lors du login",
-        "it": "Fix(proxy): aggiungere action ai form senza attributo e intercettare submit — corregge il POST 404 al login",
-        "es": "Corrección(proxy): añadir action a formularios sin atributo e interceptar submit — corrige POST 404 en login",
-        "pl": "Poprawka(proxy): dodaj action do formularzy bez atrybutu i przechwytuj submit — naprawia POST 404 przy logowaniu",
-        "uk": "Виправлення(проксі): додати action до форм без атрибута та перехопити submit — виправляє POST 404 при вході",
-        "zh-cn": "修复(代理)：为无action属性的表单添加action并拦截submit事件——修复Django模板无form action时的登录POST 404"
-      },
-      "0.5.24": {
-        "en": "Fix(proxy): use actual target path for history.replaceState instead of '/' — prevents post-login redirect landing on web-adapter root",
-        "de": "Fix(Proxy): echten Zielpfad für history.replaceState nutzen statt '/' — verhindert, dass nach dem Login auf der Web-Adapter-Startseite gelandet wird",
-        "ru": "Исправление(прокси): использовать реальный путь для history.replaceState вместо '/' — предотвращает попадание на стартовую страницу после входа",
-        "pt": "Correção(proxy): usar caminho real para history.replaceState em vez de '/' — evita aterrar na raiz do web-adapter após login",
-        "nl": "Fix(proxy): echte doelpad gebruiken voor history.replaceState in plaats van '/' — voorkomt landen op web-adapter root na inloggen",
-        "fr": "Correction(proxy): utiliser le chemin réel pour history.replaceState au lieu de '/' — évite d'atterrir sur la racine du web-adapter après connexion",
-        "it": "Fix(proxy): usare il percorso reale per history.replaceState invece di '/' — evita di atterrare sulla root del web-adapter dopo il login",
-        "es": "Corrección(proxy): usar ruta real para history.replaceState en lugar de '/' — evita aterrizar en la raíz del web-adapter tras el login",
-        "pl": "Poprawka(proxy): używaj rzeczywistej ścieżki dla history.replaceState zamiast '/' — zapobiega lądowaniu na stronie głównej web-adaptera po logowaniu",
-        "uk": "Виправлення(проксі): використовувати реальний шлях для history.replaceState замість '/'",
-        "zh-cn": "修复(代理)：使用真实目标路径进行history.replaceState而非'/'——防止登录后跳转到web-adapter根页面"
-      },
-      "0.5.23": {
-        "en": "Fix(proxy): intercept location.href, location.assign/replace and dynamic link clicks so logout and other direct navigations are routed through the proxy",
-        "de": "Fix(Proxy): location.href, location.assign/replace und dynamische Link-Klicks abfangen, damit Logout und direkte Navigationen über den Proxy geleitet werden",
-        "ru": "Исправление(прокси): перехват location.href, location.assign/replace и кликов по динамическим ссылкам",
-        "pt": "Correção(proxy): interceptar location.href, location.assign/replace e cliques em links dinâmicos",
-        "nl": "Fix(proxy): location.href, location.assign/replace en dynamische linkklikken onderscheppen",
-        "fr": "Correction(proxy): intercepter location.href, location.assign/replace et les clics sur les liens dynamiques",
-        "it": "Fix(proxy): intercettare location.href, location.assign/replace e click su link dinamici",
-        "es": "Corrección(proxy): interceptar location.href, location.assign/replace y clics en enlaces dinámicos",
-        "pl": "Poprawka(proxy): przechwytywanie location.href, location.assign/replace i kliknięć dynamicznych linków",
-        "uk": "Виправлення(проксі): перехоплення location.href, location.assign/replace та кліків на динамічних посиланнях",
-        "zh-cn": "修复(代理)：拦截location.href、location.assign/replace和动态链接点击，使注销和直接导航通过代理路由"
-      },
-      "0.5.22": {
-        "en": "Fix(proxy): inject history.replaceState('/') so SPA routers see '/' instead of '/aura/proxy' — prevents Angular/Vue/React 404 on initial load",
-        "de": "Fix(Proxy): history.replaceState('/') injizieren, damit SPA-Router '/' statt '/aura/proxy' sehen — verhindert Angular/Vue/React-404 beim ersten Laden",
-        "ru": "Исправление(прокси): инъекция history.replaceState('/') чтобы SPA-роутеры видели '/' вместо '/aura/proxy'",
-        "pt": "Correção(proxy): injetar history.replaceState('/') para SPA routers verem '/' em vez de '/aura/proxy'",
-        "nl": "Fix(proxy): history.replaceState('/') injecteren zodat SPA-routers '/' zien in plaats van '/aura/proxy'",
-        "fr": "Correction(proxy): injecter history.replaceState('/') pour que les routeurs SPA voient '/' au lieu de '/aura/proxy'",
-        "it": "Fix(proxy): iniettare history.replaceState('/') affinché i router SPA vedano '/' invece di '/aura/proxy'",
-        "es": "Corrección(proxy): inyectar history.replaceState('/') para que los routers SPA vean '/' en lugar de '/aura/proxy'",
-        "pl": "Poprawka(proxy): wstrzyknięcie history.replaceState('/') aby routery SPA widziały '/' zamiast '/aura/proxy'",
-        "uk": "Виправлення(проксі): ін'єкція history.replaceState('/') щоб SPA-роутери бачили '/' замість '/aura/proxy'",
-        "zh-cn": "修复(代理)：注入history.replaceState('/')使SPA路由器看到'/'而非'/aura/proxy'，防止Angular/Vue/React初始加载时出现404"
-      },
-      "0.5.21": {
-        "en": "Fix(proxy): intercept XHR and fetch in proxied pages so API calls are routed through the proxy instead of failing with HTML 404",
-        "de": "Fix(Proxy): XHR und fetch in Proxy-Seiten abfangen, damit API-Aufrufe über den Proxy geleitet werden statt mit HTML-404 zu scheitern",
-        "ru": "Исправление(прокси): перехват XHR и fetch в проксированных страницах для маршрутизации API-вызовов через прокси",
-        "pt": "Correção(proxy): interceptar XHR e fetch em páginas proxy para rotear chamadas API pelo proxy",
-        "nl": "Fix(proxy): XHR en fetch onderscheppen in proxy-pagina's zodat API-aanroepen via de proxy worden gerouteerd",
-        "fr": "Correction(proxy): intercepter XHR et fetch dans les pages proxy pour router les appels API via le proxy",
-        "it": "Fix(proxy): intercettare XHR e fetch nelle pagine proxy per instradare le chiamate API tramite il proxy",
-        "es": "Corrección(proxy): interceptar XHR y fetch en páginas proxy para enrutar llamadas API a través del proxy",
-        "pl": "Poprawka(proxy): przechwytywanie XHR i fetch w stronach proxy aby przekierowywać wywołania API przez proxy",
-        "uk": "Виправлення(проксі): перехоплення XHR та fetch у проксованих сторінках для маршрутизації API-викликів через проксі",
-        "zh-cn": "修复(代理)：在代理页面中拦截XHR和fetch，使API调用通过代理路由而不是返回HTML 404"
-      },
-      "0.5.20": {
-        "en": "Fix(proxy): WebSocket proxy at /aura/proxyws + JS interceptor injected into HTML; fix CSRF 403 by overriding Referer and forwarding X-CSRFToken",
-        "de": "Fix(Proxy): WebSocket-Proxy unter /aura/proxyws + JS-Interceptor in HTML injiziert; CSRF-403-Fix durch Referer-Override und X-CSRFToken-Weiterleitung",
-        "ru": "Исправление(прокси): WebSocket-прокси /aura/proxyws + JS-перехватчик в HTML; исправление CSRF 403 через замену Referer и передачу X-CSRFToken",
-        "pt": "Correção(proxy): proxy WebSocket em /aura/proxyws + interceptor JS injetado no HTML; correção CSRF 403 via Referer override e encaminhamento de X-CSRFToken",
-        "nl": "Fix(proxy): WebSocket-proxy op /aura/proxyws + JS-interceptor in HTML geïnjecteerd; CSRF-403-fix via Referer-override en X-CSRFToken-forwarding",
-        "fr": "Correction(proxy): proxy WebSocket /aura/proxyws + intercepteur JS injecté dans HTML; correction CSRF 403 via override Referer et transfert X-CSRFToken",
-        "it": "Fix(proxy): proxy WebSocket /aura/proxyws + interceptor JS iniettato nell'HTML; fix CSRF 403 tramite override Referer e inoltro X-CSRFToken",
-        "es": "Corrección(proxy): proxy WebSocket en /aura/proxyws + interceptor JS inyectado en HTML; corrección CSRF 403 via override Referer y reenvío X-CSRFToken",
-        "pl": "Poprawka(proxy): proxy WebSocket /aura/proxyws + interceptor JS wstrzyknięty do HTML; naprawa CSRF 403 przez override Referer i przekazywanie X-CSRFToken",
-        "uk": "Виправлення(проксі): WebSocket-проксі /aura/proxyws + JS-перехоплювач у HTML; виправлення CSRF 403 через заміну Referer та передачу X-CSRFToken",
-        "zh-cn": "修复(代理)：WebSocket代理/aura/proxyws+向HTML注入JS拦截器；通过覆盖Referer和转发X-CSRFToken修复CSRF 403"
-      },
-      "0.5.19": {
-        "en": "Fix(proxy): rewrite HTML/CSS URLs so static assets and links are routed through the proxy instead of loading directly from the internal host",
-        "de": "Fix(Proxy): HTML/CSS-URLs umschreiben, damit statische Ressourcen und Links über den Proxy geleitet werden statt direkt vom internen Host zu laden",
-        "ru": "Исправление(прокси): перезапись URL в HTML/CSS — статические ресурсы теперь маршрутизируются через прокси",
-        "pt": "Correção(proxy): reescrever URLs em HTML/CSS para que assets estáticos sejam roteados pelo proxy",
-        "nl": "Fix(proxy): HTML/CSS-URL's herschrijven zodat statische bestanden via de proxy worden geladen",
-        "fr": "Correction(proxy): réécriture des URL HTML/CSS pour que les ressources statiques passent par le proxy",
-        "it": "Fix(proxy): riscrittura URL HTML/CSS per instradare risorse statiche attraverso il proxy",
-        "es": "Corrección(proxy): reescritura de URLs HTML/CSS para que los recursos estáticos pasen por el proxy",
-        "pl": "Poprawka(proxy): przepisywanie URL w HTML/CSS aby zasoby statyczne były ładowane przez proxy",
-        "uk": "Виправлення(проксі): перезапис URL у HTML/CSS щоб статичні ресурси завантажувались через проксі",
-        "zh-cn": "修复(代理)：重写HTML/CSS中的URL，使静态资源通过代理路由而非直接从内部主机加载"
-      },
-      "0.5.18": {
-        "en": "Fix(proxy): support POST and all HTTP methods — login forms now work through the iframe proxy",
-        "de": "Fix(Proxy): POST und alle HTTP-Methoden unterstützt — Login-Formulare funktionieren jetzt durch den iFrame-Proxy",
-        "ru": "Исправление(прокси): поддержка POST и всех HTTP-методов — формы входа теперь работают через прокси",
-        "pt": "Correção(proxy): suporte a POST e todos os métodos HTTP — formulários de login funcionam agora pelo proxy",
-        "nl": "Fix(proxy): POST en alle HTTP-methoden ondersteund — loginformulieren werken nu via de iframe-proxy",
-        "fr": "Correction(proxy): support POST et toutes les méthodes HTTP — les formulaires de connexion fonctionnent via le proxy",
-        "it": "Fix(proxy): supporto POST e tutti i metodi HTTP — i moduli di login ora funzionano tramite il proxy",
-        "es": "Corrección(proxy): soporte POST y todos los métodos HTTP — los formularios de inicio de sesión funcionan ahora a través del proxy",
-        "pl": "Poprawka(proxy): obsługa POST i wszystkich metod HTTP — formularze logowania działają teraz przez proxy",
-        "uk": "Виправлення(проксі): підтримка POST і всіх HTTP-методів — форми входу тепер працюють через проксі",
-        "zh-cn": "修复(代理)：支持POST和所有HTTP方法——登录表单现在可以通过iframe代理工作"
-      },
-      "0.5.17": {
-        "en": "Fix: set webInstance=* in native so iobroker.web loads the proxy extension; auto-migrate existing instances on adapter start",
-        "de": "Fix: webInstance=* in native gesetzt damit iobroker.web die Proxy-Extension lädt; bestehende Instanzen werden beim Adapterstart automatisch migriert",
-        "ru": "Исправление: webInstance=* задан в native для загрузки прокси-расширения; существующие экземпляры мигрируются при старте адаптера",
-        "pt": "Correção: webInstance=* definido em native para iobroker.web carregar a extensão proxy; instâncias existentes são migradas automaticamente na inicialização",
-        "nl": "Fix: webInstance=* ingesteld in native zodat iobroker.web de proxy-extensie laadt; bestaande instanties worden automatisch gemigreerd bij adapter-start",
-        "fr": "Correction: webInstance=* défini dans native pour que iobroker.web charge l'extension proxy; les instances existantes sont migrées automatiquement au démarrage",
-        "it": "Fix: webInstance=* impostato in native affinché iobroker.web carichi l'estensione proxy; le istanze esistenti vengono migrate automaticamente all'avvio",
-        "es": "Corrección: webInstance=* establecido en native para que iobroker.web cargue la extensión proxy; las instancias existentes se migran automáticamente al iniciar",
-        "pl": "Poprawka: webInstance=* ustawiony w native aby iobroker.web załadował rozszerzenie proxy; istniejące instancje są migrowane automatycznie przy starcie",
-        "uk": "Виправлення: webInstance=* встановлено в native щоб iobroker.web завантажував proxy-розширення; існуючі екземпляри мігруються автоматично при старті",
-        "zh-cn": "修复：在native中设置webInstance=*使iobroker.web加载代理扩展；现有实例在适配器启动时自动迁移"
-      },
-      "0.5.16": {
-        "en": "Fix: add lib/ to npm package files — lib/webExtension.js (iframe proxy) was missing from the published package",
-        "de": "Fix: lib/ zu npm-Paketdateien hinzugefügt — lib/webExtension.js (iFrame-Proxy) fehlte im veröffentlichten Paket",
-        "ru": "Исправление: lib/ добавлен в файлы npm-пакета — lib/webExtension.js (iframe-прокси) отсутствовал в опубликованном пакете",
-        "pt": "Correção: lib/ adicionado aos arquivos do pacote npm — lib/webExtension.js (proxy iframe) estava ausente do pacote publicado",
-        "nl": "Fix: lib/ toegevoegd aan npm-pakketbestanden — lib/webExtension.js (iframe-proxy) ontbrak in het gepubliceerde pakket",
-        "fr": "Correction: lib/ ajouté aux fichiers du paquet npm — lib/webExtension.js (proxy iframe) était absent du paquet publié",
-        "it": "Fix: lib/ aggiunto ai file del pacchetto npm — lib/webExtension.js (proxy iframe) mancava nel pacchetto pubblicato",
-        "es": "Corrección: lib/ añadido a los archivos del paquete npm — lib/webExtension.js (proxy iframe) faltaba en el paquete publicado",
-        "pl": "Poprawka: lib/ dodano do plików pakietu npm — lib/webExtension.js (proxy iframe) brakowało w opublikowanym pakiecie",
-        "uk": "Виправлення: lib/ додано до файлів npm-пакету — lib/webExtension.js (iframe-проксі) був відсутній у опублікованому пакеті",
-        "zh-cn": "修复：将lib/添加到npm包文件中——lib/webExtension.js（iframe代理）在发布的包中缺失"
-      },
-      "0.5.15": {
-        "en": "Fix(admin editor): tab switch no longer causes save bar to flash 'unsaved changes'; tab menu no longer flickers — TabBar extracted as isolated memoized component with narrow Zustand selectors; react-grid-layout transitions disabled when not dragging",
-        "de": "Fix(Admin-Editor): Tab-Wechsel lässt die Speicherleiste nicht mehr 'Ungespeicherte Änderungen' aufblitzen; Tab-Menü flackert nicht mehr — TabBar als isolierte, memoisierte Komponente mit schmalen Zustand-Selektoren extrahiert; react-grid-layout Übergänge deaktiviert wenn nicht gezogen wird",
-        "ru": "Fix(редактор): переключение вкладок больше не вызывает мигание строки сохранения; меню вкладок больше не мерцает — TabBar вынесен в изолированный мемоизированный компонент с узкими селекторами; переходы react-grid-layout отключены когда нет перетаскивания",
-        "pt": "Fix(editor): troca de aba não causa mais flash 'alterações não salvas'; menu de abas não pisca mais — TabBar extraído como componente memoizado isolado com seletores estreitos; transições react-grid-layout desativadas quando não há arrasto",
-        "nl": "Fix(editor): wisselen van tabblad veroorzaakt geen flash 'niet-opgeslagen wijzigingen' meer; tabbladmenu flikkert niet meer — TabBar geëxtraheerd als geïsoleerde gememoriseerde component met smalle selectors; react-grid-layout overgangen uitgeschakeld als er niet gesleept wordt",
-        "fr": "Fix(éditeur): changer d'onglet ne cause plus de flash 'modifications non enregistrées'; le menu d'onglets ne scintille plus — TabBar extrait comme composant mémoïsé isolé avec des sélecteurs étroits; transitions react-grid-layout désactivées hors glisser-déposer",
-        "it": "Fix(editor): cambiare scheda non causa più il flash 'modifiche non salvate'; il menu schede non lampeggia più — TabBar estratto come componente memoizzato isolato con selettori stretti; transizioni react-grid-layout disabilitate quando non si trascina",
-        "es": "Fix(editor): cambiar de pestaña ya no causa flash 'cambios no guardados'; el menú de pestañas ya no parpadea — TabBar extraído como componente memoizado aislado con selectores estrechos; transiciones react-grid-layout desactivadas cuando no se arrastra",
-        "pl": "Fix(edytor): przełączanie kart nie powoduje już migotania 'niezapisane zmiany'; menu kart nie migocze — TabBar wyodrębniony jako izolowany spamiętany komponent z wąskimi selektorami; przejścia react-grid-layout wyłączone gdy brak przeciągania",
-        "uk": "Fix(редактор): перемикання вкладок більше не викликає мигання рядка збереження; меню вкладок більше не мерехтить — TabBar виділено в ізольований мемоізований компонент з вузькими селекторами; переходи react-grid-layout вимкнено без перетягування",
-        "zh-cn": "修复(管理编辑器)：切换标签页不再导致保存栏闪现'未保存更改'；标签菜单不再闪烁——TabBar提取为带窄选择器的隔离记忆化组件；未拖动时禁用react-grid-layout过渡动画"
-      },
-      "0.5.14": {
-        "en": "Feat(iframe): server-side proxy to bypass X-Frame-Options — enable 'Use Proxy' toggle in iframe widget settings; fix: add proxy route to Vite dev server and remove <base> injection that caused origin:null CORS errors",
-        "de": "Neu(iFrame): serverseitiger Proxy zum Umgehen von X-Frame-Options — 'Proxy nutzen'-Schalter in den iFrame-Widget-Einstellungen aktivieren; Fix: Proxy-Route im Vite-Dev-Server ergänzt und <base>-Injektion entfernt, die origin:null CORS-Fehler verursachte",
-        "ru": "Новое(iFrame): серверный прокси для обхода X-Frame-Options — включите 'Использовать прокси' в настройках виджета iFrame; исправление: добавлен маршрут прокси в Vite dev-сервер, удалена инъекция <base>, вызывавшая ошибки CORS",
-        "pt": "Novo(iFrame): proxy server-side para contornar X-Frame-Options — ative 'Usar Proxy' nas configurações do widget iFrame; correção: rota proxy adicionada ao Vite dev server, injeção <base> removida",
-        "nl": "Nieuw(iFrame): server-side proxy om X-Frame-Options te omzeilen — schakel 'Proxy gebruiken' in de iFrame-widget-instellingen in; fix: proxy-route toegevoegd aan Vite dev-server, <base>-injectie verwijderd",
-        "fr": "Nouveau(iFrame): proxy côté serveur pour contourner X-Frame-Options — activez 'Utiliser le proxy' dans les paramètres du widget iFrame; correction: route proxy ajoutée au serveur Vite dev, injection <base> supprimée",
-        "it": "Nuovo(iFrame): proxy lato server per aggirare X-Frame-Options — attiva 'Usa proxy' nelle impostazioni del widget iFrame; fix: route proxy aggiunta al server Vite dev, rimossa iniezione <base>",
-        "es": "Nuevo(iFrame): proxy del lado servidor para eludir X-Frame-Options — activa 'Usar proxy' en la configuración del widget iFrame; corrección: ruta proxy añadida al servidor Vite dev, eliminada inyección <base>",
-        "pl": "Nowe(iFrame): proxy po stronie serwera do ominięcia X-Frame-Options — włącz 'Użyj proxy' w ustawieniach widgetu iFrame; poprawka: dodano trasę proxy do serwera Vite dev, usunięto iniekcję <base>",
-        "uk": "Нове(iFrame): серверний проксі для обходу X-Frame-Options — увімкніть 'Використати проксі' у налаштуваннях віджета iFrame; виправлення: додано маршрут проксі до Vite dev-сервера, видалено ін'єкцію <base>",
-        "zh-cn": "新功能(iFrame)：服务端代理绕过X-Frame-Options——在iFrame组件设置中启用'使用代理'开关；修复：为Vite开发服务器添加代理路由，移除导致origin:null CORS错误的<base>注入"
-      },
-      "0.5.13": {
-        "en": "Fix(tab bar): icons no longer flicker when switching views — placeholder reserves space and Icon component reference is stable",
-        "de": "Fix(Tab-Leiste): Icons flackern beim Wechseln zwischen Ansichten nicht mehr — Platzhalter reserviert den Platz und die Icon-Komponente ist stabil",
-        "ru": "Исправление(панель вкладок): иконки больше не мигают при переключении видов — заполнитель резервирует место, ссылка на компонент иконки стабильна",
-        "pt": "Correção(barra de abas): ícones não piscam mais ao trocar de vista — espaço reservado pelo placeholder e referência do componente de ícone estável",
-        "nl": "Fix(tabbalk): pictogrammen flikkeren niet meer bij het wisselen van weergave — placeholder reserveert de ruimte en de Icon-componentreferentie is stabiel",
-        "fr": "Correction(barre d'onglets): les icônes ne clignotent plus lors du changement de vue — l'espace est réservé et la référence du composant Icon est stable",
-        "it": "Fix(barra schede): le icone non lampeggiano più quando si cambia vista — il segnaposto riserva lo spazio e il riferimento del componente Icon è stabile",
-        "es": "Corrección(barra de pestañas): los iconos ya no parpadean al cambiar de vista — el marcador reserva el espacio y la referencia del componente Icon es estable",
-        "pl": "Poprawka(pasek zakładek): ikony nie migają już przy przełączaniu widoków — placeholder rezerwuje miejsce, a referencja komponentu Icon jest stabilna",
-        "uk": "Виправлення(панель вкладок): іконки більше не мигають при перемиканні видів — заповнювач резервує місце, посилання на компонент іконки стабільне",
-        "zh-cn": "修复(标签栏)：切换视图时图标不再闪烁——占位符保留空间，图标组件引用稳定"
-      },
-      "0.5.12": {
-        "en": "Fix(group): auto-expand on add/duplicate, auto-compact and shrink on delete, correct height after drag/resize; fit-height button moved to toolbar",
-        "de": "Fix(Gruppe): automatische Vergrößerung beim Hinzufügen/Duplizieren, automatische Kompaktierung und Verkleinerung beim Löschen, korrekte Höhe nach Drag/Resize; Höhe-anpassen-Button in die Toolbar verschoben",
-        "ru": "Fix(группа): авто-расширение при добавлении/дублировании, авто-компактирование и сжатие при удалении, корректная высота после перемещения/изменения размера; кнопка подгонки высоты перемещена на панель",
-        "pt": "Fix(grupo): expansão automática ao adicionar/duplicar, compactação e redução automáticas ao excluir, altura correta após arrastar/redimensionar; botão de ajuste de altura movido para barra de ferramentas",
-        "nl": "Fix(groep): automatisch uitbreiden bij toevoegen/dupliceren, automatisch comprimeren en verkleinen bij verwijderen, correcte hoogte na slepen/vergroten; hoogte-aanpassen-knop verplaatst naar werkbalk",
-        "fr": "Fix(groupe): expansion automatique à l'ajout/duplication, compactage et réduction automatiques à la suppression, hauteur correcte après glisser/redimensionner; bouton d'ajustement de hauteur déplacé dans la barre d'outils",
-        "it": "Fix(gruppo): espansione automatica all'aggiunta/duplicazione, compattamento e riduzione automatici all'eliminazione, altezza corretta dopo trascinamento/ridimensionamento; pulsante regola-altezza spostato nella barra degli strumenti",
-        "es": "Fix(grupo): expansión automática al añadir/duplicar, compactación y reducción automáticas al eliminar, altura correcta tras arrastrar/redimensionar; botón ajustar-altura movido a la barra de herramientas",
-        "pl": "Fix(grupa): automatyczne rozszerzanie przy dodawaniu/duplikowaniu, automatyczne kompaktowanie i zmniejszanie przy usuwaniu, poprawna wysokość po przeciąganiu/zmianie rozmiaru; przycisk dopasowania wysokości przeniesiony do paska narzędzi",
-        "uk": "Fix(група): авто-розширення при додаванні/дублюванні, авто-компактування та зменшення при видаленні, коректна висота після переміщення/зміни розміру; кнопку підгонки висоти перенесено на панель",
-        "zh-cn": "修复(组)：添加/复制时自动扩展，删除时自动压缩和缩小，拖动/调整大小后高度正确；适应高度按钮移至工具栏"
-      },
-      "0.5.11": {
-        "en": "CI: npm beta tag now set automatically and correctly via GitHub releases; no manual dist-tag needed after beta releases",
-        "de": "CI: npm Beta-Tag wird jetzt automatisch und korrekt über GitHub Releases gesetzt; kein manuelles dist-tag nach Beta-Releases nötig",
-        "ru": "CI: npm beta-тег теперь устанавливается автоматически и корректно через GitHub Releases",
-        "pt": "CI: tag beta npm agora definida automaticamente via GitHub Releases",
-        "nl": "CI: npm beta-tag wordt nu automatisch correct ingesteld via GitHub Releases",
-        "fr": "CI: le tag beta npm est maintenant défini automatiquement via GitHub Releases",
-        "it": "CI: il tag beta npm ora viene impostato automaticamente tramite GitHub Releases",
-        "es": "CI: la etiqueta beta de npm ahora se establece automáticamente via GitHub Releases",
-        "pl": "CI: tag beta npm jest teraz ustawiany automatycznie przez GitHub Releases",
-        "uk": "CI: npm beta-тег тепер встановлюється автоматично через GitHub Releases",
-        "zh-cn": "CI：npm beta标签现在通过GitHub Releases自动正确设置"
-      },
-      "0.5.10": {
-        "en": "Fix: clipboard copy (widget ID, URL) now works over HTTP (non-secure context fallback); feat(switch): momentary/pulse mode — sends true then false after configurable delay",
-        "de": "Fix: Zwischenablage-Kopieren (Widget-ID, URL) funktioniert jetzt auch über HTTP; Neu(Schalter): Taster-Modus — sendet true, danach nach konfigurierbarer Zeit false",
-        "ru": "Исправление: копирование в буфер обмена (ID виджета, URL) теперь работает по HTTP; новое(переключатель): режим тактовой кнопки — отправляет true, затем false после настраиваемой задержки",
-        "pt": "Correção: copiar para área de transferência (ID do widget, URL) agora funciona via HTTP; novo(interruptor): modo momentâneo — envia true depois false após delay configurável",
-        "nl": "Fix: klembord kopiëren (widget-ID, URL) werkt nu ook via HTTP; nieuw(schakelaar): drukknop-modus — stuurt true dan false na instelbare vertraging",
-        "fr": "Correction: copie dans le presse-papiers (ID widget, URL) fonctionne maintenant via HTTP; nouveau(interrupteur): mode impulsionnel — envoie true puis false après délai configurable",
-        "it": "Fix: copia negli appunti (ID widget, URL) ora funziona via HTTP; nuovo(interruttore): modalità impulso — invia true poi false dopo ritardo configurabile",
-        "es": "Corrección: copiar al portapapeles (ID widget, URL) ahora funciona vía HTTP; nuevo(interruptor): modo pulsador — envía true luego false tras retardo configurable",
-        "pl": "Poprawka: kopiowanie do schowka (ID widgetu, URL) działa teraz przez HTTP; nowe(przełącznik): tryb przycisku chwilowego — wysyła true potem false po konfigurowalnym opóźnieniu",
-        "uk": "Виправлення: копіювання в буфер обміну (ID віджета, URL) тепер працює через HTTP; нове(перемикач): режим кнопки-тактора — надсилає true потім false після налаштованої затримки",
-        "zh-cn": "修复：剪贴板复制（组件ID、URL）现在通过HTTP也能工作；新功能(开关)：点动模式——发送true后在可配置延迟后发送false"
-      }
-    }
-
-  },
-  "native": {
-    "customUrl": "",
-    "webInstance": "*"
-  },
-  "objects": [],
-  "instanceObjects": [
-    {
-      "_id": "info",
-      "type": "channel",
-      "common": {
-        "name": "Information"
-      },
-      "native": {}
-    },
-    {
-      "_id": "info.connection",
-      "type": "state",
-      "common": {
-        "name": "If adapter connected to ioBroker",
-        "type": "boolean",
-        "role": "indicator.connected",
-        "read": true,
-        "write": false,
-        "def": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "config",
-      "type": "channel",
-      "common": {
-        "name": "Configuration"
-      },
-      "native": {}
-    },
-    {
-      "_id": "config.dashboard",
-      "type": "state",
-      "common": {
-        "name": "Dashboard configuration",
-        "type": "string",
-        "role": "json",
-        "read": true,
-        "write": true,
-        "def": "{\"widgets\":[]}"
-      },
-      "native": {}
-    },
-    {
-      "_id": "navigate",
-      "type": "channel",
-      "common": {
-        "name": "Navigation"
-      },
-      "native": {}
-    },
-    {
-      "_id": "navigate.url",
-      "type": "state",
-      "common": {
-        "name": "Navigate to URL or tab slug",
-        "type": "string",
-        "role": "url",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "admin",
-      "type": "channel",
-      "common": {
-        "name": "Admin access"
-      },
-      "native": {}
-    },
-    {
-      "_id": "admin.pinHash",
-      "type": "state",
-      "common": {
-        "name": "Admin PIN hash (FNV-1a, managed by frontend)",
-        "type": "string",
-        "role": "text",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "calendar",
-      "type": "channel",
-      "common": {
-        "name": "Calendar fetch relay"
-      },
-      "native": {}
-    },
-    {
-      "_id": "calendar.request",
-      "type": "state",
-      "common": {
-        "name": "Calendar fetch request (JSON: {id, url})",
-        "type": "string",
-        "role": "json",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "calendar.response",
-      "type": "state",
-      "common": {
-        "name": "Calendar fetch response (JSON: {id, content|error})",
-        "type": "string",
-        "role": "json",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    }
-  ]
+    ]
 }
