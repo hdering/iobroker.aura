@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.5.25",
+    "version": "0.5.26",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.5.26": {
+        "en": "Fix(proxy): protect <script>/<style> content from URL rewriting; rw() resolves absolute paths directly against target without location.href interference",
+        "de": "Fix(Proxy): <script>/<style>-Inhalte vor URL-Umschreibung schützen; rw() löst absolute Pfade direkt gegen Target auf ohne location.href-Interferenz",
+        "ru": "Исправление(прокси): защита содержимого <script>/<style> от перезаписи URL; rw() разрешает абсолютные пути напрямую",
+        "pt": "Correção(proxy): proteger conteúdo de <script>/<style> de reescrita de URL; rw() resolve caminhos absolutos diretamente",
+        "nl": "Fix(proxy): <script>/<style>-inhoud beschermen tegen URL-herschrijving; rw() lost absolute paden direct op",
+        "fr": "Correction(proxy): protéger le contenu <script>/<style> de la réécriture d'URL; rw() résout les chemins absolus directement",
+        "it": "Fix(proxy): proteggere il contenuto <script>/<style> dalla riscrittura URL; rw() risolve i percorsi assoluti direttamente",
+        "es": "Corrección(proxy): proteger contenido <script>/<style> de reescritura de URL; rw() resuelve rutas absolutas directamente",
+        "pl": "Poprawka(proxy): ochrona zawartości <script>/<style> przed przepisywaniem URL; rw() rozwiązuje ścieżki bezwzględne bezpośrednio",
+        "uk": "Виправлення(проксі): захист вмісту <script>/<style> від перезапису URL; rw() вирішує абсолютні шляхи напряму",
+        "zh-cn": "修复(代理)：保护<script>/<style>内容不被URL重写；rw()直接对目标解析绝对路径而不受location.href干扰"
+      },
       "0.5.25": {
         "en": "Fix(proxy): add action attribute to forms without one and intercept form submit events — fixes login POST 404 when Django template has no form action",
         "de": "Fix(Proxy): action-Attribut zu Forms ohne eines hinzufügen und Form-Submit abfangen — behebt Login-POST-404 wenn Django-Template kein Form-Action hat",
