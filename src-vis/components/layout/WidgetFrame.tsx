@@ -2858,13 +2858,15 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                       </div>
                     </div>
                     )}
-                    {(config.layout ?? 'default') === 'default' && (
+                    {['default', 'battery', 'segments', 'wave'].includes(config.layout ?? 'default') && (
                     <div>
                       <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
                         Balkenbreite/-höhe <span style={{ opacity: 0.6 }}>(% des Widgets)</span>
                       </label>
-                      <input type="number" min={20} max={100} value={(o.barSize as number) ?? 80}
-                        onChange={(e) => set({ barSize: Number(e.target.value) })}
+                      <input type="number" min={20} max={150}
+                        defaultValue={(o.barSize as number) ?? 80}
+                        onBlur={(e) => { const v = Math.min(150, Math.max(20, Number(e.target.value) || 80)); set({ barSize: v }); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
                         className={fCls} style={fSty} />
                     </div>
                     )}

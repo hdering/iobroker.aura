@@ -259,7 +259,7 @@ function SegmentsViz({
     const segW   = 56;
     const segH   = (totalH - (SEGS - 1) * gap) / SEGS;
     return (
-      <svg viewBox="0 0 80 270" style={{ width: '100%', height: '100%' }}>
+      <svg viewBox={showValue ? "0 4 80 238" : "0 4 80 220"} style={{ width: '100%', height: '100%' }}>
         {Array.from({ length: SEGS }, (_, i) => {
           // i=0 top, i=11 bottom; bottom segments = low values → lit first
           const isLit = i >= SEGS - lit;
@@ -520,11 +520,13 @@ export function FillWidget({ config }: WidgetProps) {
           </p>
         )}
         <div className="flex-1 flex items-center justify-center min-h-0 min-w-0" style={{ padding: '4px 0' }}>
-          <BatteryViz
-            pct={pct} value={safeVal} unit={unit} decimals={decimals}
-            fillColor={fillColor} showValue={showValue} uid={uid}
-            orientation={orientation}
-          />
+          <div style={orientation === 'vertical' ? { width: `${barSize}%`, height: '100%' } : { width: '100%', height: `${barSize}%` }}>
+            <BatteryViz
+              pct={pct} value={safeVal} unit={unit} decimals={decimals}
+              fillColor={fillColor} showValue={showValue} uid={uid}
+              orientation={orientation}
+            />
+          </div>
         </div>
       </div>
     );
@@ -539,11 +541,13 @@ export function FillWidget({ config }: WidgetProps) {
           </p>
         )}
         <div className="flex-1 flex items-center justify-center min-h-0 min-w-0">
-          <SegmentsViz
-            pct={pct} value={safeVal} min={min} max={max} unit={unit} decimals={decimals}
-            fillColor={fillColor} zones={zones} colorZones={colorZones}
-            showValue={showValue} orientation={orientation}
-          />
+          <div style={orientation === 'vertical' ? { width: `${barSize}%`, height: '100%' } : { width: '100%', height: `${barSize}%` }}>
+            <SegmentsViz
+              pct={pct} value={safeVal} min={min} max={max} unit={unit} decimals={decimals}
+              fillColor={fillColor} zones={zones} colorZones={colorZones}
+              showValue={showValue} orientation={orientation}
+            />
+          </div>
         </div>
       </div>
     );
@@ -558,10 +562,12 @@ export function FillWidget({ config }: WidgetProps) {
           </p>
         )}
         <div className="flex-1 flex items-center justify-center min-h-0 min-w-0">
-          <WaveViz
-            pct={pct} value={safeVal} unit={unit} decimals={decimals}
-            fillColor={fillColor} showValue={showValue} uid={uid}
-          />
+          <div style={orientation === 'vertical' ? { width: `${barSize}%`, height: '100%' } : { width: '100%', height: `${barSize}%` }}>
+            <WaveViz
+              pct={pct} value={safeVal} unit={unit} decimals={decimals}
+              fillColor={fillColor} showValue={showValue} uid={uid}
+            />
+          </div>
         </div>
       </div>
     );
