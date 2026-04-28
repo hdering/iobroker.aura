@@ -63,8 +63,18 @@ export function useChartHistory(
   const [history, setHistory]     = useState<ChartDataPoint[]>([]);
   const [current, setCurrent]     = useState<number | null>(null);
   const [loading, setLoading]     = useState(false);
+  const [refreshTick, setRefreshTick] = useState(0);
   const mountedRef = useRef(true);
   useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; }; }, []);
+
+  // ── Periodischer Refresh damit das Zeitfenster nicht einfriert ───────────
+  useEffect(() => {
+    if (!datapointId || !historyInstance || !connected) return;
+    const rangeMs = timeRange === 'custom' ? (customRangeMs ?? 86_400_000) : RANGE_MS[timeRange as Exclude<ChartTimeRange, 'custom'>];
+    const interval = rangeMs <= 3_600_000 ? 60_000 : rangeMs <= 86_400_000 ? 300_000 : 900_000;
+    const id = setInterval(() => setRefreshTick((t) => t + 1), interval);
+    return () => clearInterval(id);
+  }, [datapointId, historyInstance, connected, timeRange, customRangeMs]);
 
   // ── 1. Verfügbare Adapter aus Objekt-Metadaten ermitteln ──────────────────
   useEffect(() => {
@@ -116,7 +126,7 @@ export function useChartHistory(
     }).catch(() => {
       if (mountedRef.current) setLoading(false);
     });
-  }, [datapointId, historyInstance, timeRange, customRangeMs, connected]);
+  }, [datapointId, historyInstance, timeRange, customRangeMs, connected, refreshTick]);
 
   // ── 4. Live-Updates abonnieren ────────────────────────────────────────────
   useEffect(() => {
