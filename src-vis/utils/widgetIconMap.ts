@@ -11,8 +11,13 @@ import { Icon } from '@iconify/react';
 import { lucidePascalToIconify } from './iconifyLoader';
 import type { LucideIcon } from 'lucide-react';
 
-/** Wrap an Iconify icon ID into a component that mimics the LucideIcon API */
+const _iconComponentCache = new Map<string, LucideIcon>();
+
+/** Wrap an Iconify icon ID into a component that mimics the LucideIcon API.
+ *  Cached by iconId so React sees a stable component reference across renders. */
 function makeIconComponent(iconId: string): LucideIcon {
+  const cached = _iconComponentCache.get(iconId);
+  if (cached) return cached;
   function IconifyWrapper({
     size = 16,
     style,
@@ -24,7 +29,9 @@ function makeIconComponent(iconId: string): LucideIcon {
   }) {
     return React.createElement(Icon, { icon: iconId, width: size, height: size, style, className });
   }
-  return IconifyWrapper as unknown as LucideIcon;
+  const comp = IconifyWrapper as unknown as LucideIcon;
+  _iconComponentCache.set(iconId, comp);
+  return comp;
 }
 
 /** Resolve a stored icon name/ID to a render-ready component.
