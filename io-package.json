@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.5.24",
+    "version": "0.5.25",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.5.25": {
+        "en": "Fix(proxy): add action attribute to forms without one and intercept form submit events — fixes login POST 404 when Django template has no form action",
+        "de": "Fix(Proxy): action-Attribut zu Forms ohne eines hinzufügen und Form-Submit abfangen — behebt Login-POST-404 wenn Django-Template kein Form-Action hat",
+        "ru": "Исправление(прокси): добавить action к формам без атрибута и перехватить submit — исправляет 404 при входе",
+        "pt": "Correção(proxy): adicionar action a formulários sem atributo e interceptar submit — corrige POST 404 no login",
+        "nl": "Fix(proxy): action toevoegen aan formulieren zonder attribuut en form submit onderscheppen — verhelpt login POST 404",
+        "fr": "Correction(proxy): ajouter action aux formulaires sans attribut et intercepter submit — corrige le POST 404 lors du login",
+        "it": "Fix(proxy): aggiungere action ai form senza attributo e intercettare submit — corregge il POST 404 al login",
+        "es": "Corrección(proxy): añadir action a formularios sin atributo e interceptar submit — corrige POST 404 en login",
+        "pl": "Poprawka(proxy): dodaj action do formularzy bez atrybutu i przechwytuj submit — naprawia POST 404 przy logowaniu",
+        "uk": "Виправлення(проксі): додати action до форм без атрибута та перехопити submit — виправляє POST 404 при вході",
+        "zh-cn": "修复(代理)：为无action属性的表单添加action并拦截submit事件——修复Django模板无form action时的登录POST 404"
+      },
       "0.5.24": {
         "en": "Fix(proxy): use actual target path for history.replaceState instead of '/' — prevents post-login redirect landing on web-adapter root",
         "de": "Fix(Proxy): echten Zielpfad für history.replaceState nutzen statt '/' — verhindert, dass nach dem Login auf der Web-Adapter-Startseite gelandet wird",
