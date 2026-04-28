@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.5.15",
+    "version": "0.5.16",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.5.16": {
+        "en": "Fix: add lib/ to npm package files — lib/webExtension.js (iframe proxy) was missing from the published package",
+        "de": "Fix: lib/ zu npm-Paketdateien hinzugefügt — lib/webExtension.js (iFrame-Proxy) fehlte im veröffentlichten Paket",
+        "ru": "Исправление: lib/ добавлен в файлы npm-пакета — lib/webExtension.js (iframe-прокси) отсутствовал в опубликованном пакете",
+        "pt": "Correção: lib/ adicionado aos arquivos do pacote npm — lib/webExtension.js (proxy iframe) estava ausente do pacote publicado",
+        "nl": "Fix: lib/ toegevoegd aan npm-pakketbestanden — lib/webExtension.js (iframe-proxy) ontbrak in het gepubliceerde pakket",
+        "fr": "Correction: lib/ ajouté aux fichiers du paquet npm — lib/webExtension.js (proxy iframe) était absent du paquet publié",
+        "it": "Fix: lib/ aggiunto ai file del pacchetto npm — lib/webExtension.js (proxy iframe) mancava nel pacchetto pubblicato",
+        "es": "Corrección: lib/ añadido a los archivos del paquete npm — lib/webExtension.js (proxy iframe) faltaba en el paquete publicado",
+        "pl": "Poprawka: lib/ dodano do plików pakietu npm — lib/webExtension.js (proxy iframe) brakowało w opublikowanym pakiecie",
+        "uk": "Виправлення: lib/ додано до файлів npm-пакету — lib/webExtension.js (iframe-проксі) був відсутній у опублікованому пакеті",
+        "zh-cn": "修复：将lib/添加到npm包文件中——lib/webExtension.js（iframe代理）在发布的包中缺失"
+      },
       "0.5.15": {
         "en": "Fix(admin editor): tab switch no longer causes save bar to flash 'unsaved changes'; tab menu no longer flickers — TabBar extracted as isolated memoized component with narrow Zustand selectors; react-grid-layout transitions disabled when not dragging",
         "de": "Fix(Admin-Editor): Tab-Wechsel lässt die Speicherleiste nicht mehr 'Ungespeicherte Änderungen' aufblitzen; Tab-Menü flackert nicht mehr — TabBar als isolierte, memoisierte Komponente mit schmalen Zustand-Selektoren extrahiert; react-grid-layout Übergänge deaktiviert wenn nicht gezogen wird",
@@ -183,21 +196,9 @@
         "pl": "Poprawka: kopiowanie do schowka (ID widgetu, URL) działa teraz przez HTTP; nowe(przełącznik): tryb przycisku chwilowego — wysyła true potem false po konfigurowalnym opóźnieniu",
         "uk": "Виправлення: копіювання в буфер обміну (ID віджета, URL) тепер працює через HTTP; нове(перемикач): режим кнопки-тактора — надсилає true потім false після налаштованої затримки",
         "zh-cn": "修复：剪贴板复制（组件ID、URL）现在通过HTTP也能工作；新功能(开关)：点动模式——发送true后在可配置延迟后发送false"
-      },
-      "0.5.9": {
-        "en": "Same as 0.5.8 — re-release to fix npm beta tag (CI workflow fix)",
-        "de": "Wie 0.5.8 — Neu-Release zur Korrektur des npm Beta-Tags (CI-Workflow-Fix)",
-        "ru": "То же, что 0.5.8 — переиздание для исправления npm beta-тега",
-        "pt": "Igual ao 0.5.8 — re-lançamento para corrigir tag beta npm",
-        "nl": "Zelfde als 0.5.8 — heruitgave om npm beta-tag te corrigeren",
-        "fr": "Identique à 0.5.8 — re-publication pour corriger le tag beta npm",
-        "it": "Uguale a 0.5.8 — re-release per correggere il tag beta npm",
-        "es": "Igual que 0.5.8 — re-publicación para corregir la etiqueta beta de npm",
-        "pl": "Tak samo jak 0.5.8 — ponowne wydanie w celu naprawy tagu beta npm",
-        "uk": "Те саме, що 0.5.8 — повторний реліз для виправлення npm beta-тегу",
-        "zh-cn": "与0.5.8相同——重新发布以修复npm beta标签"
       }
     }
+
   },
   "native": {
     "customUrl": ""

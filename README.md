@@ -175,6 +175,9 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.5.16 (2026-04-28)
+- Fix: add `lib/` to npm package files — `lib/webExtension.js` (iframe proxy) was missing from the published package
+
 ### 0.5.15 (2026-04-27)
 - Fix(admin editor): tab switch no longer causes save bar to flash "unsaved changes" — synchronous localStorage flush prevents dirty-state from briefly becoming true
 - Fix(admin editor): tab menu no longer flickers on tab switch — TabBar extracted as isolated memoized component with narrow Zustand selectors so AdminEditor does not re-render on tab switch
