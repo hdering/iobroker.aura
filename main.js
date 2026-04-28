@@ -384,7 +384,8 @@ class Aura extends utils.Adapter {
         if (obj) {
           let changed = false;
           const curLinks = obj.common.localLinks || {};
-          if (JSON.stringify(curLinks) !== JSON.stringify(wantLinks)) {
+          if (curLinks?.frontend?.link !== wantLinks.frontend.link ||
+              curLinks?.backend?.link  !== wantLinks.backend.link) {
             obj.common.localLinks = wantLinks;
             changed = true;
             this.log.info(`localLinks updated${base ? ` to custom URL: ${base}` : ' to defaults'}`);
