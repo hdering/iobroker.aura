@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.5.26",
+    "version": "0.5.27",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.5.27": {
+        "en": "Fix(proxy): restore missing targetOrigin variable dropped during v0.5.26 refactoring — caused 502 on all proxied pages",
+        "de": "Fix(Proxy): fehlende targetOrigin-Variable wiederhergestellt, die beim v0.5.26-Refactoring verloren ging — verursachte 502 auf allen Proxy-Seiten",
+        "ru": "Исправление(прокси): восстановлена переменная targetOrigin, потерянная при рефакторинге v0.5.26",
+        "pt": "Correção(proxy): restaurada variável targetOrigin perdida no refactoring v0.5.26 — causava 502",
+        "nl": "Fix(proxy): ontbrekende targetOrigin-variabele hersteld verloren bij v0.5.26-refactoring",
+        "fr": "Correction(proxy): variable targetOrigin manquante restaurée perdue lors du refactoring v0.5.26",
+        "it": "Fix(proxy): ripristinata variabile targetOrigin persa durante il refactoring v0.5.26",
+        "es": "Corrección(proxy): restaurada variable targetOrigin perdida en refactoring v0.5.26",
+        "pl": "Poprawka(proxy): przywrócono zmienną targetOrigin utraconą podczas refaktoringu v0.5.26",
+        "uk": "Виправлення(проксі): відновлено змінну targetOrigin втрачену під час рефакторингу v0.5.26",
+        "zh-cn": "修复(代理)：恢复v0.5.26重构中丢失的targetOrigin变量——导致所有代理页面502错误"
+      },
       "0.5.26": {
         "en": "Fix(proxy): protect <script>/<style> content from URL rewriting; rw() resolves absolute paths directly against target without location.href interference",
         "de": "Fix(Proxy): <script>/<style>-Inhalte vor URL-Umschreibung schützen; rw() löst absolute Pfade direkt gegen Target auf ohne location.href-Interferenz",
