@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.5.19",
+    "version": "0.5.20",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.5.20": {
+        "en": "Fix(proxy): WebSocket proxy at /aura/proxyws + JS interceptor injected into HTML; fix CSRF 403 by overriding Referer and forwarding X-CSRFToken",
+        "de": "Fix(Proxy): WebSocket-Proxy unter /aura/proxyws + JS-Interceptor in HTML injiziert; CSRF-403-Fix durch Referer-Override und X-CSRFToken-Weiterleitung",
+        "ru": "Исправление(прокси): WebSocket-прокси /aura/proxyws + JS-перехватчик в HTML; исправление CSRF 403 через замену Referer и передачу X-CSRFToken",
+        "pt": "Correção(proxy): proxy WebSocket em /aura/proxyws + interceptor JS injetado no HTML; correção CSRF 403 via Referer override e encaminhamento de X-CSRFToken",
+        "nl": "Fix(proxy): WebSocket-proxy op /aura/proxyws + JS-interceptor in HTML geïnjecteerd; CSRF-403-fix via Referer-override en X-CSRFToken-forwarding",
+        "fr": "Correction(proxy): proxy WebSocket /aura/proxyws + intercepteur JS injecté dans HTML; correction CSRF 403 via override Referer et transfert X-CSRFToken",
+        "it": "Fix(proxy): proxy WebSocket /aura/proxyws + interceptor JS iniettato nell'HTML; fix CSRF 403 tramite override Referer e inoltro X-CSRFToken",
+        "es": "Corrección(proxy): proxy WebSocket en /aura/proxyws + interceptor JS inyectado en HTML; corrección CSRF 403 via override Referer y reenvío X-CSRFToken",
+        "pl": "Poprawka(proxy): proxy WebSocket /aura/proxyws + interceptor JS wstrzyknięty do HTML; naprawa CSRF 403 przez override Referer i przekazywanie X-CSRFToken",
+        "uk": "Виправлення(проксі): WebSocket-проксі /aura/proxyws + JS-перехоплювач у HTML; виправлення CSRF 403 через заміну Referer та передачу X-CSRFToken",
+        "zh-cn": "修复(代理)：WebSocket代理/aura/proxyws+向HTML注入JS拦截器；通过覆盖Referer和转发X-CSRFToken修复CSRF 403"
+      },
       "0.5.19": {
         "en": "Fix(proxy): rewrite HTML/CSS URLs so static assets and links are routed through the proxy instead of loading directly from the internal host",
         "de": "Fix(Proxy): HTML/CSS-URLs umschreiben, damit statische Ressourcen und Links über den Proxy geleitet werden statt direkt vom internen Host zu laden",
