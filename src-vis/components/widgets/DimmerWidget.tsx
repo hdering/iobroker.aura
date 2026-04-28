@@ -38,10 +38,10 @@ export function DimmerWidget({ config }: WidgetProps) {
   const thresholdColor = useMemo(() => {
     if (!thresholds?.length) return undefined;
     for (const [thresh, color] of thresholds) {
-      if (level < thresh) return color;
+      if (displayLevel < thresh) return color;
     }
     return thresholds[thresholds.length - 1][1];
-  }, [thresholds, level]);
+  }, [thresholds, displayLevel]);
   const valueColor = thresholdColor ?? 'var(--text-primary)';
 
   const slider = (
@@ -49,7 +49,7 @@ export function DimmerWidget({ config }: WidgetProps) {
       onChange={(e) => handleSliderChange(Number(e.target.value))}
       onMouseUp={handleSliderRelease} onTouchEnd={handleSliderRelease}
       style={{ accentColor: 'var(--accent-yellow)' }}
-      className="w-full h-2 rounded-lg appearance-none cursor-pointer" />
+      className="nodrag w-full h-2 rounded-lg appearance-none cursor-pointer" />
   );
 
   const { battery, reach, batteryIcon, reachIcon, statusBadges } = useStatusFields(config);
@@ -104,17 +104,17 @@ export function DimmerWidget({ config }: WidgetProps) {
     return (
       <div className="flex flex-col justify-center h-full gap-1.5" style={{ position: 'relative' }}>
         <div className="flex items-center gap-2">
-          <CompactIcon size={iconSize} style={{ color: level > 0 ? 'var(--accent-yellow)' : 'var(--text-secondary)', flexShrink: 0 }} />
+          <CompactIcon size={iconSize} style={{ color: displayLevel > 0 ? 'var(--accent-yellow)' : 'var(--text-secondary)', flexShrink: 0 }} />
           {showTitle && <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
           {!showTitle && <span className="flex-1" />}
-          {showValue && <span className="text-sm font-bold shrink-0" style={{ color: valueColor }}>{level}%</span>}
+          {showValue && <span className="text-sm font-bold shrink-0" style={{ color: valueColor }}>{displayLevel}%</span>}
         </div>
         {showSlider && (
           <input type="range" min={0} max={100} step={1} value={displayLevel}
             onChange={(e) => handleSliderChange(Number(e.target.value))}
             onMouseUp={handleSliderRelease} onTouchEnd={handleSliderRelease}
             style={{ accentColor: 'var(--accent-yellow)' }}
-            className="ml-6 h-1.5 rounded-full appearance-none cursor-pointer" />
+            className="nodrag ml-6 h-1.5 rounded-full appearance-none cursor-pointer" />
         )}
         <StatusBadges config={config} />
       </div>
