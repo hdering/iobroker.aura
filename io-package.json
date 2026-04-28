@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.5.40": {
+        "en": "Warn on adapter start if iobroker.web needs a restart to load the webExtension",
+        "de": "Warnung beim Adapterstart wenn iobroker.web neu gestartet werden muss um die webExtension zu laden",
+        "ru": "Предупреждение при старте адаптера если iobroker.web нужно перезапустить для загрузки webExtension",
+        "pt": "Aviso ao iniciar adaptador se iobroker.web precisar ser reiniciado para carregar webExtension",
+        "nl": "Waarschuwing bij adapterstart als iobroker.web herstart moet worden om de webExtension te laden",
+        "fr": "Avertissement au démarrage si iobroker.web doit être redémarré pour charger la webExtension",
+        "it": "Avviso all'avvio se iobroker.web deve essere riavviato per caricare la webExtension",
+        "es": "Advertencia al iniciar si iobroker.web necesita reiniciarse para cargar la webExtension",
+        "pl": "Ostrzeżenie przy starcie jeśli iobroker.web wymaga restartu aby załadować webExtension",
+        "uk": "Попередження при старті якщо iobroker.web потребує перезапуску для завантаження webExtension",
+        "zh-cn": "如果iobroker.web需要重启以加载webExtension，在适配器启动时发出警告"
+      },
       "0.5.36": {
         "en": "Revert proxy script to v0.5.31 baseline: history.replaceState('/'), no <base href> injection, original segment rewriter",
         "de": "Proxy-Script auf v0.5.31-Baseline zurückgesetzt: history.replaceState('/'), keine <base href> Injection, originaler Segment-Rewriter",

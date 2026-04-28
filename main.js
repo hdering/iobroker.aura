@@ -348,6 +348,18 @@ class Aura extends utils.Adapter {
       native: {},
     });
 
+    await this.setObjectNotExistsAsync('info.webExtVersion', {
+      type: 'state',
+      common: { name: 'webExtension version last loaded by iobroker.web', type: 'string', role: 'text', read: true, write: false, def: '' },
+      native: {},
+    });
+    const webExtVersionState = await this.getStateAsync('info.webExtVersion');
+    const loadedVersion = webExtVersionState?.val ? String(webExtVersionState.val) : '';
+    if (loadedVersion !== this.version) {
+      this.log.warn(`webExtension not yet loaded by iobroker.web (adapter version: ${this.version}, last loaded: ${loadedVersion || 'never'}) — please restart the web adapter instance to activate the proxy extension`);
+    }
+    await this.setStateAsync('info.webExtVersion', this.version, true);
+
     this.subscribeStates('calendar.request');
     this.subscribeStates('calendar.clientError');
     this.subscribeStates('clients.deleteRequest');
