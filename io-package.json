@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.5.29",
+    "version": "0.5.30",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.5.30": {
+        "en": "Fix(proxy): click interceptor uses bubble phase + checks defaultPrevented — Angular RouterLink now handles internal SPA navigation without full-page reload flicker",
+        "de": "Fix(Proxy): Click-Interceptor nutzt Bubble-Phase + prüft defaultPrevented — Angular RouterLink behandelt interne SPA-Navigation jetzt ohne Flackern durch Full-Page-Reload",
+        "ru": "Исправление(прокси): обработчик кликов использует фазу всплытия + проверяет defaultPrevented — Angular RouterLink теперь обрабатывает SPA-навигацию без перезагрузки",
+        "pt": "Correção(proxy): interceptor de cliques usa fase bubble + verifica defaultPrevented — Angular RouterLink trata navegação SPA sem reload",
+        "nl": "Fix(proxy): klik-interceptor gebruikt bubble-fase + controleert defaultPrevented — Angular RouterLink verwerkt SPA-navigatie zonder volledig herladen",
+        "fr": "Correction(proxy): l'intercepteur de clics utilise la phase bubble + vérifie defaultPrevented — Angular RouterLink gère la navigation SPA sans rechargement",
+        "it": "Fix(proxy): l'interceptor click usa la fase bubble + verifica defaultPrevented — Angular RouterLink gestisce la navigazione SPA senza ricaricamento",
+        "es": "Corrección(proxy): interceptor de clics usa fase bubble + comprueba defaultPrevented — Angular RouterLink gestiona navegación SPA sin recarga",
+        "pl": "Poprawka(proxy): interceptor kliknięć używa fazy bubble + sprawdza defaultPrevented — Angular RouterLink obsługuje nawigację SPA bez przeładowania",
+        "uk": "Виправлення(проксі): перехоплювач кліків використовує фазу bubble + перевіряє defaultPrevented — Angular RouterLink обробляє SPA-навігацію без перезавантаження",
+        "zh-cn": "修复(代理)：点击拦截器使用冒泡阶段+检查defaultPrevented——Angular RouterLink现在无需整页重载即可处理SPA内部导航"
+      },
       "0.5.29": {
         "en": "Fix(proxy): always use history.replaceState('/') — using the actual target path confused Angular into building wrong API URLs like /dashboardapi/saved_views/",
         "de": "Fix(Proxy): immer history.replaceState('/') nutzen — der echte Zielpfad hat Angular verwirrt und falsche API-URLs wie /dashboardapi/saved_views/ erzeugt",
