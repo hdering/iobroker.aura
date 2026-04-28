@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.5.32",
+    "version": "0.5.33",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.5.33": {
+        "en": "Fix(proxy): restore missing 'let out' declaration dropped in v0.5.32 refactoring — caused 502 on all proxied pages",
+        "de": "Fix(Proxy): fehlende 'let out'-Deklaration wiederhergestellt, die beim v0.5.32-Refactoring verloren ging — verursachte 502 auf allen Proxy-Seiten",
+        "ru": "Исправление(прокси): восстановлена отсутствующая декларация 'let out'",
+        "pt": "Correção(proxy): restaurada declaração 'let out' ausente",
+        "nl": "Fix(proxy): ontbrekende 'let out' declaratie hersteld",
+        "fr": "Correction(proxy): déclaration 'let out' manquante restaurée",
+        "it": "Fix(proxy): ripristinata dichiarazione 'let out' mancante",
+        "es": "Corrección(proxy): restaurada declaración 'let out' faltante",
+        "pl": "Poprawka(proxy): przywrócono brakującą deklarację 'let out'",
+        "uk": "Виправлення(проксі): відновлено відсутню декларацію 'let out'",
+        "zh-cn": "修复(代理)：恢复v0.5.32重构中丢失的'let out'声明"
+      },
       "0.5.32": {
         "en": "Fix(proxy): replace history.replaceState('/') with <base href='/'>  injection — replaceState in same-origin iframe fired popstate on parent Aura window causing widget flash",
         "de": "Fix(Proxy): history.replaceState('/') durch <base href='/'> ersetzt — replaceState im same-origin iframe hat popstate im parent Aura-Fenster ausgelöst und Widget-Flackern verursacht",
