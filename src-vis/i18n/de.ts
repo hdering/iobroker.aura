@@ -859,6 +859,24 @@ export const de = {
   'mp.controlDps':     'Steuerungs-DPs',
   'mp.volumeRange':    'Lautstärke-Bereich',
 
+  // ── Slider Widget ─────────────────────────────────────────────────────────────
+  'sl.range.min':              'Min',
+  'sl.range.max':              'Max',
+  'sl.range.step':             'Schritt',
+  'sl.range.unit':             'Einheit',
+  'sl.style.orientation':      'Ausrichtung',
+  'sl.style.horizontal':       'Horizontal',
+  'sl.style.vertical':         'Vertikal',
+  'sl.style.thickness':        'Track-Breite (px)',
+  'sl.style.color':            'Slider-Farbe',
+  'sl.style.commitOnRelease':  'Wert erst beim Loslassen schreiben',
+  'sl.actions.title':          'Aktions-Buttons',
+  'sl.actions.add':            '+ Button hinzufügen',
+  'sl.actions.icon':           'Icon',
+  'sl.actions.label':          'Bezeichnung (optional)',
+  'sl.actions.dp':             'Datenpunkt',
+  'sl.actions.value':          'Wert (leer = true)',
+
   // ── Widget Previews ───────────────────────────────────────────────────────────
   'preview.feelsLike':    'Gefühlt {temp}°',
   'preview.device':       'Gerät',

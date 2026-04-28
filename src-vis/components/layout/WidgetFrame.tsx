@@ -65,6 +65,7 @@ import { HtmlWidget } from '../widgets/HtmlWidget';
 import { HtmlConfig } from '../config/HtmlConfig';
 import { DatePickerWidget, FORMAT_LABELS, type DateOutputFormat } from '../widgets/DatePickerWidget';
 import { MediaplayerWidget } from '../widgets/MediaplayerWidget';
+import { SliderWidget } from '../widgets/SliderWidget';
 import { IconPickerModal } from '../config/IconPickerModal';
 
 // Stable empty array – avoids creating a new reference on every render when no conditions are set
@@ -102,6 +103,7 @@ function getWidgetMap() {
     echartsPreset: EChartsPresetWidget,
     datepicker:    DatePickerWidget,
     mediaplayer:   MediaplayerWidget,
+    slider:        SliderWidget,
   } as const;
 }
 
@@ -1091,6 +1093,302 @@ function GroupMobileOrderPanel({ defId }: { defId: string }) {
   );
 }
 
+// ── SliderEditPanel ───────────────────────────────────────────────────────────
+
+type SlAction = { id: string; icon: string; label?: string; dp: string; value?: string };
+
+function SliderEditPanel({
+  config, onConfigChange, onOpenActionPicker,
+}: {
+  config: WidgetConfig;
+  onConfigChange: (c: WidgetConfig) => void;
+  onOpenActionPicker: (idx: number) => void;
+}) {
+  const o = config.options ?? {};
+  const setO = (patch: Record<string, unknown>) =>
+    onConfigChange({ ...config, options: { ...o, ...patch } });
+  const t = useT();
+
+  const sInputCls = 'w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none font-mono';
+  const sInputStyle = { background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' };
+  const numInputStyle = { background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)', width: '72px' };
+  const isVertical = (o.orientation as string) === 'vertical';
+
+  const actions = (o.actions as SlAction[] | undefined) ?? [];
+  const [actionIconPickerIdx, setActionIconPickerIdx] = useState<number | null>(null);
+  const [addingAction, setAddingAction] = useState(false);
+  const [newActionIcon, setNewActionIcon] = useState('Play');
+  const [newActionLabel, setNewActionLabel] = useState('');
+
+  const addAction = () => {
+    const next = [...actions, { id: String(Date.now()), icon: newActionIcon, label: newActionLabel || undefined, dp: '' }];
+    setO({ actions: next });
+    setAddingAction(false);
+    setNewActionIcon('Play');
+    setNewActionLabel('');
+  };
+
+  const removeAction = (id: string) => setO({ actions: actions.filter((a) => a.id !== id) });
+
+  const updateAction = (id: string, patch: Partial<SlAction>) =>
+    setO({ actions: actions.map((a) => a.id === id ? { ...a, ...patch } : a) });
+
+  return (
+    <>
+      {/* Wertebereich */}
+      <details className="group" open>
+        <summary className="flex items-center justify-between cursor-pointer list-none select-none mb-1">
+          <span className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>Wertebereich</span>
+          <ChevronDown size={12} className="transition-transform group-open:rotate-180" style={{ color: 'var(--text-secondary)' }} />
+        </summary>
+        <div className="space-y-2">
+          <div className="flex gap-2 items-center flex-wrap">
+            {(['min', 'max', 'step'] as const).map((k) => (
+              <div key={k} className="flex items-center gap-1">
+                <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
+                  {t((`sl.range.${k}`) as never)}
+                </span>
+                <input
+                  type="number"
+                  value={(o[k] as number) ?? (k === 'max' ? 100 : k === 'step' ? 1 : 0)}
+                  onChange={(e) => setO({ [k]: Number(e.target.value) })}
+                  className="text-xs rounded-lg px-2 py-1.5 focus:outline-none"
+                  style={numInputStyle}
+                />
+              </div>
+            ))}
+          </div>
+          <div>
+            <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
+              {t('sl.range.unit' as never)}
+            </label>
+            <input
+              type="text"
+              value={(o.unit as string) ?? ''}
+              onChange={(e) => setO({ unit: e.target.value || undefined })}
+              placeholder="z.B. %, °C, dB"
+              className={sInputCls}
+              style={sInputStyle}
+            />
+          </div>
+        </div>
+      </details>
+
+      {/* Slider-Optik */}
+      <details className="group">
+        <summary className="flex items-center justify-between cursor-pointer list-none select-none mb-1">
+          <span className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>Slider-Optik</span>
+          <ChevronDown size={12} className="transition-transform group-open:rotate-180" style={{ color: 'var(--text-secondary)' }} />
+        </summary>
+        <div className="space-y-2">
+          {/* Orientation */}
+          <div>
+            <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
+              {t('sl.style.orientation' as never)}
+            </label>
+            <div className="flex gap-1">
+              {(['horizontal', 'vertical'] as const).map((dir) => (
+                <button
+                  key={dir}
+                  type="button"
+                  onClick={() => setO({ orientation: dir })}
+                  className="flex-1 text-xs py-1.5 rounded-lg hover:opacity-80"
+                  style={{
+                    background: (o.orientation ?? 'horizontal') === dir ? 'var(--accent)' : 'var(--app-bg)',
+                    color: (o.orientation ?? 'horizontal') === dir ? '#fff' : 'var(--text-secondary)',
+                    border: '1px solid var(--app-border)',
+                  }}
+                >
+                  {t((`sl.style.${dir}`) as never)}
+                </button>
+              ))}
+            </div>
+            {isVertical && (
+              <p className="text-[10px] mt-1" style={{ color: 'var(--text-secondary)' }}>
+                Tipp: Widget-Größe auf ca. 4 × 8 anpassen für optimale Darstellung.
+              </p>
+            )}
+          </div>
+          {/* Track-Breite */}
+          <div className="flex items-center gap-1">
+            <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
+              {t('sl.style.thickness' as never)}
+            </span>
+            <input
+              type="number"
+              min={2}
+              max={24}
+              value={(o.sliderThickness as number) ?? 6}
+              onChange={(e) => setO({ sliderThickness: Number(e.target.value) })}
+              className="text-xs rounded-lg px-2 py-1.5 focus:outline-none"
+              style={numInputStyle}
+            />
+          </div>
+          {/* Farbe */}
+          <div>
+            <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
+              {t('sl.style.color' as never)}
+            </label>
+            <div className="flex gap-1 items-center">
+              <input
+                type="color"
+                value={(o.color as string) || '#3b82f6'}
+                onChange={(e) => setO({ color: e.target.value })}
+                className="w-8 h-7 rounded cursor-pointer border-0 p-0"
+                style={{ background: 'none' }}
+              />
+              <input
+                type="text"
+                value={(o.color as string) ?? ''}
+                onChange={(e) => setO({ color: e.target.value || undefined })}
+                placeholder="var(--accent)"
+                className="flex-1 text-xs rounded-lg px-2 py-1.5 focus:outline-none"
+                style={sInputStyle}
+              />
+            </div>
+          </div>
+          {/* Commit on release */}
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={!!o.commitOnRelease}
+              onChange={(e) => setO({ commitOnRelease: e.target.checked || undefined })}
+              className="rounded"
+            />
+            <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+              {t('sl.style.commitOnRelease' as never)}
+            </span>
+          </label>
+        </div>
+      </details>
+
+      {/* Aktions-Buttons */}
+      <details className="group">
+        <summary className="flex items-center justify-between cursor-pointer list-none select-none mb-1">
+          <span className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>
+            {t('sl.actions.title' as never)}
+          </span>
+          <ChevronDown size={12} className="transition-transform group-open:rotate-180" style={{ color: 'var(--text-secondary)' }} />
+        </summary>
+        <div className="space-y-1.5">
+          {actions.map((action, idx) => (
+            <div key={action.id} className="rounded-lg p-2 space-y-1.5" style={{ background: 'var(--app-bg)', border: '1px solid var(--app-border)' }}>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setActionIconPickerIdx(idx)}
+                  className="text-[10px] px-1.5 py-1 rounded hover:opacity-80 shrink-0"
+                  style={{ background: 'var(--app-surface,var(--app-bg))', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+                  title={t('sl.actions.icon' as never)}
+                >
+                  {action.icon || '?'}
+                </button>
+                <input
+                  type="text"
+                  value={action.label ?? ''}
+                  onChange={(e) => updateAction(action.id, { label: e.target.value || undefined })}
+                  placeholder={t('sl.actions.label' as never)}
+                  className="flex-1 text-xs rounded px-2 py-1 focus:outline-none min-w-0"
+                  style={sInputStyle}
+                />
+                <button onClick={() => removeAction(action.id)} className="hover:opacity-70 shrink-0" style={{ color: 'var(--accent-red, #ef4444)' }}>
+                  <Trash2 size={12} />
+                </button>
+              </div>
+              <div className="flex gap-1 items-center">
+                <input
+                  type="text"
+                  value={action.dp}
+                  onChange={(e) => updateAction(action.id, { dp: e.target.value })}
+                  placeholder="DP-ID"
+                  className={`flex-1 ${sInputCls} min-w-0`}
+                  style={sInputStyle}
+                />
+                <button
+                  onClick={() => onOpenActionPicker(idx)}
+                  className="px-2 rounded-lg hover:opacity-80 shrink-0"
+                  style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+                >
+                  <Database size={13} />
+                </button>
+              </div>
+              <input
+                type="text"
+                value={action.value ?? ''}
+                onChange={(e) => updateAction(action.id, { value: e.target.value || undefined })}
+                placeholder={t('sl.actions.value' as never)}
+                className={`w-full ${sInputCls}`}
+                style={sInputStyle}
+              />
+            </div>
+          ))}
+          {addingAction ? (
+            <div className="rounded-lg p-2 space-y-1.5" style={{ background: 'var(--app-bg)', border: '1px solid var(--app-border)' }}>
+              <div className="flex gap-1 items-center">
+                <button
+                  onClick={() => setActionIconPickerIdx(-1)}
+                  className="text-[10px] px-1.5 py-1 rounded hover:opacity-80 shrink-0"
+                  style={{ background: 'var(--app-surface,var(--app-bg))', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+                >
+                  {newActionIcon}
+                </button>
+                <input
+                  type="text"
+                  value={newActionLabel}
+                  onChange={(e) => setNewActionLabel(e.target.value)}
+                  placeholder={t('sl.actions.label' as never)}
+                  className="flex-1 text-xs rounded px-2 py-1 focus:outline-none min-w-0"
+                  style={sInputStyle}
+                  autoFocus
+                />
+              </div>
+              <div className="flex gap-1">
+                <button
+                  onClick={addAction}
+                  className="flex-1 text-xs py-1 rounded-lg hover:opacity-80"
+                  style={{ background: 'var(--accent)', color: '#fff' }}
+                >
+                  {t('common.add')}
+                </button>
+                <button
+                  onClick={() => { setAddingAction(false); setNewActionLabel(''); }}
+                  className="flex-1 text-xs py-1 rounded-lg hover:opacity-80"
+                  style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+                >
+                  {t('common.cancel')}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setAddingAction(true)}
+              className="w-full text-[11px] py-1.5 rounded-lg hover:opacity-80 text-center"
+              style={{ background: 'var(--app-bg)', color: 'var(--accent)', border: '1px dashed var(--accent)44' }}
+            >
+              {t('sl.actions.add' as never)}
+            </button>
+          )}
+        </div>
+      </details>
+
+      {/* Action icon picker */}
+      {actionIconPickerIdx !== null && (
+        <IconPickerModal
+          current={actionIconPickerIdx === -1 ? newActionIcon : (actions[actionIconPickerIdx]?.icon ?? '')}
+          onSelect={(name) => {
+            if (actionIconPickerIdx === -1) {
+              setNewActionIcon(name || 'Play');
+            } else {
+              updateAction(actions[actionIconPickerIdx].id, { icon: name || 'Play' });
+            }
+            setActionIconPickerIdx(null);
+          }}
+          onClose={() => setActionIconPickerIdx(null)}
+        />
+      )}
+    </>
+  );
+}
+
 // ── MediaplayerEditPanel ──────────────────────────────────────────────────────
 
 type MpChip = { id: string; label: string; icon?: string; dp: string; value?: string };
@@ -1420,10 +1718,11 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
       setOpenPanel(panel);
     }
   };
-  const [pickerTarget, setPickerTarget] = useState<'datapoint' | 'actualDatapoint' | 'localTempDatapoint' | 'shutter_activityDp' | 'shutter_directionDp' | 'shutter_stopDp' | 'gauge_pointer2Dp' | 'gauge_pointer3Dp' | 'windowcontact_batteryDp' | 'wc_lockDp' | 'status_batteryDp' | 'status_unreachDp' | 'camera_wakeUpDp' | 'camera_slot' | 'html_dp' | 'mp_dp' | 'mp_chip' | null>(null);
+  const [pickerTarget, setPickerTarget] = useState<'datapoint' | 'actualDatapoint' | 'localTempDatapoint' | 'shutter_activityDp' | 'shutter_directionDp' | 'shutter_stopDp' | 'gauge_pointer2Dp' | 'gauge_pointer3Dp' | 'windowcontact_batteryDp' | 'wc_lockDp' | 'status_batteryDp' | 'status_unreachDp' | 'camera_wakeUpDp' | 'camera_slot' | 'html_dp' | 'mp_dp' | 'mp_chip' | 'sl_action' | null>(null);
   const [cameraSlotPickerIdx, setCameraSlotPickerIdx] = useState(0);
   const [mpPickerKey, setMpPickerKey] = useState('');
   const [mpChipIdx, setMpChipIdx] = useState(0);
+  const [slActionIdx, setSlActionIdx] = useState(0);
   const [iconPickerOpen, setIconPickerOpen] = useState(false);
   const [iconPickerTrueOpen,  setIconPickerTrueOpen]  = useState(false);
   const [iconPickerFalseOpen, setIconPickerFalseOpen] = useState(false);
@@ -2094,6 +2393,9 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
               ] : config.type === 'mediaplayer' ? [
                 { value: 'default', label: t('wf.edit.layout.standard') },
                 { value: 'custom',  label: 'Custom' },
+              ] : config.type === 'slider' ? [
+                { value: 'default', label: t('wf.edit.layout.standard') },
+                { value: 'custom',  label: 'Custom' },
               ] : [
                 { value: 'default', label: t('wf.edit.layout.standard') },
                 { value: 'card',    label: t('wf.edit.layout.card') },
@@ -2150,6 +2452,11 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                     { key: 'showVolume',   label: 'Lautstärke-Slider' },
                     { key: 'showMute',     label: 'Mute' },
                     { key: 'showChips',    label: 'Schnellzugriff-Chips' },
+                  ];
+                  case 'slider': return [
+                    { key: 'showValue',  label: 'Wert' },
+                    { key: 'showUnit',   label: 'Einheit' },
+                    { key: 'showMinMax', label: 'Min/Max-Beschriftung' },
                   ];
                   default: return [];
                 }
@@ -3391,6 +3698,14 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                 />
               )}
 
+              {config.type === 'slider' && (
+                <SliderEditPanel
+                  config={config}
+                  onConfigChange={onConfigChange}
+                  onOpenActionPicker={(idx) => { setSlActionIdx(idx); setPickerTarget('sl_action'); }}
+                />
+              )}
+
               {config.type === 'binarysensor' && (() => {
                 const o = config.options ?? {};
                 const setO = (patch: Record<string, unknown>) =>
@@ -4064,6 +4379,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                   value:         [{ key: 'icon', label: 'Widget-Icon' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
                   switch:        [{ key: 'icon', label: 'Widget-Icon' }, { key: 'toggle', label: 'Schalter' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
                   dimmer:        [{ key: 'icon', label: 'Widget-Icon' }, { key: 'slider', label: 'Dimmer-Slider' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
+                  slider:        [{ key: 'slider', label: 'Schieberegler' }, { key: 'actions', label: 'Aktions-Buttons' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
                   thermostat:    [{ key: 'icon', label: 'Widget-Icon' }, { key: 'btn-plus', label: '+ Temperatur' }, { key: 'btn-minus', label: '− Temperatur' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
                   shutter:       [{ key: 'icon', label: 'Widget-Icon' }, { key: 'btn-up', label: '▲ Hoch' }, { key: 'btn-stop', label: '■ Stop' }, { key: 'btn-down', label: '▼ Runter' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
                   windowcontact: [{ key: 'icon', label: 'Status-Icon' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'lock-icon', label: 'Schloss-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
@@ -4306,6 +4622,14 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                               { key: 'album',   label: 'Album' },
                               { key: 'source',  label: 'Quelle / Player' },
                               { key: 'volume',  label: 'Lautstärke (%)' },
+                              { key: 'battery', label: 'Batterie' },
+                              { key: 'reach',   label: 'Erreichbarkeit' },
+                            ],
+                            slider: [
+                              { key: 'value',   label: 'Wert' },
+                              { key: 'unit',    label: 'Einheit' },
+                              { key: 'min',     label: 'Minimum' },
+                              { key: 'max',     label: 'Maximum' },
                               { key: 'battery', label: 'Batterie' },
                               { key: 'reach',   label: 'Erreichbarkeit' },
                             ],
@@ -4717,6 +5041,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
             pickerTarget === 'html_dp'                  ? ((config.options?.htmlDatapoint as string) ?? '') :
             pickerTarget === 'mp_dp'   ? ((config.options?.[mpPickerKey] as string) ?? '') :
             pickerTarget === 'mp_chip' ? (() => { const chips = (config.options?.chips as Array<{ dp: string }>) ?? []; return chips[mpChipIdx]?.dp ?? ''; })() :
+            pickerTarget === 'sl_action' ? (() => { const acts = (config.options?.actions as Array<{ dp: string }>) ?? []; return acts[slActionIdx]?.dp ?? ''; })() :
             pickerTarget === 'camera_slot' ? (() => {
               const key = (config.layout ?? 'minimal') === 'default' ? 'infoItems' : 'customSlots';
               const arr = (config.options?.[key] as CameraSlot[]) ?? [];
@@ -4820,6 +5145,10 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
               const chips = [...((config.options?.chips as Array<Record<string, unknown>>) ?? [])];
               chips[mpChipIdx] = { ...chips[mpChipIdx], dp: id };
               onConfigChange({ ...config, options: { ...config.options, chips } });
+            } else if (pickerTarget === 'sl_action') {
+              const acts = [...((config.options?.actions as Array<Record<string, unknown>>) ?? [])];
+              acts[slActionIdx] = { ...acts[slActionIdx], dp: id };
+              onConfigChange({ ...config, options: { ...config.options, actions: acts } });
             } else if (pickerTarget === 'camera_slot') {
               const key = (config.layout ?? 'minimal') === 'default' ? 'infoItems' : 'customSlots';
               const arr = [...((config.options?.[key] as CameraSlot[]) ?? [])];

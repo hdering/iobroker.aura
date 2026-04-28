@@ -82,6 +82,14 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     mock: { t: 'Licht', v: '75', u: '%' },
   },
   {
+    type: 'slider',
+    label: 'Schieberegler', shortLabel: 'Regler',
+    Icon: SlidersHorizontal, iconName: 'SlidersHorizontal', color: '#0ea5e9',
+    defaultW: 8,            defaultH: 4,
+    addMode: 'datapoint',   widgetGroup: 'control',
+    mock: { t: 'Lautstärke', v: '50', u: '%' },
+  },
+  {
     type: 'thermostat',
     label: 'Thermostat',    shortLabel: 'Thermostat',
     Icon: Thermometer,      iconName: 'Thermometer', color: '#ef4444',

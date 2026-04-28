@@ -43,7 +43,8 @@ export type WidgetType =
   | 'echartsPreset'
   | 'html'
   | 'datepicker'
-  | 'mediaplayer';
+  | 'mediaplayer'
+  | 'slider';
 
 export type WidgetLayout = 'default' | 'card' | 'compact' | 'minimal' | 'agenda' | 'flow' | 'battery' | 'production' | 'consumption' | 'loadpoints' | 'custom' | 'count';
 

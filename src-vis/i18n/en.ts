@@ -861,6 +861,24 @@ export const en: Record<TranslationKey, string> = {
   'mp.controlDps':     'Control DPs',
   'mp.volumeRange':    'Volume Range',
 
+  // ── Slider Widget ─────────────────────────────────────────────────────────────
+  'sl.range.min':              'Min',
+  'sl.range.max':              'Max',
+  'sl.range.step':             'Step',
+  'sl.range.unit':             'Unit',
+  'sl.style.orientation':      'Orientation',
+  'sl.style.horizontal':       'Horizontal',
+  'sl.style.vertical':         'Vertical',
+  'sl.style.thickness':        'Track thickness (px)',
+  'sl.style.color':            'Slider color',
+  'sl.style.commitOnRelease':  'Write value only on release',
+  'sl.actions.title':          'Action buttons',
+  'sl.actions.add':            '+ Add button',
+  'sl.actions.icon':           'Icon',
+  'sl.actions.label':          'Label (optional)',
+  'sl.actions.dp':             'Datapoint',
+  'sl.actions.value':          'Value (empty = true)',
+
   // ── Widget Previews ───────────────────────────────────────────────────────────
   'preview.feelsLike':    'Feels like {temp}°',
   'preview.device':       'Device',
