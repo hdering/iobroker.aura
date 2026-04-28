@@ -64,6 +64,7 @@ import { JsonTableConfig } from '../config/JsonTableConfig';
 import { HtmlWidget } from '../widgets/HtmlWidget';
 import { HtmlConfig } from '../config/HtmlConfig';
 import { DatePickerWidget, FORMAT_LABELS, type DateOutputFormat } from '../widgets/DatePickerWidget';
+import { MediaplayerWidget } from '../widgets/MediaplayerWidget';
 import { IconPickerModal } from '../config/IconPickerModal';
 
 // Stable empty array – avoids creating a new reference on every render when no conditions are set
@@ -100,6 +101,7 @@ function getWidgetMap() {
     stateimage:    StateImageWidget,
     echartsPreset: EChartsPresetWidget,
     datepicker:    DatePickerWidget,
+    mediaplayer:   MediaplayerWidget,
   } as const;
 }
 
@@ -1089,6 +1091,261 @@ function GroupMobileOrderPanel({ defId }: { defId: string }) {
   );
 }
 
+// ── MediaplayerEditPanel ──────────────────────────────────────────────────────
+
+type MpChip = { id: string; label: string; icon?: string; dp: string; value?: string };
+
+function MediaplayerEditPanel({
+  config, onConfigChange, onOpenPicker, onOpenChipPicker,
+}: {
+  config: WidgetConfig;
+  onConfigChange: (c: WidgetConfig) => void;
+  onOpenPicker: (key: string) => void;
+  onOpenChipPicker: (idx: number) => void;
+}) {
+  const o = config.options ?? {};
+  const setO = (patch: Record<string, unknown>) =>
+    onConfigChange({ ...config, options: { ...o, ...patch } });
+  const t = useT();
+
+  const sInputCls = 'w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none font-mono';
+  const sInputStyle = { background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' };
+  const numInputStyle = { background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)', width: '72px' };
+
+  const chips = (o.chips as MpChip[] | undefined) ?? [];
+  const [addingChip, setAddingChip] = useState(false);
+  const [newChipLabel, setNewChipLabel] = useState('');
+  const [newChipValue, setNewChipValue] = useState('');
+  const [chipIconPickerIdx, setChipIconPickerIdx] = useState<number | null>(null);
+
+  const dpRow = (labelKey: string, optKey: string) => (
+    <div key={optKey}>
+      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t(labelKey as never)}</label>
+      <div className="flex gap-1">
+        <input type="text" value={(o[optKey] as string) ?? ''}
+          onChange={(e) => setO({ [optKey]: e.target.value || undefined })}
+          placeholder="optional"
+          className={`flex-1 ${sInputCls} min-w-0`} style={sInputStyle} />
+        <button onClick={() => onOpenPicker(optKey)}
+          className="px-2 rounded-lg hover:opacity-80 shrink-0"
+          style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+          <Database size={13} />
+        </button>
+      </div>
+    </div>
+  );
+
+  const autoFill = async () => {
+    if (!config.datapoint) return;
+    const parts = config.datapoint.split('.');
+    const parent = parts.slice(0, -1).join('.');
+    const entries = await ensureDatapointCache();
+    const sibs = entries.filter((e) => e.id.startsWith(parent + '.'));
+    const find = (...names: string[]) =>
+      names.map((n) => sibs.find((e) => e.id === `${parent}.${n}`)?.id).find(Boolean);
+    const patch: Record<string, unknown> = {};
+    const TITLE_NAMES  = ['currentTitle','current_title','TITLE','title','Title','name','trackName','track_name','song','media_title'];
+    const ARTIST_NAMES = ['currentArtist','current_artist','ARTIST','artist','Artist','artistName','artist_name','media_artist'];
+    const ALBUM_NAMES  = ['currentAlbum','current_album','ALBUM','album','Album','albumName','album_name','media_album'];
+    const COVER_NAMES  = ['imageURL','image_url','imageUrl','coverUrl','cover_url','albumArt','album_art','artwork','cover','COVER','media_image_url'];
+    const SOURCE_NAMES = ['roomName','room_name','source','SOURCE','playerName','player_name','zone','ZONE','device'];
+    const STATE_NAMES  = ['state','STATE','playState','play_state','status','STATUS','playerState','playing','PLAYING'];
+    const VOL_NAMES    = ['volume','VOLUME','Volume','vol','VOL','volumeLevel','volume_level','currentVolume','media_volume_level'];
+    const MUTE_NAMES   = ['muted','MUTED','Muted','mute','MUTE','muteState','media_volume_muted'];
+    const PLAY_NAMES   = ['play','PLAY','Play','cmd_play','cmdPlay'];
+    const PAUSE_NAMES  = ['pause','PAUSE','Pause','cmd_pause','cmdPause'];
+    const NEXT_NAMES   = ['next','NEXT','Next','cmd_next','cmdNext','skipForward'];
+    const PREV_NAMES   = ['prev','PREV','Prev','previous','PREVIOUS','cmd_prev','cmdPrev','skipBack'];
+    const SHUFFLE_NAMES= ['shuffle','SHUFFLE','Shuffle','shuffleMode','shuffle_mode'];
+    const REPEAT_NAMES = ['repeat','REPEAT','Repeat','repeatMode','repeat_mode'];
+    const mp = (k: string, names: string[]) => { const v = find(...names); if (v) patch[k] = v; };
+    mp('titleDp', TITLE_NAMES); mp('artistDp', ARTIST_NAMES); mp('albumDp', ALBUM_NAMES);
+    mp('coverDp', COVER_NAMES); mp('sourceDp', SOURCE_NAMES); mp('playStateDp', STATE_NAMES);
+    mp('volumeDp', VOL_NAMES);  mp('muteDp', MUTE_NAMES);
+    mp('playDp', PLAY_NAMES);   mp('pauseDp', PAUSE_NAMES);
+    mp('nextDp', NEXT_NAMES);   mp('prevDp', PREV_NAMES);
+    mp('shuffleDp', SHUFFLE_NAMES); mp('repeatDp', REPEAT_NAMES);
+    if (Object.keys(patch).length) setO(patch);
+  };
+
+  const confirmAddChip = () => {
+    if (!newChipLabel.trim()) return;
+    const next: MpChip = { id: Date.now().toString(), label: newChipLabel.trim(), dp: '', value: newChipValue.trim() || undefined };
+    setO({ chips: [...chips, next] });
+    setNewChipLabel(''); setNewChipValue('');
+    setAddingChip(false);
+  };
+
+  const updateChip = (id: string, patch: Partial<MpChip>) =>
+    setO({ chips: chips.map((c) => c.id === id ? { ...c, ...patch } : c) });
+
+  const removeChip = (id: string) =>
+    setO({ chips: chips.filter((c) => c.id !== id) });
+
+  return (
+    <>
+      {/* Auto-detect */}
+      {config.datapoint && (
+        <div className="flex items-center justify-between">
+          <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Geschwister-DPs auto-erkennen</span>
+          <button onClick={() => void autoFill()}
+            className="text-[10px] px-2 py-0.5 rounded hover:opacity-80"
+            style={{ background: 'var(--accent)22', color: 'var(--accent)', border: '1px solid var(--accent)44' }}>
+            {t('mp.autodetect' as never)}
+          </button>
+        </div>
+      )}
+
+      {/* Anzeige-DPs */}
+      <details className="group" open>
+        <summary className="flex items-center justify-between cursor-pointer list-none select-none mb-1">
+          <span className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>{t('mp.displayDps' as never)}</span>
+          <ChevronDown size={12} className="transition-transform group-open:rotate-180" style={{ color: 'var(--text-secondary)' }} />
+        </summary>
+        <div className="space-y-2">
+          {dpRow('mp.dp.title',     'titleDp')}
+          {dpRow('mp.dp.artist',    'artistDp')}
+          {dpRow('mp.dp.album',     'albumDp')}
+          {dpRow('mp.dp.cover',     'coverDp')}
+          {dpRow('mp.dp.source',    'sourceDp')}
+          {dpRow('mp.dp.playState', 'playStateDp')}
+          {dpRow('mp.dp.volume',    'volumeDp')}
+          {dpRow('mp.dp.mute',      'muteDp')}
+        </div>
+      </details>
+
+      {/* Steuerungs-DPs */}
+      <details className="group">
+        <summary className="flex items-center justify-between cursor-pointer list-none select-none mb-1">
+          <span className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>{t('mp.controlDps' as never)}</span>
+          <ChevronDown size={12} className="transition-transform group-open:rotate-180" style={{ color: 'var(--text-secondary)' }} />
+        </summary>
+        <div className="space-y-2">
+          {dpRow('mp.dp.play',    'playDp')}
+          {dpRow('mp.dp.pause',   'pauseDp')}
+          {dpRow('mp.dp.stop',    'stopDp')}
+          {dpRow('mp.dp.next',    'nextDp')}
+          {dpRow('mp.dp.prev',    'prevDp')}
+          {dpRow('mp.dp.shuffle', 'shuffleDp')}
+          {dpRow('mp.dp.repeat',  'repeatDp')}
+        </div>
+      </details>
+
+      {/* Volume-Bereich */}
+      <details className="group">
+        <summary className="flex items-center justify-between cursor-pointer list-none select-none mb-1">
+          <span className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>{t('mp.volumeRange' as never)}</span>
+          <ChevronDown size={12} className="transition-transform group-open:rotate-180" style={{ color: 'var(--text-secondary)' }} />
+        </summary>
+        <div className="flex gap-2 items-center flex-wrap">
+          {(['min', 'max', 'step'] as const).map((k) => (
+            <div key={k} className="flex items-center gap-1">
+              <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
+                {t((`mp.vol.${k}`) as never)}
+              </span>
+              <input
+                type="number"
+                value={(o[`volume${k.charAt(0).toUpperCase() + k.slice(1)}`] as number) ?? (k === 'min' ? 0 : k === 'max' ? 100 : 1)}
+                onChange={(e) => setO({ [`volume${k.charAt(0).toUpperCase() + k.slice(1)}`]: Number(e.target.value) })}
+                className="text-xs rounded-lg px-2 py-1.5 focus:outline-none"
+                style={numInputStyle}
+              />
+            </div>
+          ))}
+        </div>
+      </details>
+
+      {/* Chips */}
+      <details className="group">
+        <summary className="flex items-center justify-between cursor-pointer list-none select-none mb-1">
+          <span className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>{t('mp.chips.title' as never)}</span>
+          <ChevronDown size={12} className="transition-transform group-open:rotate-180" style={{ color: 'var(--text-secondary)' }} />
+        </summary>
+        <div className="space-y-1.5">
+          {chips.map((chip, idx) => (
+            <div key={chip.id} className="rounded-lg p-2 space-y-1.5" style={{ background: 'var(--app-bg)', border: '1px solid var(--app-border)' }}>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setChipIconPickerIdx(idx)}
+                  className="text-[10px] px-1.5 py-1 rounded hover:opacity-80 shrink-0"
+                  style={{ background: 'var(--app-surface,var(--app-bg))', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+                  title="Icon wählen">
+                  {chip.icon ? chip.icon : '🎵'}
+                </button>
+                <input type="text" value={chip.label}
+                  onChange={(e) => updateChip(chip.id, { label: e.target.value })}
+                  placeholder={t('mp.chips.label' as never)}
+                  className="flex-1 text-xs rounded px-2 py-1 focus:outline-none min-w-0"
+                  style={sInputStyle} />
+                <button onClick={() => removeChip(chip.id)} className="hover:opacity-70 shrink-0" style={{ color: 'var(--accent-red, #ef4444)' }}>
+                  <Trash2 size={12} />
+                </button>
+              </div>
+              <div className="flex gap-1 items-center">
+                <input type="text" value={chip.dp}
+                  onChange={(e) => updateChip(chip.id, { dp: e.target.value })}
+                  placeholder="DP-ID"
+                  className={`flex-1 ${sInputCls} min-w-0`} style={sInputStyle} />
+                <button onClick={() => onOpenChipPicker(idx)}
+                  className="px-2 rounded-lg hover:opacity-80 shrink-0"
+                  style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+                  <Database size={13} />
+                </button>
+              </div>
+              <input type="text" value={chip.value ?? ''}
+                onChange={(e) => updateChip(chip.id, { value: e.target.value || undefined })}
+                placeholder={t('mp.chips.value' as never)}
+                className={`w-full ${sInputCls}`} style={sInputStyle} />
+            </div>
+          ))}
+          {addingChip ? (
+            <div className="rounded-lg p-2 space-y-1.5" style={{ background: 'var(--app-bg)', border: '1px solid var(--app-border)' }}>
+              <input type="text" value={newChipLabel}
+                onChange={(e) => setNewChipLabel(e.target.value)}
+                placeholder={t('mp.chips.label' as never)}
+                className={`w-full ${sInputCls}`} style={sInputStyle} autoFocus />
+              <input type="text" value={newChipValue}
+                onChange={(e) => setNewChipValue(e.target.value)}
+                placeholder={t('mp.chips.value' as never)}
+                className={`w-full ${sInputCls}`} style={sInputStyle} />
+              <div className="flex gap-1">
+                <button onClick={confirmAddChip}
+                  className="flex-1 text-xs py-1 rounded-lg hover:opacity-80"
+                  style={{ background: 'var(--accent)', color: '#fff' }}>
+                  {t('common.add')}
+                </button>
+                <button onClick={() => { setAddingChip(false); setNewChipLabel(''); setNewChipValue(''); }}
+                  className="flex-1 text-xs py-1 rounded-lg hover:opacity-80"
+                  style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+                  {t('common.cancel')}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button onClick={() => setAddingChip(true)}
+              className="w-full text-[11px] py-1.5 rounded-lg hover:opacity-80 text-center"
+              style={{ background: 'var(--app-bg)', color: 'var(--accent)', border: '1px dashed var(--accent)44' }}>
+              {t('mp.chips.add' as never)}
+            </button>
+          )}
+        </div>
+      </details>
+
+      {/* Chip icon picker */}
+      {chipIconPickerIdx !== null && (
+        <IconPickerModal
+          current={chips[chipIconPickerIdx]?.icon ?? ''}
+          onSelect={(name) => {
+            updateChip(chips[chipIconPickerIdx].id, { icon: name || undefined });
+            setChipIconPickerIdx(null);
+          }}
+          onClose={() => setChipIconPickerIdx(null)}
+        />
+      )}
+    </>
+  );
+}
+
 export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDuplicate }: WidgetFrameProps) {
   const t = useT();
   const [openPanel, setOpenPanel] = useState<'menu' | 'edit' | 'conditions' | 'group-mobile-order' | null>(null);
@@ -1163,8 +1420,10 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
       setOpenPanel(panel);
     }
   };
-  const [pickerTarget, setPickerTarget] = useState<'datapoint' | 'actualDatapoint' | 'localTempDatapoint' | 'shutter_activityDp' | 'shutter_directionDp' | 'shutter_stopDp' | 'gauge_pointer2Dp' | 'gauge_pointer3Dp' | 'windowcontact_batteryDp' | 'wc_lockDp' | 'status_batteryDp' | 'status_unreachDp' | 'camera_wakeUpDp' | 'camera_slot' | 'html_dp' | null>(null);
+  const [pickerTarget, setPickerTarget] = useState<'datapoint' | 'actualDatapoint' | 'localTempDatapoint' | 'shutter_activityDp' | 'shutter_directionDp' | 'shutter_stopDp' | 'gauge_pointer2Dp' | 'gauge_pointer3Dp' | 'windowcontact_batteryDp' | 'wc_lockDp' | 'status_batteryDp' | 'status_unreachDp' | 'camera_wakeUpDp' | 'camera_slot' | 'html_dp' | 'mp_dp' | 'mp_chip' | null>(null);
   const [cameraSlotPickerIdx, setCameraSlotPickerIdx] = useState(0);
+  const [mpPickerKey, setMpPickerKey] = useState('');
+  const [mpChipIdx, setMpChipIdx] = useState(0);
   const [iconPickerOpen, setIconPickerOpen] = useState(false);
   const [iconPickerTrueOpen,  setIconPickerTrueOpen]  = useState(false);
   const [iconPickerFalseOpen, setIconPickerFalseOpen] = useState(false);
@@ -1832,6 +2091,9 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                 { value: 'card',    label: t('wf.edit.layout.card') },
               ] : config.type === 'echartsPreset' ? [
                 { value: 'default', label: t('wf.edit.layout.standard') },
+              ] : config.type === 'mediaplayer' ? [
+                { value: 'default', label: t('wf.edit.layout.standard') },
+                { value: 'custom',  label: 'Custom' },
               ] : [
                 { value: 'default', label: t('wf.edit.layout.standard') },
                 { value: 'card',    label: t('wf.edit.layout.card') },
@@ -1875,6 +2137,19 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                     { key: 'showDate',     label: 'Datum / Uhrzeit' },
                     { key: 'showLocation', label: 'Ort' },
                     { key: 'showMore',     label: '+ weitere Termine' },
+                  ];
+                  case 'mediaplayer':    return [
+                    { key: 'showCover',    label: 'Cover' },
+                    { key: 'showTitle',    label: 'Titel' },
+                    { key: 'showSubtitle', label: 'Untertitel (Artist · Album)' },
+                    { key: 'showSource',   label: 'Quelle' },
+                    { key: 'showShuffle',  label: 'Shuffle' },
+                    { key: 'showPrev',     label: 'Vorheriger' },
+                    { key: 'showNext',     label: 'Nächster' },
+                    { key: 'showRepeat',   label: 'Repeat' },
+                    { key: 'showVolume',   label: 'Lautstärke-Slider' },
+                    { key: 'showMute',     label: 'Mute' },
+                    { key: 'showChips',    label: 'Schnellzugriff-Chips' },
                   ];
                   default: return [];
                 }
@@ -3107,6 +3382,15 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                 );
               })()}
 
+              {config.type === 'mediaplayer' && (
+                <MediaplayerEditPanel
+                  config={config}
+                  onConfigChange={onConfigChange}
+                  onOpenPicker={(key) => { setMpPickerKey(key); setPickerTarget('mp_dp'); }}
+                  onOpenChipPicker={(idx) => { setMpChipIdx(idx); setPickerTarget('mp_chip'); }}
+                />
+              )}
+
               {config.type === 'binarysensor' && (() => {
                 const o = config.options ?? {};
                 const setO = (patch: Record<string, unknown>) =>
@@ -3785,6 +4069,20 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                   windowcontact: [{ key: 'icon', label: 'Status-Icon' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'lock-icon', label: 'Schloss-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
                   binarysensor:  [{ key: 'icon', label: 'Status-Icon' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
                   stateimage:    [{ key: 'icon', label: 'Zustands-Icon' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
+                  mediaplayer:   [
+                    { key: 'play-pause',     label: '▶ / ⏸ Play / Pause' },
+                    { key: 'prev',           label: '⏮ Vorheriger Titel' },
+                    { key: 'next',           label: '⏭ Nächster Titel' },
+                    { key: 'shuffle',        label: '⇄ Shuffle' },
+                    { key: 'repeat',         label: '↺ Repeat' },
+                    { key: 'mute',           label: '🔇 Mute / Unmute' },
+                    { key: 'volume-slider',  label: '🔊 Lautstärke-Slider' },
+                    { key: 'cover',          label: '🖼 Album-Cover' },
+                    { key: 'chips',          label: '🎵 Schnellzugriff-Chips' },
+                    { key: 'battery-icon',   label: 'Batterie-Icon' },
+                    { key: 'reach-icon',     label: 'Erreichbarkeit-Icon' },
+                    { key: 'status-badges',  label: 'Status-Badges (alle)' },
+                  ],
                 };
                 const o   = config.options ?? {};
                 const cells: CustomGrid = (o.customGrid as CustomGrid | undefined) ?? DEFAULT_CUSTOM_GRID;
@@ -4001,6 +4299,15 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                               { key: 'wind',      label: 'Wind' },
                               { key: 'condition', label: 'Wetterlage' },
                               { key: 'emoji',     label: 'Wetter-Emoji' },
+                            ],
+                            mediaplayer: [
+                              { key: 'title',   label: 'Titel' },
+                              { key: 'artist',  label: 'Künstler' },
+                              { key: 'album',   label: 'Album' },
+                              { key: 'source',  label: 'Quelle / Player' },
+                              { key: 'volume',  label: 'Lautstärke (%)' },
+                              { key: 'battery', label: 'Batterie' },
+                              { key: 'reach',   label: 'Erreichbarkeit' },
                             ],
                           };
                           const options = FIELD_OPTIONS[config.type] ?? [];
@@ -4408,6 +4715,8 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
             pickerTarget === 'status_unreachDp'         ? ((config.options?.unreachDp  as string) ?? '') :
             pickerTarget === 'camera_wakeUpDp'          ? ((config.options?.wakeUpDp   as string) ?? '') :
             pickerTarget === 'html_dp'                  ? ((config.options?.htmlDatapoint as string) ?? '') :
+            pickerTarget === 'mp_dp'   ? ((config.options?.[mpPickerKey] as string) ?? '') :
+            pickerTarget === 'mp_chip' ? (() => { const chips = (config.options?.chips as Array<{ dp: string }>) ?? []; return chips[mpChipIdx]?.dp ?? ''; })() :
             pickerTarget === 'camera_slot' ? (() => {
               const key = (config.layout ?? 'minimal') === 'default' ? 'infoItems' : 'customSlots';
               const arr = (config.options?.[key] as CameraSlot[]) ?? [];
@@ -4505,6 +4814,12 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
               onConfigChange({ ...config, options: { ...config.options, wakeUpDp: id } });
             } else if (pickerTarget === 'html_dp') {
               onConfigChange({ ...config, options: { ...config.options, htmlDatapoint: id } });
+            } else if (pickerTarget === 'mp_dp') {
+              onConfigChange({ ...config, options: { ...config.options, [mpPickerKey]: id } });
+            } else if (pickerTarget === 'mp_chip') {
+              const chips = [...((config.options?.chips as Array<Record<string, unknown>>) ?? [])];
+              chips[mpChipIdx] = { ...chips[mpChipIdx], dp: id };
+              onConfigChange({ ...config, options: { ...config.options, chips } });
             } else if (pickerTarget === 'camera_slot') {
               const key = (config.layout ?? 'minimal') === 'default' ? 'infoItems' : 'customSlots';
               const arr = [...((config.options?.[key] as CameraSlot[]) ?? [])];

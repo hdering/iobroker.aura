@@ -42,7 +42,8 @@ export type WidgetType =
   | 'stateimage'
   | 'echartsPreset'
   | 'html'
-  | 'datepicker';
+  | 'datepicker'
+  | 'mediaplayer';
 
 export type WidgetLayout = 'default' | 'card' | 'compact' | 'minimal' | 'agenda' | 'flow' | 'battery' | 'production' | 'consumption' | 'loadpoints' | 'custom' | 'count';
 

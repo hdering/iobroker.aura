@@ -1,174 +1,94 @@
-# Aura – Development Guidelines for Claude
+<!-- dgc-policy-v11 -->
+# Dual-Graph Context Policy
 
-## Project Overview
+This project uses a local dual-graph MCP server for efficient context retrieval.
 
-**iobroker.aura** is a visualization dashboard adapter for ioBroker built with React 18 + TypeScript + Vite + Tailwind CSS + Zustand. The adapter serves a frontend from `www/` via ioBroker's web adapter.
+## MANDATORY: Adaptive graph_continue rule
 
-- Frontend: `src-vis/` (React/TypeScript, built to `www/`)
-- Adapter backend: `main.js` (Node.js, ioBroker adapter-core)
-- Build: `npm run build:adapter` (always use this, not `npm run build`)
+**Call `graph_continue` ONLY when you do NOT already know the relevant files.**
 
-## ioBroker Adapter Rules
+### Call `graph_continue` when:
+- This is the first message of a new task / conversation
+- The task shifts to a completely different area of the codebase
+- You need files you haven't read yet in this session
 
-These rules come from the [ioBroker AI Developer Guide](https://github.com/Jey-Cee/iobroker-ai-developer-guide) and are mandatory:
+### SKIP `graph_continue` when:
+- You already identified the relevant files earlier in this conversation
+- You are doing follow-up work on files already read (verify, refactor, test, docs, cleanup, commit)
+- The task is pure text (writing a commit message, summarising, explaining)
 
-### Timers & Scheduling
-- **NEVER** use native `setTimeout` / `setInterval` in adapter code (`lib/main.js`)
-- **ALWAYS** use `this.setTimeout` / `this.setInterval` / `this.clearTimeout` / `this.clearInterval`
-- The adapter framework manages these and cleans them up on unload automatically
+**If skipping, go directly to `graph_read` on the already-known `file::symbol`.**
 
-### Process termination
-- **NEVER** use `process.exit()` in adapter code
-- **ALWAYS** use `this.terminate()` for fatal errors
+## When you DO call graph_continue
 
-### State management
-- **ALWAYS** use `setObjectNotExistsAsync` for creating objects (never `setObjectAsync` which overwrites)
-- Use `extendObjectAsync` only when intentionally updating an existing object definition
-- `ack: true` → confirmed/read value (adapter writing a sensor value)
-- `ack: false` → command (user/script wants to change something)
-- Subscribe to states with `this.subscribeStates()` and handle in `onStateChange`
+1. **If `graph_continue` returns `needs_project=true`**: call `graph_scan` with `pwd`. Do NOT ask the user.
 
-### Object hierarchy
-- Object tree must follow: `device` → `channel` → `state`
-- **Every intermediate node must be explicitly created**
-  - e.g. for `calendar.request`: create `calendar` (channel) AND `calendar.request` (state)
-- Object IDs must only contain: `A-Za-z0-9._-` — no spaces, no special characters
+2. **If `graph_continue` returns `skip=true`**: fewer than 5 files  - read only specifically named files.
 
-### State Roles
-- Do NOT use generic `role: "state"` everywhere
-- Use correct roles from the [State Roles list](https://github.com/ioBroker/ioBroker/blob/master/doc/STATE_ROLES.md):
-  - `indicator.connected` for connection status
-  - `json` for JSON strings
-  - `url` for URL strings
-  - `level` for writable numeric values
-  - `value` for read-only numeric values
-  - `switch` for boolean on/off
-  - `button` for trigger states
+3. **Read `recommended_files`** using `graph_read`.
+   - Always use `file::symbol` notation (e.g. `src/auth.ts::handleLogin`)  - never read whole files.
+   - `recommended_files` entries that already contain `::` must be passed verbatim.
 
-### Logging
-- All log messages must be in **English**
-- Use appropriate log levels:
-  - `this.log.debug()` for verbose debug info
-  - `this.log.info()` for important state changes
-  - `this.log.warn()` for recoverable issues
-  - `this.log.error()` for errors
+4. **Obey confidence caps:**
+   - `confidence=high` -> Stop. Do NOT grep or explore further.
+   - `confidence=medium` -> `fallback_rg` at most `max_supplementary_greps` times, then `graph_read` at most `max_supplementary_files` more symbols. Stop.
+   - `confidence=low` -> same as medium. Stop.
 
-### Unload / Cleanup
-- `onUnload` must clean up ALL resources: timers, connections, servers
-- The current implementation is minimal — extend if new resources are added
+## Session State (compact, update after every turn)
 
-### Compact Mode
-- Currently set to `compact: false` in io-package.json
-- Do not change this without fully testing compact mode
+Maintain a short JSON block in your working memory. Update it after each turn:
 
-## Frontend Rules
-
-### Socket communication
-- Use `getSocket()` from `src-vis/hooks/useIoBroker.ts` for all socket operations
-- **Do NOT use `sendTo` with acknowledgement callbacks** — the ioBroker web adapter does not reliably forward them
-- Use **state-based relay** for request/response patterns (see `calendar.request` / `calendar.response`)
-
-### Modifying system.adapter objects
-
-The adapter currently calls `setForeignObjectAsync('system.adapter.aura.X', ...)` to update `localLinks` when a custom URL is configured. **This is under review by the ioBroker core team.** Do not expand this pattern until the review result from @Apollon77 is known. If it turns out to be disallowed, the custom URL feature must be implemented differently (e.g. via the web adapter's `pathPrefix` config or a dedicated ioBroker feature).
-
-### Datapoints
-- State subscriptions via `useDatapoint(id)` hook
-- Direct subscriptions via `subscribeStateDirect(id, callback)` from `useIoBroker.ts`
-
-### Build
-- Always build with `npm run build:adapter` (sets `VITE_BASE=/aura/`)
-- Never commit without a fresh build — `www/` must be up to date
-
-## Release Process
-
-Releases are staged — never go straight to stable for significant changes.
-
-### Stages
-
-| Stage | How | Who sees it |
-|-------|-----|-------------|
-| **Local test** | build + copy `www/` to local ioBroker test instance | Developer only |
-| **npm / beta** | GitHub Pre-release → npm tag `beta` | ioBroker users with Beta channel enabled |
-| **npm / stable** | GitHub Release (non-pre-release) → npm tag `latest` | All ioBroker users |
-| **ioBroker beta repo** | PR on `ioBroker/ioBroker.repositories` → `sources-dist.json` | Shown in ioBroker adapter list (beta) |
-| **ioBroker stable repo** | PR on `ioBroker/ioBroker.repositories` → `sources-dist-stable.json` | Shown in ioBroker adapter list (stable) |
-
-### io-package.json news rules
-
-- **Max 7 entries** — remove the oldest when adding a new one
-- **npm latest must always be present** — never remove the version that npm `latest` points to
-- **Only published versions** — never list a version that failed CI and was never published to npm (E2004)
-- **Validate before every commit:**
-  ```bash
-  # 1. JSON valid?
-  node -e "JSON.parse(require('fs').readFileSync('io-package.json','utf8')); console.log('OK')"
-  # 2. All news versions exist on npm?
-  node -e "
-    const news = Object.keys(JSON.parse(require('fs').readFileSync('io-package.json','utf8')).common.news);
-    const https = require('https');
-    https.get('https://registry.npmjs.org/iobroker.aura', res => {
-      let d=''; res.on('data',c=>d+=c); res.on('end',()=>{
-        const versions = Object.keys(JSON.parse(d).versions);
-        news.forEach(v => console.log(v, versions.includes(v) ? 'OK' : 'MISSING ON NPM'));
-      });
-    });
-  "
-  ```
-
-### Workflow: Coding vs. Releasing
-
-**After completing a task:** only commit locally — do NOT push and do NOT create a GitHub release.
-The user will explicitly say "neues release" (or similar) when a release is wanted.
-
-### Steps when the user requests a release
-
-1. Bump version in **both** `package.json` AND `io-package.json` (must match)
-2. Add entry to `news` in `io-package.json` (EN + DE minimum, all 11 languages preferred)
-3. Add entry to `## Changelog` in `README.md` — **mandatory, causes E6006 if missing**
-   - Format: `### X.Y.Z (YYYY-MM-DD)` followed by bullet points
-   - Every version that appears in `io-package.json` news **must** also appear in README.md Changelog
-4. Run the news validation checks above
-5. `npm run build:adapter`
-6. `git add -A && git commit` (if there are uncommitted changes)
-7. `git push`
-8. Create GitHub release:
-   - **Beta** (new features, not yet fully tested):
-     ```
-     "/c/Program Files/GitHub CLI/gh.exe" release create vX.Y.Z --title "vX.Y.Z" --notes "..." --prerelease
-     ```
-   - **Stable** (tested, ready for all users):
-     ```
-     "/c/Program Files/GitHub CLI/gh.exe" release create vX.Y.Z --title "vX.Y.Z" --notes "..."
-     ```
-   - **Promote existing pre-release to stable:**
-     ```
-     "/c/Program Files/GitHub CLI/gh.exe" release edit vX.Y.Z --prerelease=false
-     ```
-
-### npm tag behaviour (CI workflow)
-
-`ioBroker/testing-action-deploy@v1` always publishes to `latest` AND promotes GitHub prereleases to full releases. The workflow (`.github/workflows/test-and-release.yml`) works around this:
-
-1. **Before deploy**: snapshots the current `latest` npm tag
-2. **Deploy runs**: publishes the new version to `latest` (wrong for betas)
-3. **After deploy**: tags the new version as `beta`, restores `latest` to the snapshotted previous value
-
-**This is fully automatic — no manual `npm dist-tag` needed after a beta release.**
-
-If `latest` is ever wrong (e.g. after a failed CI run), fix manually:
-```bash
-npm dist-tag add iobroker.aura@X.Y.Z latest   # restore stable
-npm dist-tag add iobroker.aura@X.Y.Z beta     # set beta
+```json
+{
+  "files_identified": ["path/to/file.py"],
+  "symbols_changed": ["module::function"],
+  "fix_applied": true,
+  "features_added": ["description"],
+  "open_issues": ["one-line note"]
+}
 ```
-Note: npm 2FA (OTP) is required for manual dist-tag commands.
 
-### When to ask about release type
+Use this state  - not prose summaries  - to remember what's been done across turns.
 
-Ask the user "Beta oder Stable Release?" when:
-- The change adds new user-facing features
-- The change touches adapter backend logic (`lib/main.js`)
-- The change could break existing setups
-- It's the first release after a series of fixes/features
+## Token Usage
 
-Don't ask for pure internal fixes (typos, i18n, build config) — those can go stable directly.
+A `token-counter` MCP is available for tracking live token usage.
+
+- Before reading a large file: `count_tokens({text: "<content>"})` to check cost first.
+- To show running session cost: `get_session_stats()`
+- To log completed task: `log_usage({input_tokens: N, output_tokens: N, description: "task"})`
+
+## Rules
+
+- Do NOT use `rg`, `grep`, or bash file exploration before calling `graph_continue` (when required).
+- Do NOT do broad/recursive exploration at any confidence level.
+- `max_supplementary_greps` and `max_supplementary_files` are hard caps  - never exceed them.
+- Do NOT call `graph_continue` more than once per turn.
+- Always use `file::symbol` notation with `graph_read`  - never bare filenames.
+- After edits, call `graph_register_edit` with changed files using `file::symbol` notation.
+
+## Context Store
+
+Whenever you make a decision, identify a task, note a next step, fact, or blocker during a conversation, append it to `.dual-graph/context-store.json`.
+
+**Entry format:**
+```json
+{"type": "decision|task|next|fact|blocker", "content": "one sentence max 15 words", "tags": ["topic"], "files": ["relevant/file.ts"], "date": "YYYY-MM-DD"}
+```
+
+**To append:** Read the file -> add the new entry to the array -> Write it back -> call `graph_register_edit` on `.dual-graph/context-store.json`.
+
+**Rules:**
+- Only log things worth remembering across sessions (not every minor detail)
+- `content` must be under 15 words
+- `files` lists the files this decision/task relates to (can be empty)
+- Log immediately when the item arises  - not at session end
+
+## Session End
+
+When the user signals they are done (e.g. "bye", "done", "wrap up", "end session"), proactively update `CONTEXT.md` in the project root with:
+- **Current Task**: one sentence on what was being worked on
+- **Key Decisions**: bullet list, max 3 items
+- **Next Steps**: bullet list, max 3 items
+
+Keep `CONTEXT.md` under 20 lines total. Do NOT summarize the full conversation  - only what's needed to resume next session.
