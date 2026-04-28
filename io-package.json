@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.5.27",
+    "version": "0.5.28",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.5.28": {
+        "en": "Fix(proxy): rewrite src= in script/style opening tags while leaving inline content untouched — v0.5.26 accidentally skipped script src attributes causing 404 for JS bundles",
+        "de": "Fix(Proxy): src= in script/style-Öffnungs-Tags umschreiben, Inline-Inhalt unberührt lassen — v0.5.26 hat versehentlich script-src-Attribute übersprungen was 404 für JS-Bundles verursachte",
+        "ru": "Исправление(прокси): перезапись src= в открывающих тегах script/style при сохранении inline-содержимого",
+        "pt": "Correção(proxy): reescrever src= em tags de abertura script/style mantendo conteúdo inline intacto",
+        "nl": "Fix(proxy): src= herschrijven in openingstags script/style terwijl inline-inhoud ongewijzigd blijft",
+        "fr": "Correction(proxy): réécrire src= dans les balises ouvrantes script/style en laissant le contenu inline intact",
+        "it": "Fix(proxy): riscrivere src= nei tag di apertura script/style lasciando il contenuto inline invariato",
+        "es": "Corrección(proxy): reescribir src= en etiquetas de apertura script/style manteniendo el contenido inline intacto",
+        "pl": "Poprawka(proxy): przepisywanie src= w otwierających tagach script/style z zachowaniem treści inline",
+        "uk": "Виправлення(проксі): перезапис src= у відкриваючих тегах script/style зі збереженням inline-вмісту",
+        "zh-cn": "修复(代理)：重写script/style开标签中的src=同时保留内联内容不变——v0.5.26意外跳过了script src属性导致JS包404"
+      },
       "0.5.27": {
         "en": "Fix(proxy): restore missing targetOrigin variable dropped during v0.5.26 refactoring — caused 502 on all proxied pages",
         "de": "Fix(Proxy): fehlende targetOrigin-Variable wiederhergestellt, die beim v0.5.26-Refactoring verloren ging — verursachte 502 auf allen Proxy-Seiten",
