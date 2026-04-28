@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.5.30",
+    "version": "0.5.31",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,19 @@
       }
     ],
     "news": {
+      "0.5.31": {
+        "en": "Fix(proxy): MutationObserver rewrites dynamically set src= attributes — Angular [src] bindings (thumbnails, images) now route through the proxy",
+        "de": "Fix(Proxy): MutationObserver schreibt dynamisch gesetzte src=-Attribute um — Angular [src]-Bindings (Thumbnails, Bilder) werden jetzt durch den Proxy geleitet",
+        "ru": "Исправление(прокси): MutationObserver перезаписывает динамически установленные атрибуты src= — привязки Angular [src] теперь проходят через прокси",
+        "pt": "Correção(proxy): MutationObserver reescreve atributos src= definidos dinamicamente — bindings Angular [src] agora roteiam pelo proxy",
+        "nl": "Fix(proxy): MutationObserver herschrijft dynamisch ingestelde src=-attributen — Angular [src]-bindingen worden nu via de proxy gerouteerd",
+        "fr": "Correction(proxy): MutationObserver réécrit les attributs src= définis dynamiquement — les liaisons Angular [src] passent maintenant par le proxy",
+        "it": "Fix(proxy): MutationObserver riscrive attributi src= impostati dinamicamente — i binding Angular [src] ora passano attraverso il proxy",
+        "es": "Corrección(proxy): MutationObserver reescribe atributos src= establecidos dinámicamente — los bindings Angular [src] ahora se enrutan por el proxy",
+        "pl": "Poprawka(proxy): MutationObserver przepisuje dynamicznie ustawiane atrybuty src= — wiązania Angular [src] teraz są kierowane przez proxy",
+        "uk": "Виправлення(проксі): MutationObserver перезаписує динамічно встановлені атрибути src= — прив'язки Angular [src] тепер маршрутизуються через проксі",
+        "zh-cn": "修复(代理)：MutationObserver重写动态设置的src=属性——Angular [src]绑定(缩略图、图片)现在通过代理路由"
+      },
       "0.5.30": {
         "en": "Fix(proxy): click interceptor uses bubble phase + checks defaultPrevented — Angular RouterLink now handles internal SPA navigation without full-page reload flicker",
         "de": "Fix(Proxy): Click-Interceptor nutzt Bubble-Phase + prüft defaultPrevented — Angular RouterLink behandelt interne SPA-Navigation jetzt ohne Flackern durch Full-Page-Reload",
