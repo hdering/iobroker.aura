@@ -21,6 +21,49 @@
       "md": 6,
       "lg": 4,
       "xl": 4
+    },
+    "_proxyHeader": {
+      "type": "header",
+      "text": {
+        "en": "Proxy / iframe integration",
+        "de": "Proxy / iFrame-Integration"
+      },
+      "size": 2,
+      "xs": 12,
+      "sm": 12,
+      "md": 12,
+      "lg": 12,
+      "xl": 12
+    },
+    "webInstance": {
+      "type": "instance",
+      "adapter": "web",
+      "label": {
+        "en": "Web instance for proxy",
+        "de": "Web-Instanz für Proxy"
+      },
+      "help": {
+        "en": "The proxy extension (iframe X-Frame-Options bypass) is loaded into this web instance. Recommended: create a dedicated web instance (e.g. web.1) so that stopping aura does not restart web.0 (VIS, Material, etc.). Leave empty to disable the proxy.",
+        "de": "Die Proxy-Extension (iFrame X-Frame-Options Bypass) wird in diese Web-Instanz geladen. Empfohlen: dedizierte Web-Instanz anlegen (z.B. web.1), damit das Stoppen von aura nicht web.0 (VIS, Material etc.) neustartet. Leer lassen um den Proxy zu deaktivieren."
+      },
+      "allowNone": true,
+      "xs": 12,
+      "sm": 12,
+      "md": 6,
+      "lg": 4,
+      "xl": 4
+    },
+    "_proxyHelp": {
+      "type": "staticText",
+      "text": {
+        "en": "How to set up a dedicated web instance: (1) Admin → Adapters → web → '+' → new instance web.1. (2) Set port to e.g. 8083. (3) Select web.1 here and save.",
+        "de": "Dedizierte Web-Instanz einrichten: (1) Admin → Adapter → web → '+' → neue Instanz web.1. (2) Port auf z.B. 8083 setzen. (3) web.1 hier auswählen und speichern."
+      },
+      "xs": 12,
+      "sm": 12,
+      "md": 12,
+      "lg": 8,
+      "xl": 8
     }
   }
 }

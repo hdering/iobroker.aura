@@ -371,10 +371,20 @@ class Aura extends utils.Adapter {
     // Only writes when the value actually changed to avoid restart loops.
     {
       const base = this.config.customUrl ? this.config.customUrl.replace(/\/+$/, '') : null;
-      const frontendLink = base ? `${base}/aura/` : '%protocol%://%ip%:8082/aura/';
-      const backendLink  = base ? `${base}/aura/#/admin` : '%protocol%://%ip%:8082/aura/#/admin';
       const langs = ['en','de','ru','pt','nl','fr','it','es','pl','uk','zh-cn'];
       const makeName = (v) => Object.fromEntries(langs.map(l => [l, v]));
+
+      let port = 8082;
+      const webInstanceId = this.config.webInstance;
+      if (webInstanceId) {
+        try {
+          const webObj = await this.getForeignObjectAsync(webInstanceId);
+          port = webObj?.native?.port || 8082;
+        } catch { /* keep default */ }
+      }
+
+      const frontendLink = base ? `${base}/aura/` : `%protocol%://%ip%:${port}/aura/`;
+      const backendLink  = base ? `${base}/aura/#/admin` : `%protocol%://%ip%:${port}/aura/#/admin`;
       const wantLinks = {
         frontend: { link: frontendLink, name: makeName('Aura Frontend') },
         backend:  { link: backendLink,  name: makeName('Aura Backend')  },
@@ -388,12 +398,14 @@ class Aura extends utils.Adapter {
               curLinks?.backend?.link  !== wantLinks.backend.link) {
             obj.common.localLinks = wantLinks;
             changed = true;
-            this.log.info(`localLinks updated${base ? ` to custom URL: ${base}` : ' to defaults'}`);
+            this.log.info(`localLinks updated${base ? ` to custom URL: ${base}` : ` to port ${port}`}`);
           }
-          if (!obj.native?.webInstance) {
-            obj.native = { ...(obj.native || {}), webInstance: '*' };
-            changed = true;
-            this.log.info('webInstance migrated to "*" — restart web adapter to activate proxy extension');
+          if (obj.native?.webInstance === '*') {
+            this.log.warn(
+              'aura: webInstance is set to "*" — proxy is loaded into ALL web instances. ' +
+              'Stopping aura will restart every web instance (including VIS, Material, etc.). ' +
+              'Recommended: configure a dedicated web instance (e.g. web.1) in the aura admin UI.'
+            );
           }
           if (changed) {
             await this.setForeignObjectAsync(`system.adapter.${this.namespace}`, obj);

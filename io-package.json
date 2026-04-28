@@ -474,7 +474,7 @@
   },
   "native": {
     "customUrl": "",
-    "webInstance": "*"
+    "webInstance": ""
   },
   "objects": [],
   "instanceObjects": [

@@ -60,6 +60,15 @@ Open ioBroker Admin → Instances → **web.0** → Settings and set:
 > Aura requires socket.io on the **same port** as the web adapter (integrated mode) so that both
 > plain HTTP access and HTTPS via reverse proxy work with a single connection endpoint.
 
+### Step 3b – (Optional) Dedicated web instance for proxy
+
+Aura loads a proxy extension into a web adapter instance to enable the **iframe X-Frame-Options bypass** feature. By default no web instance is configured (proxy disabled).
+
+> **Tip:** If you configure `web.0` as the proxy target, stopping or restarting aura will also restart `web.0` — taking down VIS, Material UI etc. To avoid this, create a dedicated instance:
+>
+> 1. Admin → **Adapters** → **web** → **+** → create `web.1`, set port to e.g. `8083`.
+> 2. In **aura** admin → **"Web instance for proxy"** → select `system.adapter.web.1` → save.
+
 ### Step 4 – Open dashboard
 
 The dashboard is available at:
