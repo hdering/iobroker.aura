@@ -311,7 +311,7 @@ const MIME_TYPES = {
 
 const WWW_DIR = path.join(__dirname, 'www');
 
-function serveStatic(pathname, res, socketPort, host, isSecure, socketUrlOverride) {
+function serveStatic(pathname, res, host, isSecure, socketUrlOverride) {
   const rel = pathname === '/' ? 'index.html' : pathname.slice(1);
   const abs = path.join(WWW_DIR, rel);
   if (!abs.startsWith(WWW_DIR)) { res.writeHead(403); res.end(); return; }
@@ -321,9 +321,8 @@ function serveStatic(pathname, res, socketPort, host, isSecure, socketUrlOverrid
     if (socketUrlOverride) {
       socketUrl = socketUrlOverride;
     } else {
-      const ip = (host || '').split(':')[0] || 'localhost';
       const proto = isSecure ? 'https' : 'http';
-      socketUrl = `${proto}://${ip}:${socketPort}`;
+      socketUrl = `${proto}://${host || 'localhost'}`;
     }
     const injection = `<script>window.__AURA_SOCKET_URL__=${JSON.stringify(socketUrl)}</script>`;
     const html = data.toString('utf8').replace('</head>', `${injection}</head>`);
@@ -555,8 +554,26 @@ class Aura extends utils.Adapter {
         return;
       }
 
+      if (pathname.startsWith('/socket.io/') || pathname === '/socket.io') {
+        const proxyReq = http.request({
+          hostname: 'localhost',
+          port: socketPort,
+          path: req.url,
+          method: req.method,
+          headers: { ...req.headers, host: `localhost:${socketPort}` },
+          timeout: 10000,
+        }, (proxyRes) => {
+          res.writeHead(proxyRes.statusCode || 200, proxyRes.headers);
+          proxyRes.pipe(res, { end: true });
+        });
+        proxyReq.on('timeout', () => { proxyReq.destroy(); if (!res.headersSent) { res.writeHead(504); res.end('Socket proxy timeout'); } });
+        proxyReq.on('error',   e  => { if (!res.headersSent) { res.writeHead(502); res.end(`Socket proxy error: ${e.message}`); } });
+        req.pipe(proxyReq, { end: true });
+        return;
+      }
+
       const isSecure = req.socket.encrypted === true || req.headers['x-forwarded-proto'] === 'https';
-      serveStatic(pathname, res, socketPort, req.headers.host, isSecure, this.config.socketUrl || '');
+      serveStatic(pathname, res, req.headers.host, isSecure, this.config.socketUrl || '');
     };
 
     let server;
@@ -609,6 +626,10 @@ class Aura extends utils.Adapter {
     server.on('upgrade', (req, socket, _head) => {
       let parsedUrl;
       try { parsedUrl = new URL(req.url, 'http://localhost'); } catch { return; }
+      if (parsedUrl.pathname.startsWith('/socket.io/')) {
+        proxyWebSocket(req, socket, `ws://localhost:${socketPort}${req.url}`, this.log);
+        return;
+      }
       if (parsedUrl.pathname !== '/proxyws') return;
       const targetWsUrl = parsedUrl.searchParams.get('url');
       if (!targetWsUrl) { socket.destroy(); return; }
