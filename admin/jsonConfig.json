@@ -46,7 +46,6 @@
         "en": "Required: aura serves its frontend through this web instance. Recommended: create a dedicated web instance (e.g. web.1) so that stopping aura does not restart web.0 (VIS, Material, etc.).",
         "de": "Erforderlich: aura liefert sein Frontend über diese Web-Instanz aus. Empfohlen: dedizierte Web-Instanz anlegen (z.B. web.1), damit das Stoppen von aura nicht web.0 (VIS, Material etc.) neustartet."
       },
-      "required": true,
       "xs": 12,
       "sm": 12,
       "md": 6,
