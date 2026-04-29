@@ -400,7 +400,25 @@ class Aura extends utils.Adapter {
             changed = true;
             this.log.info(`localLinks updated${base ? ` to custom URL: ${base}` : ` to port ${port}`}`);
           }
-          if (obj.native?.webInstance === '*') {
+          if (!obj.native?.webInstance) {
+            // Auto-migrate: no web instance configured → pick one so the extension loads
+            let autoInstance = '*';
+            try {
+              const view = await this.getObjectViewAsync('system', 'instance', {
+                startkey: 'system.adapter.web.',
+                endkey:   'system.adapter.web.香',
+              });
+              const ids = (view?.rows || []).map(r => r.id.replace('system.adapter.', ''));
+              if (ids.length === 1) {
+                autoInstance = ids[0];
+                this.log.info(`aura: webInstance not configured — auto-selected "${autoInstance}". Change it in the aura admin UI if needed.`);
+              } else {
+                this.log.warn(`aura: webInstance not configured — ${ids.length} web instances found, defaulting to "*". Please select a dedicated web instance in the aura admin UI.`);
+              }
+            } catch { /* keep '*' */ }
+            obj.native.webInstance = autoInstance;
+            changed = true;
+          } else if (obj.native?.webInstance === '*') {
             this.log.warn(
               'aura: webInstance is set to "*" — proxy is loaded into ALL web instances. ' +
               'Stopping aura will restart every web instance (including VIS, Material, etc.). ' +
