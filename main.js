@@ -555,28 +555,35 @@ class Aura extends utils.Adapter {
     };
 
     let server;
+    let httpsActive = false;
     if (useHttps) {
       try {
+        if (!this.config.certPublic || !this.config.certPrivate) {
+          throw new Error('certPublic and certPrivate must be selected in adapter config');
+        }
         let certificates;
         if (typeof this.getCertificatesAsync === 'function') {
           const result = await this.getCertificatesAsync(
-            this.config.certPublic  || '',
-            this.config.certPrivate || '',
+            this.config.certPublic,
+            this.config.certPrivate,
             this.config.certChained || '',
           );
-          certificates = result?.certificates || result;
+          certificates = result?.certificates ?? result;
         } else {
           certificates = await new Promise((resolve, reject) => {
             this.getCertificates(
-              this.config.certPublic  || '',
-              this.config.certPrivate || '',
+              this.config.certPublic,
+              this.config.certPrivate,
               this.config.certChained || '',
               (err, certs) => (err ? reject(err) : resolve(certs)),
             );
           });
         }
-        if (!certificates?.key || !certificates?.cert) throw new Error('No usable certificates returned');
+        if (!certificates?.key || !certificates?.cert) {
+          throw new Error('certificates loaded but key/cert are empty — check system.certificates');
+        }
         server = https.createServer(certificates, handler);
+        httpsActive = true;
       } catch (e) {
         this.log.error(`aura: HTTPS startup failed (${e.message}) — falling back to HTTP`);
         server = http.createServer(handler);
@@ -596,7 +603,7 @@ class Aura extends utils.Adapter {
 
     server.on('error', e => this.log.error(`aura: server error: ${e.message}`));
 
-    server.listen(port, () => this.log.info(`aura: ${useHttps ? 'HTTPS' : 'HTTP'} server listening on port ${port}`));
+    server.listen(port, () => this.log.info(`aura: ${httpsActive ? 'HTTPS' : 'HTTP'} server listening on port ${port}`));
     this._httpServer = server;
   }
 
