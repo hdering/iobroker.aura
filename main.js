@@ -555,13 +555,16 @@ class Aura extends utils.Adapter {
       }
 
       if (pathname.startsWith('/socket.io/') || pathname === '/socket.io') {
-        const proxyReq = http.request({
+        const socketSecure = !!this.config.socketSecure;
+        const socketLib    = socketSecure ? https : http;
+        const proxyReq = socketLib.request({
           hostname: 'localhost',
           port: socketPort,
           path: req.url,
           method: req.method,
           headers: { ...req.headers, host: `localhost:${socketPort}` },
           timeout: 10000,
+          rejectUnauthorized: false,
         }, (proxyRes) => {
           res.writeHead(proxyRes.statusCode || 200, proxyRes.headers);
           proxyRes.pipe(res, { end: true });
@@ -627,7 +630,8 @@ class Aura extends utils.Adapter {
       let parsedUrl;
       try { parsedUrl = new URL(req.url, 'http://localhost'); } catch { return; }
       if (parsedUrl.pathname.startsWith('/socket.io/')) {
-        proxyWebSocket(req, socket, `ws://localhost:${socketPort}${req.url}`, this.log);
+        const wsScheme = this.config.socketSecure ? 'wss' : 'ws';
+        proxyWebSocket(req, socket, `${wsScheme}://localhost:${socketPort}${req.url}`, this.log);
         return;
       }
       if (parsedUrl.pathname !== '/proxyws') return;
