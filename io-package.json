@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.5.48",
+    "version": "0.5.49",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -54,7 +54,6 @@
     "tier": 3,
     "connectionType": "local",
     "dataSource": "push",
-    "webExtension": "lib/webExtension.js",
     "noIntro": true,
     "singleton": true,
     "platform": "Javascript/Node.js",
@@ -63,7 +62,7 @@
     },
     "localLinks": {
       "frontend": {
-        "link": "%protocol%://%ip%:8082/aura/",
+        "link": "%protocol%://%ip%:8095/",
         "name": {
           "en": "Aura Frontend",
           "de": "Aura Frontend",
@@ -79,7 +78,7 @@
         }
       },
       "backend": {
-        "link": "%protocol%://%ip%:8082/aura/#/admin",
+        "link": "%protocol%://%ip%:8095/#/admin",
         "name": {
           "en": "Aura Backend",
           "de": "Aura Backend",
@@ -106,6 +105,10 @@
       }
     ],
     "news": {
+      "0.5.49": {
+        "en": "Feat: replace webExtension with built-in HTTP server — no more web adapter restarts when aura stops; configurable port (default 8095)",
+        "de": "Neu: webExtension durch eingebauten HTTP-Server ersetzt — kein Web-Adapter-Neustart mehr beim Stoppen von aura; konfigurierbarer Port (Standard 8095)"
+      },
       "0.5.48": {
         "en": "Fix(config): remove invalid jsonConfig schema properties (allowNone, required) from web instance field",
         "de": "Fix(config): ungültige jsonConfig-Schema-Properties (allowNone, required) aus dem Web-Instanz-Feld entfernt"
@@ -486,7 +489,7 @@
   },
   "native": {
     "customUrl": "",
-    "webInstance": ""
+    "port": 8095
   },
   "objects": [],
   "instanceObjects": [

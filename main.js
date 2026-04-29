@@ -1,8 +1,12 @@
 'use strict';
 
 const utils = require('@iobroker/adapter-core');
-const http = require('node:http');
+const http  = require('node:http');
 const https = require('node:https');
+const fs    = require('node:fs');
+const path  = require('node:path');
+
+// ── Calendar fetch helper ────────────────────────────────────────────────────
 
 const FETCH_TIMEOUT_MS = 15000;
 
@@ -41,15 +45,302 @@ function fetchUrl(url, _depth = 0) {
   });
 }
 
+// ── Proxy helpers ────────────────────────────────────────────────────────────
+
+const STRIP_HEADERS = new Set([
+  'x-frame-options',
+  'content-security-policy',
+  'x-content-type-options',
+  'x-xss-protection',
+  'cross-origin-resource-policy',
+  'cross-origin-embedder-policy',
+  'cross-origin-opener-policy',
+]);
+
+const PROXY_TIMEOUT_MS = 15_000;
+
+function rewriteHtml(html, baseUrl) {
+  function toProxy(url) {
+    if (!url) return url;
+    const trimmed = url.trim();
+    if (/^(data:|javascript:|blob:|mailto:|tel:|#)/.test(trimmed)) return url;
+    try {
+      const abs = new URL(trimmed, baseUrl).toString();
+      return '/proxy?url=' + encodeURIComponent(abs);
+    } catch { return url; }
+  }
+
+  const SKIP_RE = /(<(?:script|style)\b[^>]*>)([\s\S]*?)(<\/(?:script|style)>)/gi;
+
+  function rewriteSegment(seg) {
+    let out = seg.replace(/<base\b[^>]*>/gi, '');
+    out = out.replace(
+      /\b(src|href|action)(\s*=\s*)(["'])([^"']*)\3/gi,
+      (_, attr, eq, q, url) => `${attr}${eq}${q}${toProxy(url)}${q}`,
+    );
+    out = out.replace(/<form\b([^>]*)>/gi, (match, attrs) => {
+      if (/\baction\s*=/i.test(attrs)) return match;
+      return `<form${attrs} action="${toProxy(baseUrl)}">`;
+    });
+    out = out.replace(
+      /\bsrcset(\s*=\s*)(["'])([^"']*)\2/gi,
+      (_, eq, q, val) => {
+        const rw = val.replace(/([^,\s]+)(\s*(?:[^,]*))/g, (m, url, rest) => toProxy(url) + rest);
+        return `srcset${eq}${q}${rw}${q}`;
+      },
+    );
+    return out;
+  }
+
+  const parts = [];
+  let last = 0;
+  let m;
+  SKIP_RE.lastIndex = 0;
+  while ((m = SKIP_RE.exec(html)) !== null) {
+    parts.push(rewriteSegment(html.slice(last, m.index)));
+    parts.push(rewriteSegment(m[1]) + m[2] + m[3]);
+    last = m.index + m[0].length;
+  }
+  parts.push(rewriteSegment(html.slice(last)));
+  let out = parts.join('');
+
+  const targetOrigin = new URL(baseUrl).origin;
+  const tgtNoProto = targetOrigin.replace(/^https?:/, '');
+  const wsProto    = targetOrigin.startsWith('https:') ? 'wss:' : 'ws:';
+  const wsSnippet  = `<script>(function(){` +
+    `var tgt=${JSON.stringify(targetOrigin)},tgtNP=${JSON.stringify(tgtNoProto)},wsp=${JSON.stringify(wsProto)};` +
+    `history.replaceState(history.state,'','/');` +
+    `function rw(u){` +
+      `try{` +
+        `var s=String(u);` +
+        `if(s.startsWith('/proxy'))return u;` +
+        `if(s.charAt(0)==='/'&&s.charAt(1)!=='/'){` +
+          `return '/proxy?url='+encodeURIComponent(tgt+s);` +
+        `}` +
+        `var a=new URL(s,location.href);` +
+        `if((a.origin===location.origin&&!a.pathname.startsWith('/proxy'))||a.origin===tgt){` +
+          `return '/proxy?url='+encodeURIComponent(tgt+a.pathname+a.search+a.hash);` +
+        `}` +
+      `}catch(e){}` +
+      `return u;` +
+    `}` +
+    `var _W=window.WebSocket;` +
+    `window.WebSocket=function(u,p){` +
+      `try{` +
+        `var a=new URL(u.replace(/^wss?:/,'https:'),location.href);` +
+        `if(a.pathname==='/proxyws')return new _W(u,p);` +
+        `if(a.origin===location.origin||a.origin===tgt){` +
+          `u='/proxyws?url='+encodeURIComponent(wsp+tgtNP+a.pathname+(a.search||''));` +
+        `}` +
+      `}catch(e){}` +
+      `return new _W(u,p);` +
+    `};` +
+    `Object.assign(window.WebSocket,_W);` +
+    `var _xo=XMLHttpRequest.prototype.open;` +
+    `XMLHttpRequest.prototype.open=function(){` +
+      `if(arguments[1])arguments[1]=rw(String(arguments[1]));` +
+      `return _xo.apply(this,arguments);` +
+    `};` +
+    `var _f=window.fetch;` +
+    `if(_f)window.fetch=function(r,o){` +
+      `if(typeof r==='string')r=rw(r);` +
+      `return _f.call(window,r,o);` +
+    `};` +
+    `try{` +
+      `var _lp=Object.getPrototypeOf(location),_hd=Object.getOwnPropertyDescriptor(_lp,'href');` +
+      `if(_hd&&_hd.set)Object.defineProperty(_lp,'href',{get:_hd.get,set:function(u){_hd.set.call(this,rw(String(u)));},configurable:true});` +
+    `}catch(e){}` +
+    `['assign','replace'].forEach(function(m){` +
+      `var o=location[m].bind(location);` +
+      `try{location[m]=function(u){o(rw(u));};}catch(e){}` +
+    `});` +
+    `document.addEventListener('click',function(e){` +
+      `if(e.defaultPrevented)return;` +
+      `var el=e.target;` +
+      `while(el&&el.tagName!=='A')el=el.parentElement;` +
+      `if(!el)return;` +
+      `var h=el.getAttribute('href');` +
+      `if(!h)return;` +
+      `var rh=rw(h);` +
+      `if(rh!==h){e.preventDefault();location.href=rh;}` +
+    `},false);` +
+    `document.addEventListener('submit',function(e){` +
+      `var form=e.target;` +
+      `if(!form||form.tagName!=='FORM')return;` +
+      `var act=form.getAttribute('action')||'';` +
+      `if(act.indexOf('/proxy')===0)return;` +
+      `var abs=form.action;` +
+      `var rh=rw(abs);` +
+      `if(rh!==abs){e.preventDefault();form.setAttribute('action',rh);form.submit();}` +
+    `},true);` +
+    `try{` +
+      `function rwAttr(el,a){var v=el.getAttribute&&el.getAttribute(a);if(v){var r=rw(v);if(r!==v)el.setAttribute(a,r);}}` +
+      `function rwTree(n){` +
+        `if(n.nodeType!==1)return;` +
+        `rwAttr(n,'src');` +
+        `try{n.querySelectorAll('[src]').forEach(function(c){rwAttr(c,'src');});}catch(e){}` +
+      `}` +
+      `var _mo=new MutationObserver(function(muts){` +
+        `muts.forEach(function(m){` +
+          `if(m.type==='attributes'){rwAttr(m.target,m.attributeName);}` +
+          `else{m.addedNodes.forEach(rwTree);}` +
+        `});` +
+      `});` +
+      `_mo.observe(document,{attributes:true,attributeFilter:['src'],childList:true,subtree:true});` +
+    `}catch(e){}` +
+    `})();</script>`;
+
+  if (/<\/head>/i.test(out)) {
+    out = out.replace(/<\/head>/i, `${wsSnippet}</head>`);
+  } else if (/<head>/i.test(out)) {
+    out = out.replace(/<head>/i, `<head>${wsSnippet}`);
+  } else {
+    out = wsSnippet + out;
+  }
+  return out;
+}
+
+function rewriteCss(css, baseUrl) {
+  function toProxy(url) {
+    const trimmed = url.replace(/^['"]|['"]$/g, '').trim();
+    if (!trimmed || /^(data:|#)/.test(trimmed)) return url;
+    try {
+      return `'${'/proxy?url=' + encodeURIComponent(new URL(trimmed, baseUrl).toString())}'`;
+    } catch { return url; }
+  }
+  return css.replace(/url\(([^)]*)\)/gi, (_, inner) => `url(${toProxy(inner)})`);
+}
+
+function bufferResponse(proxyRes) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    proxyRes.on('data', c => chunks.push(c));
+    proxyRes.on('end', () => resolve(Buffer.concat(chunks)));
+    proxyRes.on('error', reject);
+  });
+}
+
+function buildFwdHeaders(req) {
+  const h = {
+    'Accept':          req.headers['accept']          || 'text/html,*/*',
+    'Accept-Language': req.headers['accept-language'] || 'en',
+    'User-Agent':      'Mozilla/5.0 (ioBroker-Aura)',
+  };
+  for (const k of ['content-type', 'content-length', 'cookie', 'x-csrftoken', 'x-requested-with']) {
+    if (req.headers[k]) h[k.split('-').map(p => p[0].toUpperCase() + p.slice(1)).join('-')] = req.headers[k];
+  }
+  return h;
+}
+
+function buildHeaders(incoming) {
+  const out = {};
+  for (const [key, val] of Object.entries(incoming)) {
+    if (!STRIP_HEADERS.has(key.toLowerCase())) out[key] = val;
+  }
+  return out;
+}
+
+function proxyWebSocket(req, socket, targetWsUrl, log) {
+  let targetUrl;
+  try {
+    targetUrl = new URL(targetWsUrl);
+    if (!['ws:', 'wss:'].includes(targetUrl.protocol)) throw new Error('Only ws/wss');
+  } catch (e) {
+    socket.write('HTTP/1.1 400 Bad Request\r\n\r\n');
+    socket.destroy();
+    return;
+  }
+
+  const isSecure = targetUrl.protocol === 'wss:';
+  const lib = isSecure ? https : http;
+  const opts = {
+    hostname: targetUrl.hostname,
+    port:     targetUrl.port || (isSecure ? 443 : 80),
+    path:     targetUrl.pathname + (targetUrl.search || ''),
+    method:   'GET',
+    headers:  {
+      Connection:              'Upgrade',
+      Upgrade:                 'websocket',
+      Host:                    targetUrl.host,
+      'Sec-WebSocket-Version': req.headers['sec-websocket-version'] || '13',
+      'Sec-WebSocket-Key':     req.headers['sec-websocket-key'],
+    },
+    rejectUnauthorized: false,
+  };
+  if (req.headers['sec-websocket-protocol']) opts.headers['Sec-WebSocket-Protocol'] = req.headers['sec-websocket-protocol'];
+  if (req.headers['cookie']) opts.headers['Cookie'] = req.headers['cookie'];
+
+  const proxyReq = lib.request(opts);
+  proxyReq.on('upgrade', (proxyRes, proxySocket, proxyHead) => {
+    const lines = [
+      'HTTP/1.1 101 Switching Protocols',
+      'Upgrade: websocket',
+      'Connection: Upgrade',
+      `Sec-WebSocket-Accept: ${proxyRes.headers['sec-websocket-accept']}`,
+    ];
+    if (proxyRes.headers['sec-websocket-protocol']) lines.push(`Sec-WebSocket-Protocol: ${proxyRes.headers['sec-websocket-protocol']}`);
+    socket.write(lines.join('\r\n') + '\r\n\r\n');
+    if (proxyHead && proxyHead.length) proxySocket.unshift(proxyHead);
+    proxySocket.pipe(socket);
+    socket.pipe(proxySocket);
+    proxySocket.on('error', () => socket.destroy());
+    socket.on('error',      () => proxySocket.destroy());
+  });
+  proxyReq.on('error', e => {
+    log.debug(`aura: WS proxy error for ${targetWsUrl}: ${e.message}`);
+    socket.write('HTTP/1.1 502 Bad Gateway\r\n\r\n');
+    socket.destroy();
+  });
+  proxyReq.end();
+}
+
+// ── Static file serving ──────────────────────────────────────────────────────
+
+const MIME_TYPES = {
+  '.html': 'text/html; charset=utf-8',
+  '.js':   'application/javascript; charset=utf-8',
+  '.css':  'text/css; charset=utf-8',
+  '.svg':  'image/svg+xml',
+  '.png':  'image/png',
+  '.ico':  'image/x-icon',
+  '.json': 'application/json',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.ttf':  'font/ttf',
+};
+
+const WWW_DIR = path.join(__dirname, 'www');
+
+function serveStatic(pathname, res) {
+  const rel = pathname === '/' ? 'index.html' : pathname.slice(1);
+  const abs = path.join(WWW_DIR, rel);
+  if (!abs.startsWith(WWW_DIR)) { res.writeHead(403); res.end(); return; }
+
+  fs.readFile(abs, (err, data) => {
+    if (err) {
+      // SPA fallback
+      fs.readFile(path.join(WWW_DIR, 'index.html'), (err2, idx) => {
+        if (err2) { res.writeHead(404); res.end('Not found'); return; }
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(idx);
+      });
+      return;
+    }
+    const ct = MIME_TYPES[path.extname(abs).toLowerCase()] || 'application/octet-stream';
+    res.writeHead(200, { 'Content-Type': ct });
+    res.end(data);
+  });
+}
+
+// ── Adapter ──────────────────────────────────────────────────────────────────
+
 class Aura extends utils.Adapter {
   constructor(options = {}) {
-    super({
-      ...options,
-      name: 'aura',
-    });
+    super({ ...options, name: 'aura' });
     this.on('ready', this.onReady.bind(this));
     this.on('stateChange', this.onStateChange.bind(this));
     this.on('unload', this.onUnload.bind(this));
+    this._httpServer = null;
   }
 
   // State-based calendar fetch: frontend writes {id, url, ttl?} to calendar.request,
@@ -112,7 +403,6 @@ class Aura extends utils.Adapter {
       const clientId = String(state.val).trim();
       if (clientId) {
         const base = `${this.namespace}.clients.${clientId}`;
-        // Delete leaves first, then channels, then root channel
         const toDelete = [
           `${base}.info.name`,
           `${base}.info.lastSeen`,
@@ -139,7 +429,6 @@ class Aura extends utils.Adapter {
     const ttlMs = (typeof req.ttl === 'number' && req.ttl > 0 ? req.ttl : 900) * 1000;
     const now   = Date.now();
 
-    // ── Check cache ────────────────────────────────────────────────────────
     let cache = {};
     try {
       const cs = await this.getStateAsync('calendar.cache');
@@ -153,7 +442,6 @@ class Aura extends utils.Adapter {
       return;
     }
 
-    // ── Fetch ──────────────────────────────────────────────────────────────
     this.log.info(`[calendar] fetch request id=${req.id} url=${req.url}`);
     try {
       const content = await fetchUrl(req.url);
@@ -163,7 +451,6 @@ class Aura extends utils.Adapter {
       await this.setStateAsync('calendar.response', JSON.stringify({ id: req.id, content }), true);
     } catch (err) {
       this.log.error(`[calendar] fetch error (id=${req.id}): ${String(err)}`);
-      // On error, serve stale cache if available rather than failing completely
       if (hit?.content) {
         this.log.warn(`[calendar] serving stale cache for url=${req.url}`);
         await this.setStateAsync('calendar.response', JSON.stringify({ id: req.id, content: hit.content }), true);
@@ -173,51 +460,114 @@ class Aura extends utils.Adapter {
     }
   }
 
+  startHttpServer() {
+    const port = this.config.port || 8095;
+
+    const server = http.createServer((req, res) => {
+      let parsedUrl;
+      try { parsedUrl = new URL(req.url, 'http://localhost'); } catch {
+        res.writeHead(400); res.end(); return;
+      }
+      const { pathname } = parsedUrl;
+
+      if (pathname === '/proxy') {
+        const urlParam = parsedUrl.searchParams.get('url');
+        if (!urlParam) { res.writeHead(400); res.end('Missing url parameter'); return; }
+
+        let targetUrl;
+        try {
+          targetUrl = new URL(urlParam);
+          if (!['http:', 'https:'].includes(targetUrl.protocol)) throw new Error('Only http/https allowed');
+        } catch (e) {
+          res.writeHead(400); res.end(`Invalid proxy URL: ${e.message}`); return;
+        }
+
+        const lib = targetUrl.protocol === 'https:' ? https : http;
+        const fwdHeaders = buildFwdHeaders(req);
+        fwdHeaders['Referer'] = targetUrl.origin + '/';
+
+        const reqOptions = {
+          hostname: targetUrl.hostname,
+          port:     targetUrl.port || (targetUrl.protocol === 'https:' ? 443 : 80),
+          path:     targetUrl.pathname + targetUrl.search,
+          method:   req.method,
+          timeout:  PROXY_TIMEOUT_MS,
+          headers:  fwdHeaders,
+          rejectUnauthorized: false,
+        };
+
+        const proxyReq = lib.request(reqOptions, (proxyRes) => {
+          if ((proxyRes.statusCode === 301 || proxyRes.statusCode === 302) && proxyRes.headers.location) {
+            const absLocation = new URL(proxyRes.headers.location, targetUrl.toString()).toString();
+            const rh = buildHeaders(proxyRes.headers);
+            rh['location'] = `/proxy?url=${encodeURIComponent(absLocation)}`;
+            res.writeHead(proxyRes.statusCode, rh);
+            res.end();
+            return;
+          }
+
+          const ct = (proxyRes.headers['content-type'] || '').toLowerCase();
+          const isHtml = ct.includes('text/html');
+          const isCss  = ct.includes('text/css');
+
+          if (isHtml || isCss) {
+            const resHeaders = buildHeaders(proxyRes.headers);
+            delete resHeaders['content-length'];
+            bufferResponse(proxyRes).then(buf => {
+              const charset = (ct.match(/charset=([^\s;]+)/) || [])[1] || 'utf-8';
+              const enc = charset.toLowerCase() === 'utf-8' ? 'utf8' : 'latin1';
+              let text = buf.toString(enc);
+              text = isHtml ? rewriteHtml(text, targetUrl.toString()) : rewriteCss(text, targetUrl.toString());
+              res.writeHead(proxyRes.statusCode || 200, resHeaders);
+              res.end(text, enc);
+            }).catch(e => {
+              if (!res.headersSent) res.writeHead(502); res.end(`Proxy rewrite error: ${e.message}`);
+            });
+          } else {
+            res.writeHead(proxyRes.statusCode || 200, buildHeaders(proxyRes.headers));
+            proxyRes.pipe(res, { end: true });
+          }
+        });
+
+        proxyReq.on('timeout', () => { proxyReq.destroy(); if (!res.headersSent) { res.writeHead(504); res.end('Proxy timeout'); } });
+        proxyReq.on('error',   e  => { if (!res.headersSent) { res.writeHead(502); res.end(`Proxy error: ${e.message}`); } });
+        req.pipe(proxyReq, { end: true });
+        return;
+      }
+
+      serveStatic(pathname, res);
+    });
+
+    server.on('upgrade', (req, socket, _head) => {
+      let parsedUrl;
+      try { parsedUrl = new URL(req.url, 'http://localhost'); } catch { return; }
+      if (parsedUrl.pathname !== '/proxyws') return;
+      const targetWsUrl = parsedUrl.searchParams.get('url');
+      if (!targetWsUrl) { socket.destroy(); return; }
+      proxyWebSocket(req, socket, targetWsUrl, this.log);
+    });
+
+    server.on('error', e => this.log.error(`aura: HTTP server error: ${e.message}`));
+
+    server.listen(port, () => this.log.info(`aura: HTTP server listening on port ${port}`));
+    this._httpServer = server;
+  }
+
   async onReady() {
     this.log.info('aura adapter started');
 
-    // Channel objects (intermediate nodes in the object tree)
-    await this.setObjectNotExistsAsync('config', {
-      type: 'channel',
-      common: { name: 'Configuration' },
-      native: {},
-    });
-    await this.setObjectNotExistsAsync('navigate', {
-      type: 'channel',
-      common: { name: 'Navigation' },
-      native: {},
-    });
-    await this.setObjectNotExistsAsync('calendar', {
-      type: 'channel',
-      common: { name: 'Calendar fetch relay' },
-      native: {},
-    });
-    await this.setObjectNotExistsAsync('admin', {
-      type: 'channel',
-      common: { name: 'Admin access' },
-      native: {},
-    });
-    await this.setObjectNotExistsAsync('clients', {
-      type: 'channel',
-      common: { name: 'Connected clients' },
-      native: {},
-    });
+    await this.setObjectNotExistsAsync('config', { type: 'channel', common: { name: 'Configuration' }, native: {} });
+    await this.setObjectNotExistsAsync('navigate', { type: 'channel', common: { name: 'Navigation' }, native: {} });
+    await this.setObjectNotExistsAsync('calendar', { type: 'channel', common: { name: 'Calendar fetch relay' }, native: {} });
+    await this.setObjectNotExistsAsync('admin', { type: 'channel', common: { name: 'Admin access' }, native: {} });
+    await this.setObjectNotExistsAsync('clients', { type: 'channel', common: { name: 'Connected clients' }, native: {} });
 
-    // Dashboard-Konfiguration als Datenpunkt anlegen
     await this.setObjectNotExistsAsync('config.dashboard', {
       type: 'state',
-      common: {
-        name: 'Dashboard configuration',
-        type: 'string',
-        role: 'json',
-        read: true,
-        write: true,
-        def: '{"widgets":[]}',
-      },
+      common: { name: 'Dashboard configuration', type: 'string', role: 'json', read: true, write: true, def: '{"widgets":[]}' },
       native: {},
     });
 
-    // Separate config states (one per store key — avoids single-blob quota issues)
     const configStates = [
       { id: 'config.theme',           name: 'Theme configuration' },
       { id: 'config.groups',          name: 'Group configuration' },
@@ -233,158 +583,68 @@ class Aura extends utils.Adapter {
       });
     }
 
-    // Automatisches Backup – wird nach jedem Speichern geschrieben
     await this.setObjectNotExistsAsync('config.dashboard_backup', {
       type: 'state',
-      common: {
-        name: 'Dashboard configuration backup',
-        type: 'string',
-        role: 'json',
-        read: true,
-        write: false,
-        def: '',
-      },
+      common: { name: 'Dashboard configuration backup', type: 'string', role: 'json', read: true, write: false, def: '' },
       native: {},
     });
 
-    // Navigation-Datenpunkt
     await this.setObjectNotExistsAsync('navigate.url', {
       type: 'state',
-      common: {
-        name: 'Navigate to URL or tab slug',
-        type: 'string',
-        role: 'url',
-        read: true,
-        write: true,
-        def: '',
-      },
+      common: { name: 'Navigate to URL or tab slug', type: 'string', role: 'url', read: true, write: true, def: '' },
       native: {},
     });
 
-    // Calendar fetch relay states
     await this.setObjectNotExistsAsync('calendar.cache', {
       type: 'state',
-      common: {
-        name: 'Calendar fetch cache (JSON: {url: {content, fetchedAt}})',
-        type: 'string',
-        role: 'json',
-        read: true,
-        write: false,
-        def: '{}',
-      },
+      common: { name: 'Calendar fetch cache (JSON: {url: {content, fetchedAt}})', type: 'string', role: 'json', read: true, write: false, def: '{}' },
       native: {},
     });
     await this.setObjectNotExistsAsync('calendar.request', {
       type: 'state',
-      common: {
-        name: 'Calendar fetch request (JSON: {id, url})',
-        type: 'string',
-        role: 'json',
-        read: true,
-        write: true,
-        def: '',
-      },
+      common: { name: 'Calendar fetch request (JSON: {id, url})', type: 'string', role: 'json', read: true, write: true, def: '' },
       native: {},
     });
     await this.setObjectNotExistsAsync('calendar.response', {
       type: 'state',
-      common: {
-        name: 'Calendar fetch response (JSON: {id, content|error})',
-        type: 'string',
-        role: 'json',
-        read: true,
-        write: true,
-        def: '',
-      },
+      common: { name: 'Calendar fetch response (JSON: {id, content|error})', type: 'string', role: 'json', read: true, write: true, def: '' },
       native: {},
     });
     await this.setObjectNotExistsAsync('calendar.clientError', {
       type: 'state',
-      common: {
-        name: 'Calendar client error (written by frontend after all retries failed)',
-        type: 'string',
-        role: 'text',
-        read: true,
-        write: true,
-        def: '',
-      },
+      common: { name: 'Calendar client error (written by frontend after all retries failed)', type: 'string', role: 'text', read: true, write: true, def: '' },
       native: {},
     });
     await this.setObjectNotExistsAsync('admin.pinHash', {
       type: 'state',
-      common: {
-        name: 'Admin PIN hash (FNV-1a, managed by frontend)',
-        type: 'string',
-        role: 'text',
-        read: true,
-        write: true,
-        def: '',
-      },
+      common: { name: 'Admin PIN hash (FNV-1a, managed by frontend)', type: 'string', role: 'text', read: true, write: true, def: '' },
       native: {},
     });
     await this.setObjectNotExistsAsync('clients.deleteRequest', {
       type: 'state',
-      common: {
-        name: 'Client delete request (write clientId to delete that client tree)',
-        type: 'string',
-        role: 'text',
-        read: true,
-        write: true,
-        def: '',
-      },
+      common: { name: 'Client delete request (write clientId to delete that client tree)', type: 'string', role: 'text', read: true, write: true, def: '' },
       native: {},
     });
-
     await this.setObjectNotExistsAsync('clients.register', {
       type: 'state',
-      common: {
-        name: 'Client register relay (write JSON {clientId, name} to create client object tree)',
-        type: 'string',
-        role: 'json',
-        read: true,
-        write: true,
-        def: '',
-      },
+      common: { name: 'Client register relay (write JSON {clientId, name} to create client object tree)', type: 'string', role: 'json', read: true, write: true, def: '' },
       native: {},
     });
-
-    await this.setObjectNotExistsAsync('info.webExtVersion', {
-      type: 'state',
-      common: { name: 'webExtension version last loaded by iobroker.web', type: 'string', role: 'text', read: true, write: false, def: '' },
-      native: {},
-    });
-    const webExtVersionState = await this.getStateAsync('info.webExtVersion');
-    const loadedVersion = webExtVersionState?.val ? String(webExtVersionState.val) : '';
-    if (loadedVersion !== this.version) {
-      this.log.warn(`webExtension not yet loaded by iobroker.web (adapter version: ${this.version}, last loaded: ${loadedVersion || 'never'}) — please restart the web adapter instance to activate the proxy extension`);
-    }
-    await this.setStateAsync('info.webExtVersion', this.version, true);
 
     this.subscribeStates('calendar.request');
     this.subscribeStates('calendar.clientError');
     this.subscribeStates('clients.deleteRequest');
     this.subscribeStates('clients.register');
 
-    // NOTE: The block below modifies system.adapter.aura.X via setForeignObjectAsync
-    // to keep localLinks (overview tile URLs) up-to-date when a custom URL is configured.
-    // This is under review by the ioBroker core team – see developer feedback.
-    // Only writes when the value actually changed to avoid restart loops.
+    // Update localLinks to point to the aura HTTP server port
     {
       const base = this.config.customUrl ? this.config.customUrl.replace(/\/+$/, '') : null;
+      const port = this.config.port || 8095;
       const langs = ['en','de','ru','pt','nl','fr','it','es','pl','uk','zh-cn'];
       const makeName = (v) => Object.fromEntries(langs.map(l => [l, v]));
 
-      let port = 8082;
-      const webInstanceId = this.config.webInstance;
-      if (webInstanceId) {
-        try {
-          const webObj = await this.getForeignObjectAsync(webInstanceId);
-          port = webObj?.native?.port || 8082;
-        } catch { /* keep default */ }
-      }
-
-      const frontendLink = base ? `${base}/aura/` : `%protocol%://%ip%:${port}/aura/`;
-      const backendLink  = base ? `${base}/aura/#/admin` : `%protocol%://%ip%:${port}/aura/#/admin`;
+      const frontendLink = base ? `${base}/`        : `%protocol%://%ip%:${port}/`;
+      const backendLink  = base ? `${base}/#/admin`  : `%protocol%://%ip%:${port}/#/admin`;
       const wantLinks = {
         frontend: { link: frontendLink, name: makeName('Aura Frontend') },
         backend:  { link: backendLink,  name: makeName('Aura Backend')  },
@@ -392,57 +652,31 @@ class Aura extends utils.Adapter {
       try {
         const obj = await this.getForeignObjectAsync(`system.adapter.${this.namespace}`);
         if (obj) {
-          let changed = false;
           const curLinks = obj.common.localLinks || {};
           if (curLinks?.frontend?.link !== wantLinks.frontend.link ||
               curLinks?.backend?.link  !== wantLinks.backend.link) {
             obj.common.localLinks = wantLinks;
-            changed = true;
-            this.log.info(`localLinks updated${base ? ` to custom URL: ${base}` : ` to port ${port}`}`);
-          }
-          if (obj.native?.webInstance === '*') {
-            // Auto-migrate '*' → specific instance so the admin UI dropdown can represent it correctly.
-            // Without this, opening the config UI with webInstance='*' resets it to '' on save.
-            let migrated = false;
-            try {
-              const view = await this.getObjectViewAsync('system', 'instance', {
-                startkey: 'system.adapter.web.',
-                endkey:   'system.adapter.web.香',
-              });
-              const ids = (view?.rows || []).map(r => r.id.replace('system.adapter.', ''));
-              if (ids.length === 1) {
-                obj.native.webInstance = ids[0];
-                changed = true;
-                migrated = true;
-                this.log.info(`aura: auto-migrated webInstance from "*" to "${ids[0]}". The web instance will restart once to apply the change.`);
-              }
-            } catch { /* leave as '*' if lookup fails */ }
-            if (!migrated) {
-              this.log.warn(
-                'aura: webInstance is set to "*" — proxy is loaded into ALL web instances. ' +
-                'Stopping aura will restart every web instance (including VIS, Material, etc.). ' +
-                'Recommended: select a dedicated web instance in the aura admin UI.'
-              );
-            }
-          } else if (!obj.native?.webInstance) {
-            this.log.warn('aura: no web instance configured — frontend not accessible. Please select a web instance in the aura admin UI.');
-          }
-          if (changed) {
             await this.setForeignObjectAsync(`system.adapter.${this.namespace}`, obj);
+            this.log.info(`localLinks updated to port ${port}${base ? ` (custom URL: ${base})` : ''}`);
           }
         }
       } catch (e) {
-        this.log.warn(`Could not update instance object: ${e.message}`);
+        this.log.warn(`Could not update localLinks: ${e.message}`);
       }
     }
 
+    this.startHttpServer();
     this.setState('info.connection', true, true);
-    this.log.info('aura ready – serving frontend from www/');
+    this.log.info('aura ready');
   }
 
   onUnload(callback) {
     try {
-      callback();
+      if (this._httpServer) {
+        this._httpServer.close(() => callback());
+      } else {
+        callback();
+      }
     } catch {
       callback();
     }

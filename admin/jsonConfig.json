@@ -15,14 +15,14 @@
       "type": "text",
       "label": "Base URL",
       "placeholder": "https://your-domain.com",
-      "help": "Override the links shown in ioBroker overview and instances. Leave empty to use the default (http://<ip>:8082).",
+      "help": "Override the links shown in ioBroker overview and instances. Leave empty to use the default (http://<ip>:<port>).",
       "xs": 12,
       "sm": 12,
       "md": 6,
       "lg": 4,
       "xl": 4
     },
-    "_proxyHeader": {
+    "_serverHeader": {
       "type": "header",
       "text": {
         "en": "Frontend configuration",
@@ -35,34 +35,24 @@
       "lg": 12,
       "xl": 12
     },
-    "webInstance": {
-      "type": "instance",
-      "adapter": "web",
+    "port": {
+      "type": "number",
       "label": {
-        "en": "Web instance (required)",
-        "de": "Web-Instanz (erforderlich)"
+        "en": "Port",
+        "de": "Port"
       },
       "help": {
-        "en": "Required: aura serves its frontend through this web instance. Recommended: create a dedicated web instance (e.g. web.1) so that stopping aura does not restart web.0 (VIS, Material, etc.).",
-        "de": "Erforderlich: aura liefert sein Frontend über diese Web-Instanz aus. Empfohlen: dedizierte Web-Instanz anlegen (z.B. web.1), damit das Stoppen von aura nicht web.0 (VIS, Material etc.) neustartet."
+        "en": "Port for the aura HTTP server (frontend + iframe proxy). Must be free and reachable in your network. Default: 8095.",
+        "de": "Port für den aura HTTP-Server (Frontend + iFrame-Proxy). Muss frei und im Netzwerk erreichbar sein. Standard: 8095."
       },
+      "min": 1024,
+      "max": 65535,
+      "default": 8095,
       "xs": 12,
       "sm": 12,
       "md": 6,
       "lg": 4,
       "xl": 4
-    },
-    "_proxyHelp": {
-      "type": "staticText",
-      "text": {
-        "en": "How to set up a dedicated web instance: (1) Admin → Adapters → web → '+' → new instance web.1. (2) Set port to e.g. 8083. (3) Select web.1 here and save.",
-        "de": "Dedizierte Web-Instanz einrichten: (1) Admin → Adapter → web → '+' → neue Instanz web.1. (2) Port auf z.B. 8083 setzen. (3) web.1 hier auswählen und speichern."
-      },
-      "xs": 12,
-      "sm": 12,
-      "md": 12,
-      "lg": 8,
-      "xl": 8
     }
   }
 }
