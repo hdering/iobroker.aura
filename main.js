@@ -318,7 +318,10 @@ function serveStatic(pathname, res) {
 
   fs.readFile(abs, (err, data) => {
     if (err) {
-      // SPA fallback
+      // Only serve SPA fallback for extension-less paths (React Router navigation).
+      // Asset requests (.js, .css, …) that are missing are real 404s — returning
+      // index.html would cause the browser to reject them due to wrong MIME type.
+      if (path.extname(pathname)) { res.writeHead(404); res.end('Not found'); return; }
       fs.readFile(path.join(WWW_DIR, 'index.html'), (err2, idx) => {
         if (err2) { res.writeHead(404); res.end('Not found'); return; }
         res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
@@ -652,16 +655,26 @@ class Aura extends utils.Adapter {
       try {
         const obj = await this.getForeignObjectAsync(`system.adapter.${this.namespace}`);
         if (obj) {
+          let changed = false;
           const curLinks = obj.common.localLinks || {};
           if (curLinks?.frontend?.link !== wantLinks.frontend.link ||
               curLinks?.backend?.link  !== wantLinks.backend.link) {
             obj.common.localLinks = wantLinks;
-            await this.setForeignObjectAsync(`system.adapter.${this.namespace}`, obj);
+            changed = true;
             this.log.info(`localLinks updated to port ${port}${base ? ` (custom URL: ${base})` : ''}`);
+          }
+          // Migration: clear legacy webInstance so iobroker.web stops tracking aura
+          if (obj.native?.webInstance !== undefined) {
+            delete obj.native.webInstance;
+            changed = true;
+            this.log.info('aura: cleared legacy webInstance — iobroker.web will no longer restart on aura stop');
+          }
+          if (changed) {
+            await this.setForeignObjectAsync(`system.adapter.${this.namespace}`, obj);
           }
         }
       } catch (e) {
-        this.log.warn(`Could not update localLinks: ${e.message}`);
+        this.log.warn(`Could not update instance object: ${e.message}`);
       }
     }
 

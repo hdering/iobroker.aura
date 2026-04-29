@@ -25,7 +25,7 @@ function ioBrokerDevPlugin(): Plugin {
     configureServer(server) {
 
       // Server-side iframe proxy – strips X-Frame-Options so pages can be embedded
-      server.middlewares.use('/aura/proxy', (req, res) => {
+      server.middlewares.use('/proxy', (req, res) => {
         const rawUrl = new URL(req.url ?? '', 'http://localhost').searchParams.get('url');
         if (!rawUrl) { res.writeHead(400); res.end('Missing url parameter'); return; }
         try {
@@ -56,7 +56,7 @@ function ioBrokerDevPlugin(): Plugin {
               for (const [k, v] of Object.entries(proxyRes.headers)) {
                 if (!stripHeaders.has(k.toLowerCase()) && v !== undefined) rh[k] = v as string | string[];
               }
-              rh['location'] = `/aura/proxy?url=${encodeURIComponent(abs)}`;
+              rh['location'] = `/proxy?url=${encodeURIComponent(abs)}`;
               res.writeHead(proxyRes.statusCode!, rh);
               res.end();
               return;
