@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.5.47",
+    "version": "0.5.48",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -106,6 +106,10 @@
       }
     ],
     "news": {
+      "0.5.48": {
+        "en": "Fix(config): remove invalid jsonConfig schema properties (allowNone, required) from web instance field",
+        "de": "Fix(config): ungültige jsonConfig-Schema-Properties (allowNone, required) aus dem Web-Instanz-Feld entfernt"
+      },
       "0.5.47": {
         "en": "Fix: auto-migrate webInstance='*' to the specific web instance so the admin UI dropdown works correctly after upgrade",
         "de": "Fix: webInstance='*' automatisch auf die konkrete Web-Instanz migrieren, damit das Admin-Dropdown nach dem Update korrekt angezeigt wird"
