@@ -425,7 +425,7 @@ class Aura extends utils.Adapter {
               );
             }
           } else if (!obj.native?.webInstance) {
-            this.log.info('aura: no web instance configured — proxy extension disabled. Select a web instance in the aura admin UI to enable the frontend.');
+            this.log.warn('aura: no web instance configured — frontend not accessible. Please select a web instance in the aura admin UI.');
           }
           if (changed) {
             await this.setForeignObjectAsync(`system.adapter.${this.namespace}`, obj);
