@@ -107,8 +107,8 @@
     ],
     "news": {
       "0.5.47": {
-        "en": "Fix: auto-select web instance on first start when none is configured so the proxy extension loads correctly",
-        "de": "Fix: Web-Instanz beim ersten Start automatisch auswählen wenn keine konfiguriert ist, damit die Proxy-Extension korrekt geladen wird"
+        "en": "Fix: auto-migrate webInstance='*' to the specific web instance so the admin UI dropdown works correctly after upgrade",
+        "de": "Fix: webInstance='*' automatisch auf die konkrete Web-Instanz migrieren, damit das Admin-Dropdown nach dem Update korrekt angezeigt wird"
       },
       "0.5.46": {
         "en": "Feat(config): dedicated web instance selector — default is now empty (proxy disabled); select a specific web instance to avoid restarting VIS/Material on aura stop",

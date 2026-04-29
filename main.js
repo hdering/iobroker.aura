@@ -400,9 +400,10 @@ class Aura extends utils.Adapter {
             changed = true;
             this.log.info(`localLinks updated${base ? ` to custom URL: ${base}` : ` to port ${port}`}`);
           }
-          if (!obj.native?.webInstance) {
-            // Auto-migrate: no web instance configured → pick one so the extension loads
-            let autoInstance = '*';
+          if (obj.native?.webInstance === '*') {
+            // Auto-migrate '*' → specific instance so the admin UI dropdown can represent it correctly.
+            // Without this, opening the config UI with webInstance='*' resets it to '' on save.
+            let migrated = false;
             try {
               const view = await this.getObjectViewAsync('system', 'instance', {
                 startkey: 'system.adapter.web.',
@@ -410,20 +411,21 @@ class Aura extends utils.Adapter {
               });
               const ids = (view?.rows || []).map(r => r.id.replace('system.adapter.', ''));
               if (ids.length === 1) {
-                autoInstance = ids[0];
-                this.log.info(`aura: webInstance not configured — auto-selected "${autoInstance}". Change it in the aura admin UI if needed.`);
-              } else {
-                this.log.warn(`aura: webInstance not configured — ${ids.length} web instances found, defaulting to "*". Please select a dedicated web instance in the aura admin UI.`);
+                obj.native.webInstance = ids[0];
+                changed = true;
+                migrated = true;
+                this.log.info(`aura: auto-migrated webInstance from "*" to "${ids[0]}". The web instance will restart once to apply the change.`);
               }
-            } catch { /* keep '*' */ }
-            obj.native.webInstance = autoInstance;
-            changed = true;
-          } else if (obj.native?.webInstance === '*') {
-            this.log.warn(
-              'aura: webInstance is set to "*" — proxy is loaded into ALL web instances. ' +
-              'Stopping aura will restart every web instance (including VIS, Material, etc.). ' +
-              'Recommended: configure a dedicated web instance (e.g. web.1) in the aura admin UI.'
-            );
+            } catch { /* leave as '*' if lookup fails */ }
+            if (!migrated) {
+              this.log.warn(
+                'aura: webInstance is set to "*" — proxy is loaded into ALL web instances. ' +
+                'Stopping aura will restart every web instance (including VIS, Material, etc.). ' +
+                'Recommended: select a dedicated web instance in the aura admin UI.'
+              );
+            }
+          } else if (!obj.native?.webInstance) {
+            this.log.info('aura: no web instance configured — proxy extension disabled. Select a web instance in the aura admin UI to enable the frontend.');
           }
           if (changed) {
             await this.setForeignObjectAsync(`system.adapter.${this.namespace}`, obj);
