@@ -1,8 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { BarChart2, Maximize2, X } from 'lucide-react';
-import { getAuraBaseUrl } from '../../hooks/useIoBroker';
 import type { WidgetProps } from '../../types';
+
+function getIoBrokerBase(): string {
+  const injected = (window as unknown as { __AURA_SOCKET_URL__?: string }).__AURA_SOCKET_URL__;
+  if (injected) {
+    try { return new URL(injected).origin; } catch { /* ignore */ }
+  }
+  return window.location.origin;
+}
 
 export function EChartsPresetWidget({ config, editMode }: WidgetProps) {
   const opts     = config.options ?? {};
@@ -10,17 +17,14 @@ export function EChartsPresetWidget({ config, editMode }: WidgetProps) {
   const darkMode = (opts.darkMode as boolean) ?? true;
   const manualBase = (opts.baseUrl as string | undefined)?.replace(/\/$/, '');
 
-  const [autoBase, setAutoBase] = useState(window.location.origin);
+  const [autoBase] = useState(getIoBrokerBase);
   const [fullscreen, setFullscreen] = useState(false);
-
-  useEffect(() => {
-    if (!manualBase) getAuraBaseUrl().then(setAutoBase);
-  }, [manualBase]);
 
   const closeFullscreen = useCallback(() => setFullscreen(false), []);
 
   useEffect(() => {
     if (!fullscreen) return;
+
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') closeFullscreen(); };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);

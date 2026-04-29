@@ -54,6 +54,23 @@
       "lg": 4,
       "xl": 4
     },
+    "socketUrl": {
+      "type": "text",
+      "label": {
+        "en": "ioBroker socket URL (override)",
+        "de": "ioBroker Socket-URL (Override)"
+      },
+      "help": {
+        "en": "Override the socket URL injected into the frontend. Leave empty for auto-detection (http(s)://<host>:<socketPort>). Set this when using a reverse proxy — e.g. 'https://your-domain.com' if nginx proxies /socket.io/ and /echarts/ to the web adapter port.",
+        "de": "Überschreibt die in das Frontend injizierte Socket-URL. Leer lassen für automatische Erkennung (http(s)://<Host>:<socketPort>). Setzen bei Reverse-Proxy — z.B. 'https://deine-domain.de' wenn nginx /socket.io/ und /echarts/ zum Web-Adapter-Port weiterleitet."
+      },
+      "placeholder": "https://your-domain.com",
+      "xs": 12,
+      "sm": 12,
+      "md": 6,
+      "lg": 4,
+      "xl": 4
+    },
     "socketPort": {
       "type": "number",
       "label": {
