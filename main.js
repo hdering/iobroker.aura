@@ -554,7 +554,8 @@ class Aura extends utils.Adapter {
         return;
       }
 
-      if (pathname.startsWith('/socket.io/') || pathname === '/socket.io') {
+      const webAdapterPrefixes = ['/socket.io', '/echarts'];
+      if (webAdapterPrefixes.some(p => pathname === p || pathname.startsWith(p + '/'))) {
         const socketSecure = !!this.config.socketSecure;
         const socketLib    = socketSecure ? https : http;
         const proxyReq = socketLib.request({
@@ -563,14 +564,14 @@ class Aura extends utils.Adapter {
           path: req.url,
           method: req.method,
           headers: { ...req.headers, host: `localhost:${socketPort}` },
-          timeout: 10000,
+          timeout: 30000,
           rejectUnauthorized: false,
         }, (proxyRes) => {
           res.writeHead(proxyRes.statusCode || 200, proxyRes.headers);
           proxyRes.pipe(res, { end: true });
         });
-        proxyReq.on('timeout', () => { proxyReq.destroy(); if (!res.headersSent) { res.writeHead(504); res.end('Socket proxy timeout'); } });
-        proxyReq.on('error',   e  => { if (!res.headersSent) { res.writeHead(502); res.end(`Socket proxy error: ${e.message}`); } });
+        proxyReq.on('timeout', () => { proxyReq.destroy(); if (!res.headersSent) { res.writeHead(504); res.end('Proxy timeout'); } });
+        proxyReq.on('error',   e  => { if (!res.headersSent) { res.writeHead(502); res.end(`Proxy error: ${e.message}`); } });
         req.pipe(proxyReq, { end: true });
         return;
       }
