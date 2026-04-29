@@ -571,7 +571,12 @@ class Aura extends utils.Adapter {
             this.config.certChained || '',
           );
           this.log.debug(`aura: getCertificatesAsync raw result keys: ${Object.keys(rawResult || {}).join(', ')}`);
-          certificates = rawResult?.certificates ?? rawResult;
+          // Some adapter-core versions resolve with [certificates, letsEncrypt] array
+          if (Array.isArray(rawResult)) {
+            certificates = rawResult[0];
+          } else {
+            certificates = rawResult?.certificates ?? rawResult;
+          }
         } else {
           certificates = await new Promise((resolve, reject) => {
             this.getCertificates(
