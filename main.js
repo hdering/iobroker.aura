@@ -554,7 +554,7 @@ class Aura extends utils.Adapter {
         return;
       }
 
-      const webAdapterPrefixes = ['/socket.io', '/echarts'];
+      const webAdapterPrefixes = ['/socket.io', '/echarts', '/lib'];
       if (webAdapterPrefixes.some(p => pathname === p || pathname.startsWith(p + '/'))) {
         const socketSecure = !!this.config.socketSecure;
         const socketLib    = socketSecure ? https : http;
