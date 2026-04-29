@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.5.51",
+    "version": "0.5.52",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -105,6 +105,10 @@
       }
     ],
     "news": {
+      "0.5.52": {
+        "en": "Feat: optional HTTPS for built-in HTTP server — certificates picked from ioBroker system.certificates",
+        "de": "Neu: Optionales HTTPS für eingebauten HTTP-Server — Zertifikate aus ioBroker system.certificates"
+      },
       "0.5.51": {
         "en": "Fix: inject iobroker socket URL into index.html so frontend connects to correct port; add socketPort config (default 8082)",
         "de": "Fix: iobroker Socket-URL in index.html injizieren damit Frontend sich zum richtigen Port verbindet; socketPort-Konfiguration hinzugefügt (Standard 8082)"
@@ -498,7 +502,11 @@
   "native": {
     "customUrl": "",
     "port": 8095,
-    "socketPort": 8082
+    "socketPort": 8082,
+    "secure": false,
+    "certPublic": "",
+    "certPrivate": "",
+    "certChained": ""
   },
   "objects": [],
   "instanceObjects": [

@@ -311,14 +311,15 @@ const MIME_TYPES = {
 
 const WWW_DIR = path.join(__dirname, 'www');
 
-function serveStatic(pathname, res, socketPort, host) {
+function serveStatic(pathname, res, socketPort, host, isSecure) {
   const rel = pathname === '/' ? 'index.html' : pathname.slice(1);
   const abs = path.join(WWW_DIR, rel);
   if (!abs.startsWith(WWW_DIR)) { res.writeHead(403); res.end(); return; }
 
   const serveIndex = (data) => {
     const ip = (host || '').split(':')[0] || 'localhost';
-    const socketUrl = `http://${ip}:${socketPort}`;
+    const proto = isSecure ? 'https' : 'http';
+    const socketUrl = `${proto}://${ip}:${socketPort}`;
     const injection = `<script>window.__AURA_SOCKET_URL__=${JSON.stringify(socketUrl)}</script>`;
     const html = data.toString('utf8').replace('</head>', `${injection}</head>`);
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
@@ -472,11 +473,12 @@ class Aura extends utils.Adapter {
     }
   }
 
-  startHttpServer() {
+  async startHttpServer() {
     const port       = this.config.port       || 8095;
     const socketPort = this.config.socketPort || 8082;
+    const useHttps   = !!this.config.secure;
 
-    const server = http.createServer((req, res) => {
+    const handler = (req, res) => {
       let parsedUrl;
       try { parsedUrl = new URL(req.url, 'http://localhost'); } catch {
         res.writeHead(400); res.end(); return;
@@ -548,8 +550,40 @@ class Aura extends utils.Adapter {
         return;
       }
 
-      serveStatic(pathname, res, socketPort, req.headers.host);
-    });
+      const isSecure = req.socket.encrypted === true || req.headers['x-forwarded-proto'] === 'https';
+      serveStatic(pathname, res, socketPort, req.headers.host, isSecure);
+    };
+
+    let server;
+    if (useHttps) {
+      try {
+        let certificates;
+        if (typeof this.getCertificatesAsync === 'function') {
+          const result = await this.getCertificatesAsync(
+            this.config.certPublic  || '',
+            this.config.certPrivate || '',
+            this.config.certChained || '',
+          );
+          certificates = result?.certificates || result;
+        } else {
+          certificates = await new Promise((resolve, reject) => {
+            this.getCertificates(
+              this.config.certPublic  || '',
+              this.config.certPrivate || '',
+              this.config.certChained || '',
+              (err, certs) => (err ? reject(err) : resolve(certs)),
+            );
+          });
+        }
+        if (!certificates?.key || !certificates?.cert) throw new Error('No usable certificates returned');
+        server = https.createServer(certificates, handler);
+      } catch (e) {
+        this.log.error(`aura: HTTPS startup failed (${e.message}) — falling back to HTTP`);
+        server = http.createServer(handler);
+      }
+    } else {
+      server = http.createServer(handler);
+    }
 
     server.on('upgrade', (req, socket, _head) => {
       let parsedUrl;
@@ -560,9 +594,9 @@ class Aura extends utils.Adapter {
       proxyWebSocket(req, socket, targetWsUrl, this.log);
     });
 
-    server.on('error', e => this.log.error(`aura: HTTP server error: ${e.message}`));
+    server.on('error', e => this.log.error(`aura: server error: ${e.message}`));
 
-    server.listen(port, () => this.log.info(`aura: HTTP server listening on port ${port}`));
+    server.listen(port, () => this.log.info(`aura: ${useHttps ? 'HTTPS' : 'HTTP'} server listening on port ${port}`));
     this._httpServer = server;
   }
 
@@ -688,7 +722,7 @@ class Aura extends utils.Adapter {
       }
     }
 
-    this.startHttpServer();
+    await this.startHttpServer();
     this.setState('info.connection', true, true);
     this.log.info('aura ready');
   }
