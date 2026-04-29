@@ -25,8 +25,8 @@
     "_proxyHeader": {
       "type": "header",
       "text": {
-        "en": "Proxy / iframe integration",
-        "de": "Proxy / iFrame-Integration"
+        "en": "Frontend configuration",
+        "de": "Frontend-Konfiguration"
       },
       "size": 2,
       "xs": 12,
