@@ -561,14 +561,17 @@ class Aura extends utils.Adapter {
         if (!this.config.certPublic || !this.config.certPrivate) {
           throw new Error('certPublic and certPrivate must be selected in adapter config');
         }
+        this.log.debug(`aura: loading certificates — public="${this.config.certPublic}" private="${this.config.certPrivate}" chained="${this.config.certChained || ''}"`);
         let certificates;
+        let rawResult;
         if (typeof this.getCertificatesAsync === 'function') {
-          const result = await this.getCertificatesAsync(
+          rawResult = await this.getCertificatesAsync(
             this.config.certPublic,
             this.config.certPrivate,
             this.config.certChained || '',
           );
-          certificates = result?.certificates ?? result;
+          this.log.debug(`aura: getCertificatesAsync raw result keys: ${Object.keys(rawResult || {}).join(', ')}`);
+          certificates = rawResult?.certificates ?? rawResult;
         } else {
           certificates = await new Promise((resolve, reject) => {
             this.getCertificates(
@@ -579,8 +582,9 @@ class Aura extends utils.Adapter {
             );
           });
         }
+        this.log.debug(`aura: certificates object keys: ${Object.keys(certificates || {}).join(', ')} | key=${certificates?.key ? `present (${String(certificates.key).length} chars)` : 'MISSING'} cert=${certificates?.cert ? `present (${String(certificates.cert).length} chars)` : 'MISSING'}`);
         if (!certificates?.key || !certificates?.cert) {
-          throw new Error('certificates loaded but key/cert are empty — check system.certificates');
+          throw new Error(`certificates loaded but key/cert are empty (got keys: ${Object.keys(certificates || {}).join(', ') || 'none'})`);
         }
         server = https.createServer(certificates, handler);
         httpsActive = true;
