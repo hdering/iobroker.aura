@@ -50,9 +50,12 @@ export function prefetchStates(
 
 // Determine initial socket URL:
 // - Dev: Vite dev server proxies /socket.io → configured ioBroker (no CORS), use same origin
-// - Prod: read persisted ioBroker URL from localStorage (set by connectionStore)
+// - Prod: injected by aura server as window.__AURA_SOCKET_URL__, or persisted in localStorage
 function getInitialUrl(): string {
   if (import.meta.env.DEV) return window.location.origin;
+  // Injected by the aura HTTP server into index.html — points to iobroker.web socket port
+  const injected = (window as unknown as Record<string, unknown>)['__AURA_SOCKET_URL__'];
+  if (injected && typeof injected === 'string') return injected;
   try {
     const stored = localStorage.getItem('aura-connection');
     if (stored) {
@@ -61,10 +64,6 @@ function getInitialUrl(): string {
       if (storedUrl) {
         try {
           const u = new URL(storedUrl);
-          // Only use stored URL when it won't cause mixed-content errors:
-          // HTTPS page → HTTP socket.io would be blocked by the browser.
-          // Fall back to same-origin so the connection goes through the
-          // same web adapter (or reverse proxy) that served the page.
           if (window.location.protocol === 'https:' && u.protocol === 'http:') {
             return window.location.origin;
           }
@@ -75,8 +74,6 @@ function getInitialUrl(): string {
       }
     }
   } catch { /* ignore */ }
-  // Default: same origin as the page (web adapter serves socket.io on same port,
-  // works for both HTTP and HTTPS without mixed-content issues)
   return window.location.origin;
 }
 

@@ -311,10 +311,19 @@ const MIME_TYPES = {
 
 const WWW_DIR = path.join(__dirname, 'www');
 
-function serveStatic(pathname, res) {
+function serveStatic(pathname, res, socketPort, host) {
   const rel = pathname === '/' ? 'index.html' : pathname.slice(1);
   const abs = path.join(WWW_DIR, rel);
   if (!abs.startsWith(WWW_DIR)) { res.writeHead(403); res.end(); return; }
+
+  const serveIndex = (data) => {
+    const ip = (host || '').split(':')[0] || 'localhost';
+    const socketUrl = `http://${ip}:${socketPort}`;
+    const injection = `<script>window.__AURA_SOCKET_URL__=${JSON.stringify(socketUrl)}</script>`;
+    const html = data.toString('utf8').replace('</head>', `${injection}</head>`);
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(html, 'utf8');
+  };
 
   fs.readFile(abs, (err, data) => {
     if (err) {
@@ -324,11 +333,11 @@ function serveStatic(pathname, res) {
       if (path.extname(pathname)) { res.writeHead(404); res.end('Not found'); return; }
       fs.readFile(path.join(WWW_DIR, 'index.html'), (err2, idx) => {
         if (err2) { res.writeHead(404); res.end('Not found'); return; }
-        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-        res.end(idx);
+        serveIndex(idx);
       });
       return;
     }
+    if (rel === 'index.html') { serveIndex(data); return; }
     const ct = MIME_TYPES[path.extname(abs).toLowerCase()] || 'application/octet-stream';
     res.writeHead(200, { 'Content-Type': ct });
     res.end(data);
@@ -464,7 +473,8 @@ class Aura extends utils.Adapter {
   }
 
   startHttpServer() {
-    const port = this.config.port || 8095;
+    const port       = this.config.port       || 8095;
+    const socketPort = this.config.socketPort || 8082;
 
     const server = http.createServer((req, res) => {
       let parsedUrl;
@@ -538,7 +548,7 @@ class Aura extends utils.Adapter {
         return;
       }
 
-      serveStatic(pathname, res);
+      serveStatic(pathname, res, socketPort, req.headers.host);
     });
 
     server.on('upgrade', (req, socket, _head) => {

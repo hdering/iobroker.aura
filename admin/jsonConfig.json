@@ -53,6 +53,25 @@
       "md": 6,
       "lg": 4,
       "xl": 4
+    },
+    "socketPort": {
+      "type": "number",
+      "label": {
+        "en": "ioBroker socket port",
+        "de": "ioBroker Socket-Port"
+      },
+      "help": {
+        "en": "Port of the iobroker.web instance that provides the socket.io connection (usually the same as your web adapter port, default: 8082).",
+        "de": "Port der iobroker.web-Instanz, die die socket.io-Verbindung bereitstellt (normalerweise der Port des Web-Adapters, Standard: 8082)."
+      },
+      "min": 1024,
+      "max": 65535,
+      "default": 8082,
+      "xs": 12,
+      "sm": 12,
+      "md": 6,
+      "lg": 4,
+      "xl": 4
     }
   }
 }
