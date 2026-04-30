@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { usePortalTarget } from '../../contexts/PortalTargetContext';
 import { useT, t, type TranslationKey } from '../../i18n';
-import { X, Pencil, Database, Sparkles, EyeOff, ChevronDown, Plus, Trash2, Download, ArrowRightLeft, Copy, Layers2, Minimize2, Smartphone, GripVertical } from 'lucide-react';
+import { X, Pencil, Database, Sparkles, EyeOff, ChevronDown, Plus, Trash2, Download, ArrowRightLeft, Copy, Layers2, Minimize2, Smartphone, GripVertical, MousePointerClick } from 'lucide-react';
 import { setDragBridge } from '../../utils/dragBridge';
 import { verticalCompact } from '../../utils/gridCompact';
 import { exportWidget } from '../../utils/widgetExportImport';
@@ -15,7 +15,7 @@ import { cloneGroupDef, useGroupDefsStore } from '../../store/groupDefsStore';
 import { useConfigStore } from '../../store/configStore';
 import { useActiveLayoutId } from '../../contexts/ActiveLayoutContext';
 import { useEffectiveSettings } from '../../hooks/useEffectiveSettings';
-import type { WidgetConfig, WidgetCondition, CustomCell, CustomGrid, WidgetType } from '../../types';
+import type { WidgetConfig, WidgetCondition, CustomCell, CustomGrid, WidgetType, ClickAction } from '../../types';
 import { DEFAULT_CUSTOM_GRID } from '../widgets/CustomGridView';
 import { DatapointPicker } from '../config/DatapointPicker';
 import { ConditionEditor } from '../config/ConditionEditor';
@@ -68,6 +68,8 @@ import { DatePickerWidget, FORMAT_LABELS, type DateOutputFormat } from '../widge
 import { MediaplayerWidget } from '../widgets/MediaplayerWidget';
 import { SliderWidget } from '../widgets/SliderWidget';
 import { IconPickerModal } from '../config/IconPickerModal';
+import { ClickActionEditor } from '../config/ClickActionEditor';
+import { WidgetClickPopup } from '../widgets/popup/WidgetClickPopup';
 
 // Stable empty array – avoids creating a new reference on every render when no conditions are set
 const NO_CONDITIONS: WidgetCondition[] = [];
@@ -1657,7 +1659,8 @@ function MediaplayerEditPanel({
 
 export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDuplicate }: WidgetFrameProps) {
   const t = useT();
-  const [openPanel, setOpenPanel] = useState<'menu' | 'edit' | 'conditions' | 'group-mobile-order' | null>(null);
+  const [openPanel, setOpenPanel] = useState<'menu' | 'edit' | 'conditions' | 'action' | 'group-mobile-order' | null>(null);
+  const [popupOpen, setPopupOpen] = useState(false);
   const [idCopied, setIdCopied] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [showMoveMenu, setShowMoveMenu] = useState(false);
@@ -1786,6 +1789,35 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
     }).filter(([, v]) => v !== undefined && v !== ''),
   ) as React.CSSProperties;
 
+  // ── Click action ──────────────────────────────────────────────────────────
+  const clickAction = (config.options?.clickAction as ClickAction | undefined) ?? { kind: 'none' as const };
+  const hasClickAction = clickAction.kind !== 'none';
+
+  const handleWidgetClick = (e: React.MouseEvent) => {
+    if (editMode || !hasClickAction) return;
+    if ((e.target as HTMLElement).closest('[data-widget-interactive]')) return;
+    e.stopPropagation();
+    switch (clickAction.kind) {
+      case 'link-external':
+        if (clickAction.newTab) window.open(clickAction.url, '_blank', 'noopener');
+        else window.location.href = clickAction.url;
+        return;
+      case 'link-tab': {
+        const tab = useDashboardStore.getState().layouts
+          .find((l) => l.id === clickAction.layoutId)
+          ?.tabs.find((t) => t.id === clickAction.tabId);
+        if (tab?.disabled) { return; }
+        useDashboardStore.getState().setActiveLayoutAndTab(clickAction.layoutId, clickAction.tabId);
+        return;
+      }
+      case 'link-widget':
+        useDashboardStore.getState().setActiveLayoutAndTab(clickAction.layoutId, clickAction.tabId);
+        return;
+      default:
+        setPopupOpen(true);
+    }
+  };
+
   // Verhindert Drag bei Klick auf Controls
   const stopDrag = (e: React.MouseEvent | React.PointerEvent) => e.stopPropagation();
 
@@ -1838,6 +1870,8 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
 
   return (
     <div
+      className={`aura-widget aura-widget-${config.id} aura-widget-type-${config.type} relative h-full transition-all overflow-visible ${isHeader ? 'px-2 py-0' : isNoPad ? 'p-0' : ''} ${editMode ? 'ring-2 ring-accent/40 rounded-xl' : ''} ${!editMode && conditionResult.effect === 'pulse' ? 'animate-pulse' : ''} ${!editMode && conditionResult.effect === 'blink' ? 'animate-[blink_1s_step-end_infinite]' : ''}`}
+      onClick={handleWidgetClick}
       style={isHeader || isTransparent ? {
         background: 'transparent',
         borderRadius: isTransparent && editMode ? 'var(--widget-radius)' : 0,
@@ -1846,8 +1880,8 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
         borderWidth: isTransparent && editMode ? 1 : 0,
         borderStyle: 'dashed',
         borderColor: isTransparent && editMode ? 'var(--app-border)' : 'transparent',
+        cursor: !editMode && hasClickAction ? 'pointer' : undefined,
         ...cssOverride,
-        // non-reflow hide: keep space but invisible
         ...(!editMode && conditionResult.hidden && !conditionResult.reflow
           ? { visibility: 'hidden', pointerEvents: 'none' } : {}),
       } : {
@@ -1859,11 +1893,11 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
         borderStyle: 'solid',
         borderColor: 'var(--widget-border)',
         padding: isNoPad ? undefined : widgetPadding,
+        cursor: !editMode && hasClickAction ? 'pointer' : undefined,
         ...cssOverride,
         ...(!editMode && conditionResult.hidden && !conditionResult.reflow
           ? { visibility: 'hidden', pointerEvents: 'none' } : {}),
       }}
-      className={`aura-widget aura-widget-${config.id} aura-widget-type-${config.type} relative h-full transition-all overflow-visible ${isHeader ? 'px-2 py-0' : isNoPad ? 'p-0' : ''} ${editMode ? 'ring-2 ring-accent/40 rounded-xl' : ''} ${!editMode && conditionResult.effect === 'pulse' ? 'animate-pulse' : ''} ${!editMode && conditionResult.effect === 'blink' ? 'animate-[blink_1s_step-end_infinite]' : ''}`}
     >
       {editMode && conditionResult.hidden && (
         <div className="nodrag absolute inset-0 z-20 rounded-[inherit] flex items-start justify-end pointer-events-none p-1.5">
@@ -1990,6 +2024,19 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                 <span className="ml-auto text-[11px] px-1.5 py-0.5 rounded-full" style={{ background: 'var(--accent)22', color: 'var(--accent)' }}>
                   {conditions.length}
                 </span>
+              )}
+            </button>
+
+            {/* Klick-Aktion */}
+            <button
+              onClick={() => { openPanelFor('action'); setConfirmDelete(false); }}
+              className="flex items-center gap-2.5 px-3 py-2 text-sm rounded-md text-left hover:opacity-80 transition-opacity"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              <MousePointerClick size={13} style={{ color: hasClickAction ? 'var(--accent)' : 'var(--text-secondary)', flexShrink: 0 }} />
+              {t('wf.menu.clickAction')}
+              {hasClickAction && (
+                <span className="ml-auto w-2 h-2 rounded-full" style={{ background: 'var(--accent)', flexShrink: 0 }} />
               )}
             </button>
 
@@ -5215,6 +5262,23 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
             }
           />
         </CenteredModal>
+      )}
+
+      {/* Click-Action Settings Modal */}
+      {openPanel === 'action' && (
+        <CenteredModal title={t('wf.menu.clickAction')} onClose={() => openPanelFor(null)}>
+          <ClickActionEditor config={config} onConfigChange={(c) => { onConfigChange(c); }} />
+        </CenteredModal>
+      )}
+
+      {/* Runtime popup */}
+      {popupOpen && hasClickAction && (
+        <WidgetClickPopup
+          widget={config}
+          action={clickAction}
+          onClose={() => setPopupOpen(false)}
+          allWidgets={activeTabs.flatMap((t) => t.widgets)}
+        />
       )}
     </div>
   );

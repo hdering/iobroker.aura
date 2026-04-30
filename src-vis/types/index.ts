@@ -114,6 +114,25 @@ export interface ObjectViewResult {
   rows: { id: string; value: ioBrokerObject }[];
 }
 
+// ── Widget click action ───────────────────────────────────────────────────────
+
+export type ClickAction =
+  | { kind: 'none' }
+  | { kind: 'popup-dimmer' }
+  | { kind: 'popup-thermostat'; setpointDp?: string; modeDp?: string }
+  | { kind: 'popup-image';     url?: string;  dp?: string;  fit?: 'contain' | 'cover' }
+  | { kind: 'popup-iframe';    url: string;   sandbox?: boolean }
+  | { kind: 'popup-json';      json?: string; dp?: string }
+  | { kind: 'popup-html';      html?: string; dp?: string }
+  | { kind: 'popup-widget';    widgetId?: string }
+  | { kind: 'link-tab';        layoutId: string; tabId: string }
+  | { kind: 'link-external';   url: string;   newTab?: boolean }
+  | { kind: 'link-widget';     layoutId: string; tabId: string; widgetId: string };
+
+// options.clickAction?: ClickAction
+// options.popupTitle?: string      – override header title in popup
+// options.popupShowHistory?: boolean – show history icon in popup header
+
 // ── Conditional widget styling ────────────────────────────────────────────────
 
 export type ConditionOperator =

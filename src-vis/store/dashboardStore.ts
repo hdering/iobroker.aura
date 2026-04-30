@@ -175,6 +175,7 @@ interface DashboardState {
   updateTab: (id: string, patch: Partial<Pick<Tab, 'name' | 'slug' | 'icon' | 'hideLabel' | 'disabled' | 'conditions'>>) => void;
   setTabSlug: (id: string, slug: string) => void;
   setActiveTab: (id: string) => void;
+  setActiveLayoutAndTab: (layoutId: string, tabId: string) => void;
   reorderTabs: (fromIndex: number, toIndex: number) => void;
   setDefaultTab: (layoutId: string, tabId: string) => void;
 
@@ -312,6 +313,14 @@ export const useDashboardStore = create<DashboardState>()(
           return { layouts: patchLayout(s.layouts, s.activeLayoutId, (l) => ({ ...l, activeTabId: id })) };
         });
         if (changed) flushKey('aura-dashboard');
+      },
+
+      setActiveLayoutAndTab: (layoutId, tabId) => {
+        set((s) => ({
+          activeLayoutId: layoutId,
+          layouts: patchLayout(s.layouts, layoutId, (l) => ({ ...l, activeTabId: tabId })),
+        }));
+        flushKey('aura-dashboard');
       },
 
       reorderTabs: (fromIndex, toIndex) =>

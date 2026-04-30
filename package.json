@@ -52,6 +52,8 @@
     "@iconify-json/mdi": "^1.2.3",
     "@iconify/react": "^6.0.2",
     "@iobroker/adapter-core": "^3.3.2",
+    "@types/dompurify": "^3.0.5",
+    "dompurify": "^3.4.1",
     "echarts": "^6.0.0",
     "echarts-for-react": "^3.0.6",
     "ical.js": "^2.2.1",

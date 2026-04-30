@@ -404,6 +404,7 @@ export const en: Record<TranslationKey, string> = {
   'wf.menu.confirm':          'Confirm',
   'wf.menu.hidden':           'Hidden',
   'wf.menu.options':          'Widget Options',
+  'wf.menu.clickAction':      'Click action',
 
   'wf.edit.title':          'Edit Widget',
   'wf.edit.name':           'Name',

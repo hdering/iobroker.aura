@@ -402,6 +402,7 @@ export const de = {
   'wf.menu.confirm':          'Bestätigen',
   'wf.menu.hidden':           'Versteckt',
   'wf.menu.options':          'Widget-Optionen',
+  'wf.menu.clickAction':      'Klick-Aktion',
 
   'wf.edit.title':          'Widget bearbeiten',
   'wf.edit.name':           'Name',
