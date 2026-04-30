@@ -6,6 +6,7 @@ import { useConfigSync } from './hooks/useConfigSync';
 import { useConnectionStore } from './store/connectionStore';
 import { useConfigStore } from './store/configStore';
 import { useDashboardStore, useLayoutBySlug } from './store/dashboardStore';
+import { useNavigationStore } from './store/navigationStore';
 import { useThemeStore } from './store/themeStore';
 import { getTheme } from './themes';
 import { useGroupStore } from './store/groupStore';
@@ -266,6 +267,29 @@ export default function App() {
     if (ids.length > 0) void prefetchStates(ids);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTabId, connected]);
+
+  // Handle widget click-action tab/layout navigation
+  const consumeNav = useNavigationStore((s) => s.consume);
+  const pendingNav = useNavigationStore((s) => s.pending);
+  useEffect(() => {
+    if (!pendingNav) return;
+    const nav = consumeNav();
+    if (!nav) return;
+    const targetLayout = useDashboardStore.getState().layouts.find((l) => l.id === nav.layoutId);
+    if (!targetLayout) return;
+    const targetTab = targetLayout.tabs.find((t) => t.id === nav.tabId);
+    if (!targetTab) return;
+    const tabSl = targetTab.slug ?? targetTab.id;
+    const laySl = targetLayout.slug;
+    if (laySl !== layoutSlug) {
+      navigate(`/view/${laySl}/tab/${tabSl}`);
+    } else if (layoutSlug) {
+      navigate(`/view/${layoutSlug}/tab/${tabSl}`);
+    } else {
+      navigate(`/tab/${tabSl}`);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingNav]);
 
   // Sync cross-tab localStorage changes (admin panel → frontend)
   useEffect(() => {

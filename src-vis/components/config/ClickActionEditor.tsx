@@ -1,8 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Database } from 'lucide-react';
 import type { WidgetConfig, ClickAction } from '../../types';
 import { useDashboardStore } from '../../store/dashboardStore';
 import { DatapointPicker } from './DatapointPicker';
+
+function defaultActionForType(type: string): ClickAction | null {
+  if (type === 'dimmer')     return { kind: 'popup-dimmer' };
+  if (type === 'thermostat') return { kind: 'popup-thermostat' };
+  return null;
+}
 
 interface Props {
   config: WidgetConfig;
@@ -79,6 +85,15 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
   const setAction = (patch: Partial<ClickAction> & { kind: ClickAction['kind'] }) => {
     onConfigChange({ ...config, options: { ...o, clickAction: patch } });
   };
+
+  // Auto-set default action when editor opens for a widget with a natural default
+  useEffect(() => {
+    if (!o.clickAction) {
+      const def = defaultActionForType(config.type);
+      if (def) setAction(def);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const setOpts = (patch: Record<string, unknown>) => {
     onConfigChange({ ...config, options: { ...o, ...patch } });

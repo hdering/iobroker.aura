@@ -70,6 +70,7 @@ import { SliderWidget } from '../widgets/SliderWidget';
 import { IconPickerModal } from '../config/IconPickerModal';
 import { ClickActionEditor } from '../config/ClickActionEditor';
 import { WidgetClickPopup } from '../widgets/popup/WidgetClickPopup';
+import { useNavigationStore } from '../../store/navigationStore';
 
 // Stable empty array – avoids creating a new reference on every render when no conditions are set
 const NO_CONDITIONS: WidgetCondition[] = [];
@@ -1806,12 +1807,12 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
         const tab = useDashboardStore.getState().layouts
           .find((l) => l.id === clickAction.layoutId)
           ?.tabs.find((t) => t.id === clickAction.tabId);
-        if (tab?.disabled) { return; }
-        useDashboardStore.getState().setActiveLayoutAndTab(clickAction.layoutId, clickAction.tabId);
+        if (tab?.disabled) return;
+        useNavigationStore.getState().navigateTo(clickAction.layoutId, clickAction.tabId);
         return;
       }
       case 'link-widget':
-        useDashboardStore.getState().setActiveLayoutAndTab(clickAction.layoutId, clickAction.tabId);
+        useNavigationStore.getState().navigateTo(clickAction.layoutId, clickAction.tabId);
         return;
       default:
         setPopupOpen(true);
