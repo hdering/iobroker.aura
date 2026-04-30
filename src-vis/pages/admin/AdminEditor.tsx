@@ -117,7 +117,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
   // Widget types from WIDGET_REGISTRY not covered by any DP_TEMPLATE
   const coveredWidgetTypes = useMemo(() => new Set(DP_TEMPLATES.map((t) => t.widgetType)), []);
   const furtherWidgets = useMemo(
-    () => WIDGET_REGISTRY.filter((w) => !coveredWidgetTypes.has(w.type)),
+    () => WIDGET_REGISTRY.filter((w) => !coveredWidgetTypes.has(w.type)).sort((a, b) => a.shortLabel.localeCompare(b.shortLabel)),
     [coveredWidgetTypes],
   );
 
@@ -359,35 +359,33 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
 
           {/* Template grid */}
           <div className="px-6 pb-2">
-            <div className="space-y-3 py-2">
-              {/* Standard categories – filtered or all */}
-              {DP_TEMPLATE_CATEGORIES
-                .filter((cat) => categoryFilter === 'all' || categoryFilter === cat.id)
-                .map((cat) => {
-                  const catTpls = DP_TEMPLATES.filter((tpl) => tpl.category === cat.id);
-                  if (!catTpls.length) return null;
-                  return (
-                    <div key={cat.id}>
-                      {categoryFilter === 'all' && (
-                        <p className="text-[10px] font-semibold uppercase tracking-wider mb-1.5"
+            <div className="py-2 space-y-3">
+
+              {/* "Alle"-Ansicht: Kategorien nebeneinander, je eine Spalte mit vertikaler Template-Liste */}
+              {categoryFilter === 'all' && (
+                <div className="grid grid-cols-4 gap-x-4 gap-y-4">
+                  {DP_TEMPLATE_CATEGORIES.map((cat) => {
+                    const catTpls = DP_TEMPLATES.filter((tpl) => tpl.category === cat.id).sort((a, b) => a.label.localeCompare(b.label));
+                    if (!catTpls.length) return null;
+                    return (
+                      <div key={cat.id} className="flex flex-col gap-1">
+                        <p className="text-[10px] font-semibold uppercase tracking-wider mb-1"
                           style={{ color: 'var(--text-secondary)', opacity: 0.5 }}>
                           {cat.label}
                         </p>
-                      )}
-                      <div className="grid grid-cols-3 gap-2">
                         {catTpls.map((tpl) => {
                           const active = templateId === tpl.id;
                           return (
                             <button key={tpl.id} type="button"
                               onClick={() => selectTemplate(tpl.id, tpl.widgetType)}
-                              className="flex items-center gap-2.5 rounded-xl transition-all hover:scale-[1.02] active:scale-95 text-left"
+                              className="flex items-center gap-2 rounded-xl transition-all hover:scale-[1.02] active:scale-95 text-left w-full"
                               style={{
-                                padding: '8px 12px',
+                                padding: '7px 10px',
                                 background: active ? 'var(--accent)1a' : 'var(--app-bg)',
                                 border: `1.5px solid ${active ? 'var(--accent)' : 'var(--app-border)'}`,
                                 boxShadow: active ? '0 0 0 3px var(--accent)22' : 'none',
                               }}>
-                              <span style={{ fontSize: 20, lineHeight: 1, flexShrink: 0 }}>{tpl.icon}</span>
+                              <span style={{ fontSize: 18, lineHeight: 1, flexShrink: 0 }}>{tpl.icon}</span>
                               <span className="leading-tight font-medium truncate"
                                 style={{ fontSize: 12, color: active ? 'var(--accent)' : 'var(--text-secondary)' }}>
                                 {tpl.label}
@@ -396,20 +394,48 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
                           );
                         })}
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+              )}
 
-              {/* Further widget types – shown for "Alle" or "Weitere" filter */}
+              {/* Einzelne Kategorie gefiltert */}
+              {categoryFilter !== 'all' && categoryFilter !== 'further' && (
+                <div className="grid grid-cols-3 gap-2">
+                  {DP_TEMPLATES
+                    .filter((tpl) => tpl.category === categoryFilter)
+                    .sort((a, b) => a.label.localeCompare(b.label))
+                    .map((tpl) => {
+                      const active = templateId === tpl.id;
+                      return (
+                        <button key={tpl.id} type="button"
+                          onClick={() => selectTemplate(tpl.id, tpl.widgetType)}
+                          className="flex items-center gap-2.5 rounded-xl transition-all hover:scale-[1.02] active:scale-95 text-left"
+                          style={{
+                            padding: '8px 12px',
+                            background: active ? 'var(--accent)1a' : 'var(--app-bg)',
+                            border: `1.5px solid ${active ? 'var(--accent)' : 'var(--app-border)'}`,
+                            boxShadow: active ? '0 0 0 3px var(--accent)22' : 'none',
+                          }}>
+                          <span style={{ fontSize: 20, lineHeight: 1, flexShrink: 0 }}>{tpl.icon}</span>
+                          <span className="leading-tight font-medium truncate"
+                            style={{ fontSize: 12, color: active ? 'var(--accent)' : 'var(--text-secondary)' }}>
+                            {tpl.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                </div>
+              )}
+
+              {/* Weitere Widgets */}
               {(categoryFilter === 'all' || categoryFilter === 'further') && (
                 <div>
-                  {categoryFilter === 'all' && (
-                    <p className="text-[10px] font-semibold uppercase tracking-wider mb-1.5"
-                      style={{ color: 'var(--text-secondary)', opacity: 0.5 }}>
-                      Weitere Widgets
-                    </p>
-                  )}
-                  <div className="grid grid-cols-3 gap-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider mb-1.5"
+                    style={{ color: 'var(--text-secondary)', opacity: 0.5 }}>
+                    Weitere Widgets
+                  </p>
+                  <div className="grid grid-cols-4 gap-2">
                     {furtherWidgets.map((w) => {
                       const active = templateId === w.type;
                       return (

@@ -211,7 +211,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
   },
   {
     type: 'trashSchedule',
-    label: 'Müllabfuhr-Zeitplan', shortLabel: 'Zeitplan',
+    label: 'Müllabfuhr-Zeitplan', shortLabel: 'Müllabfuhr (Müllabfuhr-Zeitplan)',
     Icon: CalendarCheck2,         iconName: 'CalendarCheck2', color: '#6b7280',
     defaultW: 10,                 defaultH: 5,
     addMode: 'datapoint',         widgetGroup: 'special',
