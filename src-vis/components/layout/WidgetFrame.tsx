@@ -2409,6 +2409,8 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                 { value: 'custom',  label: 'Custom' },
               ] : config.type === 'group' ? [
                 { value: 'default', label: t('wf.edit.layout.standard') },
+              ] : config.type === 'trash' || config.type === 'trashSchedule' ? [
+                { value: 'default', label: t('wf.edit.layout.standard') },
               ] : [
                 { value: 'default', label: t('wf.edit.layout.standard') },
                 { value: 'card',    label: t('wf.edit.layout.card') },

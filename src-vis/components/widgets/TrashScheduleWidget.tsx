@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Truck } from 'lucide-react';
+import { Truck, CalendarCheck2 } from 'lucide-react';
 import { useDatapoint } from '../../hooks/useDatapoint';
 import { DatapointPicker } from '../config/DatapointPicker';
 import type { WidgetProps, WidgetConfig } from '../../types';
 import { TRASH_ICON_OPTIONS, ICON_MAP } from './TrashWidget';
+import { getWidgetIcon } from '../../utils/widgetIconMap';
 
 // ── Data model from trashschedule JSON DP ─────────────────────────────────
 
@@ -53,6 +54,7 @@ function BinCircle({
   entry,
   iconName,
   size,
+  showNames,
   showDays,
   showDate,
   dateFormat,
@@ -60,6 +62,7 @@ function BinCircle({
   entry:      TrashEntry;
   iconName:   string;
   size:       number;
+  showNames:  boolean;
   showDays:   boolean;
   showDate:   boolean;
   dateFormat: string;
@@ -85,13 +88,15 @@ function BinCircle({
         <Icon size={iconPx} color={dimmed ? color : '#ffffff'} strokeWidth={2} />
       </div>
 
-      <span
-        className="text-center leading-tight truncate w-full"
-        style={{ fontSize: lblSize, color: 'var(--text-secondary)' }}
-        title={entry.name}
-      >
-        {entry.name}
-      </span>
+      {showNames && (
+        <span
+          className="text-center leading-tight truncate w-full"
+          style={{ fontSize: lblSize, color: 'var(--text-secondary)' }}
+          title={entry.name}
+        >
+          {entry.name}
+        </span>
+      )}
 
       {showDays && (
         <span
@@ -119,9 +124,11 @@ function BinCircle({
 export function TrashScheduleWidget({ config }: WidgetProps) {
   const { value } = useDatapoint(config.datapoint);
   const o = config.options ?? {};
+  const TitleIcon = getWidgetIcon(o.icon as string | undefined, CalendarCheck2);
 
   const hiddenNames  = (o.hiddenNames  as string[] | undefined)  ?? [];
   const iconMap      = (o.iconMap      as Record<string, string> | undefined) ?? {};
+  const showNames    = (o.showNames    as boolean | undefined)    ?? true;
   const showDays     = (o.showDays     as boolean | undefined)    ?? true;
   const showDate     = (o.showDate     as boolean | undefined)    ?? true;
   const dateFormat   = (o.dateFormat   as string | undefined)     ?? 'dd.MM.';
@@ -132,7 +139,7 @@ export function TrashScheduleWidget({ config }: WidgetProps) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-2"
         style={{ color: 'var(--text-secondary)' }}>
-        <Truck size={32} strokeWidth={1} />
+        <TitleIcon size={32} strokeWidth={1} style={{ color: 'var(--text-secondary)' }} />
         <p className="text-xs text-center">
           {config.title || 'Müllabfuhr-Zeitplan'}
           <br />
@@ -163,9 +170,12 @@ export function TrashScheduleWidget({ config }: WidgetProps) {
   return (
     <div className="flex flex-col h-full">
       {config.title && !(o.hideTitle) && (
-        <p className="text-xs mb-2 truncate shrink-0" style={{ color: 'var(--text-secondary)' }}>
-          {config.title}
-        </p>
+        <div className="flex items-center gap-1.5 mb-2 shrink-0 min-w-0">
+          <TitleIcon size={14} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>
+            {config.title}
+          </p>
+        </div>
       )}
       <div className="flex-1 flex flex-wrap items-start justify-center gap-3 content-center min-h-0">
         {visible.map((entry) => (
@@ -174,6 +184,7 @@ export function TrashScheduleWidget({ config }: WidgetProps) {
             entry={entry}
             iconName={iconMap[entry.name] ?? 'Trash2'}
             size={iconSize}
+            showNames={showNames}
             showDays={showDays}
             showDate={showDate}
             dateFormat={dateFormat}
@@ -203,9 +214,10 @@ export function TrashScheduleConfig({
   const [showPicker, setShowPicker] = useState(false);
   const { value } = useDatapoint(config.datapoint);
 
-  const o          = config.options ?? {};
+  const o           = config.options ?? {};
   const hiddenNames = (o.hiddenNames as string[] | undefined)  ?? [];
   const iconMap     = (o.iconMap     as Record<string, string> | undefined) ?? {};
+  const showNames   = (o.showNames   as boolean | undefined)   ?? true;
   const showDays    = (o.showDays    as boolean | undefined)   ?? true;
   const showDate    = (o.showDate    as boolean | undefined)   ?? true;
   const dateFormat  = (o.dateFormat  as string | undefined)    ?? 'dd.MM.';
@@ -278,12 +290,17 @@ export function TrashScheduleConfig({
                   <div key={entry.name} className="rounded-xl p-3 space-y-2"
                     style={{ background: 'var(--app-bg)', border: '1px solid var(--app-border)', opacity: hidden ? 0.5 : 1 }}>
 
-                    {/* Header: Farbpunkt + Name + Sichtbarkeit-Toggle */}
+                    {/* Header: Icon-Kreis + Name + Sichtbarkeit-Toggle */}
                     <div className="flex items-center gap-2">
-                      <div
-                        className="w-4 h-4 rounded-full shrink-0"
-                        style={{ background: color }}
-                      />
+                      {(() => {
+                        const PreviewIcon = ICON_MAP[curIcon] ?? Truck;
+                        return (
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                            style={{ background: `${color}22`, border: `2px solid ${color}88` }}>
+                            <PreviewIcon size={16} color={color} strokeWidth={1.5} />
+                          </div>
+                        );
+                      })()}
                       <span className="text-xs font-medium flex-1 truncate" style={{ color: 'var(--text-primary)' }}>
                         {entry.name}
                       </span>
@@ -342,6 +359,18 @@ export function TrashScheduleConfig({
           <label className="text-[11px] mb-1 block font-medium" style={{ color: 'var(--text-secondary)' }}>
             Anzeige-Optionen
           </label>
+
+          <div className="flex items-center justify-between">
+            <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Namen anzeigen</label>
+            <button
+              onClick={() => setO({ showNames: !showNames })}
+              className="relative w-9 h-5 rounded-full transition-colors"
+              style={{ background: showNames ? 'var(--accent)' : 'var(--app-border)' }}
+            >
+              <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                style={{ left: showNames ? '18px' : '2px' }} />
+            </button>
+          </div>
 
           <div className="flex items-center justify-between">
             <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Tage anzeigen</label>
