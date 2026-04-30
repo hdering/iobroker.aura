@@ -1796,6 +1796,8 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
 
   const handleWidgetClick = (e: React.MouseEvent) => {
     if (editMode || !hasClickAction) return;
+    // Portal backdrop clicks bubble through the React tree back here — ignore while popup is open
+    if (popupOpen) return;
     if ((e.target as HTMLElement).closest('[data-widget-interactive]')) return;
     e.stopPropagation();
     switch (clickAction.kind) {

@@ -120,6 +120,9 @@ export type ClickAction =
   | { kind: 'none' }
   | { kind: 'popup-dimmer' }
   | { kind: 'popup-thermostat'; setpointDp?: string; modeDp?: string }
+  | { kind: 'popup-switch' }
+  | { kind: 'popup-shutter' }
+  | { kind: 'popup-mediaplayer' }
   | { kind: 'popup-image';     url?: string;  dp?: string;  fit?: 'contain' | 'cover' }
   | { kind: 'popup-iframe';    url: string;   sandbox?: boolean }
   | { kind: 'popup-json';      json?: string; dp?: string }
@@ -131,6 +134,7 @@ export type ClickAction =
 
 // options.clickAction?: ClickAction
 // options.popupTitle?: string      – override header title in popup
+// options.popupHideTitle?: boolean  – hide the title bar entirely
 // options.popupShowHistory?: boolean – show history icon in popup header
 
 // ── Conditional widget styling ────────────────────────────────────────────────

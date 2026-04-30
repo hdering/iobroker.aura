@@ -4,10 +4,27 @@ import type { WidgetConfig, ClickAction } from '../../types';
 import { useDashboardStore } from '../../store/dashboardStore';
 import { DatapointPicker } from './DatapointPicker';
 
-function defaultActionForType(type: string): ClickAction | null {
-  if (type === 'dimmer')     return { kind: 'popup-dimmer' };
-  if (type === 'thermostat') return { kind: 'popup-thermostat' };
-  return null;
+function defaultActionForConfig(config: WidgetConfig): ClickAction | null {
+  switch (config.type) {
+    case 'dimmer':
+      return { kind: 'popup-dimmer' };
+    case 'thermostat':
+      return {
+        kind: 'popup-thermostat',
+        setpointDp: config.datapoint || undefined,
+        modeDp:     (config.options?.actualDatapoint as string | undefined) || undefined,
+      };
+    case 'switch':
+      return { kind: 'popup-switch' };
+    case 'shutter':
+      return { kind: 'popup-shutter' };
+    case 'mediaplayer':
+      return { kind: 'popup-mediaplayer' };
+    case 'slider':
+      return { kind: 'popup-widget', widgetId: '' };
+    default:
+      return null;
+  }
 }
 
 interface Props {
@@ -22,7 +39,7 @@ const MODE_GROUPS: { label: string; modes: ClickAction['kind'][] }[] = [
   },
   {
     label: 'Popup',
-    modes: ['popup-dimmer', 'popup-thermostat', 'popup-image', 'popup-iframe', 'popup-json', 'popup-html', 'popup-widget'],
+    modes: ['popup-dimmer', 'popup-thermostat', 'popup-switch', 'popup-shutter', 'popup-mediaplayer', 'popup-image', 'popup-iframe', 'popup-json', 'popup-html', 'popup-widget'],
   },
   {
     label: 'Navigation',
@@ -44,6 +61,9 @@ function modeLabel(kind: ClickAction['kind']): string {
     case 'none':              return 'Aus';
     case 'popup-dimmer':      return 'Popup: Dimmer';
     case 'popup-thermostat':  return 'Popup: Thermostat';
+    case 'popup-switch':      return 'Popup: Schalter';
+    case 'popup-shutter':     return 'Popup: Rolladen';
+    case 'popup-mediaplayer': return 'Popup: Mediaplayer';
     case 'popup-image':       return 'Popup: Bild';
     case 'popup-iframe':      return 'Popup: Webseite (iframe)';
     case 'popup-json':        return 'Popup: JSON';
@@ -75,8 +95,13 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: 
 
 export function ClickActionEditor({ config, onConfigChange }: Props) {
   const o = config.options ?? {};
-  const action = (o.clickAction as ClickAction | undefined) ?? { kind: 'none' as const };
-  const popupTitle = (o.popupTitle as string) ?? '';
+  // If no action is stored yet, derive a sensible default from widget type
+  const storedAction = o.clickAction as ClickAction | undefined;
+  const action: ClickAction = storedAction ?? defaultActionForConfig(config) ?? { kind: 'none' as const };
+  const popupTitle     = (o.popupTitle     as string)  ?? '';
+  const popupHideTitle = !!(o.popupHideTitle);
+  const popupWidth     = (o.popupWidth  as number | undefined);
+  const popupHeight    = (o.popupHeight as number | undefined);
 
   const layouts = useDashboardStore((s) => s.layouts);
 
@@ -86,10 +111,10 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
     onConfigChange({ ...config, options: { ...o, clickAction: patch } });
   };
 
-  // Auto-set default action when editor opens for a widget with a natural default
+  // Persist the derived default on first open so run-mode picks it up
   useEffect(() => {
-    if (!o.clickAction) {
-      const def = defaultActionForType(config.type);
+    if (!storedAction) {
+      const def = defaultActionForConfig(config);
       if (def) setAction(def);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -104,6 +129,9 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
       case 'none':              setAction({ kind: 'none' }); break;
       case 'popup-dimmer':      setAction({ kind: 'popup-dimmer' }); break;
       case 'popup-thermostat':  setAction({ kind: 'popup-thermostat' }); break;
+      case 'popup-switch':      setAction({ kind: 'popup-switch' }); break;
+      case 'popup-shutter':     setAction({ kind: 'popup-shutter' }); break;
+      case 'popup-mediaplayer': setAction({ kind: 'popup-mediaplayer' }); break;
       case 'popup-image':       setAction({ kind: 'popup-image' }); break;
       case 'popup-iframe':      setAction({ kind: 'popup-iframe', url: '' }); break;
       case 'popup-json':        setAction({ kind: 'popup-json' }); break;
@@ -317,13 +345,13 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
             </div>
           </div>
           <div>
-            <label className={labelCls} style={labelStyle}>Modus-Datenpunkt</label>
+            <label className={labelCls} style={labelStyle}>Ist-Temperatur Datenpunkt</label>
             <div className="flex gap-1">
               <input
                 type="text"
                 value={action.modeDp ?? ''}
                 onChange={(e) => setAction({ ...action, modeDp: e.target.value })}
-                placeholder="leer = kein Modus"
+                placeholder="leer = keine Ist-Anzeige"
                 className={inputCls} style={{ ...inputStyle, flex: 1 }}
               />
               <button
@@ -458,15 +486,46 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
       {/* ── Popup-wide options (for all popup-* modes) ── */}
       {isPopup && (
         <div className="space-y-3 pt-2" style={{ borderTop: '1px solid var(--app-border)' }}>
-          <div>
-            <label className={labelCls} style={labelStyle}>Custom Popup-Titel (leer = Widget-Titel)</label>
-            <input
-              type="text"
-              value={popupTitle}
-              onChange={(e) => setOpts({ popupTitle: e.target.value || undefined })}
-              placeholder={config.title || 'Widget-Titel'}
-              className={inputCls} style={inputStyle}
-            />
+          <Toggle
+            checked={popupHideTitle}
+            onChange={(v) => setOpts({ popupHideTitle: v || undefined })}
+            label="Titel ausblenden"
+          />
+          {!popupHideTitle && (
+            <div>
+              <label className={labelCls} style={labelStyle}>Custom Popup-Titel (leer = Widget-Titel)</label>
+              <input
+                type="text"
+                value={popupTitle}
+                onChange={(e) => setOpts({ popupTitle: e.target.value || undefined })}
+                placeholder={config.title || 'Widget-Titel'}
+                className={inputCls} style={inputStyle}
+              />
+            </div>
+          )}
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <label className={labelCls} style={labelStyle}>Breite (px, leer = auto)</label>
+              <input
+                type="number"
+                min={200} max={1600} step={50}
+                value={popupWidth ?? ''}
+                onChange={(e) => setOpts({ popupWidth: e.target.value ? Number(e.target.value) : undefined })}
+                placeholder="600"
+                className={inputCls} style={inputStyle}
+              />
+            </div>
+            <div className="flex-1">
+              <label className={labelCls} style={labelStyle}>Höhe (px, leer = auto)</label>
+              <input
+                type="number"
+                min={200} max={1200} step={50}
+                value={popupHeight ?? ''}
+                onChange={(e) => setOpts({ popupHeight: e.target.value ? Number(e.target.value) : undefined })}
+                placeholder="auto"
+                className={inputCls} style={inputStyle}
+              />
+            </div>
           </div>
         </div>
       )}

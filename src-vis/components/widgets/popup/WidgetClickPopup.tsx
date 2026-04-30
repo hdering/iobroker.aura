@@ -5,6 +5,9 @@ import type { WidgetConfig, ClickAction } from '../../../types';
 import { usePortalTarget } from '../../../contexts/PortalTargetContext';
 import { DimmerPopupBody } from './DimmerPopupBody';
 import { ThermostatPopupBody } from './ThermostatPopupBody';
+import { SwitchPopupBody } from './SwitchPopupBody';
+import { ShutterPopupBody } from './ShutterPopupBody';
+import { MediaplayerPopupBody } from './MediaplayerPopupBody';
 import { ImagePopupBody } from './ImagePopupBody';
 import { IframePopupBody } from './IframePopupBody';
 import { JsonPopupBody } from './JsonPopupBody';
@@ -23,19 +26,25 @@ function getTitle(widget: WidgetConfig, action: ClickAction): string {
   if (custom) return custom;
   if (widget.title) return widget.title;
   switch (action.kind) {
-    case 'popup-dimmer':     return 'Dimmer';
-    case 'popup-thermostat': return 'Thermostat';
-    case 'popup-image':      return 'Bild';
-    case 'popup-iframe':     return 'Webseite';
-    case 'popup-json':       return 'JSON';
-    case 'popup-html':       return 'HTML';
-    case 'popup-widget':     return 'Widget';
-    default:                 return '';
+    case 'popup-dimmer':      return 'Dimmer';
+    case 'popup-thermostat':  return 'Thermostat';
+    case 'popup-switch':      return 'Schalter';
+    case 'popup-shutter':     return 'Rolladen';
+    case 'popup-mediaplayer': return 'Mediaplayer';
+    case 'popup-image':       return 'Bild';
+    case 'popup-iframe':      return 'Webseite';
+    case 'popup-json':        return 'JSON';
+    case 'popup-html':        return 'HTML';
+    case 'popup-widget':      return 'Widget';
+    default:                  return '';
   }
 }
 
 export function WidgetClickPopup({ widget, action, onClose, allWidgets = [] }: Props) {
-  const portalTarget = usePortalTarget();
+  // Prefer the frontend container so the popup inherits per-layout scoped CSS vars.
+  // Falls back to the portal target (admin context) or document.body.
+  const adminTarget = usePortalTarget();
+  const portalTarget = document.querySelector('[data-aura-app="frontend"]') ?? adminTarget;
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -43,8 +52,11 @@ export function WidgetClickPopup({ widget, action, onClose, allWidgets = [] }: P
     return () => document.removeEventListener('keydown', handler);
   }, [onClose]);
 
-  const isIframe = action.kind === 'popup-iframe';
-  const title = getTitle(widget, action);
+  const isIframe    = action.kind === 'popup-iframe';
+  const hideTitle   = !!(widget.options?.popupHideTitle);
+  const title       = getTitle(widget, action);
+  const customWidth  = widget.options?.popupWidth  as number | undefined;
+  const customHeight = widget.options?.popupHeight as number | undefined;
 
   const body = (() => {
     switch (action.kind) {
@@ -52,6 +64,12 @@ export function WidgetClickPopup({ widget, action, onClose, allWidgets = [] }: P
         return <DimmerPopupBody widget={widget} />;
       case 'popup-thermostat':
         return <ThermostatPopupBody widget={widget} action={action} />;
+      case 'popup-switch':
+        return <SwitchPopupBody widget={widget} />;
+      case 'popup-shutter':
+        return <ShutterPopupBody widget={widget} />;
+      case 'popup-mediaplayer':
+        return <MediaplayerPopupBody widget={widget} />;
       case 'popup-image':
         return <ImagePopupBody action={action} />;
       case 'popup-iframe':
@@ -74,32 +92,36 @@ export function WidgetClickPopup({ widget, action, onClose, allWidgets = [] }: P
       onClick={onClose}
     >
       <div
-        className="flex flex-col rounded-2xl shadow-2xl overflow-hidden"
+        className="relative flex flex-col rounded-2xl shadow-2xl overflow-hidden"
         style={{
           background: 'var(--app-surface)',
           border: '1px solid var(--app-border)',
-          maxWidth: isIframe ? undefined : 'min(90vw, 600px)',
+          maxWidth: isIframe ? undefined : (customWidth ? `min(90vw, ${customWidth}px)` : 'min(90vw, 600px)'),
           width: isIframe ? undefined : '100%',
-          maxHeight: isIframe ? undefined : '85vh',
+          maxHeight: isIframe ? undefined : (customHeight ? `min(85vh, ${customHeight}px)` : '85vh'),
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div
-          className="flex items-center justify-between px-5 py-3 shrink-0"
-          style={{ borderBottom: '1px solid var(--app-border)' }}
+        {/* Close button — always absolute top-right of popup */}
+        <button
+          onClick={onClose}
+          className="absolute top-2.5 right-2.5 z-20 w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-70 transition-opacity"
+          style={{ color: 'var(--text-secondary)', background: 'var(--app-bg)', border: '1px solid var(--app-border)' }}
         >
-          <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
-            {title}
-          </span>
-          <button
-            onClick={onClose}
-            className="w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-70 transition-opacity"
-            style={{ color: 'var(--text-secondary)', background: 'var(--app-bg)', border: '1px solid var(--app-border)' }}
+          <X size={13} />
+        </button>
+
+        {/* Optional title header */}
+        {!hideTitle && title && (
+          <div
+            className="shrink-0 px-5 pr-12 py-3"
+            style={{ borderBottom: '1px solid var(--app-border)' }}
           >
-            <X size={13} />
-          </button>
-        </div>
+            <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+              {title}
+            </span>
+          </div>
+        )}
 
         {/* Body */}
         <div className="overflow-auto" style={{ flex: isIframe ? 'none' : '1 1 auto' }}>
