@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { Settings, X, GripVertical } from 'lucide-react';
+import { Settings, X, GripVertical, ChevronDown, ChevronRight } from 'lucide-react';
 import { useDashboardStore, useActiveLayout } from '../../store/dashboardStore';
 import type { Tab, TabBarItem, TabBarSettings, DashboardLayout } from '../../store/dashboardStore';
 import { useConfigStore } from '../../store/configStore';
@@ -11,6 +11,8 @@ import { loadIconSets, areIconSetsLoaded } from '../../utils/iconifyLoader';
 import { useT } from '../../i18n';
 import { subscribeStateDirect } from '../../hooks/useIoBroker';
 import { applyCustomFormat, fmtTime, fmtDate } from '../../utils/clockUtils';
+import { useTabConditionStyle } from '../../hooks/useTabConditionStyle';
+import { ConditionEditor } from '../config/ConditionEditor';
 
 interface TabBarProps {
   readonly?: boolean;
@@ -111,6 +113,7 @@ function renderTabBarItem(item: TabBarItem) {
 }
 
 // ── Computed tab styles based on indicatorStyle ────────────────────────────────
+// Uses var(--tab-*) with fallbacks so condition CSS vars can override per-tab.
 
 function tabStyle(
   isActive: boolean,
@@ -122,8 +125,8 @@ function tabStyle(
 
   if (style === 'pills') {
     return {
-      background: isActive ? activeClr : 'transparent',
-      color: isActive ? '#fff' : inactiveClr,
+      background: isActive ? `var(--tab-bg, ${activeClr})` : 'var(--tab-bg, transparent)',
+      color: isActive ? 'var(--tab-text, #fff)' : `var(--tab-text, ${inactiveClr})`,
       borderRadius: '9999px',
       padding: '4px 12px',
       borderBottom: 'none',
@@ -132,8 +135,10 @@ function tabStyle(
 
   if (style === 'filled') {
     return {
-      background: isActive ? `color-mix(in srgb, ${activeClr} 15%, transparent)` : 'transparent',
-      color: isActive ? activeClr : inactiveClr,
+      background: isActive
+        ? `var(--tab-bg, color-mix(in srgb, ${activeClr} 15%, transparent))`
+        : 'var(--tab-bg, transparent)',
+      color: isActive ? `var(--tab-text, ${activeClr})` : `var(--tab-text, ${inactiveClr})`,
       borderRadius: '8px',
       borderBottom: 'none',
     };
@@ -141,9 +146,22 @@ function tabStyle(
 
   // underline (default)
   return {
-    borderBottomColor: isActive ? activeClr : 'transparent',
-    color: isActive ? activeClr : inactiveClr,
+    borderBottomColor: isActive ? `var(--tab-accent, ${activeClr})` : 'transparent',
+    color: isActive ? `var(--tab-accent, ${activeClr})` : `var(--tab-text, ${inactiveClr})`,
   };
+}
+
+// ── Tab condition wrapper — allows useTabConditionStyle per tab ────────────────
+
+function TabConditionWrapper({
+  tab,
+  children,
+}: {
+  tab: Tab;
+  children: (result: ReturnType<typeof useTabConditionStyle>) => React.ReactNode;
+}) {
+  const result = useTabConditionStyle(tab.conditions);
+  return <>{children(result)}</>;
 }
 
 // ── Main component ─────────────────────────────────────────────────────────────
@@ -188,6 +206,7 @@ export function TabBar({ readonly = false, viewTabs, viewActiveTabId, onViewTabC
 
   const [settingsTabId, setSettingsTabId] = useState<string | null>(null);
   const [panelPos, setPanelPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const [conditionsOpen, setConditionsOpen] = useState(false);
   const settingsBtnRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
   const [dragIdx, setDragIdx] = useState<number | null>(null);
@@ -200,6 +219,10 @@ export function TabBar({ readonly = false, viewTabs, viewActiveTabId, onViewTabC
   useEffect(() => {
     if (!editMode) setSettingsTabId(null);
   }, [editMode]);
+
+  useEffect(() => {
+    setConditionsOpen(false);
+  }, [settingsTabId]);
 
   const commitRename = () => {
     if (editingId && editingName.trim()) renameTab(editingId, editingName.trim());
@@ -243,103 +266,114 @@ export function TabBar({ readonly = false, viewTabs, viewActiveTabId, onViewTabC
   };
 
   // ── Tab rendering ────────────────────────────────────────────────────────────
-  const renderTabs = () => tabs.map((tab, idx) => {
-    const isActive = tab.id === activeTabId;
-    const ts = tabStyle(isActive, tbSettings);
-    const indicatorStyle = tbSettings?.indicatorStyle ?? 'underline';
+  const renderTabs = () => tabs.map((tab, idx) => (
+    <TabConditionWrapper key={tab.id} tab={tab}>
+      {({ cssVars, effect, hidden }) => {
+        // Frontend or readonly preview: hide disabled / condition-hidden tabs
+        if (readonly && (tab.disabled || hidden)) return null;
 
-    const isDraggingThis = dragIdx === idx;
-    const isDragTarget   = dragOverIdx === idx && dragIdx !== null && dragIdx !== idx;
+        const isActive = tab.id === activeTabId;
+        const ts = tabStyle(isActive, tbSettings);
+        const indicatorStyle = tbSettings?.indicatorStyle ?? 'underline';
+        const isDraggingThis = dragIdx === idx;
+        const isDragTarget   = dragOverIdx === idx && dragIdx !== null && dragIdx !== idx;
 
-    return (
-      <div key={tab.id}
-        className={`group relative flex items-center gap-1.5 px-3 cursor-pointer transition-colors whitespace-nowrap select-none ${indicatorStyle === 'underline' ? 'py-2.5 border-b-2' : 'py-1.5'}`}
-        style={{
-          ...ts,
-          opacity: isDraggingThis ? 0.4 : 1,
-          ...(isDragTarget ? { boxShadow: '-2px 0 0 0 var(--accent)' } : {}),
-        }}
-        onDragOver={editMode && !readonly ? (e) => { e.preventDefault(); setDragOverIdx(idx); } : undefined}
-        onDragEnter={editMode && !readonly ? (e) => { e.preventDefault(); setDragOverIdx(idx); } : undefined}
-        onDragLeave={editMode && !readonly ? () => setDragOverIdx(null) : undefined}
-        onDrop={editMode && !readonly ? (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          if (dragIdx !== null && dragIdx !== idx) reorderTabs(dragIdx, idx);
-          setDragIdx(null);
-          setDragOverIdx(null);
-        } : undefined}
-        onClick={() => { setConfirmDeleteId(null); handleTabClick(tab.id); }}
-      >
-        {editMode && !readonly && (
-          <span
-            draggable
-            onDragStart={(e) => {
-              e.stopPropagation();
-              setDragIdx(idx);
-              e.dataTransfer.effectAllowed = 'move';
-              e.dataTransfer.setData('text/plain', String(idx));
+        const baseOpacity = isDraggingThis ? 0.4 : (tab.disabled ? 0.45 : 1);
+
+        return (
+          <div
+            className={`group relative flex items-center gap-1.5 px-3 cursor-pointer transition-colors whitespace-nowrap select-none ${indicatorStyle === 'underline' ? 'py-2.5 border-b-2' : 'py-1.5'}`}
+            style={{
+              ...(cssVars as React.CSSProperties),
+              ...ts,
+              opacity: baseOpacity,
+              ...(isDragTarget ? { boxShadow: '-2px 0 0 0 var(--accent)' } : {}),
+              animation: !editMode && effect === 'pulse' ? 'tabPulse 1.5s ease-in-out infinite'
+                       : !editMode && effect === 'blink' ? 'tabBlink 1s step-end infinite' : undefined,
             }}
-            onDragEnd={() => { setDragIdx(null); setDragOverIdx(null); }}
-            onClick={(e) => e.stopPropagation()}
-            style={{ cursor: 'grab', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', flexShrink: 0 }}
+            onDragOver={editMode && !readonly ? (e) => { e.preventDefault(); setDragOverIdx(idx); } : undefined}
+            onDragEnter={editMode && !readonly ? (e) => { e.preventDefault(); setDragOverIdx(idx); } : undefined}
+            onDragLeave={editMode && !readonly ? () => setDragOverIdx(null) : undefined}
+            onDrop={editMode && !readonly ? (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (dragIdx !== null && dragIdx !== idx) reorderTabs(dragIdx, idx);
+              setDragIdx(null);
+              setDragOverIdx(null);
+            } : undefined}
+            onClick={() => { setConfirmDeleteId(null); handleTabClick(tab.id); }}
           >
-            <GripVertical size={12} />
-          </span>
-        )}
+            {editMode && !readonly && (
+              <span
+                draggable
+                onDragStart={(e) => {
+                  e.stopPropagation();
+                  setDragIdx(idx);
+                  e.dataTransfer.effectAllowed = 'move';
+                  e.dataTransfer.setData('text/plain', String(idx));
+                }}
+                onDragEnd={() => { setDragIdx(null); setDragOverIdx(null); }}
+                onClick={(e) => e.stopPropagation()}
+                style={{ cursor: 'grab', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', flexShrink: 0 }}
+              >
+                <GripVertical size={12} />
+              </span>
+            )}
 
-        {tab.icon && (
-          <span style={{ width: 14, height: 14, flexShrink: 0, display: 'inline-flex', alignItems: 'center' }}>
-            {iconsReady && <Icon icon={tab.icon} width={14} height={14} style={{ color: 'currentColor' }} />}
-          </span>
-        )}
+            {tab.icon && (
+              <span style={{ width: 14, height: 14, flexShrink: 0, display: 'inline-flex', alignItems: 'center' }}>
+                {iconsReady && <Icon icon={tab.icon} width={14} height={14} style={{ color: 'currentColor' }} />}
+              </span>
+            )}
 
-        {!readonly && editingId === tab.id ? (
-          <input ref={inputRef} value={editingName}
-            onChange={(e) => setEditingName(e.target.value)}
-            onBlur={commitRename}
-            onKeyDown={(e) => { if (e.key === 'Enter') commitRename(); if (e.key === 'Escape') setEditingId(null); }}
-            onClick={(e) => e.stopPropagation()}
-            className="w-24 text-sm rounded px-1.5 py-0.5 focus:outline-none"
-            style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--accent)' }} />
-        ) : (
-          (!readonly || !tab.hideLabel) && (
-            <span onDoubleClick={(e) => { if (!readonly) { e.stopPropagation(); setEditingId(tab.id); setEditingName(tab.name); } }}>
-              {tab.name}
-            </span>
-          )
-        )}
+            {!readonly && editingId === tab.id ? (
+              <input ref={inputRef} value={editingName}
+                onChange={(e) => setEditingName(e.target.value)}
+                onBlur={commitRename}
+                onKeyDown={(e) => { if (e.key === 'Enter') commitRename(); if (e.key === 'Escape') setEditingId(null); }}
+                onClick={(e) => e.stopPropagation()}
+                className="w-24 text-sm rounded px-1.5 py-0.5 focus:outline-none"
+                style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--accent)' }} />
+            ) : (
+              (!readonly || !tab.hideLabel) && (
+                <span onDoubleClick={(e) => { if (!readonly) { e.stopPropagation(); setEditingId(tab.id); setEditingName(tab.name); } }}>
+                  {tab.name}
+                </span>
+              )
+            )}
 
-        {!readonly && editMode && (
-          <button
-            ref={(el) => { if (el) settingsBtnRefs.current.set(tab.id, el); else settingsBtnRefs.current.delete(tab.id); }}
-            onClick={(e) => { e.stopPropagation(); openSettings(tab.id); }}
-            className="opacity-0 group-hover:opacity-100 w-4 h-4 flex items-center justify-center rounded transition-all hover:opacity-80"
-            style={{ color: settingsTabId === tab.id ? 'var(--accent)' : 'var(--text-secondary)' }}
-          >
-            <Settings size={11} />
-          </button>
-        )}
+            {!readonly && editMode && (
+              <button
+                ref={(el) => { if (el) settingsBtnRefs.current.set(tab.id, el); else settingsBtnRefs.current.delete(tab.id); }}
+                onClick={(e) => { e.stopPropagation(); openSettings(tab.id); }}
+                className="opacity-0 group-hover:opacity-100 w-4 h-4 flex items-center justify-center rounded transition-all hover:opacity-80"
+                style={{ color: settingsTabId === tab.id ? 'var(--accent)' : 'var(--text-secondary)' }}
+              >
+                <Settings size={11} />
+              </button>
+            )}
 
-        {!readonly && editMode && tabs.length > 1 && (
-          confirmDeleteId === tab.id ? (
-            <>
-              <button onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(null); }}
-                className="w-4 h-4 flex items-center justify-center rounded-full text-xs transition-all hover:opacity-80"
-                style={{ background: 'var(--app-border)', color: 'var(--text-secondary)' }}>✕</button>
-              <button onClick={(e) => { e.stopPropagation(); removeTab(tab.id); setConfirmDeleteId(null); }}
-                className="w-4 h-4 flex items-center justify-center rounded-full text-xs transition-all hover:opacity-80"
-                style={{ background: 'var(--accent-red)', color: '#fff' }}>✓</button>
-            </>
-          ) : (
-            <button onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(tab.id); }}
-              className="opacity-0 group-hover:opacity-100 w-4 h-4 flex items-center justify-center rounded-full text-xs transition-all hover:opacity-80"
-              style={{ background: 'var(--accent-red)', color: '#fff' }}>✕</button>
-          )
-        )}
-      </div>
-    );
-  });
+            {!readonly && editMode && tabs.length > 1 && (
+              confirmDeleteId === tab.id ? (
+                <>
+                  <button onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(null); }}
+                    className="w-4 h-4 flex items-center justify-center rounded-full text-xs transition-all hover:opacity-80"
+                    style={{ background: 'var(--app-border)', color: 'var(--text-secondary)' }}>✕</button>
+                  <button onClick={(e) => { e.stopPropagation(); removeTab(tab.id); setConfirmDeleteId(null); }}
+                    className="w-4 h-4 flex items-center justify-center rounded-full text-xs transition-all hover:opacity-80"
+                    style={{ background: 'var(--accent-red)', color: '#fff' }}>✓</button>
+                </>
+              ) : (
+                <button onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(tab.id); }}
+                  className="opacity-0 group-hover:opacity-100 w-4 h-4 flex items-center justify-center rounded-full text-xs transition-all hover:opacity-80"
+                  style={{ background: 'var(--accent-red)', color: '#fff' }}>✕</button>
+              )
+            )}
+          </div>
+        );
+      }}
+    </TabConditionWrapper>
+  ));
 
   // ── Tab settings portal ──────────────────────────────────────────────────────
   const settingsPanel = settingsTabId && settingsTab
@@ -347,10 +381,11 @@ export function TabBar({ readonly = false, viewTabs, viewActiveTabId, onViewTabC
         <>
           <div className="fixed inset-0 z-[998]" onClick={() => setSettingsTabId(null)} />
           <div
-            className="fixed z-[999] rounded-xl shadow-2xl p-3 space-y-3 w-64"
+            className="fixed z-[999] rounded-xl shadow-2xl p-3 space-y-3"
             style={{
               top: panelPos.top,
               left: panelPos.left,
+              width: conditionsOpen ? 500 : 256,
               background: 'var(--app-surface)',
               backdropFilter: 'blur(20px)',
               WebkitBackdropFilter: 'blur(20px)',
@@ -383,6 +418,22 @@ export function TabBar({ readonly = false, viewTabs, viewActiveTabId, onViewTabC
               </button>
             </div>
 
+            <div className="flex items-center justify-between">
+              <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{t('tabBar.disabled')}</label>
+              <button
+                onClick={() => {
+                  const nonDisabledCount = tabs.filter((t) => !t.disabled).length;
+                  if (!settingsTab.disabled && nonDisabledCount <= 1) return; // last visible tab
+                  updateTab(settingsTabId, { disabled: !settingsTab.disabled });
+                }}
+                className="relative w-9 h-5 rounded-full transition-colors shrink-0"
+                style={{ background: settingsTab.disabled ? 'var(--accent)' : 'var(--app-border)' }}
+              >
+                <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                  style={{ left: settingsTab.disabled ? '18px' : '2px' }} />
+              </button>
+            </div>
+
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{t('tabBar.icon')}</label>
@@ -410,6 +461,38 @@ export function TabBar({ readonly = false, viewTabs, viewActiveTabId, onViewTabC
                   );
                 })}
               </div>
+            </div>
+
+            {/* ── Conditions section ──────────────────────────────────────── */}
+            <div className="border-t pt-2" style={{ borderColor: 'var(--app-border)' }}>
+              <button
+                className="flex items-center gap-1.5 w-full text-left hover:opacity-80"
+                onClick={() => setConditionsOpen((o) => !o)}
+              >
+                <span style={{ color: 'var(--text-secondary)' }}>
+                  {conditionsOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                </span>
+                <span className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>
+                  {t('tabBar.conditions')}
+                  {(settingsTab.conditions?.length ?? 0) > 0 && (
+                    <span className="ml-1.5 px-1 rounded-full text-[9px]"
+                      style={{ background: 'var(--accent)22', color: 'var(--accent)' }}>
+                      {settingsTab.conditions!.length}
+                    </span>
+                  )}
+                </span>
+              </button>
+
+              {conditionsOpen && (
+                <div className="mt-2">
+                  <ConditionEditor
+                    conditions={settingsTab.conditions ?? []}
+                    onChange={(next) => updateTab(settingsTabId, { conditions: next })}
+                    context="tab"
+                    style={{ width: '100%', padding: 0 }}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </>,

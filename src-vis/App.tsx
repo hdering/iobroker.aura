@@ -244,6 +244,14 @@ export default function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layout?.id]);
 
+  // If active tab is disabled, jump to the first non-disabled tab
+  useEffect(() => {
+    const active = tabs.find((t) => t.id === activeTabId);
+    if (!active || !active.disabled) return;
+    const next = tabs.find((t) => !t.disabled);
+    if (next) setActiveTabId(next.id);
+  }, [tabs, activeTabId]);
+
   // Clear iFrame fullscreen overlay whenever the active tab changes.
   const setIframeFullscreen = useIframeStore((s) => s.setFullscreen);
   useEffect(() => {

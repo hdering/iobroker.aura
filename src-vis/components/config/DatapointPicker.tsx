@@ -4,6 +4,7 @@ import { RefreshCw, Search, X, Check } from 'lucide-react';
 import { useDatapointList, type DatapointEntry } from '../../hooks/useDatapointList';
 import { useT } from '../../i18n';
 import { isRelevantDp } from '../../utils/dpRelevance';
+import { usePortalThemeVars } from '../../contexts/PortalTargetContext';
 
 interface DatapointPickerProps {
   currentValue: string;
@@ -20,6 +21,7 @@ const MAX_DISPLAY = 250;
 
 export function DatapointPicker({ currentValue, onSelect, onClose, multiSelect, onMultiSelect, allowedTypes }: DatapointPickerProps) {
   const t = useT();
+  const themeVars = usePortalThemeVars();
   const { datapoints, loading, loaded, load } = useDatapointList();
   // Pre-fill search with the current value so the DP is immediately visible.
   // The user can delete characters from the end to broaden the search.
@@ -44,6 +46,7 @@ export function DatapointPicker({ currentValue, onSelect, onClose, multiSelect, 
   const onDragMouseDown = useCallback((e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('button')) return;
     e.preventDefault();
+    e.stopPropagation();
     dragOrigin.current = { mx: e.clientX, my: e.clientY, px: posRef.current.x, py: posRef.current.y };
     const onMove = (ev: MouseEvent) => {
       if (!dragOrigin.current) return;
@@ -57,11 +60,11 @@ export function DatapointPicker({ currentValue, onSelect, onClose, multiSelect, 
     };
     const onUp = () => {
       dragOrigin.current = null;
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
+      window.removeEventListener('mousemove', onMove, true);
+      window.removeEventListener('mouseup', onUp, true);
     };
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
+    window.addEventListener('mousemove', onMove, true);
+    window.addEventListener('mouseup', onUp, true);
   }, []);
 
   const onResizeMouseDown = useCallback((e: React.MouseEvent) => {
@@ -80,11 +83,11 @@ export function DatapointPicker({ currentValue, onSelect, onClose, multiSelect, 
     };
     const onUp = () => {
       resizeOrigin.current = null;
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
+      window.removeEventListener('mousemove', onMove, true);
+      window.removeEventListener('mouseup', onUp, true);
     };
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
+    window.addEventListener('mousemove', onMove, true);
+    window.addEventListener('mouseup', onUp, true);
   }, []);
 
   // Cancel any drag active in underlying RGL when the picker opens.
@@ -156,9 +159,11 @@ export function DatapointPicker({ currentValue, onSelect, onClose, multiSelect, 
   return createPortal(
     <div
       className="fixed inset-0 bg-black/70 z-[9999]"
+      style={themeVars}
       onMouseDown={(e) => e.stopPropagation()}
       onMouseMove={(e) => e.stopPropagation()}
       onMouseUp={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
     >
       <div
         className="rounded-xl flex flex-col shadow-2xl"

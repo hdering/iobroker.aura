@@ -1,11 +1,13 @@
 import { useState, useMemo, useRef, useEffect, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { shallow } from 'zustand/shallow';
-import { Plus, Trash2, Edit3, Check, Database, Wand2, Smartphone, GripVertical, Upload, Settings, X, Ruler } from 'lucide-react';
+import { Plus, Trash2, Edit3, Check, Database, Wand2, Smartphone, GripVertical, Upload, Settings, X, Ruler, ChevronDown, ChevronRight } from 'lucide-react';
 import { ImportWidgetDialog } from '../../components/config/ImportWidgetDialog';
 import { Icon } from '@iconify/react';
 import { CURATED_ICON_IDS, getWidgetIcon } from '../../utils/widgetIconMap';
 import { useDashboardStore } from '../../store/dashboardStore';
+import { ConditionEditor } from '../../components/config/ConditionEditor';
+import { usePortalTarget } from '../../contexts/PortalTargetContext';
 import { useGroupStore } from '../../store/groupStore';
 import { Dashboard } from '../../components/layout/Dashboard';
 import { TabWizard } from '../../components/config/TabWizard';
@@ -769,6 +771,7 @@ function MobileOrderPanel({ layoutId }: { layoutId: string }) {
 // does not trigger a re-render. Only `activeTabId` changes on each switch.
 const TabBar = memo(function TabBar() {
   const t = useT();
+  const portalTarget = usePortalTarget();
 
   const tabs = useDashboardStore((s) => (s.layouts.find((l) => l.id === s.activeLayoutId) ?? s.layouts[0]).tabs);
   const activeTabId = useDashboardStore((s) => (s.layouts.find((l) => l.id === s.activeLayoutId) ?? s.layouts[0]).activeTabId);
@@ -782,6 +785,7 @@ const TabBar = memo(function TabBar() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [settingsTabId, setSettingsTabId] = useState<string | null>(null);
   const [panelPos, setPanelPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const [conditionsOpen, setConditionsOpen] = useState(false);
   const settingsBtnRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
   const [tabDragIdx, setTabDragIdx] = useState<number | null>(null);
   const [tabDragOverIdx, setTabDragOverIdx] = useState<number | null>(null);
@@ -806,7 +810,7 @@ const TabBar = memo(function TabBar() {
     const panelW = 256;
     const left = Math.min(rect.left, window.innerWidth - panelW - 12);
     setPanelPos({ top: rect.bottom + 6, left: Math.max(8, left) });
-    setSettingsTabId((prev) => (prev === tabId ? null : tabId));
+    setSettingsTabId((prev) => { if (prev !== tabId) setConditionsOpen(false); return prev === tabId ? null : tabId; });
   };
 
   const settingsTab = tabs.find((t) => t.id === settingsTabId);
@@ -854,7 +858,7 @@ const TabBar = memo(function TabBar() {
                     style={{
                       background: isActive ? 'var(--accent)22' : 'var(--app-surface)',
                       border: `1px solid ${isActive ? 'var(--accent)' : 'var(--app-border)'}`,
-                      opacity: tabDragIdx === idx ? 0.4 : 1,
+                      opacity: tabDragIdx === idx ? 0.4 : tab.disabled ? 0.45 : 1,
                     }}>
                     <span
                       draggable
@@ -925,8 +929,8 @@ const TabBar = memo(function TabBar() {
         <>
           <div className="fixed inset-0 z-[998]" onClick={() => setSettingsTabId(null)} />
           <div
-            className="aura-scroll fixed z-[999] rounded-xl shadow-2xl p-3 space-y-3 w-64 overflow-y-auto"
-            style={{ top: panelPos.top, left: panelPos.left, maxHeight: `calc(100vh - ${panelPos.top + 12}px)`, background: 'var(--app-surface)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid var(--app-border)' }}
+            className="aura-scroll fixed z-[999] rounded-xl shadow-2xl p-3 space-y-3 overflow-y-auto"
+            style={{ top: panelPos.top, left: panelPos.left, width: conditionsOpen ? 500 : 256, maxHeight: `calc(100vh - ${panelPos.top + 12}px)`, background: 'var(--app-surface)', border: '1px solid var(--app-border)', color: 'var(--text-primary)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{t('editor.tabMgmt.settings')}</span>
@@ -979,6 +983,21 @@ const TabBar = memo(function TabBar() {
                   style={{ left: settingsTab.hideLabel ? '18px' : '2px' }} />
               </button>
             </div>
+            <div className="flex items-center justify-between">
+              <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{t('editor.tabMgmt.disabled')}</label>
+              <button
+                onClick={() => {
+                  const nonDisabledCount = tabs.filter((t) => !t.disabled).length;
+                  if (!settingsTab.disabled && nonDisabledCount <= 1) return;
+                  updateTab(settingsTabId, { disabled: !settingsTab.disabled });
+                }}
+                className="relative w-9 h-5 rounded-full transition-colors shrink-0"
+                style={{ background: settingsTab.disabled ? 'var(--accent)' : 'var(--app-border)' }}
+              >
+                <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                  style={{ left: settingsTab.disabled ? '18px' : '2px' }} />
+              </button>
+            </div>
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{t('editor.tabMgmt.icon')}</label>
@@ -1007,9 +1026,41 @@ const TabBar = memo(function TabBar() {
                 })}
               </div>
             </div>
+
+            {/* ── Conditions section ──────────────────────────────────────── */}
+            <div className="border-t pt-2" style={{ borderColor: 'var(--app-border)' }}>
+              <button
+                className="flex items-center gap-1.5 w-full text-left hover:opacity-80"
+                onClick={() => setConditionsOpen((o) => !o)}
+              >
+                <span style={{ color: 'var(--text-secondary)' }}>
+                  {conditionsOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                </span>
+                <span className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>
+                  {t('editor.tabMgmt.conditions')}
+                  {(settingsTab.conditions?.length ?? 0) > 0 && (
+                    <span className="ml-1.5 px-1 rounded-full text-[9px]"
+                      style={{ background: 'var(--accent)22', color: 'var(--accent)' }}>
+                      {settingsTab.conditions!.length}
+                    </span>
+                  )}
+                </span>
+              </button>
+
+              {conditionsOpen && (
+                <div className="mt-2">
+                  <ConditionEditor
+                    conditions={settingsTab.conditions ?? []}
+                    onChange={(next) => updateTab(settingsTabId, { conditions: next })}
+                    context="tab"
+                    style={{ width: '100%', padding: 0 }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </>,
-        document.body,
+        portalTarget,
       )}
     </>
   );

@@ -12,3 +12,15 @@ export const PortalTargetContext = createContext<Element | null>(null);
 export function usePortalTarget(): Element {
   return useContext(PortalTargetContext) ?? document.body;
 }
+
+/**
+ * Provides admin theme CSS variables as a style object.
+ * Used by portals that must render to document.body (e.g. draggable dialogs
+ * that need position:fixed relative to the viewport) but still need to inherit
+ * the admin theme rather than the frontend theme.
+ */
+export const PortalThemeContext = createContext<React.CSSProperties>({});
+
+export function usePortalThemeVars(): React.CSSProperties {
+  return useContext(PortalThemeContext);
+}

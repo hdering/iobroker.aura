@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useConfigSync } from '../../hooks/useConfigSync';
 import { version as appVersion } from '../../../package.json';
-import { PortalTargetContext } from '../../contexts/PortalTargetContext';
+import { PortalTargetContext, PortalThemeContext } from '../../contexts/PortalTargetContext';
 import { Navigate, Outlet, NavLink } from 'react-router-dom';
 import { LayoutDashboard, Palette, Settings, LogOut, PenSquare, Save, Undo2, Layers, Layers2, Sun, Moon, ExternalLink, Menu, X } from 'lucide-react';
 import { useAuthStore, logout } from '../../store/authStore';
@@ -181,6 +181,7 @@ export function AdminLayout() {
   if (!sessionActive) return <Navigate to="/admin/login" replace />;
 
   return (
+    <PortalThemeContext.Provider value={adminVars}>
     <PortalTargetContext.Provider value={portalTarget}>
     <div className="min-h-screen flex" style={{
       ...adminVars,
@@ -321,5 +322,6 @@ export function AdminLayout() {
       <div ref={setPortalTarget} />
     </div>
     </PortalTargetContext.Provider>
+    </PortalThemeContext.Provider>
   );
 }

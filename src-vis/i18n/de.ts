@@ -376,15 +376,17 @@ export const de = {
   'editor.mobile.bottom': 'Unten',
   'editor.mobile.hidden': 'Versteckt',
 
-  'editor.tabMgmt.title':     'Tab-Verwaltung',
-  'editor.tabMgmt.settings':  'Tab-Einstellungen',
-  'editor.tabMgmt.name':      'Name',
-  'editor.tabMgmt.hideLabel': 'Beschriftung ausblenden',
-  'editor.tabMgmt.icon':      'Icon',
-  'editor.tabMgmt.slug':      'URL-Slug',
-  'editor.tabMgmt.slugTaken': 'Bereits vergeben',
-  'editor.tabMgmt.remove':    'Entfernen',
-  'editor.tabMgmt.delete':    'Tab löschen',
+  'editor.tabMgmt.title':        'Tab-Verwaltung',
+  'editor.tabMgmt.settings':     'Tab-Einstellungen',
+  'editor.tabMgmt.name':         'Name',
+  'editor.tabMgmt.hideLabel':    'Beschriftung ausblenden',
+  'editor.tabMgmt.disabled':     'Tab deaktiviert',
+  'editor.tabMgmt.conditions':   'Bedingungen',
+  'editor.tabMgmt.icon':         'Icon',
+  'editor.tabMgmt.slug':         'URL-Slug',
+  'editor.tabMgmt.slugTaken':    'Bereits vergeben',
+  'editor.tabMgmt.remove':       'Entfernen',
+  'editor.tabMgmt.delete':       'Tab löschen',
 
   // ── WidgetFrame menu & edit modal ─────────────────────────────────────────────
   'wf.menu.edit':             'Bearbeiten',
@@ -542,12 +544,15 @@ export const de = {
   'lc.nYears':       'vor {n} Jahren',
 
   // ── TabBar ────────────────────────────────────────────────────────────────────
-  'tabBar.settings':  'Tab-Einstellungen',
-  'tabBar.name':      'Name',
-  'tabBar.hideLabel': 'Beschriftung ausblenden',
-  'tabBar.icon':      'Icon',
-  'tabBar.remove':    'Entfernen',
-  'tabBar.addTab':    '+ Tab',
+  'tabBar.settings':      'Tab-Einstellungen',
+  'tabBar.name':          'Name',
+  'tabBar.hideLabel':     'Beschriftung ausblenden',
+  'tabBar.disabled':      'Tab deaktiviert',
+  'tabBar.conditions':    'Bedingungen',
+  'tabBar.hideTabOnCond': 'Tab verbergen wenn Bedingung zutrifft',
+  'tabBar.icon':          'Icon',
+  'tabBar.remove':        'Entfernen',
+  'tabBar.addTab':        '+ Tab',
 
   // ── Frontend Dashboard ────────────────────────────────────────────────────────
   'frontend.noWidgets':   'Keine Widgets konfiguriert.',

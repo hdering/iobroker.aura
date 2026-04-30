@@ -378,15 +378,17 @@ export const en: Record<TranslationKey, string> = {
   'editor.mobile.bottom': 'Bottom',
   'editor.mobile.hidden': 'Hidden',
 
-  'editor.tabMgmt.title':     'Tab Management',
-  'editor.tabMgmt.settings':  'Tab Settings',
-  'editor.tabMgmt.name':      'Name',
-  'editor.tabMgmt.hideLabel': 'Hide Label',
-  'editor.tabMgmt.icon':      'Icon',
-  'editor.tabMgmt.slug':      'URL Slug',
-  'editor.tabMgmt.slugTaken': 'Already taken',
-  'editor.tabMgmt.remove':    'Remove',
-  'editor.tabMgmt.delete':    'Delete Tab',
+  'editor.tabMgmt.title':        'Tab Management',
+  'editor.tabMgmt.settings':     'Tab Settings',
+  'editor.tabMgmt.name':         'Name',
+  'editor.tabMgmt.hideLabel':    'Hide Label',
+  'editor.tabMgmt.disabled':     'Tab disabled',
+  'editor.tabMgmt.conditions':   'Conditions',
+  'editor.tabMgmt.icon':         'Icon',
+  'editor.tabMgmt.slug':         'URL Slug',
+  'editor.tabMgmt.slugTaken':    'Already taken',
+  'editor.tabMgmt.remove':       'Remove',
+  'editor.tabMgmt.delete':       'Delete Tab',
 
   // ── WidgetFrame menu & edit modal ─────────────────────────────────────────────
   'wf.menu.edit':             'Edit',
@@ -544,12 +546,15 @@ export const en: Record<TranslationKey, string> = {
   'lc.nYears':       '{n} years ago',
 
   // ── TabBar ────────────────────────────────────────────────────────────────────
-  'tabBar.settings':  'Tab Settings',
-  'tabBar.name':      'Name',
-  'tabBar.hideLabel': 'Hide Label',
-  'tabBar.icon':      'Icon',
-  'tabBar.remove':    'Remove',
-  'tabBar.addTab':    '+ Tab',
+  'tabBar.settings':      'Tab Settings',
+  'tabBar.name':          'Name',
+  'tabBar.hideLabel':     'Hide Label',
+  'tabBar.disabled':      'Tab disabled',
+  'tabBar.conditions':    'Conditions',
+  'tabBar.hideTabOnCond': 'Hide tab when condition matches',
+  'tabBar.icon':          'Icon',
+  'tabBar.remove':        'Remove',
+  'tabBar.addTab':        '+ Tab',
 
   // ── Frontend Dashboard ────────────────────────────────────────────────────────
   'frontend.noWidgets':  'No widgets configured.',

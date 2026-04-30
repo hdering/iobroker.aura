@@ -194,10 +194,12 @@ function ConditionRule({
   condition,
   onChange,
   onDelete,
+  context = 'widget',
 }: {
   condition: WidgetCondition;
   onChange: (c: WidgetCondition) => void;
   onDelete: () => void;
+  context?: 'widget' | 'tab';
 }) {
   const t = useT();
   const [open, setOpen] = useState(true);
@@ -314,12 +316,16 @@ function ConditionRule({
             </select>
           </div>
 
-          {/* Hide widget */}
+          {/* Hide widget / tab */}
           <div className="h-px" style={{ background: 'var(--app-border)' }} />
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-medium" style={{ color: 'var(--text-primary)' }}>{t('cond.hideWidget')}</p>
-              <p className="text-[9px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>{t('cond.hideWidgetHint')}</p>
+              <p className="text-[10px] font-medium" style={{ color: 'var(--text-primary)' }}>
+                {context === 'tab' ? t('tabBar.hideTabOnCond') : t('cond.hideWidget')}
+              </p>
+              {context !== 'tab' && (
+                <p className="text-[9px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>{t('cond.hideWidgetHint')}</p>
+              )}
             </div>
             <button
               onClick={() => onChange({ ...condition, hideWidget: !condition.hideWidget, reflow: condition.hideWidget ? false : condition.reflow })}
@@ -330,7 +336,7 @@ function ConditionRule({
                 style={{ left: condition.hideWidget ? '18px' : '2px' }} />
             </button>
           </div>
-          {condition.hideWidget && (
+          {context !== 'tab' && condition.hideWidget && (
             <div className="flex items-center justify-between pl-3 border-l-2" style={{ borderColor: 'var(--accent)44' }}>
               <div>
                 <p className="text-[10px] font-medium" style={{ color: 'var(--text-primary)' }}>{t('cond.pushOthers')}</p>
@@ -357,9 +363,11 @@ function ConditionRule({
 interface ConditionEditorProps {
   conditions: WidgetCondition[];
   onChange: (conditions: WidgetCondition[]) => void;
+  context?: 'widget' | 'tab';
+  style?: React.CSSProperties;
 }
 
-export function ConditionEditor({ conditions, onChange }: ConditionEditorProps) {
+export function ConditionEditor({ conditions, onChange, context = 'widget', style }: ConditionEditorProps) {
   const t = useT();
   const update = (i: number, c: WidgetCondition) =>
     onChange(conditions.map((x, j) => (j === i ? c : x)));
@@ -368,7 +376,7 @@ export function ConditionEditor({ conditions, onChange }: ConditionEditorProps) 
     onChange(conditions.filter((_, j) => j !== i));
 
   return (
-    <div className="p-3 space-y-2.5" style={{ width: '480px' }} onMouseDown={(e) => e.stopPropagation()}>
+    <div className="p-3 space-y-2.5" style={{ width: '480px', ...style }} onMouseDown={(e) => e.stopPropagation()}>
       <div className="flex items-center justify-between mb-1">
         <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{t('cond.rules')}</p>
         <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>
@@ -388,6 +396,7 @@ export function ConditionEditor({ conditions, onChange }: ConditionEditorProps) 
           condition={cond}
           onChange={(c) => update(i, c)}
           onDelete={() => remove(i)}
+          context={context}
         />
       ))}
 

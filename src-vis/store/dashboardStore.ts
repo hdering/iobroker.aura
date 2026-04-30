@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { managedStorage, flushKey } from './persistManager';
 import { useGroupDefsStore, newGroupDefId, cloneGroupDef } from './groupDefsStore';
 import { slugify } from '../utils/slugify';
-import type { WidgetConfig } from '../types';
+import type { WidgetConfig, WidgetCondition } from '../types';
 import type { ThemeVars } from '../themes';
 
 // ── Tab bar items (clock / datapoint / static text) ───────────────────────────
@@ -67,8 +67,10 @@ export interface Tab {
   name: string;
   slug: string;
   widgets: WidgetConfig[];
-  icon?: string;       // icon name from WIDGET_ICON_MAP
-  hideLabel?: boolean; // show only icon, hide text
+  icon?: string;        // icon name from WIDGET_ICON_MAP
+  hideLabel?: boolean;  // show only icon, hide text
+  disabled?: boolean;   // hidden in frontend, shown grayed-out in editor
+  conditions?: WidgetCondition[]; // DP-based style/visibility conditions for tab button
 }
 
 export interface DashboardLayout {
@@ -170,7 +172,7 @@ interface DashboardState {
   addTab: (name: string) => void;
   removeTab: (id: string) => void;
   renameTab: (id: string, name: string) => void;
-  updateTab: (id: string, patch: Partial<Pick<Tab, 'name' | 'slug' | 'icon' | 'hideLabel'>>) => void;
+  updateTab: (id: string, patch: Partial<Pick<Tab, 'name' | 'slug' | 'icon' | 'hideLabel' | 'disabled' | 'conditions'>>) => void;
   setTabSlug: (id: string, slug: string) => void;
   setActiveTab: (id: string) => void;
   reorderTabs: (fromIndex: number, toIndex: number) => void;
