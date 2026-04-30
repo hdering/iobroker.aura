@@ -44,7 +44,8 @@ export type WidgetType =
   | 'html'
   | 'datepicker'
   | 'mediaplayer'
-  | 'slider';
+  | 'slider'
+  | 'trashSchedule';
 
 export type WidgetLayout = 'default' | 'card' | 'compact' | 'minimal' | 'agenda' | 'flow' | 'battery' | 'production' | 'consumption' | 'loadpoints' | 'custom' | 'count';
 

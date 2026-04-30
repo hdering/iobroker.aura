@@ -52,6 +52,7 @@ import { ImageWidget } from '../widgets/ImageWidget';
 import { IframeWidget } from '../widgets/IframeWidget';
 import { FillWidget } from '../widgets/FillWidget';
 import { TrashWidget, TrashConfig } from '../widgets/TrashWidget';
+import { TrashScheduleWidget, TrashScheduleConfig } from '../widgets/TrashScheduleWidget';
 import { AutoListWidget } from '../widgets/AutoListWidget';
 import { ShutterWidget } from '../widgets/ShutterWidget';
 import { JsonTableWidget } from '../widgets/JsonTableWidget';
@@ -93,7 +94,8 @@ function getWidgetMap() {
     image:      ImageWidget,
     iframe:     IframeWidget,
     fill:       FillWidget,
-    trash:      TrashWidget,
+    trash:         TrashWidget,
+    trashSchedule: TrashScheduleWidget,
     shutter:       ShutterWidget,
     jsontable:     JsonTableWidget,
     html:          HtmlWidget,
@@ -529,6 +531,15 @@ function ChartHistoryConfig({ config, onConfigChange }: { config: WidgetConfig; 
               className="rounded"
             />
             <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Durchschnittslinie anzeigen</span>
+          </label>
+          <label className="flex items-center gap-2 mt-1 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={(o.showAverageAsValue as boolean | undefined) ?? false}
+              onChange={(e) => set({ showAverageAsValue: e.target.checked })}
+              className="rounded"
+            />
+            <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Ø als Zahlenwert anzeigen</span>
           </label>
         </div>
       )}
@@ -2213,7 +2224,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
       {openPanel === 'edit' && (
         <CenteredModal
           title={<>{t('wf.edit.title')} <span className="relative inline-flex items-center"><span className="text-[10px] font-mono opacity-40 ml-1 font-normal cursor-pointer hover:opacity-70 active:opacity-50 select-none" title="ID kopieren" onClick={() => { copyToClipboard(config.id); setIdCopied(true); setTimeout(() => setIdCopied(false), 1500); }}>({config.id})</span>{idCopied && <span className="absolute left-full ml-1 whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-sans font-normal" style={{ background: 'var(--accent)', color: '#fff', opacity: 1 }}>Kopiert!</span>}</span></>}
-          wide={config.type === 'echart' || config.type === 'autolist' || config.type === 'list' || config.type === 'trash'}
+          wide={config.type === 'echart' || config.type === 'autolist' || config.type === 'list' || config.type === 'trash' || config.type === 'trashSchedule'}
           onClose={() => openPanelFor(null)}
         >
           {/* ─── 1. Name / Titel ──────────────────────────────────────────── */}
@@ -2396,6 +2407,8 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
               ] : config.type === 'slider' ? [
                 { value: 'default', label: t('wf.edit.layout.standard') },
                 { value: 'custom',  label: 'Custom' },
+              ] : config.type === 'group' ? [
+                { value: 'default', label: t('wf.edit.layout.standard') },
               ] : [
                 { value: 'default', label: t('wf.edit.layout.standard') },
                 { value: 'card',    label: t('wf.edit.layout.card') },
@@ -2403,7 +2416,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                 { value: 'minimal', label: t('wf.edit.layout.minimal') },
                 ...(config.type === 'calendar' ? [{ value: 'agenda', label: t('wf.edit.layout.agenda') }] : []),
                 ...(config.type === 'autolist' ? [{ value: 'count', label: 'Anzahl' }] : []),
-                ...(!['iframe', 'jsontable', 'html', 'trash', 'header', 'fill', 'list', 'autolist', 'datepicker'].includes(config.type) ? [{ value: 'custom', label: 'Custom' }] : []),
+                ...(!['iframe', 'jsontable', 'html', 'trash', 'trashSchedule', 'header', 'fill', 'list', 'autolist', 'datepicker'].includes(config.type) ? [{ value: 'custom', label: 'Custom' }] : []),
                 ...(config.type === 'evcc' ? [
                   { value: 'flow',        label: 'Nur Fluss' },
                   { value: 'battery',     label: 'Nur Batterie' },
@@ -2583,7 +2596,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
             })()}
 
             {/* Icon-Größe */}
-            {!['clock', 'calendar', 'gauge', 'chart', 'echart', 'echartsPreset', 'fill', 'iframe', 'html', 'jsontable', 'image', 'camera', 'list', 'autolist', 'header', 'trash', 'evcc', 'weather', 'group'].includes(config.type) && (() => {
+            {!['clock', 'calendar', 'gauge', 'chart', 'echart', 'echartsPreset', 'fill', 'iframe', 'html', 'jsontable', 'image', 'camera', 'list', 'autolist', 'header', 'trash', 'trashSchedule', 'evcc', 'weather', 'group'].includes(config.type) && (() => {
               const o = config.options ?? {};
               const iconSize = (o.iconSize as number) || 36;
               const displayIconSize = draftIconSize ?? iconSize;
@@ -2678,7 +2691,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                 <CalendarEditPanel config={config} onConfigChange={onConfigChange} />
               )}
 
-              {config.type !== 'list' && config.type !== 'clock' && config.type !== 'calendar' && config.type !== 'header' && config.type !== 'group' && config.type !== 'evcc' && config.type !== 'echart' && config.type !== 'weather' && config.type !== 'camera' && config.type !== 'autolist' && config.type !== 'image' && config.type !== 'iframe' && config.type !== 'trash' && config.type !== 'echartsPreset' && config.type !== 'html' && (
+              {config.type !== 'list' && config.type !== 'clock' && config.type !== 'calendar' && config.type !== 'header' && config.type !== 'group' && config.type !== 'evcc' && config.type !== 'echart' && config.type !== 'weather' && config.type !== 'camera' && config.type !== 'autolist' && config.type !== 'image' && config.type !== 'iframe' && config.type !== 'trash' && config.type !== 'trashSchedule' && config.type !== 'echartsPreset' && config.type !== 'html' && (
                 <div>
                   <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
                     {config.type === 'thermostat'     ? 'Soll-Temperatur Datenpunkt' :
@@ -3569,6 +3582,11 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                 <TrashConfig config={config} onConfigChange={onConfigChange} />
               )}
 
+              {/* ── TrashSchedule / Müllabfuhr-Zeitplan config ── */}
+              {config.type === 'trashSchedule' && (
+                <TrashScheduleConfig config={config} onConfigChange={onConfigChange} />
+              )}
+
               {config.type === 'dimmer' && (() => {
                 const o = config.options ?? {};
                 const setO = (patch: Record<string, unknown>) =>
@@ -4371,7 +4389,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
               })()}
 
               {/* ── Custom-Grid editor (all widgets except excluded) ── */}
-              {!['iframe', 'jsontable', 'html', 'trash', 'header', 'fill', 'camera', 'datepicker'].includes(config.type) && (config.layout ?? 'default') === 'custom' && (() => {
+              {!['iframe', 'jsontable', 'html', 'trash', 'trashSchedule', 'header', 'fill', 'camera', 'datepicker'].includes(config.type) && (config.layout ?? 'default') === 'custom' && (() => {
                 const CELL_LABELS: Record<string, string> = {
                   empty: '–', title: 'Titel', value: 'Wert', unit: 'Einheit', text: 'Text', dp: 'DP', field: 'Feld', component: 'Aktion',
                 };

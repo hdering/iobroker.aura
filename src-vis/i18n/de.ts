@@ -705,6 +705,7 @@ export const de = {
   'widget.camera':        'Kamera',
   'widget.image':         'Bild',
   'widget.trash':         'Müllabfuhr',
+  'widget.trashSchedule': 'Müllabfuhr-Zeitplan',
   'widget.iframe':        'iFrame',
   'widget.jsontable':     'JSON-Tabelle',
   'widget.html':          'HTML',

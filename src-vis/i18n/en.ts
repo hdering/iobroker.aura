@@ -707,6 +707,7 @@ export const en: Record<TranslationKey, string> = {
   'widget.camera':        'Camera',
   'widget.image':         'Image',
   'widget.trash':         'Waste Collection',
+  'widget.trashSchedule': 'Waste Collection Schedule',
   'widget.iframe':        'iFrame',
   'widget.jsontable':     'JSON Table',
   'widget.html':          'HTML',

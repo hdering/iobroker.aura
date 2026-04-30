@@ -27,7 +27,7 @@ export const TRASH_ICON_OPTIONS: { name: string; label: string }[] = [
   { name: 'Truck',         label: 'Sperrmüll' },
 ];
 
-const ICON_MAP: Record<string, LucideIcon> = {
+export const ICON_MAP: Record<string, LucideIcon> = {
   Trash2, Newspaper, Archive, Leaf, TreeDeciduous, Scissors,
   Recycle, Package, ShoppingBag, GlassWater, Wine,
   Battery, Flame, Truck,
