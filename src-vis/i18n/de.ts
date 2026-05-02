@@ -740,7 +740,6 @@ export const de = {
   'weather.warnSeverity.moderate': 'Mäßig',
   'weather.warnSeverity.severe':   'Stark',
   'weather.warnSeverity.extreme':  'Extrem',
-  'weather.localSensor':     '(Eigener Sensor)',
 
   // ── Calendar Widget ───────────────────────────────────────────────────────────
   'calendar.title':      'Kalender',

@@ -742,7 +742,6 @@ export const en: Record<TranslationKey, string> = {
   'weather.warnSeverity.moderate': 'Moderate',
   'weather.warnSeverity.severe':   'Severe',
   'weather.warnSeverity.extreme':  'Extreme',
-  'weather.localSensor':     '(Local sensor)',
 
   // ── Calendar Widget ───────────────────────────────────────────────────────────
   'calendar.title':      'Calendar',

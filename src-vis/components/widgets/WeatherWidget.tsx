@@ -215,7 +215,6 @@ export function WeatherWidget({ config }: WidgetProps) {
           <span className="text-4xl font-black tabular-nums" style={{ color: 'var(--text-primary)' }}>
             {Math.round(localTemp)}°
           </span>
-          <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{t('weather.localSensor')}</span>
         </div>
       );
     }
@@ -248,7 +247,6 @@ export function WeatherWidget({ config }: WidgetProps) {
   const onlineTemp = data ? Math.round(data.current.temperature_2m) : null;
   const displayTemp = localTemp !== null ? Math.round(localTemp) : onlineTemp ?? 0;
   const tempStr = `${displayTemp}°C`;
-  const localLabel = localTemp !== null ? ` ${t('weather.localSensor')}` : '';
 
   const cur  = data!.current;
   const info = getWeatherInfo(cur.weather_code, t);
@@ -278,7 +276,6 @@ export function WeatherWidget({ config }: WidgetProps) {
           <span className="text-3xl font-black tabular-nums" style={{ color: 'var(--text-primary)' }}>
             {displayTemp}°
           </span>
-          {localLabel && <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{localLabel}</span>}
         </div>
         {showWarnings && (
           <div className="shrink-0">
@@ -337,9 +334,6 @@ export function WeatherWidget({ config }: WidgetProps) {
             <span className="font-bold" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
               {info.desc}, {tempStr}
             </span>
-            {localLabel && (
-              <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{localLabel}</span>
-            )}
           </div>
           <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
             💧 {cur.relative_humidity_2m}% {t('weather.humidity')}
