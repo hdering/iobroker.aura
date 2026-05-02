@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Music, Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Speaker,
@@ -233,6 +233,25 @@ export function MediaplayerWidget({ config }: WidgetProps) {
     setState(chip.dp, chip.value !== undefined ? chip.value : true);
   };
 
+  // muteViaVolume: Mute durch Volume=0 (z.B. Alexa unterstützt kein echtes Mute-Write)
+  const muteViaVolume = !!(o.muteViaVolume);
+  const [savedVolPct, setSavedVolPct] = useState<number | null>(null);
+  const isActuallyMuted = muteViaVolume ? volPct === 0 : Boolean(muted);
+
+  const handleMute = () => {
+    if (muteViaVolume) {
+      if (volPct === 0) {
+        writeVol(savedVolPct ?? 50);
+        setSavedVolPct(null);
+      } else {
+        setSavedVolPct(volPct);
+        writeVol(0);
+      }
+    } else if (typeof o.muteDp === 'string' && o.muteDp) {
+      setState(o.muteDp, !muted);
+    }
+  };
+
   // Sichtbarkeits-Defaults (konfigurierbar via options.show*)
   const showCover    = o.showCover    !== false;
   const showTitle    = o.showTitle    !== false;
@@ -243,7 +262,7 @@ export function MediaplayerWidget({ config }: WidgetProps) {
   const showPrev     = o.showPrev     !== false && !!(o.prevDp);
   const showNext     = o.showNext     !== false && !!(o.nextDp);
   const showVolume   = o.showVolume   !== false && !!(o.volumeDp);
-  const showMute     = o.showMute     !== false && !!(o.muteDp);
+  const showMute     = o.showMute     !== false && (!!(o.muteDp) || muteViaVolume);
   const chips        = (o.chips as MediaChip[] | undefined) ?? [];
   const showChips    = o.showChips    !== false && chips.length > 0;
 
@@ -274,7 +293,7 @@ export function MediaplayerWidget({ config }: WidgetProps) {
           next:            <IconBtn icon={SkipForward} onClick={() => trigger(o.nextDp)} />,
           shuffle:         <IconBtn icon={Shuffle}     onClick={() => trigger(o.shuffleDp)} />,
           repeat:          <IconBtn icon={Repeat}      onClick={() => trigger(o.repeatDp)} />,
-          mute:            <IconBtn icon={muted ? VolumeX : Volume2} onClick={() => trigger(o.muteDp)} />,
+          mute:            <IconBtn icon={isActuallyMuted ? VolumeX : Volume2} onClick={handleMute} />,
           'volume-slider': <VolumeSlider pct={volPct} step={volStep} onChange={writeVol} />,
           chips:           showChips ? <ChipRow chips={chips} onTrigger={handleChip} /> : null,
           'status-badges': statusBadges,
@@ -344,10 +363,8 @@ export function MediaplayerWidget({ config }: WidgetProps) {
             <div className="flex items-center gap-2">
               {showMute && (
                 <IconBtn
-                  icon={muted ? VolumeX : Volume2}
-                  onClick={() => {
-                    if (typeof o.muteDp === 'string' && o.muteDp) setState(o.muteDp, !muted);
-                  }}
+                  icon={isActuallyMuted ? VolumeX : Volume2}
+                  onClick={handleMute}
                 />
               )}
               {showVolume && <VolumeSlider pct={volPct} step={volStep} onChange={writeVol} />}
@@ -447,10 +464,8 @@ export function MediaplayerWidget({ config }: WidgetProps) {
             <div className="shrink-0 flex items-center gap-1.5">
               {showMute && (
                 <IconBtn
-                  icon={muted ? VolumeX : Volume2}
-                  onClick={() => {
-                    if (typeof o.muteDp === 'string' && o.muteDp) setState(o.muteDp, !muted);
-                  }}
+                  icon={isActuallyMuted ? VolumeX : Volume2}
+                  onClick={handleMute}
                 />
               )}
               {showVolume && (

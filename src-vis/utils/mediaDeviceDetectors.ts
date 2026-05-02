@@ -62,7 +62,8 @@ const DETECTORS: DeviceDetector[] = [
       sourceDp:           `${root}.providerName`,
       playStateDp:        `${root}.currentState`,
       volumeDp:           `${root}.volume`,
-      muteDp:             `${root}.muted`,
+      // muteDp ist read-only bei Alexa → muteViaVolume stattdessen
+      muteViaVolume:      'true',
       playDp:             `${root}.controlPlay`,
       pauseDp:            `${root}.controlPause`,
       nextDp:             `${root}.controlNext`,
