@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useRef, useEffect, useState, useMemo } from 'react';
 import {
   Music, Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Speaker,
@@ -10,6 +10,7 @@ import { getWidgetIcon } from '../../utils/widgetIconMap';
 import { CustomGridView } from './CustomGridView';
 import { StatusBadges } from './StatusBadges';
 import { useStatusFields } from '../../hooks/useStatusFields';
+import { useDashboardMobile } from '../../contexts/DashboardMobileContext';
 import type { CustomGrid } from '../../types';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -24,23 +25,22 @@ type MediaChip = {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function CoverImage({ src }: { src: string }) {
+function CoverImage({ src, Icon, iconSize }: { src: string; Icon: React.ElementType; iconSize: number }) {
   if (src) {
     return (
       <img
         src={src}
         alt=""
         className="w-full h-full rounded-xl object-cover"
-        style={{ aspectRatio: '1 / 1' }}
       />
     );
   }
   return (
     <div
       className="w-full h-full rounded-xl flex items-center justify-center"
-      style={{ background: 'var(--app-bg)', border: '1px solid var(--app-border)', aspectRatio: '1 / 1' }}
+      style={{ background: 'var(--app-bg)', border: '1px solid var(--app-border)' }}
     >
-      <Music size={28} style={{ color: 'var(--text-secondary)' }} />
+      <Icon size={iconSize} style={{ color: 'var(--text-secondary)' }} />
     </div>
   );
 }
@@ -150,8 +150,19 @@ export function MediaplayerWidget({ config }: WidgetProps) {
   const o = config.options ?? {};
   const layout = config.layout ?? 'default';
   const { setState } = useIoBroker();
+  const isMobile = useDashboardMobile();
 
-  const { value: title }     = useDatapoint((o.titleDp     as string) ?? config.datapoint ?? '');
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [cH, setCH] = useState(120);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([e]) => setCH(e.contentRect.height));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const { value: title }     = useDatapoint((o.titleDp     as string) ?? '');
   const { value: artist }    = useDatapoint((o.artistDp    as string) ?? '');
   const { value: album }     = useDatapoint((o.albumDp     as string) ?? '');
   const { value: cover }     = useDatapoint((o.coverDp     as string) ?? '');
@@ -218,6 +229,14 @@ export function MediaplayerWidget({ config }: WidgetProps) {
 
   const { battery, reach, batteryIcon, reachIcon, statusBadges } = useStatusFields(config);
 
+  const WidgetIcon = getWidgetIcon(o.icon as string | undefined, Music);
+  const iconSize = (o.iconSize as number) || 32;
+
+  // Responsive cover: cap at 96px, hide when widget is too small
+  const chipRowH  = showChips ? 38 : 0;
+  const coverSizePx   = Math.max(40, Math.min(96, cH - chipRowH - 12));
+  const showCoverActual = showCover && cH >= 60;
+
   // ── CUSTOM ───────────────────────────────────────────────────────────────────
   if (layout === 'custom') {
     const customGrid = (o.customGrid as CustomGrid | undefined) ?? DEFAULT_MEDIAPLAYER_GRID;
@@ -227,7 +246,7 @@ export function MediaplayerWidget({ config }: WidgetProps) {
         value={titleStr}
         extraFields={{ title: titleStr, artist: artistStr, album: albumStr, source: sourceStr, volume: `${volPct}%`, battery, reach }}
         extraComponents={{
-          cover:           <CoverImage src={coverStr} />,
+          cover:           <CoverImage src={coverStr} Icon={WidgetIcon} iconSize={iconSize} />,
           'play-pause':    <PlayPauseBtn playing={isPlaying} onClick={handlePlayPause} />,
           prev:            <IconBtn icon={SkipBack}    onClick={() => trigger(o.prevDp)} />,
           next:            <IconBtn icon={SkipForward} onClick={() => trigger(o.nextDp)} />,
@@ -244,14 +263,79 @@ export function MediaplayerWidget({ config }: WidgetProps) {
     );
   }
 
+  // ── MOBILE: vertikaler Aufbau ────────────────────────────────────────────────
+  if (isMobile) {
+    return (
+      <div className="flex flex-col gap-3 w-full">
+        {/* Cover */}
+        {showCover && (
+          <div className="w-full rounded-xl overflow-hidden" style={{ aspectRatio: '1 / 1', maxHeight: '260px' }}>
+            <CoverImage src={coverStr} Icon={WidgetIcon} iconSize={iconSize} />
+          </div>
+        )}
+
+        {/* Titel + Untertitel */}
+        {(showTitle || (showSubtitle && subtitle) || (showSource && sourceStr)) && (
+          <div className="space-y-0.5 text-center min-w-0">
+            {showTitle && (
+              <p className="text-base font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+                {titleStr || '–'}
+              </p>
+            )}
+            {showSubtitle && subtitle && (
+              <p className="text-sm truncate" style={{ color: 'var(--text-secondary)' }}>
+                {subtitle}
+              </p>
+            )}
+            {showSource && sourceStr && (
+              <p className="flex items-center justify-center gap-1 text-xs truncate" style={{ color: 'var(--text-secondary)' }}>
+                <Speaker size={12} />
+                {sourceStr}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Steuerung */}
+        <div className="flex items-center justify-center gap-2">
+          {showShuffle && <IconBtn icon={Shuffle}     onClick={() => trigger(o.shuffleDp)} />}
+          {showPrev    && <IconBtn icon={SkipBack}    size="md" onClick={() => trigger(o.prevDp)} />}
+          <PlayPauseBtn playing={isPlaying} onClick={handlePlayPause} />
+          {showNext    && <IconBtn icon={SkipForward} size="md" onClick={() => trigger(o.nextDp)} />}
+          {showRepeat  && <IconBtn icon={Repeat}      onClick={() => trigger(o.repeatDp)} />}
+        </div>
+
+        {/* Lautstärke */}
+        {(showVolume || showMute) && (
+          <div className="flex items-center gap-2 px-1">
+            {showMute && (
+              <IconBtn
+                icon={muted ? VolumeX : Volume2}
+                onClick={() => {
+                  if (typeof o.muteDp === 'string' && o.muteDp) setState(o.muteDp, !muted);
+                }}
+              />
+            )}
+            {showVolume && <VolumeSlider pct={volPct} step={volStep} onChange={writeVol} />}
+          </div>
+        )}
+
+        {/* Schnellzugriff-Chips */}
+        {showChips && <ChipRow chips={chips} onTrigger={handleChip} />}
+
+        <StatusBadges config={config} />
+      </div>
+    );
+  }
+
   // ── DEFAULT ──────────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col h-full gap-2" style={{ position: 'relative' }}>
+    <div ref={containerRef} className="flex flex-col h-full gap-2" style={{ position: 'relative' }}>
       {/* Main row: cover + info/controls */}
       <div className="flex gap-3 flex-1 min-h-0">
-        {showCover && (
-          <div className="shrink-0" style={{ height: '100%', maxHeight: '100%' }}>
-            <CoverImage src={coverStr} />
+        {showCoverActual && (
+          <div className="shrink-0 self-center" style={{ width: coverSizePx, height: coverSizePx }}>
+            <CoverImage src={coverStr} Icon={WidgetIcon} iconSize={Math.round(coverSizePx * 0.45)} />
           </div>
         )}
         <div className="flex flex-col flex-1 min-w-0 justify-between py-0.5">

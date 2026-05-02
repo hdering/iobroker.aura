@@ -1494,6 +1494,16 @@ function MediaplayerEditPanel({
   const removeChip = (id: string) =>
     setO({ chips: chips.filter((c) => c.id !== id) });
 
+  const moveChip = (id: string, dir: -1 | 1) => {
+    const idx = chips.findIndex((c) => c.id === id);
+    if (idx < 0) return;
+    const next = idx + dir;
+    if (next < 0 || next >= chips.length) return;
+    const arr = [...chips];
+    [arr[idx], arr[next]] = [arr[next], arr[idx]];
+    setO({ chips: arr });
+  };
+
   return (
     <>
       {/* Auto-detect */}
@@ -1577,6 +1587,16 @@ function MediaplayerEditPanel({
           {chips.map((chip, idx) => (
             <div key={chip.id} className="rounded-lg p-2 space-y-1.5" style={{ background: 'var(--app-bg)', border: '1px solid var(--app-border)' }}>
               <div className="flex items-center gap-1">
+                <div className="flex flex-col shrink-0">
+                  <button onClick={() => moveChip(chip.id, -1)} disabled={idx === 0}
+                    className="text-[9px] px-1 py-0.5 rounded hover:opacity-80 disabled:opacity-30 leading-none"
+                    style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+                    title="Nach oben">▲</button>
+                  <button onClick={() => moveChip(chip.id, 1)} disabled={idx === chips.length - 1}
+                    className="text-[9px] px-1 py-0.5 rounded hover:opacity-80 disabled:opacity-30 leading-none mt-0.5"
+                    style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+                    title="Nach unten">▼</button>
+                </div>
                 <button
                   onClick={() => setChipIconPickerIdx(idx)}
                   className="text-[10px] px-1.5 py-1 rounded hover:opacity-80 shrink-0"
@@ -2743,7 +2763,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                 <CalendarEditPanel config={config} onConfigChange={onConfigChange} />
               )}
 
-              {config.type !== 'list' && config.type !== 'clock' && config.type !== 'calendar' && config.type !== 'header' && config.type !== 'group' && config.type !== 'evcc' && config.type !== 'echart' && config.type !== 'weather' && config.type !== 'camera' && config.type !== 'autolist' && config.type !== 'image' && config.type !== 'iframe' && config.type !== 'trash' && config.type !== 'trashSchedule' && config.type !== 'echartsPreset' && config.type !== 'html' && (
+              {config.type !== 'list' && config.type !== 'clock' && config.type !== 'calendar' && config.type !== 'header' && config.type !== 'group' && config.type !== 'evcc' && config.type !== 'echart' && config.type !== 'weather' && config.type !== 'camera' && config.type !== 'autolist' && config.type !== 'image' && config.type !== 'iframe' && config.type !== 'trash' && config.type !== 'trashSchedule' && config.type !== 'echartsPreset' && config.type !== 'html' && config.type !== 'mediaplayer' && (
                 <div>
                   <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
                     {config.type === 'thermostat'     ? 'Soll-Temperatur Datenpunkt' :
