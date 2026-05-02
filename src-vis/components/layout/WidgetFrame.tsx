@@ -21,6 +21,7 @@ import { DatapointPicker } from '../config/DatapointPicker';
 import { ConditionEditor } from '../config/ConditionEditor';
 import { getObjectDirect, subscribeStateDirect, getStateDirect } from '../../hooks/useIoBroker';
 import { lookupDatapointEntry, ensureDatapointCache } from '../../hooks/useDatapointList';
+import { detectMediaDevices, type DetectedMediaDevice } from '../../utils/mediaDeviceDetectors';
 import { WIDGET_REGISTRY, WIDGET_GROUPS, WIDGET_BY_TYPE } from '../../widgetRegistry';
 import { detectType } from '../../utils/widgetDetection';
 import { DP_TEMPLATES, findMainDpForSecondary, autoDetectStatusDps } from '../../utils/dpTemplates';
@@ -1429,6 +1430,43 @@ function MediaplayerEditPanel({
   const [newChipLabel, setNewChipLabel] = useState('');
   const [newChipValue, setNewChipValue] = useState('');
   const [chipIconPickerIdx, setChipIconPickerIdx] = useState<number | null>(null);
+  const [detectedDevices, setDetectedDevices] = useState<DetectedMediaDevice[] | null>(null);
+  const [detecting, setDetecting] = useState(false);
+
+  const runDetection = async () => {
+    setDetecting(true);
+    try {
+      const entries = await ensureDatapointCache();
+      const devices = detectMediaDevices(entries);
+
+      // Enrich labels: fetch live name + serial for adapters that provide those DPs
+      const enriched = await Promise.all(devices.map(async (dev) => {
+        if (!dev.nameDp) return dev;
+        try {
+          const [nameState, serialState] = await Promise.all([
+            getStateDirect(dev.nameDp),
+            dev.serialDp ? getStateDirect(dev.serialDp) : Promise.resolve(null),
+          ]);
+          const name   = nameState?.val   ? String(nameState.val)   : null;
+          const serial = serialState?.val ? String(serialState.val) : null;
+          if (name) {
+            const label = `${dev.adapter === 'alexa2' ? 'Alexa' : dev.adapter} — ${name}${serial ? ` (${serial})` : ''}`;
+            return { ...dev, label };
+          }
+        } catch { /* keep fallback label */ }
+        return dev;
+      }));
+
+      setDetectedDevices(enriched);
+    } finally {
+      setDetecting(false);
+    }
+  };
+
+  const applyDevice = (device: DetectedMediaDevice) => {
+    setO(device.config as Record<string, unknown>);
+    setDetectedDevices(null);
+  };
 
   const dpRow = (labelKey: string, optKey: string) => (
     <div key={optKey}>
@@ -1446,39 +1484,6 @@ function MediaplayerEditPanel({
       </div>
     </div>
   );
-
-  const autoFill = async () => {
-    if (!config.datapoint) return;
-    const parts = config.datapoint.split('.');
-    const parent = parts.slice(0, -1).join('.');
-    const entries = await ensureDatapointCache();
-    const sibs = entries.filter((e) => e.id.startsWith(parent + '.'));
-    const find = (...names: string[]) =>
-      names.map((n) => sibs.find((e) => e.id === `${parent}.${n}`)?.id).find(Boolean);
-    const patch: Record<string, unknown> = {};
-    const TITLE_NAMES  = ['currentTitle','current_title','TITLE','title','Title','name','trackName','track_name','song','media_title'];
-    const ARTIST_NAMES = ['currentArtist','current_artist','ARTIST','artist','Artist','artistName','artist_name','media_artist'];
-    const ALBUM_NAMES  = ['currentAlbum','current_album','ALBUM','album','Album','albumName','album_name','media_album'];
-    const COVER_NAMES  = ['imageURL','image_url','imageUrl','coverUrl','cover_url','albumArt','album_art','artwork','cover','COVER','media_image_url'];
-    const SOURCE_NAMES = ['roomName','room_name','source','SOURCE','playerName','player_name','zone','ZONE','device'];
-    const STATE_NAMES  = ['state','STATE','playState','play_state','status','STATUS','playerState','playing','PLAYING'];
-    const VOL_NAMES    = ['volume','VOLUME','Volume','vol','VOL','volumeLevel','volume_level','currentVolume','media_volume_level'];
-    const MUTE_NAMES   = ['muted','MUTED','Muted','mute','MUTE','muteState','media_volume_muted'];
-    const PLAY_NAMES   = ['play','PLAY','Play','cmd_play','cmdPlay'];
-    const PAUSE_NAMES  = ['pause','PAUSE','Pause','cmd_pause','cmdPause'];
-    const NEXT_NAMES   = ['next','NEXT','Next','cmd_next','cmdNext','skipForward'];
-    const PREV_NAMES   = ['prev','PREV','Prev','previous','PREVIOUS','cmd_prev','cmdPrev','skipBack'];
-    const SHUFFLE_NAMES= ['shuffle','SHUFFLE','Shuffle','shuffleMode','shuffle_mode'];
-    const REPEAT_NAMES = ['repeat','REPEAT','Repeat','repeatMode','repeat_mode'];
-    const mp = (k: string, names: string[]) => { const v = find(...names); if (v) patch[k] = v; };
-    mp('titleDp', TITLE_NAMES); mp('artistDp', ARTIST_NAMES); mp('albumDp', ALBUM_NAMES);
-    mp('coverDp', COVER_NAMES); mp('sourceDp', SOURCE_NAMES); mp('playStateDp', STATE_NAMES);
-    mp('volumeDp', VOL_NAMES);  mp('muteDp', MUTE_NAMES);
-    mp('playDp', PLAY_NAMES);   mp('pauseDp', PAUSE_NAMES);
-    mp('nextDp', NEXT_NAMES);   mp('prevDp', PREV_NAMES);
-    mp('shuffleDp', SHUFFLE_NAMES); mp('repeatDp', REPEAT_NAMES);
-    if (Object.keys(patch).length) setO(patch);
-  };
 
   const confirmAddChip = () => {
     if (!newChipLabel.trim()) return;
@@ -1506,17 +1511,39 @@ function MediaplayerEditPanel({
 
   return (
     <>
-      {/* Auto-detect */}
-      {config.datapoint && (
+      {/* Gerät automatisch erkennen */}
+      <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Geschwister-DPs auto-erkennen</span>
-          <button onClick={() => void autoFill()}
-            className="text-[10px] px-2 py-0.5 rounded hover:opacity-80"
+          <span className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>Gerät erkennen</span>
+          <button
+            onClick={() => void runDetection()}
+            disabled={detecting}
+            className="text-[10px] px-2 py-0.5 rounded hover:opacity-80 disabled:opacity-50"
             style={{ background: 'var(--accent)22', color: 'var(--accent)', border: '1px solid var(--accent)44' }}>
-            {t('mp.autodetect' as never)}
+            {detecting ? '…' : 'Suchen'}
           </button>
         </div>
-      )}
+        {detectedDevices !== null && (
+          detectedDevices.length === 0 ? (
+            <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Keine bekannten Geräte gefunden.</p>
+          ) : (
+            <div className="space-y-1">
+              {detectedDevices.map((dev) => (
+                <button
+                  key={dev.id}
+                  onClick={() => applyDevice(dev)}
+                  className="w-full text-left text-[11px] px-2.5 py-1.5 rounded-lg hover:opacity-80 truncate"
+                  style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
+                  title={dev.id}
+                >
+                  <span className="font-medium">{dev.label}</span>
+                  <span className="ml-1.5 opacity-50">{dev.adapter}</span>
+                </button>
+              ))}
+            </div>
+          )
+        )}
+      </div>
 
       {/* Anzeige-DPs */}
       <details className="group" open>
@@ -1530,9 +1557,13 @@ function MediaplayerEditPanel({
           {dpRow('mp.dp.album',     'albumDp')}
           {dpRow('mp.dp.cover',     'coverDp')}
           {dpRow('mp.dp.source',    'sourceDp')}
-          {dpRow('mp.dp.playState', 'playStateDp')}
-          {dpRow('mp.dp.volume',    'volumeDp')}
-          {dpRow('mp.dp.mute',      'muteDp')}
+          {dpRow('mp.dp.playState',        'playStateDp')}
+          {dpRow('mp.dp.volume',           'volumeDp')}
+          {dpRow('mp.dp.mute',             'muteDp')}
+          {dpRow('mp.dp.mediaProgress'    as never, 'mediaProgressDp')}
+          {dpRow('mp.dp.mediaLength'      as never, 'mediaLengthDp')}
+          {dpRow('mp.dp.mediaProgressStr' as never, 'mediaProgressStrDp')}
+          {dpRow('mp.dp.mediaLengthStr'   as never, 'mediaLengthStrDp')}
         </div>
       </details>
 

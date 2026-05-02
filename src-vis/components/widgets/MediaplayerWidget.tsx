@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import {
   Music, Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Speaker,
@@ -130,6 +130,27 @@ function ChipRow({ chips, onTrigger }: {
   );
 }
 
+function ProgressBar({ pct, progressStr, durationStr }: {
+  pct: number;
+  progressStr?: string;
+  durationStr?: string;
+}) {
+  const hasText = !!(progressStr || durationStr);
+  return (
+    <div className="space-y-0.5">
+      <div className="relative h-1 rounded-full overflow-hidden" style={{ background: 'var(--app-border)' }}>
+        <div className="absolute inset-y-0 left-0 rounded-full transition-[width]" style={{ width: `${Math.min(100, Math.max(0, pct))}%`, background: 'var(--accent)' }} />
+      </div>
+      {hasText && (
+        <div className="flex justify-between" style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
+          <span>{progressStr ?? ''}</span>
+          <span>{durationStr ?? ''}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Default custom grid for layout='custom' ───────────────────────────────────
 
 export const DEFAULT_MEDIAPLAYER_GRID: CustomGrid = [
@@ -152,29 +173,35 @@ export function MediaplayerWidget({ config }: WidgetProps) {
   const { setState } = useIoBroker();
   const isMobile = useDashboardMobile();
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [cH, setCH] = useState(120);
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(([e]) => setCH(e.contentRect.height));
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  const { value: title }     = useDatapoint((o.titleDp     as string) ?? '');
-  const { value: artist }    = useDatapoint((o.artistDp    as string) ?? '');
-  const { value: album }     = useDatapoint((o.albumDp     as string) ?? '');
-  const { value: cover }     = useDatapoint((o.coverDp     as string) ?? '');
-  const { value: source }    = useDatapoint((o.sourceDp    as string) ?? '');
-  const { value: playState } = useDatapoint((o.playStateDp as string) ?? '');
-  const { value: rawVol }    = useDatapoint((o.volumeDp    as string) ?? '');
-  const { value: muted }     = useDatapoint((o.muteDp      as string) ?? '');
+  const { value: title }       = useDatapoint((o.titleDp          as string) ?? '');
+  const { value: artist }      = useDatapoint((o.artistDp         as string) ?? '');
+  const { value: album }       = useDatapoint((o.albumDp          as string) ?? '');
+  const { value: cover }       = useDatapoint((o.coverDp          as string) ?? '');
+  const { value: source }      = useDatapoint((o.sourceDp         as string) ?? '');
+  const { value: playState }   = useDatapoint((o.playStateDp      as string) ?? '');
+  const { value: rawVol }      = useDatapoint((o.volumeDp         as string) ?? '');
+  const { value: muted }       = useDatapoint((o.muteDp           as string) ?? '');
+  const { value: mediaProgress } = useDatapoint((o.mediaProgressDp as string) ?? '');
+  const { value: mediaLength }   = useDatapoint((o.mediaLengthDp   as string) ?? '');
+  const { value: mediaProgressStr } = useDatapoint((o.mediaProgressStrDp as string) ?? '');
+  const { value: mediaLengthStr }   = useDatapoint((o.mediaLengthStrDp   as string) ?? '');
 
   const isPlaying = useMemo(
     () => playState === true || playState === 1 || playState === 'play' || playState === 'playing',
     [playState],
   );
+
+  const progressPct = useMemo(() => {
+    if (typeof mediaLength === 'number' && mediaLength > 0 && typeof mediaProgress === 'number') {
+      return Math.min(100, Math.max(0, (mediaProgress / mediaLength) * 100));
+    }
+    if (typeof mediaProgress === 'number' && mediaProgress >= 0 && mediaProgress <= 100) {
+      return mediaProgress;
+    }
+    return 0;
+  }, [mediaProgress, mediaLength]);
+
+  const showProgress = !!(o.mediaProgressDp || o.mediaLengthDp);
 
   const volMin  = (o.volumeMin  as number) ?? 0;
   const volMax  = (o.volumeMax  as number) ?? 100;
@@ -232,11 +259,6 @@ export function MediaplayerWidget({ config }: WidgetProps) {
   const WidgetIcon = getWidgetIcon(o.icon as string | undefined, Music);
   const iconSize = (o.iconSize as number) || 32;
 
-  // Responsive cover: cap at 96px, hide when widget is too small
-  const chipRowH  = showChips ? 38 : 0;
-  const coverSizePx   = Math.max(40, Math.min(96, cH - chipRowH - 12));
-  const showCoverActual = showCover && cH >= 60;
-
   // ── CUSTOM ───────────────────────────────────────────────────────────────────
   if (layout === 'custom') {
     const customGrid = (o.customGrid as CustomGrid | undefined) ?? DEFAULT_MEDIAPLAYER_GRID;
@@ -267,16 +289,16 @@ export function MediaplayerWidget({ config }: WidgetProps) {
   if (isMobile) {
     return (
       <div className="flex flex-col gap-3 w-full">
-        {/* Cover */}
+        {/* Cover: halbe Widget-Breite, quadratisch, zentriert */}
         {showCover && (
-          <div className="w-full rounded-xl overflow-hidden" style={{ aspectRatio: '1 / 1', maxHeight: '260px' }}>
+          <div className="rounded-xl overflow-hidden self-center shrink-0" style={{ width: '50%', aspectRatio: '1 / 1' }}>
             <CoverImage src={coverStr} Icon={WidgetIcon} iconSize={iconSize} />
           </div>
         )}
 
         {/* Titel + Untertitel */}
         {(showTitle || (showSubtitle && subtitle) || (showSource && sourceStr)) && (
-          <div className="space-y-0.5 text-center min-w-0">
+          <div className="shrink-0 space-y-0.5 text-center min-w-0">
             {showTitle && (
               <p className="text-base font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
                 {titleStr || '–'}
@@ -296,8 +318,19 @@ export function MediaplayerWidget({ config }: WidgetProps) {
           </div>
         )}
 
+        {/* Fortschritt */}
+        {showProgress && (
+          <div className="shrink-0 px-1">
+            <ProgressBar
+              pct={progressPct}
+              progressStr={mediaProgressStr != null ? String(mediaProgressStr) : undefined}
+              durationStr={mediaLengthStr   != null ? String(mediaLengthStr)   : undefined}
+            />
+          </div>
+        )}
+
         {/* Steuerung */}
-        <div className="flex items-center justify-center gap-2">
+        <div className="shrink-0 flex items-center justify-center gap-2">
           {showShuffle && <IconBtn icon={Shuffle}     onClick={() => trigger(o.shuffleDp)} />}
           {showPrev    && <IconBtn icon={SkipBack}    size="md" onClick={() => trigger(o.prevDp)} />}
           <PlayPauseBtn playing={isPlaying} onClick={handlePlayPause} />
@@ -307,40 +340,67 @@ export function MediaplayerWidget({ config }: WidgetProps) {
 
         {/* Lautstärke */}
         {(showVolume || showMute) && (
-          <div className="flex items-center gap-2 px-1">
-            {showMute && (
-              <IconBtn
-                icon={muted ? VolumeX : Volume2}
-                onClick={() => {
-                  if (typeof o.muteDp === 'string' && o.muteDp) setState(o.muteDp, !muted);
-                }}
-              />
+          <div className="shrink-0 space-y-1.5 px-1">
+            <div className="flex items-center gap-2">
+              {showMute && (
+                <IconBtn
+                  icon={muted ? VolumeX : Volume2}
+                  onClick={() => {
+                    if (typeof o.muteDp === 'string' && o.muteDp) setState(o.muteDp, !muted);
+                  }}
+                />
+              )}
+              {showVolume && <VolumeSlider pct={volPct} step={volStep} onChange={writeVol} />}
+              {showVolume && (
+                <span className="shrink-0 text-[11px] tabular-nums" style={{ color: 'var(--text-secondary)', minWidth: '28px', textAlign: 'right' }}>
+                  {volPct} %
+                </span>
+              )}
+            </div>
+            {showVolume && (
+              <div className="flex gap-1.5">
+                {[25, 50, 75, 100].map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => writeVol(p)}
+                    className="flex-1 text-[11px] py-1 rounded-lg hover:opacity-80 transition-opacity"
+                    style={{
+                      background: volPct === p ? 'var(--accent)22' : 'var(--app-bg)',
+                      color: volPct === p ? 'var(--accent)' : 'var(--text-secondary)',
+                      border: `1px solid ${volPct === p ? 'var(--accent)44' : 'var(--app-border)'}`,
+                    }}
+                  >{p}%</button>
+                ))}
+              </div>
             )}
-            {showVolume && <VolumeSlider pct={volPct} step={volStep} onChange={writeVol} />}
           </div>
         )}
 
         {/* Schnellzugriff-Chips */}
-        {showChips && <ChipRow chips={chips} onTrigger={handleChip} />}
+        {showChips && <div className="shrink-0"><ChipRow chips={chips} onTrigger={handleChip} /></div>}
 
-        <StatusBadges config={config} />
+        <div className="shrink-0"><StatusBadges config={config} /></div>
       </div>
     );
   }
 
   // ── DEFAULT ──────────────────────────────────────────────────────────────────
   return (
-    <div ref={containerRef} className="flex flex-col h-full gap-2" style={{ position: 'relative' }}>
-      {/* Main row: cover + info/controls */}
+    <div className="flex flex-col h-full gap-2" style={{ position: 'relative' }}>
+      {/* Main row: cover füllt volle Höhe, rechts alle Elemente */}
       <div className="flex gap-3 flex-1 min-h-0">
-        {showCoverActual && (
-          <div className="shrink-0 self-center" style={{ width: coverSizePx, height: coverSizePx }}>
-            <CoverImage src={coverStr} Icon={WidgetIcon} iconSize={Math.round(coverSizePx * 0.45)} />
+
+        {/* Cover: self-stretch + aspect-ratio → quadratisch, so groß wie die Zeile */}
+        {showCover && (
+          <div className="shrink-0 self-stretch rounded-xl overflow-hidden" style={{ aspectRatio: '1 / 1' }}>
+            <CoverImage src={coverStr} Icon={WidgetIcon} iconSize={iconSize} />
           </div>
         )}
-        <div className="flex flex-col flex-1 min-w-0 justify-between py-0.5">
+
+        {/* Rechte Spalte */}
+        <div className="flex flex-col flex-1 min-w-0 gap-1 min-h-0">
           {/* Track info */}
-          <div className="space-y-0.5 min-w-0">
+          <div className="shrink-0 space-y-0.5 min-w-0">
             {showTitle && (
               <p className="text-sm font-semibold truncate leading-snug" style={{ color: 'var(--text-primary)' }}>
                 {titleStr || '–'}
@@ -359,17 +419,33 @@ export function MediaplayerWidget({ config }: WidgetProps) {
             )}
           </div>
 
-          {/* Controls row */}
-          <div className="flex items-center justify-between gap-1">
-            <div className="flex items-center gap-1">
-              {showShuffle && <IconBtn icon={Shuffle}     onClick={() => trigger(o.shuffleDp)} />}
-              {showPrev    && <IconBtn icon={SkipBack}    onClick={() => trigger(o.prevDp)} />}
-              <PlayPauseBtn playing={isPlaying} onClick={handlePlayPause} />
-              {showNext    && <IconBtn icon={SkipForward} onClick={() => trigger(o.nextDp)} />}
-              {showRepeat  && <IconBtn icon={Repeat}      onClick={() => trigger(o.repeatDp)} />}
+          {/* Flex-Spacer: schiebt Steuerung nach unten */}
+          <div className="flex-1 min-h-0" />
+
+          {/* Fortschrittsbalken */}
+          {showProgress && (
+            <div className="shrink-0">
+              <ProgressBar
+                pct={progressPct}
+                progressStr={mediaProgressStr != null ? String(mediaProgressStr) : undefined}
+                durationStr={mediaLengthStr   != null ? String(mediaLengthStr)   : undefined}
+              />
             </div>
-            <div className="flex items-center gap-1.5">
-              {showMute   && (
+          )}
+
+          {/* Steuerung */}
+          <div className="shrink-0 flex items-center gap-1">
+            {showShuffle && <IconBtn icon={Shuffle}     onClick={() => trigger(o.shuffleDp)} />}
+            {showPrev    && <IconBtn icon={SkipBack}    onClick={() => trigger(o.prevDp)} />}
+            <PlayPauseBtn playing={isPlaying} onClick={handlePlayPause} />
+            {showNext    && <IconBtn icon={SkipForward} onClick={() => trigger(o.nextDp)} />}
+            {showRepeat  && <IconBtn icon={Repeat}      onClick={() => trigger(o.repeatDp)} />}
+          </div>
+
+          {/* Lautstärke: Mute + voller Slider + Zahl */}
+          {(showMute || showVolume) && (
+            <div className="shrink-0 flex items-center gap-1.5">
+              {showMute && (
                 <IconBtn
                   icon={muted ? VolumeX : Volume2}
                   onClick={() => {
@@ -377,13 +453,38 @@ export function MediaplayerWidget({ config }: WidgetProps) {
                   }}
                 />
               )}
-              {showVolume && <VolumeSlider pct={volPct} step={volStep} onChange={writeVol} compact />}
+              {showVolume && (
+                <>
+                  <VolumeSlider pct={volPct} step={volStep} onChange={writeVol} />
+                  <span className="shrink-0 text-[10px] tabular-nums" style={{ color: 'var(--text-secondary)', minWidth: '24px' }}>
+                    {volPct}%
+                  </span>
+                </>
+              )}
             </div>
-          </div>
+          )}
+
+          {/* Lautstärke-Schnellwahl */}
+          {showVolume && (
+            <div className="shrink-0 flex gap-1">
+              {[25, 50, 75, 100].map((p) => (
+                <button
+                  key={p}
+                  onClick={() => writeVol(p)}
+                  className="flex-1 text-[10px] py-0.5 rounded hover:opacity-80 transition-opacity"
+                  style={{
+                    background: volPct === p ? 'var(--accent)22' : 'var(--app-bg)',
+                    color:      volPct === p ? 'var(--accent)'   : 'var(--text-secondary)',
+                    border:     `1px solid ${volPct === p ? 'var(--accent)44' : 'var(--app-border)'}`,
+                  }}
+                >{p}%</button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Chip row */}
+      {/* Chip-Zeile (volle Breite) */}
       {showChips && <ChipRow chips={chips} onTrigger={handleChip} />}
 
       <StatusBadges config={config} />
