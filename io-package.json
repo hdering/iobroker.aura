@@ -544,7 +544,12 @@
     "secure": false,
     "certPublic": "",
     "certPrivate": "",
-    "certChained": ""
+    "certChained": "",
+    "fsRoots": [
+      {"label": "ioBroker", "path": "/opt/iobroker"},
+      {"label": "Mounts",   "path": "/mnt"}
+    ],
+    "fsAllowWrite": false
   },
   "objects": [],
   "instanceObjects": [

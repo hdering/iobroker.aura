@@ -574,6 +574,17 @@ export const de = {
   'dp.picker.count':    '{count} Datenpunkte',
   'dp.picker.noResults':'Keine Ergebnisse',
 
+  // ── File Picker ──────────────────────────────────────────────────────────────
+  'fs.picker.title':      'Datei-Picker',
+  'fs.picker.tab.dp':     'Datenpunkt',
+  'fs.picker.tab.files':  'Dateien',
+  'fs.picker.search':     'Suchen…',
+  'fs.picker.empty':      'Verzeichnis ist leer',
+  'fs.picker.previewNone':'Keine Vorschau',
+  'fs.picker.noRoots':    'Keine Verzeichnisse konfiguriert',
+  'fs.picker.roots':      'Wurzeln',
+  'fs.picker.select':     'Auswählen',
+
   // ── ConditionEditor ───────────────────────────────────────────────────────────
   'cond.equal':       '= Gleich',
   'cond.notEqual':    '≠ Ungleich',

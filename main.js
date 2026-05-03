@@ -307,6 +307,21 @@ const MIME_TYPES = {
   '.woff': 'font/woff',
   '.woff2': 'font/woff2',
   '.ttf':  'font/ttf',
+  '.jpg':  'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif':  'image/gif',
+  '.webp': 'image/webp',
+  '.bmp':  'image/bmp',
+  '.mp4':  'video/mp4',
+  '.webm': 'video/webm',
+  '.ogv':  'video/ogg',
+  '.mp3':  'audio/mpeg',
+  '.wav':  'audio/wav',
+  '.ogg':  'audio/ogg',
+  '.pdf':  'application/pdf',
+  '.txt':  'text/plain; charset=utf-8',
+  '.xml':  'text/xml; charset=utf-8',
+  '.zip':  'application/zip',
 };
 
 const WWW_DIR = path.join(__dirname, 'www');
@@ -482,6 +497,20 @@ class Aura extends utils.Adapter {
     const socketPort = this.config.socketPort || 8082;
     const useHttps   = !!this.config.secure;
 
+    // ── File-system helpers ──────────────────────────────────────────────────
+    const fsRootsConfig = Array.isArray(this.config.fsRoots)
+      ? this.config.fsRoots
+          .filter(r => r && r.path)
+          .map(r => ({ label: String(r.label || r.path), path: path.resolve(String(r.path)) }))
+      : [];
+
+    const resolveSafePath = (rawPath) => {
+      const abs = path.resolve(rawPath);
+      const ok = fsRootsConfig.some(r => abs === r.path || abs.startsWith(r.path + path.sep));
+      if (!ok) throw Object.assign(new Error('path outside allowed roots'), { statusCode: 403 });
+      return abs;
+    };
+
     const handler = (req, res) => {
       let parsedUrl;
       try { parsedUrl = new URL(req.url, 'http://localhost'); } catch {
@@ -551,6 +580,75 @@ class Aura extends utils.Adapter {
         proxyReq.on('timeout', () => { proxyReq.destroy(); if (!res.headersSent) { res.writeHead(504); res.end('Proxy timeout'); } });
         proxyReq.on('error',   e  => { if (!res.headersSent) { res.writeHead(502); res.end(`Proxy error: ${e.message}`); } });
         req.pipe(proxyReq, { end: true });
+        return;
+      }
+
+      // ── File-system routes ────────────────────────────────────────────────
+      if (pathname.startsWith('/fs/')) {
+        const fsPath = parsedUrl.searchParams.get('path') || '';
+
+        if (pathname === '/fs/roots') {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(fsRootsConfig));
+          return;
+        }
+
+        if (pathname === '/fs/list') {
+          if (!fsPath) { res.writeHead(400); res.end('Missing path parameter'); return; }
+          let abs;
+          try { abs = resolveSafePath(fsPath); } catch (e) { res.writeHead(e.statusCode || 500); res.end(e.message); return; }
+          fs.readdir(abs, { withFileTypes: true }, (err, entries) => {
+            if (err) { res.writeHead(err.code === 'ENOENT' ? 404 : 500); res.end(err.message); return; }
+            const items = entries.map(ent => {
+              let size = null, mtime = null, mime = null;
+              if (!ent.isDirectory()) {
+                try { const st = fs.statSync(path.join(abs, ent.name)); size = st.size; mtime = st.mtimeMs; } catch { /* ignore */ }
+                const rawMime = MIME_TYPES[path.extname(ent.name).toLowerCase()] || 'application/octet-stream';
+                mime = rawMime.split(';')[0].trim();
+              }
+              return { name: ent.name, isDir: ent.isDirectory(), size, mtime, mime };
+            });
+            items.sort((a, b) => (a.isDir !== b.isDir ? (a.isDir ? -1 : 1) : a.name.localeCompare(b.name)));
+            const parent = fsRootsConfig.some(r => r.path === abs) ? null : path.dirname(abs);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ path: abs, parent, entries: items }));
+          });
+          return;
+        }
+
+        if (pathname === '/fs/read') {
+          if (!fsPath) { res.writeHead(400); res.end('Missing path parameter'); return; }
+          let abs;
+          try { abs = resolveSafePath(fsPath); } catch (e) { res.writeHead(e.statusCode || 500); res.end(e.message); return; }
+          const streamFile = (finalPath) => {
+            const ct = MIME_TYPES[path.extname(finalPath).toLowerCase()] || 'application/octet-stream';
+            const stream = fs.createReadStream(finalPath);
+            stream.on('open', () => {
+              res.writeHead(200, { 'Content-Type': ct, 'Cache-Control': 'max-age=30' });
+              stream.pipe(res);
+            });
+            stream.on('error', (e) => {
+              if (!res.headersSent) { res.writeHead(e.code === 'ENOENT' ? 404 : 500); res.end(e.message); }
+            });
+          };
+          fs.lstat(abs, (err, lstat) => {
+            if (err) { res.writeHead(err.code === 'ENOENT' ? 404 : 500); res.end(err.message); return; }
+            if (lstat.isDirectory()) { res.writeHead(400); res.end('path is a directory'); return; }
+            if (lstat.isSymbolicLink()) {
+              fs.realpath(abs, (err2, real) => {
+                if (err2) { res.writeHead(500); res.end(err2.message); return; }
+                const ok = fsRootsConfig.some(r => real === r.path || real.startsWith(r.path + path.sep));
+                if (!ok) { res.writeHead(403); res.end('symlink outside whitelist'); return; }
+                streamFile(real);
+              });
+            } else {
+              streamFile(abs);
+            }
+          });
+          return;
+        }
+
+        res.writeHead(404); res.end('Unknown fs endpoint');
         return;
       }
 

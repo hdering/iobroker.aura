@@ -576,6 +576,17 @@ export const en: Record<TranslationKey, string> = {
   'dp.picker.count':    '{count} datapoints',
   'dp.picker.noResults':'No results',
 
+  // ── File Picker ──────────────────────────────────────────────────────────────
+  'fs.picker.title':      'File Picker',
+  'fs.picker.tab.dp':     'Datapoint',
+  'fs.picker.tab.files':  'Files',
+  'fs.picker.search':     'Search…',
+  'fs.picker.empty':      'Directory is empty',
+  'fs.picker.previewNone':'No Preview',
+  'fs.picker.noRoots':    'No directories configured',
+  'fs.picker.roots':      'Roots',
+  'fs.picker.select':     'Select',
+
   // ── ConditionEditor ───────────────────────────────────────────────────────────
   'cond.equal':       '= Equal',
   'cond.notEqual':    '≠ Not Equal',
