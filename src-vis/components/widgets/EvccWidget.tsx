@@ -505,8 +505,42 @@ function LoadpointCard({ lp, idx, prefix, compact }: {
 }) {
   const t = useT();
   const { setState } = useIoBroker();
-  const setMode    = (modeKey: string) => setState(`${prefix}.loadpoint.${idx + 1}.control.pvControl`, MODE_MAP[modeKey]);
-  const setLimitSoc = (v: number) => setState(`${prefix}.loadpoint.${idx + 1}.control.limitSoc`, v);
+
+  const [pendingMode, setPendingMode] = useState<string | null>(null);
+  const [pendingLimitSoc, setPendingLimitSoc] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (pendingMode !== null && lp.mode === pendingMode) setPendingMode(null);
+  }, [lp.mode, pendingMode]);
+
+  useEffect(() => {
+    if (pendingLimitSoc !== null && lp.effectiveLimitSoc === pendingLimitSoc) setPendingLimitSoc(null);
+  }, [lp.effectiveLimitSoc, pendingLimitSoc]);
+
+  useEffect(() => {
+    if (pendingMode === null) return;
+    const id = setTimeout(() => setPendingMode(null), 35000);
+    return () => clearTimeout(id);
+  }, [pendingMode]);
+
+  useEffect(() => {
+    if (pendingLimitSoc === null) return;
+    const id = setTimeout(() => setPendingLimitSoc(null), 35000);
+    return () => clearTimeout(id);
+  }, [pendingLimitSoc]);
+
+  const setMode = (modeKey: string) => {
+    setPendingMode(modeKey);
+    setState(`${prefix}.loadpoint.${idx + 1}.control.pvControl`, MODE_MAP[modeKey]);
+  };
+  const setLimitSoc = (v: number) => {
+    setPendingLimitSoc(v);
+    setState(`${prefix}.loadpoint.${idx + 1}.control.limitSoc`, v);
+  };
+
+  const displayMode = pendingMode ?? lp.mode;
+  const displayLimitSoc = pendingLimitSoc ?? lp.effectiveLimitSoc;
+
   const lpTitle    = lp.title || t('evcc.loadpoint', { n: idx + 1 });
   const vehicleName = lp.vehicleTitle || t('evcc.vehicle');
 
@@ -524,8 +558,11 @@ function LoadpointCard({ lp, idx, prefix, compact }: {
             {fmtKW(lp.chargePower)}
           </span>
         )}
-        <span className="ml-auto font-medium" style={{ color: 'var(--text-secondary)' }}>
-          {MODES.find((m) => m.key === lp.mode)?.label ?? lp.mode}
+        <span className="ml-auto font-medium flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
+          {pendingMode !== null && (
+            <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: 'var(--text-secondary)' }} />
+          )}
+          {MODES.find((m) => m.key === displayMode)?.label ?? displayMode}
         </span>
       </div>
     );
@@ -559,9 +596,12 @@ function LoadpointCard({ lp, idx, prefix, compact }: {
             </div>
             <div className="flex items-center gap-1">
               <span>{t('evcc.targetSoc')}</span>
-              <button className="font-semibold hover:opacity-80" style={{ color: '#6366f1' }}
-                onClick={() => setLimitSoc(Math.min(100, lp.effectiveLimitSoc + 10))}>
-                {fmtSoc(lp.effectiveLimitSoc)}
+              <button className="font-semibold hover:opacity-80 flex items-center gap-0.5" style={{ color: '#6366f1' }}
+                onClick={() => setLimitSoc(Math.min(100, displayLimitSoc + 10))}>
+                {pendingLimitSoc !== null && (
+                  <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#6366f1' }} />
+                )}
+                {fmtSoc(displayLimitSoc)}
               </button>
               {lp.sessionSolarPercentage > 0 && (
                 <span style={{ color: '#10b981' }}>· 🌿 {Math.round(lp.sessionSolarPercentage)}%</span>
@@ -588,16 +628,19 @@ function LoadpointCard({ lp, idx, prefix, compact }: {
 
       <div className="flex gap-1">
         {MODES.map((m) => {
-          const active = lp.mode === m.key;
+          const active = displayMode === m.key;
+          const pending = active && pendingMode !== null;
           return (
             <button key={m.key} onClick={() => setMode(m.key)}
-              className="flex-1 text-[11px] font-medium rounded-md transition-all hover:opacity-90 active:scale-95"
+              className="flex-1 text-[11px] font-medium rounded-md transition-all hover:opacity-90 active:scale-95 flex items-center justify-center gap-1"
               style={{
                 minHeight: 28,
                 background: active ? m.activeColor : 'var(--app-bg)',
                 color: active ? '#fff' : 'var(--text-secondary)',
                 border: `1px solid ${active ? m.activeColor : 'var(--app-border)'}`,
+                opacity: pending ? 0.75 : 1,
               }}>
+              {pending && <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse bg-white" />}
               {m.label}
             </button>
           );
