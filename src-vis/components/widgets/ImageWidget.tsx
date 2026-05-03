@@ -52,8 +52,9 @@ export function ImageWidget({ config }: WidgetProps) {
     }
     if (!imageUrl) return '';
     // base64 or data URI in URL field – use as-is, no cache-bust
-    if (imageUrl.startsWith('data:') || (!imageUrl.startsWith('http') && imageUrl.length > 64)) {
-      if (imageUrl.startsWith('data:')) return imageUrl;
+    if (imageUrl.startsWith('data:')) return imageUrl;
+    // Relative paths (e.g. /fs/read?path=…) are real URLs, not base64
+    if (!imageUrl.startsWith('http') && !imageUrl.startsWith('/') && imageUrl.length > 64) {
       return `data:image/jpeg;base64,${imageUrl}`;
     }
     const sep = imageUrl.includes('?') ? '&' : '?';
