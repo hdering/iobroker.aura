@@ -3,12 +3,13 @@ import { ImageIcon } from 'lucide-react';
 import type { WidgetProps } from '../../types';
 import { useDatapoint } from '../../hooks/useDatapoint';
 import { CustomGridView } from './CustomGridView';
+import { resolveAssetUrl } from '../../utils/assetUrl';
 
 type FitMode = 'none' | 'contain' | 'width' | 'height';
 
 export function ImageWidget({ config }: WidgetProps) {
   const opts            = config.options ?? {};
-  const imageUrl        = (opts.imageUrl        as string)   ?? '';
+  const imageUrl        = resolveAssetUrl((opts.imageUrl as string) ?? '');
   const datapointId     = (opts.imageDatapoint  as string)   ?? '';
   const fit             = (opts.fit             as FitMode)  ?? 'contain';
   const refreshSeconds  = (opts.refreshInterval as number)   ?? 0;

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { usePortalTarget } from '../../contexts/PortalTargetContext';
 import { useT, t, type TranslationKey } from '../../i18n';
-import { X, Pencil, Database, Sparkles, EyeOff, ChevronDown, Plus, Trash2, Download, ArrowRightLeft, Copy, Layers2, Minimize2, Smartphone, GripVertical, MousePointerClick } from 'lucide-react';
+import { X, Pencil, Database, Sparkles, EyeOff, ChevronDown, Plus, Trash2, Download, ArrowRightLeft, Copy, Layers2, Minimize2, Smartphone, GripVertical, MousePointerClick, FolderOpen } from 'lucide-react';
 import { setDragBridge } from '../../utils/dragBridge';
 import { verticalCompact } from '../../utils/gridCompact';
 import { exportWidget } from '../../utils/widgetExportImport';
@@ -1785,6 +1785,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
     }
   };
   const [pickerTarget, setPickerTarget] = useState<'datapoint' | 'actualDatapoint' | 'localTempDatapoint' | 'shutter_activityDp' | 'shutter_directionDp' | 'shutter_stopDp' | 'gauge_pointer2Dp' | 'gauge_pointer3Dp' | 'windowcontact_batteryDp' | 'wc_lockDp' | 'status_batteryDp' | 'status_unreachDp' | 'camera_wakeUpDp' | 'camera_slot' | 'html_dp' | 'mp_dp' | 'mp_chip' | 'sl_action' | null>(null);
+  const [imageFilePicker, setImageFilePicker] = useState(false);
   const [cameraSlotPickerIdx, setCameraSlotPickerIdx] = useState(0);
   const [mpPickerKey, setMpPickerKey] = useState('');
   const [mpChipIdx, setMpChipIdx] = useState(0);
@@ -3345,12 +3346,26 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                   <>
                     <div>
                       <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
-                        Bild-URL oder base64 <span style={{ opacity: 0.6 }}>(https://… · data:image/… · base64-String)</span>
+                        Bild-URL, base64 oder lokale Datei <span style={{ opacity: 0.6 }}>(https://… · data:image/… · Datei-Picker)</span>
                       </label>
-                      <input type="text" value={imageUrl}
-                        onChange={(e) => set({ imageUrl: e.target.value || undefined })}
-                        placeholder="https://…/bild.jpg oder base64-String"
-                        className={iCls + ' font-mono'} style={iSty} />
+                      <div className="flex gap-1">
+                        <input type="text" value={imageUrl}
+                          onChange={(e) => set({ imageUrl: e.target.value || undefined })}
+                          placeholder="https://…/bild.jpg oder base64-String"
+                          className={`flex-1 ${iCls} font-mono min-w-0`} style={iSty} />
+                        <button
+                          onClick={() => setImageFilePicker(true)}
+                          className="px-2 rounded-lg hover:opacity-80 shrink-0"
+                          style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+                          title="Lokale Datei vom Server wählen">
+                          <FolderOpen size={13} />
+                        </button>
+                      </div>
+                      {imageUrl.startsWith('aura-file:') && (
+                        <p className="text-[10px] mt-1 truncate" style={{ color: 'var(--accent)' }}>
+                          {imageUrl.slice('aura-file:'.length).split('/').pop()}
+                        </p>
+                      )}
                     </div>
                     <div>
                       <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
@@ -5291,6 +5306,22 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
             }
           }}
           onClose={() => setPickerTarget(null)}
+        />
+      )}
+
+      {/* Image file picker */}
+      {imageFilePicker && (
+        <DatapointPicker
+          modes={['files']}
+          defaultMode="files"
+          acceptMime={['image/*']}
+          currentValue={(config.options?.imageUrl as string) ?? ''}
+          onPickResult={(r) => {
+            if (r.kind === 'file') {
+              onConfigChange({ ...config, options: { ...(config.options ?? {}), imageUrl: `aura-file:${r.path}` } });
+            }
+          }}
+          onClose={() => setImageFilePicker(false)}
         />
       )}
 
