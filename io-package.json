@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.5.69",
+    "version": "0.5.70",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -546,7 +546,10 @@
     "certPrivate": "",
     "certChained": "",
     "fsRoots": [
-      {"label": "ioBroker Files", "path": "/opt/iobroker/iobroker-data/files"}
+      {
+        "label": "ioBroker Files",
+        "path": "/opt/iobroker/iobroker-data/files"
+      }
     ],
     "fsAllowWrite": false
   },
