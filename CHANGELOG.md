@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.5.69 (2026-05-03)
+
+- docs: README.md wiederherstellen mit Changelog seit v0.5.17
+- feat: ShutterWidget — Option '% geschlossen anzeigen'
+- feat: EvccWidget — optimistic UI für Modus und Ziel-SoC am Ladepunkt
+- fix: WeatherWidget — entferne Hinweis "eigener Sensor"
+- fix: MediaPlayer — Alexa Mute via Volume=0 (muteViaVolume)
+- feat: MediaPlayer — Cover volle Höhe, Lautstärke-Redesign, Geräteerkennung mit echtem Namen
+- feat: MediaPlayer-Widget — Icon, responsives Layout, mobile-vertikal, Chip-Reihenfolge
+- feat: Klick-Aktion — neue Popups, Auto-Select, Schließen-Fix
+- fix: Klick-Aktion — Tab-Navigation + Auto-Select für Dimmer/Thermostat
+- feat: Widget-Klick-Aktion — Popups + Navigation per Widget konfigurierbar
+
 ## v0.5.66 (2026-05-03)
 
 - feat: ShutterWidget ÔÇö Option '% geschlossen anzeigen'
@@ -35,6 +48,7 @@
 - feat: Klick-Aktion ÔÇö neue Popups, Auto-Select, Schlie├ƒen-Fix
 - fix: Klick-Aktion ÔÇö Tab-Navigation + Auto-Select f├╝r Dimmer/Thermostat
 - feat: Widget-Klick-Aktion ÔÇö Popups + Navigation per Widget konfigurierbar
+
 
 
 

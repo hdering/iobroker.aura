@@ -184,6 +184,19 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.5.69 (2026-05-03)
+- docs: README.md wiederherstellen mit Changelog seit v0.5.17
+- feat: ShutterWidget — Option '% geschlossen anzeigen'
+- feat: EvccWidget — optimistic UI für Modus und Ziel-SoC am Ladepunkt
+- fix: WeatherWidget — entferne Hinweis "eigener Sensor"
+- fix: MediaPlayer — Alexa Mute via Volume=0 (muteViaVolume)
+- feat: MediaPlayer — Cover volle Höhe, Lautstärke-Redesign, Geräteerkennung mit echtem Namen
+- feat: MediaPlayer-Widget — Icon, responsives Layout, mobile-vertikal, Chip-Reihenfolge
+- feat: Klick-Aktion — neue Popups, Auto-Select, Schließen-Fix
+- fix: Klick-Aktion — Tab-Navigation + Auto-Select für Dimmer/Thermostat
+- feat: Widget-Klick-Aktion — Popups + Navigation per Widget konfigurierbar
+
+
 ### 0.5.67 (2026-05-03)
 - (internal release)
 
@@ -818,3 +831,4 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
