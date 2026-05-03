@@ -3796,6 +3796,17 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                       </button>
                     </div>
                     <div className="flex items-center justify-between">
+                      <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>% geschlossen anzeigen</label>
+                      <button
+                        onClick={() => setO({ showClosedPercent: !(o.showClosedPercent ?? false) })}
+                        className="relative w-9 h-5 rounded-full transition-colors"
+                        style={{ background: (o.showClosedPercent ?? false) ? 'var(--accent)' : 'var(--app-border)' }}
+                      >
+                        <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                          style={{ left: (o.showClosedPercent ?? false) ? '18px' : '2px' }} />
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between">
                       <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Erst bei Loslassen senden</label>
                       <button
                         onClick={() => setO({ sendOnRelease: !(o.sendOnRelease !== false) })}

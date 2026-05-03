@@ -53,6 +53,7 @@ export function ShutterPopupBody({ widget }: Props) {
   const rawPos = typeof value === 'number' ? Math.round(value) : 0;
   const pos = (opts.invertPosition as boolean) ? 100 - rawPos : rawPos;
   const closedFrac = Math.max(0, Math.min(1, (100 - pos) / 100));
+  const showClosedPercent = !!(opts.showClosedPercent as boolean);
   const isMoving = activityVal === true || activityVal === 1 || activityVal === '1' || activityVal === 'true';
 
   const [sliderDraft, setSliderDraft] = useState<number | null>(null);
@@ -113,7 +114,7 @@ export function ShutterPopupBody({ widget }: Props) {
         <div className="flex justify-between text-sm">
           <span style={{ color: 'var(--text-secondary)' }}>Position</span>
           <span className="font-semibold tabular-nums" style={{ color: 'var(--text-primary)' }}>
-            {display}%
+            {showClosedPercent ? 100 - display : display}%
           </span>
         </div>
         <input

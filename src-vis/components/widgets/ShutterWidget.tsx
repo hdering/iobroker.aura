@@ -83,6 +83,8 @@ export function ShutterWidget({ config }: WidgetProps) {
   const rawPos = typeof value === 'number' ? Math.round(value) : 0;
   const pos = (opts.invertPosition as boolean) ? 100 - rawPos : rawPos;
   const closedFrac = Math.max(0, Math.min(1, (100 - pos) / 100));
+  const showClosedPercent = !!(opts.showClosedPercent as boolean);
+  const displayPct = showClosedPercent ? 100 - pos : pos;
 
   const isMoving = activityVal === true || activityVal === 1 || activityVal === '1' || activityVal === 'true';
   const movingDir: 'up' | 'down' | null =
@@ -154,7 +156,8 @@ export function ShutterWidget({ config }: WidgetProps) {
 
   const statusText = isMoving
     ? (movingDir === 'up' ? '▲ Fährt auf' : movingDir === 'down' ? '▼ Fährt zu' : '↕ Fährt...')
-    : pos === 100 ? 'Geöffnet' : pos === 0 ? 'Geschlossen' : `${pos}% geöffnet`;
+    : pos === 100 ? 'Geöffnet' : pos === 0 ? 'Geschlossen'
+    : showClosedPercent ? `${100 - pos}% geschlossen` : `${pos}% geöffnet`;
 
   const slider = (
     <input type="range" min={0} max={100} step={1} value={displayPos}
@@ -173,7 +176,7 @@ export function ShutterWidget({ config }: WidgetProps) {
         config={config}
         value={`${pos}`}
         extraFields={{
-          position:  `${pos}%`,
+          position:  `${displayPct}%`,
           status:    statusText,
           moving:    isMoving ? 'Ja' : 'Nein',
           battery,
@@ -208,7 +211,7 @@ export function ShutterWidget({ config }: WidgetProps) {
         )}
         <ShutterViz closedFrac={closedFrac} accentColor={accentColor} isMoving={isMoving} className="flex-1" />
         <div className="flex items-center justify-between">
-          {showValue && <span className="text-xl font-black" style={{ color: valueColor }}>{pos}%</span>}
+          {showValue && <span className="text-xl font-black" style={{ color: valueColor }}>{displayPct}%</span>}
           {showControls && <BtnRow onUp={openFully} onStop={stop} onDown={closeFully} size="md" />}
         </div>
         {showSlider && slider}
@@ -228,7 +231,7 @@ export function ShutterWidget({ config }: WidgetProps) {
         }
         {showTitle && <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
         {!showTitle && <span className="flex-1" />}
-        {showValue && <span className="text-sm font-bold shrink-0" style={{ color: thresholdColor ?? (isMoving ? 'var(--accent-yellow)' : 'var(--text-primary)') }}>{pos}%</span>}
+        {showValue && <span className="text-sm font-bold shrink-0" style={{ color: thresholdColor ?? (isMoving ? 'var(--accent-yellow)' : 'var(--text-primary)') }}>{displayPct}%</span>}
         {showControls && <BtnRow onUp={openFully} onStop={stop} onDown={closeFully} size="sm" />}
         <StatusBadges config={config} />
       </div>
@@ -247,7 +250,7 @@ export function ShutterWidget({ config }: WidgetProps) {
         )}
         {showValue && (
           <div className="text-center">
-            <p className="text-2xl font-black leading-none" style={{ color: valueColor }}>{pos}%</p>
+            <p className="text-2xl font-black leading-none" style={{ color: valueColor }}>{displayPct}%</p>
             {isMoving && <p className="text-[10px] animate-pulse mt-0.5" style={{ color: 'var(--accent-yellow)' }}>
               {movingDir === 'up' ? '▲' : '▼'}
             </p>}
@@ -293,7 +296,7 @@ export function ShutterWidget({ config }: WidgetProps) {
           {showValue && (
             <div className="flex justify-between items-baseline mb-1">
               <span className="text-[11px]" style={{ color: isMoving ? 'var(--accent-yellow)' : 'var(--text-secondary)' }}>{statusText}</span>
-              <span className="text-sm font-bold" style={{ color: valueColor }}>{pos}%</span>
+              <span className="text-sm font-bold" style={{ color: valueColor }}>{displayPct}%</span>
             </div>
           )}
           {showSlider && slider}
