@@ -546,8 +546,7 @@
     "certPrivate": "",
     "certChained": "",
     "fsRoots": [
-      {"label": "ioBroker", "path": "/opt/iobroker"},
-      {"label": "Mounts",   "path": "/mnt"}
+      {"label": "ioBroker Files", "path": "/opt/iobroker/iobroker-data/files"}
     ],
     "fsAllowWrite": false
   },
