@@ -106,6 +106,7 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
   const layouts = useDashboardStore((s) => s.layouts);
 
   const [dpPickerTarget, setDpPickerTarget] = useState<'image-dp' | 'json-dp' | 'html-dp' | 'thermo-setpoint' | 'thermo-mode' | null>(null);
+  const [widgetSearch, setWidgetSearch] = useState('');
 
   const setAction = (patch: Partial<ClickAction> & { kind: ClickAction['kind'] }) => {
     onConfigChange({ ...config, options: { ...o, clickAction: patch } });
@@ -366,25 +367,75 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
         </div>
       )}
 
-      {action.kind === 'popup-widget' && (
-        <div>
-          <label className={labelCls} style={labelStyle}>Ziel-Widget (leer = dieses Widget vergrößert)</label>
-          <select
-            value={action.widgetId ?? ''}
-            onChange={(e) => setAction({ ...action, widgetId: e.target.value || undefined })}
-            className={inputCls} style={inputStyle}
-          >
-            <option value="">— Dieses Widget —</option>
-            {allWidgets
-              .filter((w) => w.id !== config.id)
-              .map((w) => (
-                <option key={w.id} value={w.id}>
-                  {w.title || w.type} ({w.id})
-                </option>
+      {action.kind === 'popup-widget' && (() => {
+        const selectedId = action.widgetId ?? '';
+        const filteredWidgets = allWidgets
+          .filter((w) => w.id !== config.id)
+          .sort((a, b) => (a.title || a.type).localeCompare(b.title || b.type, 'de'))
+          .filter((w) => {
+            if (!widgetSearch) return true;
+            const q = widgetSearch.toLowerCase();
+            return (w.title || w.type).toLowerCase().includes(q) || w.id.toLowerCase().includes(q) || w.type.toLowerCase().includes(q);
+          });
+        const rowStyle = (id: string): React.CSSProperties => ({
+          padding: '4px 8px',
+          cursor: 'pointer',
+          background: selectedId === id ? 'var(--accent)' : 'transparent',
+          color: selectedId === id ? '#fff' : 'var(--text-primary)',
+          borderRadius: 4,
+        });
+        return (
+          <div className="space-y-1.5">
+            <label className={labelCls} style={labelStyle}>Ziel-Widget (leer = dieses Widget vergrößert)</label>
+            <input
+              type="text"
+              value={widgetSearch}
+              onChange={(e) => setWidgetSearch(e.target.value)}
+              placeholder="Suchen nach Name oder ID…"
+              className={inputCls} style={inputStyle}
+            />
+            <div
+              style={{
+                ...inputStyle,
+                padding: '4px',
+                maxHeight: 180,
+                overflowY: 'auto',
+                borderRadius: 8,
+              }}
+            >
+              {/* header */}
+              <div className="grid gap-x-2 px-2 pb-1 text-[10px]" style={{ gridTemplateColumns: '1fr 90px 1fr', color: 'var(--text-secondary)', borderBottom: '1px solid var(--app-border)' }}>
+                <span>Titel</span><span>Typ</span><span>ID</span>
+              </div>
+              {/* "this widget" row */}
+              <div
+                className="grid gap-x-2 px-2 rounded text-xs"
+                style={{ ...rowStyle(''), gridTemplateColumns: '1fr 90px 1fr' }}
+                onClick={() => setAction({ ...action, widgetId: undefined })}
+              >
+                <span className="truncate italic">— Dieses Widget —</span>
+                <span />
+                <span />
+              </div>
+              {filteredWidgets.map((w) => (
+                <div
+                  key={w.id}
+                  className="grid gap-x-2 px-2 rounded text-xs"
+                  style={{ ...rowStyle(w.id), gridTemplateColumns: '1fr 90px 1fr' }}
+                  onClick={() => setAction({ ...action, widgetId: w.id })}
+                >
+                  <span className="truncate">{w.title || '–'}</span>
+                  <span className="truncate" style={{ opacity: 0.75 }}>{w.type}</span>
+                  <span className="truncate" style={{ opacity: 0.6, fontFamily: 'monospace' }}>{w.id}</span>
+                </div>
               ))}
-          </select>
-        </div>
-      )}
+              {filteredWidgets.length === 0 && (
+                <div className="px-2 py-1 text-xs" style={{ color: 'var(--text-secondary)' }}>Keine Widgets gefunden</div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {action.kind === 'link-tab' && (
         <div className="space-y-3">

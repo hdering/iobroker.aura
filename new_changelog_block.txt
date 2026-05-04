@@ -1,0 +1,157 @@
+### 0.5.67 (2026-05-03)
+- (internal release)
+
+### 0.5.66 (2026-05-03)
+- (internal release)
+
+### 0.5.65 (2026-05-03)
+- (internal release)
+
+### 0.5.64 (2026-05-03)
+- feat: ShutterWidget — Option '% geschlossen anzeigen'
+
+### 0.5.63 (2026-05-03)
+- feat: EvccWidget — optimistic UI für Modus und Ziel-SoC am Ladepunkt
+- fix: WeatherWidget — entferne Hinweis "eigener Sensor"
+
+### 0.5.62 (2026-05-02)
+- fix: MediaPlayer — Alexa Mute via Volume=0 (muteViaVolume)
+- feat: MediaPlayer — Cover volle Höhe, Lautstärke-Redesign, Geräteerkennung mit echtem Namen
+- feat: MediaPlayer-Widget — Icon, responsives Layout, mobile-vertikal, Chip-Reihenfolge
+
+### 0.5.61 (2026-04-30)
+- feat: Klick-Aktion — neue Popups, Auto-Select, Schließen-Fix
+- fix: Klick-Aktion — Tab-Navigation + Auto-Select für Dimmer/Thermostat
+- feat: Widget-Klick-Aktion — Popups + Navigation per Widget konfigurierbar
+
+### 0.5.60 (2026-04-30)
+- feat: Tab-Settings — disabled flag + DP-Bedingungen für Tab-Button-Stil
+
+### 0.5.59 (2026-04-30)
+- (internal release)
+
+### 0.5.58 (2026-04-29)
+- Fix: proxy /lib/ through Aura — ioBroker shared libraries (e.g. socket.io.js) now reachable
+
+### 0.5.57 (2026-04-29)
+- Fix: proxy /echarts/ through Aura — no direct web adapter access needed
+
+### 0.5.56 (2026-04-29)
+- Fix: add socketSecure option for web adapter HTTPS — internal proxy uses wss/https when enabled
+
+### 0.5.55 (2026-04-29)
+- Feat: internal socket.io proxy — no nginx config needed for WSS through reverse proxy
+
+### 0.5.54 (2026-04-29)
+- Feat: socketUrl config override for reverse-proxy setups; echarts widget uses iobroker.web base URL
+
+### 0.5.53 (2026-04-29)
+- Fix: HTTPS fallback log now correctly shows HTTP; clearer error when certificates are not configured
+
+### 0.5.52 (2026-04-29)
+- Feat: optional HTTPS for built-in HTTP server — certificates picked from ioBroker system.certificates
+
+### 0.5.51 (2026-04-29)
+- Fix: inject iobroker socket URL into index.html so frontend connects to correct port; add socketPort config (default 8082)
+
+### 0.5.50 (2026-04-29)
+- Fix: correct asset base path, MIME type fallback, legacy webInstance migration, proxy paths
+
+### 0.5.49 (2026-04-29)
+- Feat: replace webExtension with built-in HTTP server — no more web adapter restarts when aura stops; configurable port (default 8095)
+
+### 0.5.48 (2026-04-29)
+- Fix(config): remove invalid jsonConfig schema properties (allowNone, required) from web instance field
+
+### 0.5.47 (2026-04-29)
+- Fix: auto-migrate webInstance='*' to the specific web instance so the admin UI dropdown works correctly after upgrade
+
+### 0.5.46 (2026-04-28)
+- Feat(config): dedicated web instance selector — default is now empty (proxy disabled); select a specific web instance to avoid restarting VIS/Material on aura stop
+
+### 0.5.45 (2026-04-28)
+- (internal release)
+
+### 0.5.44 (2026-04-28)
+- (internal release)
+
+### 0.5.43 (2026-04-28)
+- (internal release)
+
+### 0.5.42 (2026-04-28)
+- (internal release)
+
+### 0.5.41 (2026-04-28)
+- Warn on adapter start if iobroker.web needs a restart to load the webExtension
+
+### 0.5.40 (2026-04-28)
+- (internal release)
+
+### 0.5.39 (2026-04-28)
+- (internal release)
+
+### 0.5.38 (2026-04-28)
+- (internal release)
+
+### 0.5.37 (2026-04-28)
+- (internal release)
+
+### 0.5.36 (2026-04-28)
+- Revert proxy script to v0.5.31 baseline: history.replaceState('/'), no <base href> injection, original segment rewriter
+
+### 0.5.35 (2026-04-28)
+- Revert proxy script to v0.5.32/v0.5.33 baseline: <base href='/'> injection, no history.replaceState, original rw() and WS guards
+
+### 0.5.34 (2026-04-28)
+- Fix(proxy): restore history.replaceState('/') so apps see pathname='/' not '/aura/proxy'; narrow rw() guard to /aura/proxy only; WS guard uses startsWith
+
+### 0.5.33 (2026-04-28)
+- Fix(proxy): restore missing 'let out' declaration dropped in v0.5.32 refactoring — caused 502 on all proxied pages
+
+### 0.5.32 (2026-04-28)
+- Fix(proxy): replace history.replaceState('/') with <base href='/'>  injection — replaceState in same-origin iframe fired popstate on parent Aura window causing widget flash
+
+### 0.5.31 (2026-04-28)
+- Fix(proxy): MutationObserver rewrites dynamically set src= attributes — Angular [src] bindings (thumbnails, images) now route through the proxy
+
+### 0.5.30 (2026-04-28)
+- Fix(proxy): click interceptor uses bubble phase + checks defaultPrevented — Angular RouterLink now handles internal SPA navigation without full-page reload flicker
+
+### 0.5.29 (2026-04-28)
+- Fix(proxy): always use history.replaceState('/') — using the actual target path confused Angular into building wrong API URLs like /dashboardapi/saved_views/
+
+### 0.5.28 (2026-04-28)
+- Fix(proxy): rewrite src= in script/style opening tags while leaving inline content untouched — v0.5.26 accidentally skipped script src attributes causing 404 for JS bundles
+
+### 0.5.27 (2026-04-28)
+- Fix(proxy): restore missing targetOrigin variable dropped during v0.5.26 refactoring — caused 502 on all proxied pages
+
+### 0.5.26 (2026-04-28)
+- Fix(proxy): protect <script>/<style> content from URL rewriting; rw() resolves absolute paths directly against target without location.href interference
+
+### 0.5.25 (2026-04-28)
+- Fix(proxy): add action attribute to forms without one and intercept form submit events — fixes login POST 404 when Django template has no form action
+
+### 0.5.24 (2026-04-28)
+- Fix(proxy): use actual target path for history.replaceState instead of '/' — prevents post-login redirect landing on web-adapter root
+
+### 0.5.23 (2026-04-28)
+- Fix(proxy): intercept location.href, location.assign/replace and dynamic link clicks so logout and other direct navigations are routed through the proxy
+
+### 0.5.22 (2026-04-28)
+- Fix(proxy): inject history.replaceState('/') so SPA routers see '/' instead of '/aura/proxy' — prevents Angular/Vue/React 404 on initial load
+
+### 0.5.21 (2026-04-28)
+- Fix(proxy): intercept XHR and fetch in proxied pages so API calls are routed through the proxy instead of failing with HTML 404
+
+### 0.5.20 (2026-04-28)
+- Fix(proxy): WebSocket proxy at /aura/proxyws + JS interceptor injected into HTML; fix CSRF 403 by overriding Referer and forwarding X-CSRFToken
+
+### 0.5.19 (2026-04-28)
+- Fix(proxy): rewrite HTML/CSS URLs so static assets and links are routed through the proxy instead of loading directly from the internal host
+
+### 0.5.18 (2026-04-28)
+- Fix(proxy): support POST and all HTTP methods — login forms now work through the iframe proxy
+
+### 0.5.17 (2026-04-28)
+- Fix: set webInstance=* in native so iobroker.web loads the proxy extension; auto-migrate existing instances on adapter start

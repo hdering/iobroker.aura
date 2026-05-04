@@ -37,8 +37,9 @@ export function ChartWidget({ config }: WidgetProps) {
   const cfgCustomMs     = cfgRange === 'custom'
     ? customVal * (customUnit === 'd' ? 86_400_000 : 3_600_000)
     : undefined;
-  const lockRange       = o.lockRange === true;
-  const showAverage     = o.showAverage === true;
+  const lockRange          = o.lockRange === true;
+  const showAverage        = o.showAverage === true;
+  const showAverageAsValue = o.showAverageAsValue === true;
   const layout          = config.layout ?? 'default';
   const lineColor       = (o.lineColor  as string | undefined) ?? 'var(--accent)';
   const unitColor       = (o.unitColor  as string | undefined) ?? '#000000';
@@ -65,7 +66,7 @@ export function ChartWidget({ config }: WidgetProps) {
     activeCustomMs,
   );
 
-  const avg = showAverage && history.length > 1
+  const avg = (showAverage || showAverageAsValue) && history.length > 1
     ? Math.round((history.reduce((sum, p) => sum + p.v, 0) / history.length) * 100) / 100
     : null;
 
@@ -157,6 +158,11 @@ export function ChartWidget({ config }: WidgetProps) {
                   {unit && <span className="text-lg ml-1 font-medium" style={{ color: unitColor }}>{unit}</span>}
                 </p>
               )}
+              {showAverageAsValue && avg !== null && (
+                <p className="text-xs leading-tight mt-0.5" style={{ color: avgColor }}>
+                  Ø {avg.toLocaleString('de-DE')}{unit ? ` ${unit}` : ''}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -178,7 +184,7 @@ export function ChartWidget({ config }: WidgetProps) {
                   formatter={(v: number) => `${v.toLocaleString('de-DE')}${unit ? ` ${unit}` : ''}`} />
                 <Area type="monotone" dataKey="v" stroke={lineColor} strokeWidth={2}
                   fill={`url(#grad-${config.id})`} dot={false} isAnimationActive={false} />
-                {avg !== null && (
+                {showAverage && avg !== null && (
                   <ReferenceLine y={avg} stroke={avgColor} strokeDasharray="4 3" strokeWidth={1.5}
                     label={{ value: `Ø ${avg.toLocaleString('de-DE')}${unit ? ` ${unit}` : ''}`, position: 'insideTopRight', fill: avgColor, fontSize: 10 }} />
                 )}
@@ -200,9 +206,16 @@ export function ChartWidget({ config }: WidgetProps) {
           {showTitle && <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>}
         </div>
         {current !== null && (
-          <span className="font-bold text-sm shrink-0 ml-2" style={{ color: 'var(--text-primary)' }}>
-            {current.toLocaleString('de-DE')}{unit ? ` ${unit}` : ''}
-          </span>
+          <div className="flex flex-col items-end shrink-0 ml-2">
+            <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
+              {current.toLocaleString('de-DE')}{unit ? ` ${unit}` : ''}
+            </span>
+            {showAverageAsValue && avg !== null && (
+              <span className="text-[10px] leading-tight" style={{ color: avgColor }}>
+                Ø {avg.toLocaleString('de-DE')}{unit ? ` ${unit}` : ''}
+              </span>
+            )}
+          </div>
         )}
       </div>
       {rangeSelector && <div className="mb-1">{rangeSelector}</div>}
