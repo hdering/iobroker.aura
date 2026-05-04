@@ -60,7 +60,7 @@ export function AddWidgetDialog({ onAdd, onClose }: AddWidgetDialogProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
       <div className="bg-gray-800 rounded-xl p-6 w-full max-w-lg border border-gray-700 space-y-4" onClick={(e) => e.stopPropagation()}>
         <h2 className="text-white font-bold text-lg">{t('editor.manual.title')}</h2>
 
