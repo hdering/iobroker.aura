@@ -1869,6 +1869,10 @@ function ChipsEditPanel({
             <Database size={13} />
           </button>
         </div>
+        <p className="text-[10px] mt-1 leading-snug" style={{ color: 'var(--text-secondary)', opacity: 0.65 }}>
+          Wird gelesen um den aktiven Chip hervorzuheben. Beispiel: ein DP der die aktuelle Szene enthält.
+          Ohne Eintrag werden Chips nur als Tasten genutzt (kein Aktiv-Highlight).
+        </p>
       </div>
 
       {/* Chips */}
@@ -1907,25 +1911,36 @@ function ChipsEditPanel({
                   <Trash2 size={12} />
                 </button>
               </div>
-              <div className="flex gap-1 items-center">
-                <input type="text" value={chip.dp}
-                  onChange={(e) => updateChip(chip.id, { dp: e.target.value })}
-                  placeholder="DP-ID"
-                  className={`flex-1 ${sInputCls} min-w-0`} style={sInputStyle} />
-                <button onClick={() => onOpenChipPicker(idx)}
-                  className="px-2 rounded-lg hover:opacity-80 shrink-0"
-                  style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
-                  <Database size={13} />
-                </button>
+              <div>
+                <label className="text-[10px] mb-0.5 block" style={{ color: 'var(--text-secondary)', opacity: 0.7 }}>Schreib-DP — beim Klick wird der Wert auf diesen DP geschrieben</label>
+                <div className="flex gap-1 items-center">
+                  <input type="text" value={chip.dp}
+                    onChange={(e) => updateChip(chip.id, { dp: e.target.value })}
+                    placeholder="z.B. 0_userdata.0.scenes.relaxing"
+                    className={`flex-1 ${sInputCls} min-w-0`} style={sInputStyle} />
+                  <button onClick={() => onOpenChipPicker(idx)}
+                    className="px-2 rounded-lg hover:opacity-80 shrink-0"
+                    style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+                    <Database size={13} />
+                  </button>
+                </div>
               </div>
-              <input type="text" value={chip.value ?? ''}
-                onChange={(e) => updateChip(chip.id, { value: e.target.value || undefined })}
-                placeholder={tHook('cw.chips.value' as never)}
-                className={`w-full ${sInputCls}`} style={sInputStyle} />
-              <input type="text" value={chip.activeValue ?? ''}
-                onChange={(e) => updateChip(chip.id, { activeValue: e.target.value || undefined })}
-                placeholder={tHook('cw.chips.activeValue' as never)}
-                className={`w-full ${sInputCls}`} style={sInputStyle} />
+              <div>
+                <label className="text-[10px] mb-0.5 block" style={{ color: 'var(--text-secondary)', opacity: 0.7 }}>Schreib-Wert — was beim Klick auf den DP geschrieben wird (leer = true)</label>
+                <input type="text" value={chip.value ?? ''}
+                  onChange={(e) => updateChip(chip.id, { value: e.target.value || undefined })}
+                  placeholder="z.B. true, 1, on, relaxing"
+                  className={`w-full ${sInputCls}`} style={sInputStyle} />
+              </div>
+              {(o.checkDp as string) && (
+                <div>
+                  <label className="text-[10px] mb-0.5 block" style={{ color: 'var(--text-secondary)', opacity: 0.7 }}>Aktiv-Wert — Chip leuchtet wenn Aktiv-Status DP diesen Wert hat (leer = Schreib-Wert)</label>
+                  <input type="text" value={chip.activeValue ?? ''}
+                    onChange={(e) => updateChip(chip.id, { activeValue: e.target.value || undefined })}
+                    placeholder="z.B. relaxing"
+                    className={`w-full ${sInputCls}`} style={sInputStyle} />
+                </div>
+              )}
             </div>
           ))}
           {addingChip ? (
