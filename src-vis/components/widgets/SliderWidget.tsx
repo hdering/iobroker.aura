@@ -44,6 +44,7 @@ export function SliderWidget({ config }: WidgetProps) {
   const showUnit        = o.showUnit   !== false;
   const showMinMax      = !!o.showMinMax;
   const actions         = (o.actions as SliderAction[] | undefined) ?? [];
+  const titleAlign      = (o.titleAlign as string) ?? 'left';
 
   const { value: rawVal } = useDatapoint(config.datapoint);
   const numericVal = typeof rawVal === 'number' ? rawVal
@@ -162,7 +163,7 @@ export function SliderWidget({ config }: WidgetProps) {
   return (
     <div className="flex flex-col h-full gap-2" style={{ position: 'relative' }}>
       <div className="flex items-baseline justify-between">
-        <p className="text-sm font-medium truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+        <p className="text-sm font-medium truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>
         {showValue && (
           <p className="text-base font-semibold shrink-0 ml-2" style={{ color: 'var(--text-primary)' }}>{valueStr}</p>
         )}

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Activity, TrendingUp, Hash } from 'lucide-react';
 import { useDatapoint } from '../../hooks/useDatapoint';
 import type { WidgetProps } from '../../types';
-import { contentPositionClass, titlePositionStyle, titleTextAlign } from '../../utils/widgetUtils';
+import { contentPositionClass, titlePositionStyle } from '../../utils/widgetUtils';
 import { getWidgetIcon } from '../../utils/widgetIconMap';
 import { CustomGridView } from './CustomGridView';
 import { StatusBadges } from './StatusBadges';
@@ -19,6 +19,7 @@ export function ValueWidget({ config }: WidgetProps) {
 
   const o = config.options ?? {};
   const showTitle = o.showTitle !== false;
+  const titleAlign = (o.titleAlign as string) ?? 'left';
   const showValue = o.showValue !== false;
   const showUnit  = o.showUnit  !== false;
   const iconSize  = (o.iconSize as number) || 36;
@@ -80,7 +81,7 @@ export function ValueWidget({ config }: WidgetProps) {
           {showTitle && (
             <div className="flex items-center gap-2">
               <CardIcon size={iconSize} style={{ color: accentColor }} />
-              <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+              <p className="text-xs truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>
             </div>
           )}
           {showValue && (
@@ -102,7 +103,7 @@ export function ValueWidget({ config }: WidgetProps) {
         {showTitle && (
           <div className="flex items-center gap-2 min-w-0">
             <CompactIcon size={iconSize} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
-            <span className="text-sm truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>
+            <span className="text-sm truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</span>
           </div>
         )}
         {showValue && (
@@ -125,7 +126,7 @@ export function ValueWidget({ config }: WidgetProps) {
             {showUnit && unit && <span className="text-lg font-medium" style={{ color: 'var(--text-secondary)' }}>{unit}</span>}
           </div>
         )}
-        {showTitle && <span className="text-xs mt-2 truncate max-w-full" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
+        {showTitle && <span className="text-xs mt-2 truncate max-w-full" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</span>}
         <StatusBadges config={config} />
       </div>
     );
@@ -135,14 +136,13 @@ export function ValueWidget({ config }: WidgetProps) {
   const posClass = contentPositionClass(config.options?.contentPosition as string | undefined);
   const titlePos = config.options?.titlePosition as string | undefined;
   const titleStyle = titlePositionStyle(titlePos);
-  const titleAlign = titleTextAlign(titlePos);
 
   return (
     <div className={`flex flex-col h-full gap-2 ${posClass}`} style={{ position: 'relative' }}>
       {showTitle && (
         <div className="flex items-center gap-2" style={titleStyle}>
           <DefaultIcon size={iconSize} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
-          <p className="text-xs" style={{ color: 'var(--text-secondary)', textAlign: titleAlign, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{config.title}</p>
+          <p className="text-xs" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'], overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{config.title}</p>
         </div>
       )}
       {showValue && (

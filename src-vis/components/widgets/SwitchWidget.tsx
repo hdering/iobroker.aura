@@ -3,7 +3,7 @@ import { useDatapoint } from '../../hooks/useDatapoint';
 import { useIoBroker } from '../../hooks/useIoBroker';
 import { useConfirmAction } from '../../hooks/useConfirmAction';
 import type { WidgetProps } from '../../types';
-import { contentPositionClass, titlePositionStyle, titleTextAlign } from '../../utils/widgetUtils';
+import { contentPositionClass, titlePositionStyle } from '../../utils/widgetUtils';
 import { getWidgetIcon } from '../../utils/widgetIconMap';
 import { StatusBadges } from './StatusBadges';
 import { CustomGridView } from './CustomGridView';
@@ -16,6 +16,7 @@ export function SwitchWidget({ config }: WidgetProps) {
   const isOn = Boolean(value);
   const layout = config.layout ?? 'default';
   const o = config.options ?? {};
+  const titleAlign = (o.titleAlign as string) ?? 'left';
   const momentary      = (o.momentary      as boolean) ?? false;
   const momentaryDelay = (o.momentaryDelay as number)  ?? 500;
   const confirmAction  = (o.confirmAction  as boolean) ?? false;
@@ -85,7 +86,7 @@ export function SwitchWidget({ config }: WidgetProps) {
           style={{ color: isOn ? '#fff' : 'var(--text-secondary)', filter: isOn ? 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' : 'none' }}
         />
         <div className="text-center">
-          {showTitle && <p className="font-bold text-sm" style={{ color: isOn ? '#fff' : 'var(--text-secondary)' }}>{config.title}</p>}
+          {showTitle && <p className="font-bold text-sm" style={{ color: isOn ? '#fff' : 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>}
           {showLabel && <p className="text-xs opacity-70" style={{ color: isOn ? '#fff' : 'var(--text-secondary)' }}>{isOn ? 'AN' : 'AUS'}</p>}
         </div>
         <StatusBadges config={config} />
@@ -99,7 +100,7 @@ export function SwitchWidget({ config }: WidgetProps) {
     return (
       <div className="flex items-center gap-2 h-full" style={{ position: 'relative' }}>
         <WidgetIcon size={iconSize} style={{ color: isOn ? 'var(--accent-green)' : 'var(--text-secondary)', flexShrink: 0 }} />
-        {showTitle && <span className="flex-1 text-sm truncate" style={{ color: 'var(--text-primary)' }}>{config.title}</span>}
+        {showTitle && <span className="flex-1 text-sm truncate" style={{ color: 'var(--text-primary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</span>}
         {!showTitle && <span className="flex-1" />}
         <button onClick={handleToggle}
           className="relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0 focus:outline-none"
@@ -122,7 +123,7 @@ export function SwitchWidget({ config }: WidgetProps) {
             style={{ color: isOn ? 'var(--accent-green)' : 'var(--text-secondary)' }}
           />
         </button>
-        {showTitle && <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
+        {showTitle && <span className="text-xs" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</span>}
         <StatusBadges config={config} />
         {pending && <ConfirmOverlay text={confirmText} onConfirm={confirm} onCancel={cancel} />}
       </div>
@@ -133,14 +134,13 @@ export function SwitchWidget({ config }: WidgetProps) {
   const posClass = contentPositionClass(config.options?.contentPosition as string | undefined);
   const titlePos = config.options?.titlePosition as string | undefined;
   const titleStyle = titlePositionStyle(titlePos);
-  const titleAlign = titleTextAlign(titlePos);
 
   return (
     <div className={`flex flex-col h-full gap-2 ${posClass}`} style={{ position: 'relative' }}>
       {showTitle && (
         <div className="flex items-center gap-2" style={titleStyle}>
           <WidgetIcon size={iconSize} style={{ color: isOn ? 'var(--accent-green)' : 'var(--text-secondary)', flexShrink: 0 }} />
-          <p className="text-xs" style={{ color: 'var(--text-secondary)', textAlign: titleAlign, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{config.title}</p>
+          <p className="text-xs" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'], overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{config.title}</p>
         </div>
       )}
       <div className="flex items-center justify-between">

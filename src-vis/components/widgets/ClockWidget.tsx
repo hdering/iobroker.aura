@@ -53,6 +53,7 @@ export function ClockWidget({ config }: WidgetProps) {
   const dateLength = (opts.dateLength as 'short' | 'long') ?? 'short';
   const customFormat = opts.customFormat as string | undefined;
   const layout = config.layout ?? 'default';
+  const titleAlign = (opts.titleAlign as string) ?? 'left';
 
   const timeStr = formatTime(now, showSeconds);
   const customStr = customFormat ? applyCustomFormat(now, customFormat, t) : '';
@@ -115,7 +116,7 @@ export function ClockWidget({ config }: WidgetProps) {
           <p className="aura-clock-custom font-black tabular-nums text-center" style={{ color: 'var(--accent)', fontSize: 'calc(clamp(2rem, 6vw, 3.5rem) * var(--font-scale, 1))', lineHeight: 1.1 }}>
             {customStr}
           </p>
-          {showTitle && config.title && <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>}
+          {showTitle && config.title && <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>}
         </div>
       );
     }
@@ -131,7 +132,7 @@ export function ClockWidget({ config }: WidgetProps) {
             <DateText date={now} length={dateLength} t={t} />
           </p>
         )}
-        {showTitle && config.title && <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>}
+        {showTitle && config.title && <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>}
       </div>
     );
   }
@@ -141,7 +142,7 @@ export function ClockWidget({ config }: WidgetProps) {
     return (
       <div className="flex flex-col h-full justify-between">
         {showTitle && config.title && (
-          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>
         )}
         <p className="aura-clock-custom text-3xl font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>{customStr}</p>
       </div>
@@ -151,7 +152,7 @@ export function ClockWidget({ config }: WidgetProps) {
   return (
     <div className="flex flex-col h-full justify-between">
       {showTitle && config.title && (
-        <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+        <p className="text-xs truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>
       )}
       <div>
         {display !== 'date' && (

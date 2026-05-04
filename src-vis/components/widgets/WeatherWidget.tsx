@@ -127,6 +127,7 @@ export function WeatherWidget({ config }: WidgetProps) {
   const showWarnings     = (opts.showWarnings   as boolean) ?? false;
   const localTempDp      = (opts.localTempDatapoint as string) ?? '';
   const layout           = config.layout ?? 'default';
+  const titleAlign       = (opts.titleAlign as string) ?? 'left';
 
   // ── Local temperature sensor ──────────────────────────────────────────────
   const { value: localTempRaw } = useDatapoint(localTempDp);
@@ -322,7 +323,7 @@ export function WeatherWidget({ config }: WidgetProps) {
   return (
     <div className="aura-scroll flex flex-col h-full gap-2 overflow-auto">
       {config.title && opts.showTitle !== false && (
-        <p className="text-xs truncate mb-1" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+        <p className="text-xs truncate mb-1" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>
       )}
       {/* ── Current weather header ── */}
       <div className="flex items-start gap-3 shrink-0">

@@ -80,6 +80,7 @@ export function DatePickerWidget({ config }: WidgetProps) {
   const showTime    = timeOnly || o.showTime === true;
   const outputFmt   = (o.outputFormat as DateOutputFormat) ?? 'timestamp_ms';
   const showTitle   = o.showTitle !== false;
+  const titleAlign  = (o.titleAlign as string) ?? 'left';
   const showCurrent = o.showCurrentValue !== false;
   const layout      = config.layout ?? 'default';
   const iconSize    = (o.iconSize as number) || 36;
@@ -171,7 +172,7 @@ export function DatePickerWidget({ config }: WidgetProps) {
     return (
       <div className="flex flex-col h-full gap-2 items-center justify-center" style={{ position: 'relative' }}>
         <WidgetIcon size={iconSize} style={{ color: 'var(--accent)', opacity: 0.8 }} />
-        {showTitle && <p className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>}
+        {showTitle && <p className="text-xs font-medium" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>}
         <div className="flex flex-wrap justify-center gap-1.5">
           {dateInput}
           {timeInput}
@@ -189,7 +190,7 @@ export function DatePickerWidget({ config }: WidgetProps) {
     return (
       <div className="flex items-center gap-2 h-full" style={{ position: 'relative' }}>
         <WidgetIcon size={iconSize} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-        {showTitle && <span className="text-sm truncate flex-1 min-w-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
+        {showTitle && <span className="text-sm truncate flex-1 min-w-0" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</span>}
         {!showTitle && <span className="flex-1" />}
         <div className="flex items-center gap-1 shrink-0">
           {dateInput}
@@ -221,7 +222,7 @@ export function DatePickerWidget({ config }: WidgetProps) {
       {showTitle && (
         <div className="flex items-center gap-1.5">
           <WidgetIcon size={iconSize} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>
         </div>
       )}
       <div className="flex flex-wrap gap-1.5">

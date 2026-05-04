@@ -38,6 +38,7 @@ export function ChartWidget({ config }: WidgetProps) {
     ? customVal * (customUnit === 'd' ? 86_400_000 : 3_600_000)
     : undefined;
   const lockRange          = o.lockRange === true;
+  const titleAlign         = (o.titleAlign as string) ?? 'left';
   const showAverage        = o.showAverage === true;
   const showAverageAsValue = o.showAverageAsValue === true;
   const layout          = config.layout ?? 'default';
@@ -151,7 +152,7 @@ export function ChartWidget({ config }: WidgetProps) {
           <div className="flex items-start gap-1.5 min-w-0">
             <WidgetIcon size={16} strokeWidth={1.5} style={{ color: lineColor, flexShrink: 0, marginTop: 2 }} />
             <div className="min-w-0">
-              {showTitle && <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>}
+              {showTitle && <p className="text-xs" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>}
               {current !== null && (
                 <p className="text-3xl font-black leading-tight" style={{ color: 'var(--text-primary)' }}>
                   {current.toLocaleString('de-DE')}
@@ -203,7 +204,7 @@ export function ChartWidget({ config }: WidgetProps) {
       <div className="flex justify-between items-start mb-1">
         <div className="flex items-center gap-1 min-w-0">
           <WidgetIcon size={13} strokeWidth={1.5} style={{ color: lineColor, flexShrink: 0 }} />
-          {showTitle && <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>}
+          {showTitle && <p className="text-xs truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>}
         </div>
         {current !== null && (
           <div className="flex flex-col items-end shrink-0 ml-2">

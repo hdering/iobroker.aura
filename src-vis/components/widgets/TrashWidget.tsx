@@ -97,6 +97,7 @@ function BinDisplay({ bin, size }: { bin: TrashBin; size: number }) {
 
 export function TrashWidget({ config }: WidgetProps) {
   const bins: TrashBin[] = (config.options?.bins as TrashBin[]) ?? [];
+  const titleAlign = (config.options?.titleAlign as string) ?? 'left';
 
   if (bins.length === 0) {
     return (
@@ -117,7 +118,7 @@ export function TrashWidget({ config }: WidgetProps) {
   return (
     <div className="flex flex-col h-full">
       {config.title && !config.options?.hideTitle && (
-        <p className="text-xs mb-2 truncate shrink-0" style={{ color: 'var(--text-secondary)' }}>
+        <p className="text-xs mb-2 truncate shrink-0" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>
           {config.title}
         </p>
       )}

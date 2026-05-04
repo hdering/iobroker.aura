@@ -64,12 +64,13 @@ export function IframeWidget({ config }: WidgetProps) {
     ? 'allow-scripts allow-forms allow-popups allow-presentation'
     : undefined;
 
+  const titleAlign = (opts.titleAlign as string) ?? 'left';
   const showTitle = config.title && !config.options?.hideTitle;
 
   return (
     <div className="flex flex-col h-full">
       {showTitle && (
-        <p className="text-xs truncate shrink-0 pb-1" style={{ color: 'var(--text-secondary)' }}>
+        <p className="text-xs truncate shrink-0 pb-1" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>
           {config.title}
         </p>
       )}

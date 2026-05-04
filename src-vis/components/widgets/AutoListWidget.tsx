@@ -493,8 +493,9 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
     return result;
   }, [entries, states, valueFilter, editMode, opts.sortBy, opts.sortOrder, resolvedNames]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const hideTitle = !!(config.options as Record<string, unknown>)?.hideTitle;
-  const showTitle = opts.showTitle !== false && !hideTitle;
+  const hideTitle  = !!(config.options as Record<string, unknown>)?.hideTitle;
+  const showTitle  = opts.showTitle !== false && !hideTitle;
+  const titleAlign = ((config.options as Record<string, unknown>)?.titleAlign as string) ?? 'left';
   const showCount = opts.showCount !== false;
   const showLastChange = !!(config.options as Record<string, unknown>)?.showLastChange;
   const lastChangePos  = ((config.options as Record<string, unknown>)?.lastChangePosition as string) ?? 'left';
@@ -521,7 +522,7 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
   const header = showTitle ? (
     <div className="shrink-0 px-3 py-1.5 flex items-center justify-between"
       style={{ borderBottom: '1px solid var(--widget-border)' }}>
-      <span className="flex items-center gap-1.5 text-xs font-semibold truncate" style={{ color: 'var(--text-secondary)' }}>
+      <span className="flex items-center gap-1.5 text-xs font-semibold truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>
         {HeaderIcon && <HeaderIcon size={12} className="shrink-0" />}
         {config.title || 'Dynamische Liste'}
         {showCount && entries.length > 0 && (
@@ -595,7 +596,7 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
           {count}
         </span>
         {showTitle && config.title && (
-          <span className="text-xs truncate max-w-full px-2 text-center" style={{ color: 'var(--text-secondary)' }}>
+          <span className="text-xs truncate max-w-full px-2 text-center" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>
             {config.title}
           </span>
         )}

@@ -660,6 +660,7 @@ export function EvccWidget({ config }: WidgetProps) {
   const loadpointCount = Math.max(1, Math.min(8, (o.loadpointCount as number) ?? 1));
   const showBattery   = (o.showBattery     as boolean) ?? true;
   const layout        = config.layout ?? 'default';
+  const titleAlign    = (o.titleAlign      as string)  ?? 'left';
 
   // Which loadpoints to show (0-based indices); default = all
   const visibleLpIndices: number[] = (() => {
@@ -765,7 +766,7 @@ export function EvccWidget({ config }: WidgetProps) {
     return (
       <div className="aura-scroll flex flex-col gap-2 h-full overflow-auto">
         {config.title && !config.options?.hideTitle && (
-          <p className="text-xs truncate shrink-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+          <p className="text-xs truncate shrink-0" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>
         )}
         <div className="shrink-0" style={{ height: showBattery ? 190 : 160 }}>
           <EnergyFlowSVG site={site} loadpoints={loadpoints} showBattery={showBattery} visibleLpIndices={visibleLpIndices} />

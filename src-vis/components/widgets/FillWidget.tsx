@@ -507,7 +507,8 @@ export function FillWidget({ config }: WidgetProps) {
     fillColor, zones, colorZones, showTicks, showValue, uid,
   };
 
-  const showTitle = opts.showTitle !== false;
+  const showTitle  = opts.showTitle  !== false;
+  const titleAlign = (opts.titleAlign as string) ?? 'left';
 
   if (layout === 'custom') return <CustomGridView config={config} value={value !== null ? (decimals === 0 ? String(Math.round(safeVal)) : safeVal.toFixed(decimals)) : '–'} unit={unit} />;
 
@@ -515,7 +516,7 @@ export function FillWidget({ config }: WidgetProps) {
     return (
       <div className="flex flex-col h-full">
         {showTitle && config.title && (
-          <p className="text-xs mb-1 truncate shrink-0" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-xs mb-1 truncate shrink-0" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>
             {config.title}
           </p>
         )}
@@ -536,7 +537,7 @@ export function FillWidget({ config }: WidgetProps) {
     return (
       <div className="flex flex-col h-full">
         {showTitle && config.title && (
-          <p className="text-xs mb-1 truncate shrink-0" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-xs mb-1 truncate shrink-0" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>
             {config.title}
           </p>
         )}
@@ -557,7 +558,7 @@ export function FillWidget({ config }: WidgetProps) {
     return (
       <div className="flex flex-col h-full">
         {showTitle && config.title && (
-          <p className="text-xs mb-1 truncate shrink-0" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-xs mb-1 truncate shrink-0" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>
             {config.title}
           </p>
         )}

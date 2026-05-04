@@ -228,6 +228,7 @@ export function GaugeWidget({ config }: WidgetProps) {
     );
   });
 
+  const titleAlign = (opts.titleAlign as string) ?? 'left';
   const showTitle = opts.showTitle !== false;
   const GaugeIcon = getWidgetIcon(opts.icon as string | undefined, Gauge);
   const hasCustomIcon = !!(opts.icon as string | undefined);
@@ -237,7 +238,7 @@ export function GaugeWidget({ config }: WidgetProps) {
       {showTitle && config.title && (
         <div className="flex items-center gap-1.5 mb-1 min-w-0">
           {hasCustomIcon && <GaugeIcon size={13} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />}
-          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>
         </div>
       )}
       <div className="flex-1 flex items-center justify-center">

@@ -133,6 +133,7 @@ export function ShutterWidget({ config }: WidgetProps) {
   const valueColor = thresholdColor ?? 'var(--text-primary)';
 
   const showTitle     = opts.showTitle     !== false;
+  const titleAlign    = (opts.titleAlign   as string) ?? 'left';
   const showValue     = opts.showValue     !== false;
   const showControls  = opts.showControls  !== false;
   const showSlider    = opts.showSlider    !== false;
@@ -203,7 +204,7 @@ export function ShutterWidget({ config }: WidgetProps) {
       <div className="flex flex-col h-full gap-2" style={{ position: 'relative' }}>
         {showTitle && (
           <div className="flex items-center justify-between">
-            <p className="text-xs truncate font-medium" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+            <p className="text-xs truncate font-medium" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>
             {isMoving && <span className="text-[10px] animate-pulse" style={{ color: 'var(--accent-yellow)' }}>
               {movingDir === 'up' ? '▲' : movingDir === 'down' ? '▼' : '↕'}
             </span>}
@@ -229,7 +230,7 @@ export function ShutterWidget({ config }: WidgetProps) {
           : <ShutterViz closedFrac={closedFrac} accentColor={accentColor} isMoving={isMoving}
               style={{ width: iconSize, height: iconSize, flexShrink: 0 }} />
         }
-        {showTitle && <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
+        {showTitle && <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</span>}
         {!showTitle && <span className="flex-1" />}
         {showValue && <span className="text-sm font-bold shrink-0" style={{ color: thresholdColor ?? (isMoving ? 'var(--accent-yellow)' : 'var(--text-primary)') }}>{displayPct}%</span>}
         {showControls && <BtnRow onUp={openFully} onStop={stop} onDown={closeFully} size="sm" />}
@@ -280,7 +281,7 @@ export function ShutterWidget({ config }: WidgetProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 min-w-0">
             {CustomIcon && <CustomIcon size={iconSize} style={{ color: accentColor, flexShrink: 0 }} />}
-            <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+            <p className="text-xs truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>
           </div>
           {isMoving && <span className="text-[10px] animate-pulse shrink-0" style={{ color: 'var(--accent-yellow)' }}>
             {movingDir === 'up' ? '▲' : movingDir === 'down' ? '▼' : '↕'}

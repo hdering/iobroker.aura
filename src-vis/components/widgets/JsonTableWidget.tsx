@@ -81,6 +81,7 @@ export function JsonTableWidget({ config, onConfigChange }: WidgetProps) {
   const showSearch     = (opts.showSearch     as boolean) ?? false;
   const fontSize       = (opts.fontSize       as number)  ?? 12;
   const autoHeight     = (opts.autoHeight     as boolean) ?? false;
+  const titleAlign     = (opts.titleAlign     as string)  ?? 'left';
   const [query, setQuery] = useState('');
 
   const contentRef = useRef<HTMLDivElement>(null);
@@ -172,7 +173,7 @@ export function JsonTableWidget({ config, onConfigChange }: WidgetProps) {
     <div ref={contentRef} className={`flex flex-col gap-1 ${autoHeight ? '' : 'h-full'}`}>
       {/* Title */}
       {config.title && !opts.hideTitle && (
-        <p className="shrink-0 truncate" style={{ fontSize: fs - 1, color: 'var(--text-secondary)' }}>
+        <p className="shrink-0 truncate" style={{ fontSize: fs - 1, color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>
           {config.title}
         </p>
       )}

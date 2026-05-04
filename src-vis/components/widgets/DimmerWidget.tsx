@@ -16,6 +16,7 @@ export function DimmerWidget({ config }: WidgetProps) {
   const CompactIcon = useMemo(() => getWidgetIcon(config.options?.icon as string | undefined, SunDim), [config.options?.icon]);
   const o = config.options ?? {};
   const showTitle      = o.showTitle      !== false;
+  const titleAlign     = (o.titleAlign    as string) ?? 'left';
   const showValue      = o.showValue      !== false;
   const showSlider     = o.showSlider     !== false;
   const sendOnRelease  = o.sendOnRelease  !== false;
@@ -87,7 +88,7 @@ export function DimmerWidget({ config }: WidgetProps) {
     const opacity = 0.2 + (level / 100) * 0.8;
     return (
       <div className="flex flex-col h-full justify-between" style={{ position: 'relative' }}>
-        {showTitle && <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>}
+        {showTitle && <p className="text-xs truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>}
         <div className="flex flex-col items-center gap-3 flex-1 justify-center">
           <Sun size={iconSize} strokeWidth={1.5}
             style={{ color: 'var(--accent-yellow)', opacity, filter: level > 0 ? `drop-shadow(0 0 ${level / 10}px var(--accent-yellow))` : 'none', transition: 'all 0.3s' }} />
@@ -105,7 +106,7 @@ export function DimmerWidget({ config }: WidgetProps) {
       <div className="flex flex-col justify-center h-full gap-1.5" style={{ position: 'relative' }}>
         <div className="flex items-center gap-2">
           <CompactIcon size={iconSize} style={{ color: displayLevel > 0 ? 'var(--accent-yellow)' : 'var(--text-secondary)', flexShrink: 0 }} />
-          {showTitle && <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
+          {showTitle && <span className="flex-1 text-sm truncate min-w-0" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</span>}
           {!showTitle && <span className="flex-1" />}
           {showValue && <span className="text-sm font-bold shrink-0" style={{ color: valueColor }}>{displayLevel}%</span>}
         </div>
@@ -138,7 +139,7 @@ export function DimmerWidget({ config }: WidgetProps) {
       {showTitle && (
         <div className="flex items-center gap-2">
           <SunDim size={iconSize} style={{ color: level > 0 ? 'var(--accent-yellow)' : 'var(--text-secondary)' }} />
-          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>
         </div>
       )}
       <div className="space-y-2">

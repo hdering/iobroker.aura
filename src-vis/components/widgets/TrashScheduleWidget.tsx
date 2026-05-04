@@ -126,6 +126,7 @@ export function TrashScheduleWidget({ config }: WidgetProps) {
   const o = config.options ?? {};
   const TitleIcon = getWidgetIcon(o.icon as string | undefined, CalendarCheck2);
 
+  const titleAlign   = (o.titleAlign   as string)               ?? 'left';
   const hiddenNames  = (o.hiddenNames  as string[] | undefined)  ?? [];
   const iconMap      = (o.iconMap      as Record<string, string> | undefined) ?? {};
   const showNames    = (o.showNames    as boolean | undefined)    ?? true;
@@ -172,7 +173,7 @@ export function TrashScheduleWidget({ config }: WidgetProps) {
       {config.title && !(o.hideTitle) && (
         <div className="flex items-center gap-1.5 mb-2 shrink-0 min-w-0">
           <TitleIcon size={14} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>
             {config.title}
           </p>
         </div>

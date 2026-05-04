@@ -41,7 +41,8 @@ export function StateImageWidget({ config }: WidgetProps) {
   const isActive = Boolean(value);
   const layout = config.layout ?? 'default';
 
-  const showTitle = opts.showTitle !== false;
+  const showTitle  = opts.showTitle !== false;
+  const titleAlign = (opts.titleAlign as string) ?? 'left';
   const showLabel = opts.showLabel !== false;
   const iconSize  = (opts.iconSize as number) || 48;
 
@@ -90,7 +91,7 @@ export function StateImageWidget({ config }: WidgetProps) {
         <StateDisplay cfg={cfg} size={iconSize} />
         <div className="text-center">
           {showTitle && (
-            <p className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>{config.title}</p>
+            <p className="font-bold text-sm" style={{ color: 'var(--text-primary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>
           )}
           {showLabel && (
             <p className="text-xs" style={{ color: cfg.color }}>{cfg.label}</p>
@@ -107,7 +108,7 @@ export function StateImageWidget({ config }: WidgetProps) {
       <div className="flex items-center gap-2 h-full" style={{ position: 'relative' }}>
         <StateDisplay cfg={cfg} size={iconSize} />
         {showTitle && (
-          <span className="flex-1 text-sm truncate" style={{ color: 'var(--text-secondary)' }}>
+          <span className="flex-1 text-sm truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>
             {config.title}
           </span>
         )}
@@ -132,7 +133,7 @@ export function StateImageWidget({ config }: WidgetProps) {
           <span className="text-xs font-medium" style={{ color: cfg.color }}>{cfg.label}</span>
         )}
         {showTitle && (
-          <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>
+          <span className="text-[10px]" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</span>
         )}
         <StatusBadges config={config} />
       </div>
@@ -146,7 +147,7 @@ export function StateImageWidget({ config }: WidgetProps) {
       {showTitle && (
         <div className="flex items-center gap-2">
           <StateDisplay cfg={cfg} size={iconSize} />
-          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>
         </div>
       )}
       {showLabel && (
