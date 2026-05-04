@@ -76,7 +76,7 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
     if (next.length === 0) return config.gridPos.h;
     const maxBottom = Math.max(...next.map((c) => c.gridPos.y + c.gridPos.h));
     const innerH = maxBottom * (cellSize + gridGap) - gridGap;
-    const titleBarH = config.title ? 36 : 0;
+    const titleBarH = config.title ? 37 : (editMode ? 36 : 0);
     return Math.ceil((titleBarH + innerH + 8 + gridGap) / (cellSize + gridGap));
   };
 
