@@ -2352,6 +2352,29 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                   style={{ left: config.options?.hideTitle ? '18px' : '2px' }} />
               </button>
             </div>
+            {isGroup && (
+              <div className="flex items-center gap-2">
+                <label className="text-[11px] shrink-0" style={{ color: 'var(--text-secondary)' }}>{t('wf.edit.titlePosition')}</label>
+                <div className="flex gap-1">
+                  {(['left', 'center', 'right'] as const).map((p) => {
+                    const labels: Record<string, string> = { left: t('wf.edit.posLeft'), center: t('wf.edit.posCenter'), right: t('wf.edit.posRight') };
+                    const active = ((config.options?.titleAlign as string) ?? 'left') === p;
+                    return (
+                      <button key={p}
+                        onClick={() => onConfigChange({ ...config, options: { ...(config.options ?? {}), titleAlign: p } })}
+                        className="text-[10px] px-2 py-0.5 rounded-full transition-colors"
+                        style={{
+                          background: active ? 'var(--accent)' : 'var(--app-bg)',
+                          color:      active ? '#fff' : 'var(--text-secondary)',
+                          border:     `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}`,
+                        }}>
+                        {labels[p]}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             <div className="flex items-center justify-between">
               <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{t('wf.edit.showLastChange')}</label>
               <button

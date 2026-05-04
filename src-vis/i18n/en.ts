@@ -409,6 +409,7 @@ export const en: Record<TranslationKey, string> = {
   'wf.edit.title':          'Edit Widget',
   'wf.edit.name':           'Name',
   'wf.edit.hideName':       'Hide Name',
+  'wf.edit.titlePosition':  'Title Position',
   'wf.edit.showLastChange': 'Show Last Change',
   'wf.edit.position':       'Position',
   'wf.edit.posLeft':        'Left',

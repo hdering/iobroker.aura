@@ -407,6 +407,7 @@ export const de = {
   'wf.edit.title':          'Widget bearbeiten',
   'wf.edit.name':           'Name',
   'wf.edit.hideName':       'Name ausblenden',
+  'wf.edit.titlePosition':  'Titel-Position',
   'wf.edit.showLastChange': 'Letzte Änderung anzeigen',
   'wf.edit.position':       'Position',
   'wf.edit.posLeft':        'Links',

@@ -134,6 +134,7 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
   };
 
   // ── Title bar (always shown in editMode as outer-grid drag handle) ─────────
+  const titleAlign = (config.options?.titleAlign as string | undefined) ?? 'left';
   const titleBar = (config.title || editMode) ? (
     <div
       className="shrink-0 px-3 py-2.5 text-xs font-semibold truncate"
@@ -141,6 +142,7 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
         color: 'var(--text-secondary)',
         borderBottom: transparent ? 'none' : '1px solid var(--widget-border)',
         minHeight: editMode && !config.title ? '36px' : undefined,
+        textAlign: titleAlign as React.CSSProperties['textAlign'],
       }}
     >
       {config.title}
