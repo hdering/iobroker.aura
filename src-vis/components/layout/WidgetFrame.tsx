@@ -68,6 +68,7 @@ import { HtmlConfig } from '../config/HtmlConfig';
 import { DatePickerWidget, FORMAT_LABELS, type DateOutputFormat } from '../widgets/DatePickerWidget';
 import { MediaplayerWidget } from '../widgets/MediaplayerWidget';
 import { SliderWidget } from '../widgets/SliderWidget';
+import { ChipsWidget } from '../widgets/ChipsWidget';
 import { IconPickerModal } from '../config/IconPickerModal';
 import { ClickActionEditor } from '../config/ClickActionEditor';
 import { WidgetClickPopup } from '../widgets/popup/WidgetClickPopup';
@@ -110,6 +111,7 @@ function getWidgetMap() {
     datepicker:    DatePickerWidget,
     mediaplayer:   MediaplayerWidget,
     slider:        SliderWidget,
+    chips:         ChipsWidget,
   } as const;
 }
 
@@ -1709,6 +1711,285 @@ function MediaplayerEditPanel({
   );
 }
 
+// ── ChipsEditPanel ────────────────────────────────────────────────────────────
+
+type CwChip = { id: string; label: string; icon?: string; dp: string; value?: string; activeValue?: string };
+
+function ChipsEditPanel({
+  config, onConfigChange, onOpenChipPicker, onOpenCheckDpPicker,
+}: {
+  config: WidgetConfig;
+  onConfigChange: (c: WidgetConfig) => void;
+  onOpenChipPicker: (idx: number) => void;
+  onOpenCheckDpPicker: () => void;
+}) {
+  const o = config.options ?? {};
+  const setO = (patch: Record<string, unknown>) =>
+    onConfigChange({ ...config, options: { ...o, ...patch } });
+  const tHook = useT();
+
+  const sInputCls = 'w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none font-mono';
+  const sInputStyle = { background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' };
+  const selCls = 'w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none';
+
+  const chips = (o.chips as CwChip[] | undefined) ?? [];
+  const [addingChip, setAddingChip] = useState(false);
+  const [newChipLabel, setNewChipLabel] = useState('');
+  const [chipIconPickerIdx, setChipIconPickerIdx] = useState<number | null>(null);
+
+  const confirmAddChip = () => {
+    if (!newChipLabel.trim()) return;
+    const next: CwChip = { id: Date.now().toString(), label: newChipLabel.trim(), dp: '' };
+    setO({ chips: [...chips, next] });
+    setNewChipLabel('');
+    setAddingChip(false);
+  };
+
+  const updateChip = (id: string, patch: Partial<CwChip>) =>
+    setO({ chips: chips.map((c) => c.id === id ? { ...c, ...patch } : c) });
+
+  const removeChip = (id: string) =>
+    setO({ chips: chips.filter((c) => c.id !== id) });
+
+  const moveChip = (id: string, dir: -1 | 1) => {
+    const idx = chips.findIndex((c) => c.id === id);
+    if (idx < 0) return;
+    const next = idx + dir;
+    if (next < 0 || next >= chips.length) return;
+    const arr = [...chips];
+    [arr[idx], arr[next]] = [arr[next], arr[idx]];
+    setO({ chips: arr });
+  };
+
+  const layout = (o.layout as string) ?? 'row';
+
+  return (
+    <>
+      {/* Layout */}
+      <details className="group" open>
+        <summary className="flex items-center justify-between cursor-pointer list-none select-none mb-1">
+          <span className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>{tHook('cw.layout.title' as never)}</span>
+          <ChevronDown size={12} className="transition-transform group-open:rotate-180" style={{ color: 'var(--text-secondary)' }} />
+        </summary>
+        <div className="space-y-2">
+          <div>
+            <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{tHook('cw.layout.mode' as never)}</label>
+            <select value={layout} onChange={(e) => setO({ layout: e.target.value })} className={selCls} style={sInputStyle}>
+              <option value="row">{tHook('cw.layout.row' as never)}</option>
+              <option value="wrap">{tHook('cw.layout.wrap' as never)}</option>
+              <option value="column">{tHook('cw.layout.column' as never)}</option>
+              <option value="grid">{tHook('cw.layout.grid' as never)}</option>
+            </select>
+          </div>
+          {(layout === 'row' || layout === 'wrap' || layout === 'grid') && (
+            <div>
+              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{tHook('cw.layout.align' as never)}</label>
+              <select value={(o.align as string) ?? 'start'} onChange={(e) => setO({ align: e.target.value })} className={selCls} style={sInputStyle}>
+                <option value="start">Start</option>
+                <option value="center">Mitte</option>
+                <option value="end">Ende</option>
+              </select>
+            </div>
+          )}
+          {layout === 'column' && (
+            <div>
+              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{tHook('cw.layout.align' as never)}</label>
+              <select value={(o.align as string) ?? 'start'} onChange={(e) => setO({ align: e.target.value })} className={selCls} style={sInputStyle}>
+                <option value="start">Links</option>
+                <option value="center">Mitte</option>
+                <option value="end">Rechts</option>
+              </select>
+            </div>
+          )}
+          <div>
+            <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{tHook('cw.layout.valign' as never)}</label>
+            <select value={(o.valign as string) ?? 'middle'} onChange={(e) => setO({ valign: e.target.value })} className={selCls} style={sInputStyle}>
+              <option value="top">Oben</option>
+              <option value="middle">Mitte</option>
+              <option value="bottom">Unten</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{tHook('cw.layout.chipSize' as never)}</label>
+            <select value={(o.chipSize as string) ?? 'md'} onChange={(e) => setO({ chipSize: e.target.value })} className={selCls} style={sInputStyle}>
+              <option value="sm">{tHook('cw.size.sm' as never)}</option>
+              <option value="md">{tHook('cw.size.md' as never)}</option>
+              <option value="lg">{tHook('cw.size.lg' as never)}</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{tHook('cw.layout.chipStyle' as never)}</label>
+            <select value={(o.chipStyle as string) ?? 'outlined'} onChange={(e) => setO({ chipStyle: e.target.value })} className={selCls} style={sInputStyle}>
+              <option value="outlined">{tHook('cw.style.outlined' as never)}</option>
+              <option value="filled">{tHook('cw.style.filled' as never)}</option>
+              <option value="ghost">{tHook('cw.style.ghost' as never)}</option>
+            </select>
+          </div>
+          {layout === 'grid' && (
+            <div>
+              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{tHook('cw.layout.wrapCols' as never)}</label>
+              <input
+                type="number" min={1} max={12}
+                value={(o.wrapCols as number) ?? 2}
+                onChange={(e) => setO({ wrapCols: Number(e.target.value) || 2 })}
+                className="text-xs rounded-lg px-2 py-1.5 focus:outline-none"
+                style={{ ...sInputStyle, width: '72px' }}
+              />
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{tHook('cw.layout.gap' as never)}</label>
+            <input
+              type="number" min={0} max={32}
+              value={(o.gap as number) ?? 6}
+              onChange={(e) => setO({ gap: Number(e.target.value) })}
+              className="text-xs rounded-lg px-2 py-1.5 focus:outline-none"
+              style={{ ...sInputStyle, width: '72px' }}
+            />
+          </div>
+        </div>
+      </details>
+
+      {/* Aktiv-DP */}
+      <div>
+        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{tHook('cw.checkDp' as never)}</label>
+        <div className="flex gap-1">
+          <input
+            type="text"
+            value={(o.checkDp as string) ?? ''}
+            onChange={(e) => setO({ checkDp: e.target.value || undefined })}
+            placeholder="optional"
+            className={`flex-1 ${sInputCls} min-w-0`}
+            style={sInputStyle}
+          />
+          <button
+            onClick={onOpenCheckDpPicker}
+            className="px-2 rounded-lg hover:opacity-80 shrink-0"
+            style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+            <Database size={13} />
+          </button>
+        </div>
+      </div>
+
+      {/* Chips */}
+      <details className="group" open>
+        <summary className="flex items-center justify-between cursor-pointer list-none select-none mb-1">
+          <span className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>{tHook('cw.chips.title' as never)}</span>
+          <ChevronDown size={12} className="transition-transform group-open:rotate-180" style={{ color: 'var(--text-secondary)' }} />
+        </summary>
+        <div className="space-y-1.5">
+          {chips.map((chip, idx) => (
+            <div key={chip.id} className="rounded-lg p-2 space-y-1.5" style={{ background: 'var(--app-bg)', border: '1px solid var(--app-border)' }}>
+              <div className="flex items-center gap-1">
+                <div className="flex flex-col shrink-0">
+                  <button onClick={() => moveChip(chip.id, -1)} disabled={idx === 0}
+                    className="text-[9px] px-1 py-0.5 rounded hover:opacity-80 disabled:opacity-30 leading-none"
+                    style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+                    title="Nach oben">▲</button>
+                  <button onClick={() => moveChip(chip.id, 1)} disabled={idx === chips.length - 1}
+                    className="text-[9px] px-1 py-0.5 rounded hover:opacity-80 disabled:opacity-30 leading-none mt-0.5"
+                    style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+                    title="Nach unten">▼</button>
+                </div>
+                <button
+                  onClick={() => setChipIconPickerIdx(idx)}
+                  className="text-[10px] px-1.5 py-1 rounded hover:opacity-80 shrink-0"
+                  style={{ background: 'var(--app-surface,var(--app-bg))', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+                  title="Icon wählen">
+                  {chip.icon ? chip.icon : '🏷'}
+                </button>
+                <input type="text" value={chip.label}
+                  onChange={(e) => updateChip(chip.id, { label: e.target.value })}
+                  placeholder={tHook('cw.chips.label' as never)}
+                  className="flex-1 text-xs rounded px-2 py-1 focus:outline-none min-w-0"
+                  style={sInputStyle} />
+                <button onClick={() => removeChip(chip.id)} className="hover:opacity-70 shrink-0" style={{ color: 'var(--accent-red, #ef4444)' }}>
+                  <Trash2 size={12} />
+                </button>
+              </div>
+              <div className="flex gap-1 items-center">
+                <input type="text" value={chip.dp}
+                  onChange={(e) => updateChip(chip.id, { dp: e.target.value })}
+                  placeholder="DP-ID"
+                  className={`flex-1 ${sInputCls} min-w-0`} style={sInputStyle} />
+                <button onClick={() => onOpenChipPicker(idx)}
+                  className="px-2 rounded-lg hover:opacity-80 shrink-0"
+                  style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+                  <Database size={13} />
+                </button>
+              </div>
+              <input type="text" value={chip.value ?? ''}
+                onChange={(e) => updateChip(chip.id, { value: e.target.value || undefined })}
+                placeholder={tHook('cw.chips.value' as never)}
+                className={`w-full ${sInputCls}`} style={sInputStyle} />
+              <input type="text" value={chip.activeValue ?? ''}
+                onChange={(e) => updateChip(chip.id, { activeValue: e.target.value || undefined })}
+                placeholder={tHook('cw.chips.activeValue' as never)}
+                className={`w-full ${sInputCls}`} style={sInputStyle} />
+            </div>
+          ))}
+          {addingChip ? (
+            <div className="rounded-lg p-2 space-y-1.5" style={{ background: 'var(--app-bg)', border: '1px solid var(--app-border)' }}>
+              <input type="text" value={newChipLabel}
+                onChange={(e) => setNewChipLabel(e.target.value)}
+                placeholder={tHook('cw.chips.label' as never)}
+                className={`w-full ${sInputCls}`} style={sInputStyle} autoFocus />
+              <div className="flex gap-1">
+                <button onClick={confirmAddChip}
+                  className="flex-1 text-xs py-1 rounded-lg hover:opacity-80"
+                  style={{ background: 'var(--accent)', color: '#fff' }}>
+                  {tHook('common.add')}
+                </button>
+                <button onClick={() => { setAddingChip(false); setNewChipLabel(''); }}
+                  className="flex-1 text-xs py-1 rounded-lg hover:opacity-80"
+                  style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+                  {tHook('common.cancel')}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button onClick={() => setAddingChip(true)}
+              className="w-full text-[11px] py-1.5 rounded-lg hover:opacity-80 text-center"
+              style={{ background: 'var(--app-bg)', color: 'var(--accent)', border: '1px dashed var(--accent)44' }}>
+              {tHook('cw.chips.add' as never)}
+            </button>
+          )}
+        </div>
+      </details>
+
+      {/* Bestätigung */}
+      <div className="space-y-1.5">
+        <label className="flex items-center gap-2 cursor-pointer select-none">
+          <input type="checkbox"
+            checked={o.showConfirm === true}
+            onChange={(e) => setO({ showConfirm: e.target.checked || undefined })}
+          />
+          <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{tHook('cw.confirm.enable' as never)}</span>
+        </label>
+        {o.showConfirm === true && (
+          <input type="text"
+            value={(o.confirmText as string) ?? ''}
+            onChange={(e) => setO({ confirmText: e.target.value || undefined })}
+            placeholder={tHook('cw.confirm.text' as never)}
+            className={`w-full ${sInputCls}`} style={sInputStyle} />
+        )}
+      </div>
+
+      {/* Chip icon picker */}
+      {chipIconPickerIdx !== null && (
+        <IconPickerModal
+          current={chips[chipIconPickerIdx]?.icon ?? ''}
+          onSelect={(name) => {
+            updateChip(chips[chipIconPickerIdx].id, { icon: name || undefined });
+            setChipIconPickerIdx(null);
+          }}
+          onClose={() => setChipIconPickerIdx(null)}
+        />
+      )}
+    </>
+  );
+}
+
 export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDuplicate }: WidgetFrameProps) {
   const t = useT();
   const [openPanel, setOpenPanel] = useState<'menu' | 'edit' | 'conditions' | 'action' | 'group-mobile-order' | null>(null);
@@ -1784,11 +2065,12 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
       setOpenPanel(panel);
     }
   };
-  const [pickerTarget, setPickerTarget] = useState<'datapoint' | 'actualDatapoint' | 'localTempDatapoint' | 'shutter_activityDp' | 'shutter_directionDp' | 'shutter_stopDp' | 'gauge_pointer2Dp' | 'gauge_pointer3Dp' | 'windowcontact_batteryDp' | 'wc_lockDp' | 'status_batteryDp' | 'status_unreachDp' | 'camera_wakeUpDp' | 'camera_slot' | 'html_dp' | 'mp_dp' | 'mp_chip' | 'sl_action' | null>(null);
+  const [pickerTarget, setPickerTarget] = useState<'datapoint' | 'actualDatapoint' | 'localTempDatapoint' | 'shutter_activityDp' | 'shutter_directionDp' | 'shutter_stopDp' | 'gauge_pointer2Dp' | 'gauge_pointer3Dp' | 'windowcontact_batteryDp' | 'wc_lockDp' | 'status_batteryDp' | 'status_unreachDp' | 'camera_wakeUpDp' | 'camera_slot' | 'html_dp' | 'mp_dp' | 'mp_chip' | 'sl_action' | 'chips_chip' | 'chips_checkDp' | null>(null);
   const [imageFilePicker, setImageFilePicker] = useState(false);
   const [cameraSlotPickerIdx, setCameraSlotPickerIdx] = useState(0);
   const [mpPickerKey, setMpPickerKey] = useState('');
   const [mpChipIdx, setMpChipIdx] = useState(0);
+  const [chipsChipIdx, setChipsChipIdx] = useState(0);
   const [slActionIdx, setSlActionIdx] = useState(0);
   const [iconPickerOpen, setIconPickerOpen] = useState(false);
   const [iconPickerTrueOpen,  setIconPickerTrueOpen]  = useState(false);
@@ -3895,6 +4177,15 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                 />
               )}
 
+              {config.type === 'chips' && (
+                <ChipsEditPanel
+                  config={config}
+                  onConfigChange={onConfigChange}
+                  onOpenChipPicker={(idx) => { setChipsChipIdx(idx); setPickerTarget('chips_chip'); }}
+                  onOpenCheckDpPicker={() => setPickerTarget('chips_checkDp')}
+                />
+              )}
+
               {config.type === 'slider' && (
                 <SliderEditPanel
                   config={config}
@@ -5238,6 +5529,8 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
             pickerTarget === 'html_dp'                  ? ((config.options?.htmlDatapoint as string) ?? '') :
             pickerTarget === 'mp_dp'   ? ((config.options?.[mpPickerKey] as string) ?? '') :
             pickerTarget === 'mp_chip' ? (() => { const chips = (config.options?.chips as Array<{ dp: string }>) ?? []; return chips[mpChipIdx]?.dp ?? ''; })() :
+            pickerTarget === 'chips_chip' ? (() => { const chips = (config.options?.chips as Array<{ dp: string }>) ?? []; return chips[chipsChipIdx]?.dp ?? ''; })() :
+            pickerTarget === 'chips_checkDp' ? ((config.options?.checkDp as string) ?? '') :
             pickerTarget === 'sl_action' ? (() => { const acts = (config.options?.actions as Array<{ dp: string }>) ?? []; return acts[slActionIdx]?.dp ?? ''; })() :
             pickerTarget === 'camera_slot' ? (() => {
               const key = (config.layout ?? 'minimal') === 'default' ? 'infoItems' : 'customSlots';
@@ -5342,6 +5635,12 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
               const chips = [...((config.options?.chips as Array<Record<string, unknown>>) ?? [])];
               chips[mpChipIdx] = { ...chips[mpChipIdx], dp: id };
               onConfigChange({ ...config, options: { ...config.options, chips } });
+            } else if (pickerTarget === 'chips_chip') {
+              const chips = [...((config.options?.chips as Array<Record<string, unknown>>) ?? [])];
+              chips[chipsChipIdx] = { ...chips[chipsChipIdx], dp: id };
+              onConfigChange({ ...config, options: { ...config.options, chips } });
+            } else if (pickerTarget === 'chips_checkDp') {
+              onConfigChange({ ...config, options: { ...config.options, checkDp: id } });
             } else if (pickerTarget === 'sl_action') {
               const acts = [...((config.options?.actions as Array<Record<string, unknown>>) ?? [])];
               acts[slActionIdx] = { ...acts[slActionIdx], dp: id };

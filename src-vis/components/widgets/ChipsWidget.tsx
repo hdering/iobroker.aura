@@ -1,0 +1,125 @@
+import { useState } from 'react';
+import { Zap } from 'lucide-react';
+import { useDatapoint } from '../../hooks/useDatapoint';
+import { useIoBroker } from '../../hooks/useIoBroker';
+import { getWidgetIcon } from '../../utils/widgetIconMap';
+import { ConfirmOverlay } from './ConfirmOverlay';
+import type { WidgetProps } from '../../types';
+
+export type ChipItem = {
+  id: string;
+  label: string;
+  icon?: string;
+  dp: string;
+  value?: string | number | boolean;
+  activeValue?: string | number | boolean;
+};
+
+export function ChipsWidget({ config }: WidgetProps) {
+  const o = config.options ?? {};
+  const { setState } = useIoBroker();
+  const [pendingChip, setPendingChip] = useState<ChipItem | null>(null);
+
+  const chips      = (o.chips      as ChipItem[]    | undefined) ?? [];
+  const checkDp    = (o.checkDp    as string)        ?? '';
+  const layout     = (o.layout     as string)        ?? 'row';
+  const align      = (o.align      as string)        ?? 'start';
+  const valign     = (o.valign     as string)        ?? 'middle';
+  const chipSize   = (o.chipSize   as string)        ?? 'md';
+  const chipStyle  = (o.chipStyle  as string)        ?? 'outlined';
+  const wrapCols   = (o.wrapCols   as number | undefined);
+  const gap        = (o.gap        as number)        ?? 6;
+  const showConfirm = o.showConfirm === true;
+  const confirmText = (o.confirmText as string)      ?? '';
+
+  const { value: checkValue } = useDatapoint(checkDp);
+
+  const execute = (chip: ChipItem) => {
+    if (!chip.dp) return;
+    setState(chip.dp, chip.value !== undefined ? chip.value : true);
+  };
+
+  const handleChip = (chip: ChipItem) => {
+    if (showConfirm) { setPendingChip(chip); return; }
+    execute(chip);
+  };
+
+  const isActive = (chip: ChipItem): boolean => {
+    if (!checkDp) return false;
+    const compareTo = chip.activeValue !== undefined ? chip.activeValue : chip.value;
+    if (compareTo === undefined) return false;
+    // eslint-disable-next-line eqeqeq
+    return checkValue == compareTo;
+  };
+
+  const h    = chipSize === 'sm' ? 28 : chipSize === 'lg' ? 42 : 34;
+  const fs   = chipSize === 'sm' ? '10px' : chipSize === 'lg' ? '14px' : '12px';
+  const px   = chipSize === 'sm' ? '8px'  : chipSize === 'lg' ? '16px' : '12px';
+  const iconSz = chipSize === 'sm' ? 10 : chipSize === 'lg' ? 16 : 13;
+
+  const alignFlex =
+    align === 'end' ? 'flex-end' : align === 'center' ? 'center' : 'flex-start';
+
+  const valignJustify =
+    valign === 'top' ? 'flex-start' : valign === 'bottom' ? 'flex-end' : 'center';
+
+  const containerStyle: React.CSSProperties =
+    layout === 'grid' && wrapCols
+      ? { display: 'grid', gridTemplateColumns: `repeat(${wrapCols}, 1fr)`, gap: `${gap}px` }
+      : layout === 'column'
+      ? { display: 'flex', flexDirection: 'column', gap: `${gap}px`, alignItems: alignFlex }
+      : layout === 'wrap'
+      ? { display: 'flex', flexWrap: 'wrap', gap: `${gap}px`, justifyContent: alignFlex }
+      : { display: 'flex', gap: `${gap}px`, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: '2px', justifyContent: alignFlex };
+
+  const chipBg = (active: boolean) =>
+    chipStyle === 'filled'  ? (active ? 'var(--accent)'    : 'var(--app-bg)') :
+    chipStyle === 'ghost'   ? (active ? 'var(--accent)22'  : 'transparent')   :
+                               (active ? 'var(--accent)22'  : 'var(--app-bg)');
+
+  const chipColor = (active: boolean) =>
+    active ? (chipStyle === 'filled' ? '#fff' : 'var(--accent)') : 'var(--text-primary)';
+
+  const chipBorder = (active: boolean) =>
+    chipStyle === 'ghost' ? 'none' : `1px solid ${active ? 'var(--accent)44' : 'var(--app-border)'}`;
+
+  return (
+    <div
+      className="relative w-full h-full flex flex-col"
+      style={{ justifyContent: valignJustify }}
+    >
+      <div className="nodrag" style={containerStyle}>
+        {chips.map((chip) => {
+          const active = isActive(chip);
+          const ChipIcon = chip.icon ? getWidgetIcon(chip.icon, Zap) : null;
+          return (
+            <button
+              key={chip.id}
+              onClick={() => handleChip(chip)}
+              className="flex items-center gap-1.5 rounded-full whitespace-nowrap hover:opacity-80 transition-opacity shrink-0"
+              style={{
+                background: chipBg(active),
+                color:      chipColor(active),
+                border:     chipBorder(active),
+                fontSize:   fs,
+                height:     `${h}px`,
+                paddingLeft:  px,
+                paddingRight: px,
+              }}
+            >
+              {ChipIcon && <ChipIcon size={iconSz} />}
+              {chip.label}
+            </button>
+          );
+        })}
+      </div>
+      {pendingChip && (
+        <ConfirmOverlay
+          text={confirmText || undefined}
+          onConfirm={() => { execute(pendingChip); setPendingChip(null); }}
+          onCancel={() => setPendingChip(null)}
+        />
+      )}
+    </div>
+  );
+}

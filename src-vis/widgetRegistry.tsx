@@ -13,7 +13,7 @@
 import {
   Zap, TrendingUp, SlidersHorizontal, Thermometer, BarChart2, List,
   Clock, CalendarDays, Heading2, Layers2, Cloud, Gauge, Camera, ImageIcon, MonitorDot, Droplets, Truck, AlignJustify, Table2,
-  DoorOpen, ShieldAlert, ToggleRight, LineChart, Code2, CalendarClock, Music, CalendarCheck2,
+  DoorOpen, ShieldAlert, ToggleRight, LineChart, Code2, CalendarClock, Music, CalendarCheck2, Tag,
   type LucideIcon,
 } from 'lucide-react';
 import type { WidgetType } from './types';
@@ -304,6 +304,14 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 14,           defaultH: 6,
     addMode: 'free',        widgetGroup: 'control',
     mock: { t: 'Ocean Planet', v: 'Ethereal Nights' },
+  },
+  {
+    type: 'chips',
+    label: 'Schnellzugriff-Chips', shortLabel: 'Chips',
+    Icon: Tag,                     iconName: 'Tag',    color: '#f97316',
+    defaultW: 10,                  defaultH: 3,
+    addMode: 'free',               widgetGroup: 'control',
+    mock: { t: 'Szenen', v: '' },
   },
 ];
 
