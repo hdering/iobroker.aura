@@ -2826,6 +2826,8 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
               ] : config.type === 'mediaplayer' ? [
                 { value: 'default', label: t('wf.edit.layout.standard') },
                 { value: 'custom',  label: 'Custom' },
+              ] : config.type === 'chips' ? [
+                { value: 'default', label: t('wf.edit.layout.standard') },
               ] : config.type === 'slider' ? [
                 { value: 'default', label: t('wf.edit.layout.standard') },
                 { value: 'custom',  label: 'Custom' },
