@@ -1761,6 +1761,8 @@ function ChipsEditPanel({
     setO({ chips: arr });
   };
 
+  const layout = (o.layout as string) ?? 'row';
+
   return (
     <>
       {/* Layout */}
@@ -1771,13 +1773,34 @@ function ChipsEditPanel({
         </summary>
         <div className="space-y-2">
           <div>
-            <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{tHook('cw.layout.align' as never)}</label>
-            <select value={(o.align as string) ?? 'start'} onChange={(e) => setO({ align: e.target.value })} className={selCls} style={sInputStyle}>
-              <option value="start">Start</option>
-              <option value="center">Mitte</option>
-              <option value="end">Ende</option>
+            <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{tHook('cw.layout.mode' as never)}</label>
+            <select value={layout} onChange={(e) => setO({ layout: e.target.value })} className={selCls} style={sInputStyle}>
+              <option value="row">{tHook('cw.layout.row' as never)}</option>
+              <option value="wrap">{tHook('cw.layout.wrap' as never)}</option>
+              <option value="column">{tHook('cw.layout.column' as never)}</option>
+              <option value="grid">{tHook('cw.layout.grid' as never)}</option>
             </select>
           </div>
+          {(layout === 'row' || layout === 'wrap' || layout === 'grid') && (
+            <div>
+              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{tHook('cw.layout.align' as never)}</label>
+              <select value={(o.align as string) ?? 'start'} onChange={(e) => setO({ align: e.target.value })} className={selCls} style={sInputStyle}>
+                <option value="start">Start</option>
+                <option value="center">Mitte</option>
+                <option value="end">Ende</option>
+              </select>
+            </div>
+          )}
+          {layout === 'column' && (
+            <div>
+              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{tHook('cw.layout.align' as never)}</label>
+              <select value={(o.align as string) ?? 'start'} onChange={(e) => setO({ align: e.target.value })} className={selCls} style={sInputStyle}>
+                <option value="start">Links</option>
+                <option value="center">Mitte</option>
+                <option value="end">Rechts</option>
+              </select>
+            </div>
+          )}
           <div>
             <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{tHook('cw.layout.valign' as never)}</label>
             <select value={(o.valign as string) ?? 'middle'} onChange={(e) => setO({ valign: e.target.value })} className={selCls} style={sInputStyle}>
@@ -1802,6 +1825,18 @@ function ChipsEditPanel({
               <option value="ghost">{tHook('cw.style.ghost' as never)}</option>
             </select>
           </div>
+          {layout === 'grid' && (
+            <div>
+              <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{tHook('cw.layout.wrapCols' as never)}</label>
+              <input
+                type="number" min={1} max={12}
+                value={(o.wrapCols as number) ?? 2}
+                onChange={(e) => setO({ wrapCols: Number(e.target.value) || 2 })}
+                className="text-xs rounded-lg px-2 py-1.5 focus:outline-none"
+                style={{ ...sInputStyle, width: '72px' }}
+              />
+            </div>
+          )}
           <div className="flex items-center gap-2">
             <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{tHook('cw.layout.gap' as never)}</label>
             <input

@@ -22,10 +22,12 @@ export function ChipsWidget({ config }: WidgetProps) {
 
   const chips      = (o.chips      as ChipItem[]    | undefined) ?? [];
   const checkDp    = (o.checkDp    as string)        ?? '';
+  const layout     = (o.layout     as string)        ?? 'row';
   const align      = (o.align      as string)        ?? 'start';
   const valign     = (o.valign     as string)        ?? 'middle';
   const chipSize   = (o.chipSize   as string)        ?? 'md';
   const chipStyle  = (o.chipStyle  as string)        ?? 'outlined';
+  const wrapCols   = (o.wrapCols   as number | undefined);
   const gap        = (o.gap        as number)        ?? 6;
   const showConfirm = o.showConfirm === true;
   const confirmText = (o.confirmText as string)      ?? '';
@@ -61,9 +63,14 @@ export function ChipsWidget({ config }: WidgetProps) {
   const valignJustify =
     valign === 'top' ? 'flex-start' : valign === 'bottom' ? 'flex-end' : 'center';
 
-  const containerStyle: React.CSSProperties = {
-    display: 'flex', gap: `${gap}px`, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: '2px', justifyContent: alignFlex,
-  };
+  const containerStyle: React.CSSProperties =
+    layout === 'grid' && wrapCols
+      ? { display: 'grid', gridTemplateColumns: `repeat(${wrapCols}, 1fr)`, gap: `${gap}px` }
+      : layout === 'column'
+      ? { display: 'flex', flexDirection: 'column', gap: `${gap}px`, alignItems: alignFlex }
+      : layout === 'wrap'
+      ? { display: 'flex', flexWrap: 'wrap', gap: `${gap}px`, justifyContent: alignFlex }
+      : { display: 'flex', gap: `${gap}px`, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: '2px', justifyContent: alignFlex };
 
   const chipBg = (active: boolean) =>
     chipStyle === 'filled'  ? (active ? 'var(--accent)'    : 'var(--app-bg)') :
