@@ -660,7 +660,7 @@ function NewWidgetDialog({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <div
         className="rounded-xl w-full max-w-xl shadow-2xl p-6 space-y-4"
         style={{ background: 'linear-gradient(var(--app-surface), var(--app-surface)), var(--app-bg)', border: '1px solid var(--app-border)' }}
