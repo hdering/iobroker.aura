@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type CSSProperties } from 'react';
 import { Sun, SunDim } from 'lucide-react';
 import { useDatapoint } from '../../hooks/useDatapoint';
 import { useIoBroker } from '../../hooks/useIoBroker';
@@ -48,7 +48,7 @@ export function DimmerWidget({ config }: WidgetProps) {
     <input type="range" min={0} max={100} value={displayLevel}
       onChange={(e) => handleSliderChange(Number(e.target.value))}
       onMouseUp={handleSliderRelease} onTouchEnd={handleSliderRelease}
-      style={{ accentColor: 'var(--accent-yellow)' }}
+      style={{ '--slider-thumb-color': 'var(--accent-yellow)' } as CSSProperties}
       className="nodrag w-full h-2 rounded-lg appearance-none cursor-pointer" />
   );
 
@@ -74,7 +74,7 @@ export function DimmerWidget({ config }: WidgetProps) {
           <input type="range" min={0} max={100} step={1} value={displayLevel}
             onChange={(e) => handleSliderChange(Number(e.target.value))}
             onMouseUp={handleSliderRelease} onTouchEnd={handleSliderRelease}
-            style={{ accentColor: 'var(--accent)', width: '100%' }}
+            style={{ width: '100%' }}
             className="nodrag h-1.5 rounded-full appearance-none cursor-pointer"
           />
         ),
@@ -113,7 +113,7 @@ export function DimmerWidget({ config }: WidgetProps) {
           <input type="range" min={0} max={100} step={1} value={displayLevel}
             onChange={(e) => handleSliderChange(Number(e.target.value))}
             onMouseUp={handleSliderRelease} onTouchEnd={handleSliderRelease}
-            style={{ accentColor: 'var(--accent-yellow)' }}
+            style={{ '--slider-thumb-color': 'var(--accent-yellow)' } as CSSProperties}
             className="nodrag ml-6 h-1.5 rounded-full appearance-none cursor-pointer" />
         )}
         <StatusBadges config={config} />

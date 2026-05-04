@@ -89,6 +89,44 @@ html, body, #root {
   transition: none !important;
 }
 
+/* ── Range-input track ───────────────────────────────────────────────────────
+   appearance-none removes the native track; re-style it so the rail stays
+   visible on light themes. The thumb colour is still set per-component via
+   accentColor / ::-webkit-slider-thumb overrides where needed.
+   ─────────────────────────────────────────────────────────────────────────── */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--text-secondary, #888) 30%, transparent);
+}
+input[type="range"]::-moz-range-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--text-secondary, #888) 30%, transparent);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--slider-thumb-color, var(--accent, #3b82f6));
+  margin-top: -5px;
+  cursor: pointer;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 50%;
+  background: var(--slider-thumb-color, var(--accent, #3b82f6));
+  cursor: pointer;
+}
+
 /* Arbitrary px sizes used in some widgets */
 [data-aura-app="frontend"] .text-\[9px\]  { font-size: calc(9px        * var(--font-scale, 1)); }
 [data-aura-app="frontend"] .text-\[10px\] { font-size: calc(10px       * var(--font-scale, 1)); }

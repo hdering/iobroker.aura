@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { Power, SunDim } from 'lucide-react';
 import { useDatapoint } from '../../../hooks/useDatapoint';
 import { useIoBroker } from '../../../hooks/useIoBroker';
@@ -61,7 +61,7 @@ export function DimmerPopupBody({ widget }: Props) {
           type="range" min={0} max={100} value={display}
           onChange={(e) => set(Number(e.target.value))}
           onMouseUp={commit} onTouchEnd={commit}
-          style={{ accentColor: yellow }}
+          style={{ '--slider-thumb-color': yellow } as CSSProperties}
           className="w-full h-2 rounded-lg appearance-none cursor-pointer"
         />
         <div className="flex justify-between text-[10px] mt-1" style={{ color: 'var(--text-secondary)' }}>

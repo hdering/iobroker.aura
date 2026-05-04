@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
 import { useDatapoint } from '../../hooks/useDatapoint';
 import { useIoBroker } from '../../hooks/useIoBroker';
@@ -93,11 +93,11 @@ export function SliderWidget({ config }: WidgetProps) {
       onTouchEnd={onSliderRelease}
       onKeyUp={onSliderRelease}
       style={{
-        accentColor: sliderColor,
+        '--slider-thumb-color': sliderColor,
         ...(isVertical
           ? { writingMode: 'vertical-lr' as React.CSSProperties['writingMode'], direction: 'rtl', height: '100%', width: 'auto' }
           : { width: '100%' }),
-      }}
+      } as unknown as CSSProperties}
       className="nodrag h-1.5 rounded-full appearance-none cursor-pointer"
     />
   );
