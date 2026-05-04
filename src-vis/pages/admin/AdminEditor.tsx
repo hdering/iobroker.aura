@@ -247,7 +247,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
   // ── STEP 1: type selection ─────────────────────────────────────────────────
   if (step === 1) {
     return (
-      <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
         <div className="rounded-xl w-full max-w-4xl shadow-2xl overflow-y-auto"
           style={{ maxHeight: '95vh', background: 'linear-gradient(var(--app-surface), var(--app-surface)), var(--app-bg)', border: '1px solid var(--app-border)' }}
           onClick={(e) => e.stopPropagation()}>
@@ -258,10 +258,15 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
             <h2 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>
               {t('editor.manual.title')}
             </h2>
-            <span className="text-xs font-medium px-2 py-0.5 rounded-full"
-              style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)' }}>
-              1 / 2
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full"
+                style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)' }}>
+                1 / 2
+              </span>
+              <button onClick={onClose} className="hover:opacity-60" style={{ color: 'var(--text-secondary)' }}>
+                <X size={18} />
+              </button>
+            </div>
           </div>
 
           {/* DP field */}
@@ -498,7 +503,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
 
   // ── STEP 2: details ────────────────────────────────────────────────────────
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <div className="rounded-xl w-full max-w-xl shadow-2xl"
         style={{ background: 'linear-gradient(var(--app-surface), var(--app-surface)), var(--app-bg)', border: '1px solid var(--app-border)' }}
         onClick={(e) => e.stopPropagation()}>
@@ -513,10 +518,15 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
             {templateIcon && <span>{templateIcon}</span>}
             {templateLabel}
           </button>
-          <span className="text-xs font-medium ml-auto px-2 py-0.5 rounded-full"
-            style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)' }}>
-            2 / 2
-          </span>
+          <div className="flex items-center gap-2 ml-auto">
+            <span className="text-xs font-medium px-2 py-0.5 rounded-full"
+              style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)' }}>
+              2 / 2
+            </span>
+            <button onClick={onClose} className="hover:opacity-60" style={{ color: 'var(--text-secondary)' }}>
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         {/* Body */}
