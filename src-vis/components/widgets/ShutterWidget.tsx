@@ -204,7 +204,7 @@ export function ShutterWidget({ config }: WidgetProps) {
       <div className="flex flex-col h-full gap-2" style={{ position: 'relative' }}>
         {showTitle && (
           <div className="flex items-center justify-between">
-            <p className="text-xs truncate font-medium" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>
+            <p className="text-xs truncate font-medium" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'], flex: '1', minWidth: 0 }}>{config.title}</p>
             {isMoving && <span className="text-[10px] animate-pulse" style={{ color: 'var(--accent-yellow)' }}>
               {movingDir === 'up' ? '▲' : movingDir === 'down' ? '▼' : '↕'}
             </span>}
@@ -281,7 +281,7 @@ export function ShutterWidget({ config }: WidgetProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 min-w-0">
             {CustomIcon && <CustomIcon size={iconSize} style={{ color: accentColor, flexShrink: 0 }} />}
-            <p className="text-xs truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>
+            <p className="text-xs truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'], flex: '1', minWidth: 0 }}>{config.title}</p>
           </div>
           {isMoving && <span className="text-[10px] animate-pulse shrink-0" style={{ color: 'var(--accent-yellow)' }}>
             {movingDir === 'up' ? '▲' : movingDir === 'down' ? '▼' : '↕'}

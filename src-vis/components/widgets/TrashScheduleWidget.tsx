@@ -173,7 +173,7 @@ export function TrashScheduleWidget({ config }: WidgetProps) {
       {config.title && !(o.hideTitle) && (
         <div className="flex items-center gap-1.5 mb-2 shrink-0 min-w-0">
           <TitleIcon size={14} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>
+          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'], flex: '1', minWidth: 0 }}>
             {config.title}
           </p>
         </div>

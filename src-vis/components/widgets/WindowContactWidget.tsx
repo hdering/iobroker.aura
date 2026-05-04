@@ -241,7 +241,7 @@ export function WindowContactWidget({ config }: WidgetProps) {
       {showTitle && (
         <div className="flex items-center gap-2">
           <StateDisplay cfg={cfg} fallback={fb.Icon} size={iconSize} />
-          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>
+          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'], flex: '1', minWidth: 0 }}>{config.title}</p>
         </div>
       )}
       {showLabel && <span className="text-2xl font-bold" style={{ color: cfg.color }}>{cfg.label}</span>}

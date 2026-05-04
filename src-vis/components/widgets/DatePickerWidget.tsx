@@ -222,7 +222,7 @@ export function DatePickerWidget({ config }: WidgetProps) {
       {showTitle && (
         <div className="flex items-center gap-1.5">
           <WidgetIcon size={iconSize} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>
+          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'], flex: '1', minWidth: 0 }}>{config.title}</p>
         </div>
       )}
       <div className="flex flex-wrap gap-1.5">

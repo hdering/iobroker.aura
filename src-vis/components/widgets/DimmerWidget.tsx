@@ -139,7 +139,7 @@ export function DimmerWidget({ config }: WidgetProps) {
       {showTitle && (
         <div className="flex items-center gap-2">
           <SunDim size={iconSize} style={{ color: level > 0 ? 'var(--accent-yellow)' : 'var(--text-secondary)' }} />
-          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</p>
+          <p className="text-xs truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'], flex: '1', minWidth: 0 }}>{config.title}</p>
         </div>
       )}
       <div className="space-y-2">

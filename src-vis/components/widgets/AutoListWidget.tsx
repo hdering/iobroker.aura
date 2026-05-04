@@ -522,7 +522,7 @@ export function AutoListWidget({ config, editMode, onConfigChange }: WidgetProps
   const header = showTitle ? (
     <div className="shrink-0 px-3 py-1.5 flex items-center justify-between"
       style={{ borderBottom: '1px solid var(--widget-border)' }}>
-      <span className="flex items-center gap-1.5 text-xs font-semibold truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>
+      <span className="flex items-center gap-1.5 text-xs font-semibold truncate" style={{ color: 'var(--text-secondary)', textAlign: titleAlign as React.CSSProperties['textAlign'], flex: '1', minWidth: 0 }}>
         {HeaderIcon && <HeaderIcon size={12} className="shrink-0" />}
         {config.title || 'Dynamische Liste'}
         {showCount && entries.length > 0 && (

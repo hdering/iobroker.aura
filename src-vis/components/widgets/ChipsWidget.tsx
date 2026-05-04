@@ -96,7 +96,7 @@ export function ChipsWidget({ config }: WidgetProps) {
       {showTitle && (
         <div className="flex items-center gap-1.5 shrink-0 min-w-0">
           <WidgetIcon size={iconSize} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
-          <span className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)', textAlign: titleAlign as React.CSSProperties['textAlign'] }}>{config.title}</span>
+          <span className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)', textAlign: titleAlign as React.CSSProperties['textAlign'], flex: '1', minWidth: 0 }}>{config.title}</span>
         </div>
       )}
       <div className="nodrag" style={containerStyle}>
