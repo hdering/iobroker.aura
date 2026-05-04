@@ -1,12 +1,14 @@
 import { Power } from 'lucide-react';
 import { useDatapoint } from '../../hooks/useDatapoint';
 import { useIoBroker } from '../../hooks/useIoBroker';
+import { useConfirmAction } from '../../hooks/useConfirmAction';
 import type { WidgetProps } from '../../types';
 import { contentPositionClass, titlePositionStyle, titleTextAlign } from '../../utils/widgetUtils';
 import { getWidgetIcon } from '../../utils/widgetIconMap';
 import { StatusBadges } from './StatusBadges';
 import { CustomGridView } from './CustomGridView';
 import { useStatusFields } from '../../hooks/useStatusFields';
+import { ConfirmOverlay } from './ConfirmOverlay';
 
 export function SwitchWidget({ config }: WidgetProps) {
   const { value } = useDatapoint(config.datapoint);
@@ -16,6 +18,8 @@ export function SwitchWidget({ config }: WidgetProps) {
   const o = config.options ?? {};
   const momentary      = (o.momentary      as boolean) ?? false;
   const momentaryDelay = (o.momentaryDelay as number)  ?? 500;
+  const confirmAction  = (o.confirmAction  as boolean) ?? false;
+  const confirmText    = (o.confirmText    as string)  ?? '';
 
   const toggle = () => {
     if (momentary) {
@@ -26,6 +30,8 @@ export function SwitchWidget({ config }: WidgetProps) {
     }
   };
 
+  const { run: handleToggle, pending, confirm, cancel } = useConfirmAction(toggle, confirmAction);
+
   const WidgetIcon = getWidgetIcon(config.options?.icon as string | undefined, Power);
   const showTitle = o.showTitle !== false;
   const showLabel = o.showLabel !== false;
@@ -34,36 +40,39 @@ export function SwitchWidget({ config }: WidgetProps) {
   const { battery, reach, batteryIcon, reachIcon, statusBadges } = useStatusFields(config);
 
   if (layout === 'custom') return (
-    <CustomGridView
-      config={config}
-      value={isOn ? 'AN' : 'AUS'}
-      extraFields={{ battery, reach }}
-      extraComponents={{
-        icon:            <WidgetIcon size={iconSize} style={{ color: isOn ? 'var(--accent-green)' : 'var(--text-secondary)', flexShrink: 0 }} />,
-        'battery-icon':  batteryIcon,
-        'reach-icon':    reachIcon,
-        'status-badges': statusBadges,
-        toggle: (
-          <button
-            onClick={toggle}
-            className="nodrag relative w-10 h-5 rounded-full transition-colors focus:outline-none"
-            style={{ background: isOn ? 'var(--accent)' : 'var(--app-border)' }}
-          >
-            <span
-              className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
-              style={{ left: isOn ? '22px' : '2px' }}
-            />
-          </button>
-        ),
-      }}
-    />
+    <div className="relative w-full h-full">
+      <CustomGridView
+        config={config}
+        value={isOn ? 'AN' : 'AUS'}
+        extraFields={{ battery, reach }}
+        extraComponents={{
+          icon:            <WidgetIcon size={iconSize} style={{ color: isOn ? 'var(--accent-green)' : 'var(--text-secondary)', flexShrink: 0 }} />,
+          'battery-icon':  batteryIcon,
+          'reach-icon':    reachIcon,
+          'status-badges': statusBadges,
+          toggle: (
+            <button
+              onClick={handleToggle}
+              className="nodrag relative w-10 h-5 rounded-full transition-colors focus:outline-none"
+              style={{ background: isOn ? 'var(--accent)' : 'var(--app-border)' }}
+            >
+              <span
+                className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                style={{ left: isOn ? '22px' : '2px' }}
+              />
+            </button>
+          ),
+        }}
+      />
+      {pending && <ConfirmOverlay text={confirmText} onConfirm={confirm} onCancel={cancel} />}
+    </div>
   );
 
   // --- CARD: Vollflächige farbige Karte mit großem Icon ---
   if (layout === 'card') {
     return (
       <button
-        onClick={toggle}
+        onClick={handleToggle}
         className="w-full h-full flex flex-col items-center justify-center gap-3 rounded-widget transition-all duration-300"
         style={{
           position: 'relative',
@@ -80,6 +89,7 @@ export function SwitchWidget({ config }: WidgetProps) {
           {showLabel && <p className="text-xs opacity-70" style={{ color: isOn ? '#fff' : 'var(--text-secondary)' }}>{isOn ? 'AN' : 'AUS'}</p>}
         </div>
         <StatusBadges config={config} />
+        {pending && <ConfirmOverlay text={confirmText} onConfirm={confirm} onCancel={cancel} />}
       </button>
     );
   }
@@ -91,12 +101,13 @@ export function SwitchWidget({ config }: WidgetProps) {
         <WidgetIcon size={iconSize} style={{ color: isOn ? 'var(--accent-green)' : 'var(--text-secondary)', flexShrink: 0 }} />
         {showTitle && <span className="flex-1 text-sm truncate" style={{ color: 'var(--text-primary)' }}>{config.title}</span>}
         {!showTitle && <span className="flex-1" />}
-        <button onClick={toggle}
+        <button onClick={handleToggle}
           className="relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0 focus:outline-none"
           style={{ background: isOn ? 'var(--accent-green)' : 'var(--app-border)' }}>
           <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${isOn ? 'translate-x-5' : 'translate-x-0'}`} />
         </button>
         <StatusBadges config={config} />
+        {pending && <ConfirmOverlay text={confirmText} onConfirm={confirm} onCancel={cancel} />}
       </div>
     );
   }
@@ -105,7 +116,7 @@ export function SwitchWidget({ config }: WidgetProps) {
   if (layout === 'minimal') {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-2" style={{ position: 'relative' }}>
-        <button onClick={toggle} className="focus:outline-none transition-transform active:scale-95">
+        <button onClick={handleToggle} className="focus:outline-none transition-transform active:scale-95">
           <WidgetIcon
             size={iconSize}
             style={{ color: isOn ? 'var(--accent-green)' : 'var(--text-secondary)' }}
@@ -113,6 +124,7 @@ export function SwitchWidget({ config }: WidgetProps) {
         </button>
         {showTitle && <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{config.title}</span>}
         <StatusBadges config={config} />
+        {pending && <ConfirmOverlay text={confirmText} onConfirm={confirm} onCancel={cancel} />}
       </div>
     );
   }
@@ -137,13 +149,14 @@ export function SwitchWidget({ config }: WidgetProps) {
             {isOn ? 'AN' : 'AUS'}
           </span>
         )}
-        <button onClick={toggle}
+        <button onClick={handleToggle}
           className={`relative w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none ${!showLabel ? 'ml-auto' : ''}`}
           style={{ background: isOn ? 'var(--accent-green)' : 'var(--app-border)' }}>
           <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${isOn ? 'translate-x-6' : 'translate-x-0'}`} />
         </button>
       </div>
       <StatusBadges config={config} />
+      {pending && <ConfirmOverlay text={confirmText} onConfirm={confirm} onCancel={cancel} />}
     </div>
   );
 }

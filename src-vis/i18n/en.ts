@@ -19,6 +19,7 @@ export const en: Record<TranslationKey, string> = {
   'common.on':       'On',
   'common.off':      'Off',
   'common.confirm':  'Confirm',
+  'widget.confirm.defaultPrompt': 'Really switch?',
   'common.duplicate':'Duplicate',
   'common.export':   'Export',
   'common.move':     'Move',

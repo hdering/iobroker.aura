@@ -2901,8 +2901,9 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                 const o   = config.options ?? {};
                 const set = (patch: Record<string, unknown>) =>
                   onConfigChange({ ...config, options: { ...o, ...patch } });
-                const momentary = (o.momentary as boolean) ?? false;
-                const delay     = (o.momentaryDelay as number) ?? 500;
+                const momentary     = (o.momentary     as boolean) ?? false;
+                const delay         = (o.momentaryDelay as number)  ?? 500;
+                const confirmAction = (o.confirmAction  as boolean) ?? false;
                 return (
                   <>
                     <div className="h-px my-1" style={{ background: 'var(--app-border)' }} />
@@ -2924,6 +2925,32 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                         <input
                           type="number" min={50} max={10000} step={50} value={delay}
                           onChange={(e) => set({ momentaryDelay: Math.max(50, Number(e.target.value)) })}
+                          className="w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
+                          style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
+                        />
+                      </div>
+                    )}
+                    <div className="h-px my-1" style={{ background: 'var(--app-border)' }} />
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <label className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>Sicherheitsabfrage</label>
+                        <p className="text-[10px]" style={{ color: 'var(--text-secondary)', opacity: 0.7 }}>Bestätigung vor dem Schalten</p>
+                      </div>
+                      <button onClick={() => set({ confirmAction: !confirmAction })}
+                        className="relative w-9 h-5 rounded-full transition-colors shrink-0"
+                        style={{ background: confirmAction ? 'var(--accent)' : 'var(--app-border)' }}>
+                        <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                          style={{ left: confirmAction ? '18px' : '2px' }} />
+                      </button>
+                    </div>
+                    {confirmAction && (
+                      <div>
+                        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Abfragetext (optional)</label>
+                        <input
+                          type="text"
+                          value={(o.confirmText as string) ?? ''}
+                          onChange={(e) => set({ confirmText: e.target.value })}
+                          placeholder="Wirklich schalten?"
                           className="w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
                           style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
                         />

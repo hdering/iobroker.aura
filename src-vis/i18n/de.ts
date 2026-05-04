@@ -17,6 +17,7 @@ export const de = {
   'common.on':            'An',
   'common.off':           'Aus',
   'common.confirm':       'Bestätigen',
+  'widget.confirm.defaultPrompt': 'Wirklich schalten?',
   'common.duplicate':     'Duplizieren',
   'common.export':        'Exportieren',
   'common.move':          'Verschieben',
