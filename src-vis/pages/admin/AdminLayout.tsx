@@ -210,6 +210,11 @@ export function AdminLayout() {
             <p className="text-xs font-semibold uppercase tracking-widest mb-0.5" style={{ color: 'var(--text-secondary)' }}>Aura</p>
             <p className="font-bold text-lg leading-none" style={{ color: 'var(--text-primary)' }}>Admin</p>
             <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>v{appVersion}</p>
+            {dirty && (
+              <p className="text-[10px] mt-1 font-medium" style={{ color: 'var(--accent)' }}>
+                {countdown !== null ? t('admin.save.autoIn', { s: String(countdown) }) : t('admin.save.unsaved')}
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-1">
             {isNarrow && (
@@ -289,14 +294,9 @@ export function AdminLayout() {
           )}
           {dirty ? (
             <>
-              <span className="text-xs mr-auto" style={{ color: 'var(--accent)' }}>
-                {countdown !== null
-                  ? t('admin.save.autoIn', { s: String(countdown) })
-                  : t('admin.save.unsaved')}
-              </span>
               <button
                 onClick={revert}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium hover:opacity-80 transition-opacity"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium hover:opacity-80 transition-opacity ml-auto"
                 style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
               >
                 <Undo2 size={13} /> {t('admin.save.undo')}
