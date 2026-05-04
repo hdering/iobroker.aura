@@ -2892,6 +2892,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                     { key: 'showMute',     label: 'Mute' },
                     { key: 'showChips',    label: 'Schnellzugriff-Chips' },
                   ];
+                  case 'chips':  return [{ key: 'showTitle', label: 'Titel' }];
                   case 'slider': return [
                     { key: 'showValue',  label: 'Wert' },
                     { key: 'showUnit',   label: 'Einheit' },
