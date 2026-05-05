@@ -215,6 +215,19 @@ export const de = {
   'layouts.defaultTab':    'Standard-Tab',
   'layouts.setDefaultTab': 'Als Standard-Tab setzen (wird geöffnet wenn kein Tab in der URL angegeben ist)',
 
+  'layouts.subtab.theme':       'Theme & CSS-Vars',
+  'layouts.subtab.typo':        'Typografie & Spacing',
+  'layouts.subtab.grid':        'Grid & Mobile',
+  'layouts.subtab.guidelines':  'Hilfslinien',
+  'layouts.subtab.css':         'Custom CSS',
+  'layouts.subtab.tabbar':      'Tab-Leiste',
+  'layouts.subtab.tabbarHiddenHint': 'Tab-Leiste wird pro Layout konfiguriert. Wähle ein Layout im Picker oben.',
+
+  'layouts.context.label':      'Kontext',
+  'layouts.context.global':     'Global',
+  'layouts.context.hintGlobal': 'Voreinstellungen für alle Layouts. Layouts können einzelne Werte überschreiben.',
+  'layouts.context.hintLayout': 'Werte überschreiben den globalen Standard. ↩ Global setzt einen Wert zurück.',
+
   // ── Endpoints ─────────────────────────────────────────────────────────────────
   'endpoints.title':    'Endpunkte & Gruppen',
   'endpoints.subtitle': 'Fasse Datenpunkte in Gruppen zusammen – z.B. „Alle Lichter". Gruppen können als Listen-Widget ins Dashboard eingefügt werden.',

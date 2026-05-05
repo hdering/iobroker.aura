@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { setupPin } from '../../store/authStore';
-import { useActiveLayout, useDashboardStore } from '../../store/dashboardStore';
+import { useActiveLayout } from '../../store/dashboardStore';
 
 import { useConnectionStore } from '../../store/connectionStore';
 import { useConfigStore } from '../../store/configStore';
@@ -12,8 +12,6 @@ import { reconnectSocket, getObjectViewDirect, getStateDirect, setStateDirect } 
 import { saveAll, saveToIoBroker, BACKUP_TS_KEY } from '../../store/persistManager';
 import { Eye, EyeOff, AlertTriangle, RefreshCw, Tablet, Edit3, Check, X, Trash2, History } from 'lucide-react';
 import { useT } from '../../i18n';
-import type { LayoutSettings } from '../../store/dashboardStore';
-import type { FrontendSettings } from '../../store/configStore';
 
 // ── Shared primitives ──────────────────────────────────────────────────────────
 
@@ -45,56 +43,6 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
   );
 }
 
-function SliderSetting({
-  label, value, min, max, step, unit = '', onChange, presets, isOverridden, onClearOverride,
-}: {
-  label: string; value: number; min: number; max: number; step: number;
-  unit?: string; onChange: (v: number) => void;
-  presets: { label: string; value: number }[];
-  isOverridden?: boolean;
-  onClearOverride?: () => void;
-}) {
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center gap-1.5">
-          <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{label}</p>
-          {isOverridden && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded font-medium" style={{ background: 'color-mix(in srgb, var(--accent) 15%, transparent)', color: 'var(--accent)' }}>
-              Layout
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-1">
-          {isOverridden && onClearOverride && (
-            <button onClick={onClearOverride} title="Auf Global zurücksetzen" className="text-[10px] px-1.5 py-0.5 rounded hover:opacity-70" style={{ color: 'var(--text-secondary)' }}>
-              ↩ Global
-            </button>
-          )}
-          <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-md"
-            style={{ background: 'var(--app-bg)', color: 'var(--accent)', border: '1px solid var(--app-border)' }}>
-            {value}{unit}
-          </span>
-        </div>
-      </div>
-      <input type="range" min={min} max={max} step={step} value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full accent-[var(--accent)] mb-2" />
-      <div className="flex gap-1.5 flex-wrap">
-        {presets.map((p) => {
-          const active = value === p.value;
-          return (
-            <button key={p.value} onClick={() => onChange(p.value)}
-              className="px-2.5 py-1 rounded-lg text-xs font-medium hover:opacity-80"
-              style={{ background: active ? 'var(--accent)' : 'var(--app-bg)', color: active ? '#fff' : 'var(--text-secondary)', border: `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}` }}>
-              {p.label}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
 
 // ── Auto-Backup card ──────────────────────────────────────────────────────────
 
@@ -505,251 +453,7 @@ function ExpertSettings() {
   );
 }
 
-// ── Layout-aware Grid card ─────────────────────────────────────────────────────
 
-function GridCard({
-  frontend, updateFrontend, rescaleAllWidgetsX, updateLayoutSettings, contextId, onContextChange, t, MARGIN,
-}: {
-  frontend: FrontendSettings;
-  updateFrontend: (p: Partial<FrontendSettings>) => void;
-  rescaleAllWidgetsX: (factor: number) => void;
-  updateLayoutSettings: (layoutId: string, patch: Partial<LayoutSettings>) => void;
-  contextId: string | null;
-  onContextChange: (id: string | null) => void;
-  t: ReturnType<typeof useT>;
-  MARGIN: number;
-}) {
-  const layouts = useDashboardStore((s) => s.layouts);
-  const clearLayoutSettings = useDashboardStore((s) => s.clearLayoutSettings);
-
-  const ls = contextId ? layouts.find((l) => l.id === contextId)?.settings : undefined;
-
-  // For a given key: value = layout override (if set) else global, isOv = has override
-  function eff<K extends keyof LayoutSettings & keyof FrontendSettings>(key: K): [FrontendSettings[K], boolean] {
-    const ov = ls?.[key];
-    return [(ov !== undefined ? ov : frontend[key]) as FrontendSettings[K], contextId !== null && ov !== undefined];
-  }
-
-  function set<K extends keyof LayoutSettings & keyof FrontendSettings>(key: K, v: FrontendSettings[K]) {
-    if (!contextId) updateFrontend({ [key]: v } as Partial<FrontendSettings>);
-    else updateLayoutSettings(contextId, { [key]: v } as Partial<LayoutSettings>);
-  }
-
-  function clear(key: keyof LayoutSettings) {
-    if (contextId) clearLayoutSettings(contextId, key);
-  }
-
-  const [rowH, rowHOv] = eff('gridRowHeight');
-  const [snapX, snapXOv] = eff('gridSnapX');
-  const [mob, mobOv]   = eff('mobileBreakpoint');
-
-  return (
-    <Card title={t('settings.grid.title')}>
-      <div className="pb-2 mb-1 border-b" style={{ borderColor: 'var(--app-border)' }}>
-        <LayoutContextSwitcher selectedId={contextId} onChange={onContextChange} />
-      </div>
-      <SliderSetting
-        label={t('settings.grid.rowHeight')}
-        value={rowH ?? 20}
-        min={10} max={160} step={10} unit=" px"
-        onChange={(v) => set('gridRowHeight', v)}
-        isOverridden={rowHOv}
-        onClearOverride={() => clear('gridRowHeight')}
-        presets={[{ label: '20', value: 20 }, { label: '40', value: 40 }, { label: '60', value: 60 }, { label: '80', value: 80 }, { label: '120', value: 120 }]}
-      />
-      <div className="border-t pt-3" style={{ borderColor: 'var(--app-border)' }}>
-        <SliderSetting
-          label={t('settings.grid.snapX')}
-          value={snapX ?? rowH ?? 20}
-          min={10} max={160} step={10} unit=" px"
-          onChange={(v) => {
-            const oldSnap = (snapX ?? rowH ?? 20) as number;
-            const factor = (oldSnap + MARGIN) / (v + MARGIN);
-            if (!contextId) rescaleAllWidgetsX(factor);
-            set('gridSnapX', v);
-          }}
-          isOverridden={snapXOv}
-          onClearOverride={() => clear('gridSnapX')}
-          presets={[{ label: '20', value: 20 }, { label: '40', value: 40 }, { label: '60', value: 60 }, { label: '80', value: 80 }, { label: '120', value: 120 }]}
-        />
-      </div>
-      <div className="border-t pt-3" style={{ borderColor: 'var(--app-border)' }}>
-        <SliderSetting
-          label={t('settings.grid.mobileBreak')}
-          value={mob ?? 600}
-          min={0} max={1024} step={10} unit=" px"
-          onChange={(v) => set('mobileBreakpoint', v)}
-          isOverridden={mobOv}
-          onClearOverride={() => clear('mobileBreakpoint')}
-          presets={[{ label: '480', value: 480 }, { label: '600', value: 600 }, { label: '768', value: 768 }, { label: t('settings.grid.mobileOff'), value: 0 }]}
-        />
-      </div>
-      {/* Wizard max DPs — global only (not layout-specific) */}
-      {!contextId && (
-        <div className="border-t pt-3" style={{ borderColor: 'var(--app-border)' }}>
-          <SliderSetting
-            label={t('settings.grid.wizardMaxDp')}
-            value={frontend.wizardMaxDatapoints ?? 500}
-            min={100} max={5000} step={100}
-            onChange={(v) => updateFrontend({ wizardMaxDatapoints: v })}
-            presets={[{ label: '200', value: 200 }, { label: '500', value: 500 }, { label: '1k', value: 1000 }, { label: '2k', value: 2000 }, { label: '5k', value: 5000 }]}
-          />
-        </div>
-      )}
-    </Card>
-  );
-}
-
-// ── Layout-aware Hilfslinien card ──────────────────────────────────────────────
-
-function GuidelinesCard({
-  frontend, updateFrontend, updateLayoutSettings, contextId, onContextChange,
-}: {
-  frontend: FrontendSettings;
-  updateFrontend: (p: Partial<FrontendSettings>) => void;
-  updateLayoutSettings: (layoutId: string, patch: Partial<LayoutSettings>) => void;
-  contextId: string | null;
-  onContextChange: (id: string | null) => void;
-}) {
-  const layouts = useDashboardStore((s) => s.layouts);
-  const clearLayoutSettings = useDashboardStore((s) => s.clearLayoutSettings);
-
-  const ls = contextId ? layouts.find((l) => l.id === contextId)?.settings : undefined;
-
-  function eff<K extends keyof LayoutSettings & keyof FrontendSettings>(key: K): [FrontendSettings[K], boolean] {
-    const ov = ls?.[key];
-    return [(ov !== undefined ? ov : frontend[key]) as FrontendSettings[K], contextId !== null && ov !== undefined];
-  }
-
-  function set<K extends keyof LayoutSettings & keyof FrontendSettings>(key: K, v: FrontendSettings[K]) {
-    if (!contextId) updateFrontend({ [key]: v } as Partial<FrontendSettings>);
-    else updateLayoutSettings(contextId, { [key]: v } as Partial<LayoutSettings>);
-  }
-
-  function clear(key: keyof LayoutSettings) {
-    if (contextId) clearLayoutSettings(contextId, key);
-  }
-
-  const [w, wOv]           = eff('guidelinesWidth');
-  const [h, hOv]           = eff('guidelinesHeight');
-  const [showFe, showFeOv] = eff('guidelinesShowInFrontend');
-  const [enabled, enabledOv] = eff('guidelinesEnabled');
-
-  return (
-    <Card title="Hilfslinien">
-      <div className="pb-2 mb-1 border-b" style={{ borderColor: 'var(--app-border)' }}>
-        <LayoutContextSwitcher selectedId={contextId} onChange={onContextChange} />
-      </div>
-      <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
-        Zeigt rote gestrichelte Linien im Editor (und optional im Frontend) zur Orientierung bei der Layout-Planung für ein Zielgerät.
-      </p>
-      <div className="mb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <p className="text-sm" style={{ color: 'var(--text-primary)' }}>Aktiv</p>
-            {enabledOv && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded font-medium" style={{ background: 'color-mix(in srgb, var(--accent) 15%, transparent)', color: 'var(--accent)' }}>
-                Layout
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-1.5">
-            {enabledOv && contextId && (
-              <button onClick={() => clear('guidelinesEnabled')} className="text-[10px] px-1.5 py-0.5 rounded hover:opacity-70" style={{ color: 'var(--text-secondary)' }}>
-                ↩ Global
-              </button>
-            )}
-            <Toggle value={enabled ?? false} onChange={(v) => set('guidelinesEnabled', v)} />
-          </div>
-        </div>
-      </div>
-      <SliderSetting
-        label="Breite"
-        value={w ?? 1280}
-        min={320} max={3840} step={10} unit=" px"
-        onChange={(v) => set('guidelinesWidth', v)}
-        isOverridden={wOv}
-        onClearOverride={() => clear('guidelinesWidth')}
-        presets={[{ label: '768', value: 768 }, { label: '1024', value: 1024 }, { label: '1280', value: 1280 }, { label: '1920', value: 1920 }]}
-      />
-      <div className="border-t pt-3" style={{ borderColor: 'var(--app-border)' }}>
-        <SliderSetting
-          label="Höhe"
-          value={h ?? 800}
-          min={320} max={2160} step={10} unit=" px"
-          onChange={(v) => set('guidelinesHeight', v)}
-          isOverridden={hOv}
-          onClearOverride={() => clear('guidelinesHeight')}
-          presets={[{ label: '600', value: 600 }, { label: '768', value: 768 }, { label: '800', value: 800 }, { label: '1024', value: 1024 }, { label: '1080', value: 1080 }]}
-        />
-      </div>
-      <div className="border-t pt-3" style={{ borderColor: 'var(--app-border)' }}>
-        <div className="flex items-center justify-between py-2 border-b last:border-b-0" style={{ borderColor: 'var(--app-border)' }}>
-          <div className="flex items-center gap-1.5">
-            <p className="text-sm" style={{ color: 'var(--text-primary)' }}>Im Frontend anzeigen</p>
-            {showFeOv && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded font-medium" style={{ background: 'color-mix(in srgb, var(--accent) 15%, transparent)', color: 'var(--accent)' }}>
-                Layout
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-1.5">
-            {showFeOv && contextId && (
-              <button onClick={() => clear('guidelinesShowInFrontend')} className="text-[10px] px-1.5 py-0.5 rounded hover:opacity-70" style={{ color: 'var(--text-secondary)' }}>
-                ↩ Global
-              </button>
-            )}
-            <Toggle value={showFe ?? false} onChange={(v) => set('guidelinesShowInFrontend', v)} />
-          </div>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-// ── Layout context switcher ────────────────────────────────────────────────────
-
-function LayoutContextSwitcher({
-  selectedId,
-  onChange,
-}: {
-  selectedId: string | null; // null = global
-  onChange: (id: string | null) => void;
-}) {
-  const layouts = useDashboardStore((s) => s.layouts);
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-[11px] shrink-0" style={{ color: 'var(--text-secondary)' }}>Kontext:</span>
-      <div className="flex gap-1 flex-wrap">
-        <button
-          onClick={() => onChange(null)}
-          className="px-2.5 py-1 rounded-lg text-xs font-medium hover:opacity-80"
-          style={{
-            background: selectedId === null ? 'var(--accent)' : 'var(--app-bg)',
-            color: selectedId === null ? '#fff' : 'var(--text-secondary)',
-            border: `1px solid ${selectedId === null ? 'var(--accent)' : 'var(--app-border)'}`,
-          }}
-        >
-          Global
-        </button>
-        {layouts.map((l) => (
-          <button
-            key={l.id}
-            onClick={() => onChange(l.id)}
-            className="px-2.5 py-1 rounded-lg text-xs font-medium hover:opacity-80"
-            style={{
-              background: selectedId === l.id ? 'var(--accent)' : 'var(--app-bg)',
-              color: selectedId === l.id ? '#fff' : 'var(--text-secondary)',
-              border: `1px solid ${selectedId === l.id ? 'var(--accent)' : 'var(--app-border)'}`,
-            }}
-          >
-            {l.name}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 // ── DP Name Filter ─────────────────────────────────────────────────────────────
 
@@ -792,13 +496,6 @@ export function AdminSettings() {
   const t = useT();
   const tabs = useActiveLayout().tabs;
   const { frontend, updateFrontend } = useConfigStore();
-  const rescaleAllWidgetsX = useDashboardStore((s) => s.rescaleAllWidgetsX);
-  const updateLayoutSettings = useDashboardStore((s) => s.updateLayoutSettings);
-  const MARGIN = frontend.gridGap ?? 10;
-
-  // Layout context for Grid & Hilfslinien cards
-  const [gridContextId, setGridContextId] = useState<string | null>(null);
-  const [guidelinesContextId, setGuidelinesContextId] = useState<string | null>(null);
   const { autoSave, autoSaveDelay, setAutoSave, setAutoSaveDelay } = useAdminPrefsStore();
   const [newPin, setNewPin] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -960,37 +657,53 @@ export function AdminSettings() {
         </Card>
       </div>
 
-      {/* Row 1: Frontend + Grid + Hilfslinien */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {/* Row 1: Frontend-Vorgaben */}
+      <Card title={t('settings.frontend.title')}>
+        <ToggleRow label={t('settings.frontend.showHeader')} value={frontend.showHeader} onChange={(v) => updateFrontend({ showHeader: v })} />
+        {frontend.showHeader && (
+          <>
+            <div className="py-2 border-b" style={{ borderColor: 'var(--app-border)' }}>
+              <p className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>{t('settings.frontend.dashboardTitle')}</p>
+              <input value={frontend.headerTitle}
+                onChange={(e) => updateFrontend({ headerTitle: e.target.value })}
+                className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none"
+                style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }} />
+            </div>
+            <ToggleRow label={t('settings.frontend.connectionBadge')} value={frontend.showConnectionBadge} onChange={(v) => updateFrontend({ showConnectionBadge: v })} />
+            <ToggleRow label={t('settings.frontend.showAdminLink')} value={frontend.showAdminLink ?? false} onChange={(v) => updateFrontend({ showAdminLink: v })} />
 
-        {/* Frontend-Vorgaben */}
-        <Card title={t('settings.frontend.title')}>
-          <ToggleRow label={t('settings.frontend.showHeader')} value={frontend.showHeader} onChange={(v) => updateFrontend({ showHeader: v })} />
-          {frontend.showHeader && (
-            <>
-              <div className="py-2 border-b" style={{ borderColor: 'var(--app-border)' }}>
-                <p className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>{t('settings.frontend.dashboardTitle')}</p>
-                <input value={frontend.headerTitle}
-                  onChange={(e) => updateFrontend({ headerTitle: e.target.value })}
-                  className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none"
-                  style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }} />
-              </div>
-              <ToggleRow label={t('settings.frontend.connectionBadge')} value={frontend.showConnectionBadge} onChange={(v) => updateFrontend({ showConnectionBadge: v })} />
-              <ToggleRow label={t('settings.frontend.showAdminLink')} value={frontend.showAdminLink ?? false} onChange={(v) => updateFrontend({ showAdminLink: v })} />
-
-              {/* ── Header clock ── */}
-              <ToggleRow label={t('settings.frontend.headerClock')} value={frontend.headerClockEnabled} onChange={(v) => updateFrontend({ headerClockEnabled: v })} />
-              {frontend.headerClockEnabled && (
-                <div className="space-y-2 pl-1 pb-1">
-                  {/* Display mode */}
+            {/* ── Header clock ── */}
+            <ToggleRow label={t('settings.frontend.headerClock')} value={frontend.headerClockEnabled} onChange={(v) => updateFrontend({ headerClockEnabled: v })} />
+            {frontend.headerClockEnabled && (
+              <div className="space-y-2 pl-1 pb-1">
+                <div>
+                  <p className="text-xs mb-1.5" style={{ color: 'var(--text-secondary)' }}>{t('settings.frontend.headerClockDisplay')}</p>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {(['time', 'date', 'datetime'] as const).map((v) => {
+                      const labels = { time: t('wf.clock.timeOnly'), date: t('wf.clock.dateOnly'), datetime: t('wf.clock.datetime') };
+                      const active = (frontend.headerClockDisplay ?? 'time') === v;
+                      return (
+                        <button key={v} onClick={() => updateFrontend({ headerClockDisplay: v })}
+                          className="px-2.5 py-1 rounded-lg text-xs font-medium hover:opacity-80"
+                          style={{ background: active ? 'var(--accent)' : 'var(--app-bg)', color: active ? '#fff' : 'var(--text-secondary)', border: `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}` }}>
+                          {labels[v]}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                {frontend.headerClockDisplay !== 'date' && (
+                  <ToggleRow label={t('settings.frontend.headerClockSeconds')} value={frontend.headerClockShowSeconds} onChange={(v) => updateFrontend({ headerClockShowSeconds: v })} />
+                )}
+                {frontend.headerClockDisplay !== 'time' && (
                   <div>
-                    <p className="text-xs mb-1.5" style={{ color: 'var(--text-secondary)' }}>{t('settings.frontend.headerClockDisplay')}</p>
-                    <div className="flex gap-1.5 flex-wrap">
-                      {(['time', 'date', 'datetime'] as const).map((v) => {
-                        const labels = { time: t('wf.clock.timeOnly'), date: t('wf.clock.dateOnly'), datetime: t('wf.clock.datetime') };
-                        const active = (frontend.headerClockDisplay ?? 'time') === v;
+                    <p className="text-xs mb-1.5" style={{ color: 'var(--text-secondary)' }}>{t('settings.frontend.headerClockDateLen')}</p>
+                    <div className="flex gap-1.5">
+                      {(['short', 'long'] as const).map((v) => {
+                        const labels = { short: t('wf.clock.short'), long: t('wf.clock.long') };
+                        const active = (frontend.headerClockDateLength ?? 'short') === v;
                         return (
-                          <button key={v} onClick={() => updateFrontend({ headerClockDisplay: v })}
+                          <button key={v} onClick={() => updateFrontend({ headerClockDateLength: v })}
                             className="px-2.5 py-1 rounded-lg text-xs font-medium hover:opacity-80"
                             style={{ background: active ? 'var(--accent)' : 'var(--app-bg)', color: active ? '#fff' : 'var(--text-secondary)', border: `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}` }}>
                             {labels[v]}
@@ -999,86 +712,41 @@ export function AdminSettings() {
                       })}
                     </div>
                   </div>
-                  {/* Seconds */}
-                  {frontend.headerClockDisplay !== 'date' && (
-                    <ToggleRow label={t('settings.frontend.headerClockSeconds')} value={frontend.headerClockShowSeconds} onChange={(v) => updateFrontend({ headerClockShowSeconds: v })} />
-                  )}
-                  {/* Date length */}
-                  {frontend.headerClockDisplay !== 'time' && (
-                    <div>
-                      <p className="text-xs mb-1.5" style={{ color: 'var(--text-secondary)' }}>{t('settings.frontend.headerClockDateLen')}</p>
-                      <div className="flex gap-1.5">
-                        {(['short', 'long'] as const).map((v) => {
-                          const labels = { short: t('wf.clock.short'), long: t('wf.clock.long') };
-                          const active = (frontend.headerClockDateLength ?? 'short') === v;
-                          return (
-                            <button key={v} onClick={() => updateFrontend({ headerClockDateLength: v })}
-                              className="px-2.5 py-1 rounded-lg text-xs font-medium hover:opacity-80"
-                              style={{ background: active ? 'var(--accent)' : 'var(--app-bg)', color: active ? '#fff' : 'var(--text-secondary)', border: `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}` }}>
-                              {labels[v]}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                  {/* Custom format */}
-                  <div>
-                    <p className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>{t('settings.frontend.headerClockCustom')}</p>
-                    <input value={frontend.headerClockCustomFormat}
-                      onChange={(e) => updateFrontend({ headerClockCustomFormat: e.target.value })}
-                      placeholder="HH:mm · EE dd.MM."
-                      className="w-full rounded-lg px-3 py-2 text-xs font-mono focus:outline-none"
-                      style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }} />
-                  </div>
-                </div>
-              )}
-
-              {/* ── Header datapoint ── */}
-              <div className="pt-1">
-                <p className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>{t('settings.frontend.headerDatapoint')}</p>
-                <input value={frontend.headerDatapoint}
-                  onChange={(e) => updateFrontend({ headerDatapoint: e.target.value })}
-                  placeholder={t('settings.frontend.headerDatapointPh')}
-                  className="w-full rounded-lg px-3 py-2 text-xs font-mono focus:outline-none"
-                  style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }} />
-              </div>
-              {frontend.headerDatapoint && (
+                )}
                 <div>
-                  <p className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>{t('settings.frontend.headerDatapointTemplate')}</p>
-                  <input value={frontend.headerDatapointTemplate ?? ''}
-                    onChange={(e) => updateFrontend({ headerDatapointTemplate: e.target.value })}
-                    placeholder={t('settings.frontend.headerDatapointTemplatePh')}
+                  <p className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>{t('settings.frontend.headerClockCustom')}</p>
+                  <input value={frontend.headerClockCustomFormat}
+                    onChange={(e) => updateFrontend({ headerClockCustomFormat: e.target.value })}
+                    placeholder="HH:mm · EE dd.MM."
                     className="w-full rounded-lg px-3 py-2 text-xs font-mono focus:outline-none"
                     style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }} />
-                  <p className="text-[10px] mt-1" style={{ color: 'var(--text-secondary)', opacity: 0.6 }}>{t('settings.frontend.headerDatapointTemplateHint')}</p>
                 </div>
-              )}
-            </>
-          )}
-        </Card>
+              </div>
+            )}
 
-        {/* Grid + Mobile + Wizard */}
-        <GridCard
-          frontend={frontend}
-          updateFrontend={updateFrontend}
-          rescaleAllWidgetsX={rescaleAllWidgetsX}
-          updateLayoutSettings={updateLayoutSettings}
-          contextId={gridContextId}
-          onContextChange={setGridContextId}
-          t={t}
-          MARGIN={MARGIN}
-        />
-
-        {/* Hilfslinien */}
-        <GuidelinesCard
-          frontend={frontend}
-          updateFrontend={updateFrontend}
-          updateLayoutSettings={updateLayoutSettings}
-          contextId={guidelinesContextId}
-          onContextChange={setGuidelinesContextId}
-        />
-      </div>
+            {/* ── Header datapoint ── */}
+            <div className="pt-1">
+              <p className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>{t('settings.frontend.headerDatapoint')}</p>
+              <input value={frontend.headerDatapoint}
+                onChange={(e) => updateFrontend({ headerDatapoint: e.target.value })}
+                placeholder={t('settings.frontend.headerDatapointPh')}
+                className="w-full rounded-lg px-3 py-2 text-xs font-mono focus:outline-none"
+                style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }} />
+            </div>
+            {frontend.headerDatapoint && (
+              <div>
+                <p className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>{t('settings.frontend.headerDatapointTemplate')}</p>
+                <input value={frontend.headerDatapointTemplate ?? ''}
+                  onChange={(e) => updateFrontend({ headerDatapointTemplate: e.target.value })}
+                  placeholder={t('settings.frontend.headerDatapointTemplatePh')}
+                  className="w-full rounded-lg px-3 py-2 text-xs font-mono focus:outline-none"
+                  style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }} />
+                <p className="text-[10px] mt-1" style={{ color: 'var(--text-secondary)', opacity: 0.6 }}>{t('settings.frontend.headerDatapointTemplateHint')}</p>
+              </div>
+            )}
+          </>
+        )}
+      </Card>
 
       {/* Row 2: Clients + Expert + DP-Namen */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

@@ -217,6 +217,19 @@ export const en: Record<TranslationKey, string> = {
   'layouts.defaultTab':    'Default tab',
   'layouts.setDefaultTab': 'Set as default tab (opened when no tab is specified in URL)',
 
+  'layouts.subtab.theme':       'Theme & CSS Vars',
+  'layouts.subtab.typo':        'Typography & Spacing',
+  'layouts.subtab.grid':        'Grid & Mobile',
+  'layouts.subtab.guidelines':  'Guidelines',
+  'layouts.subtab.css':         'Custom CSS',
+  'layouts.subtab.tabbar':      'Tab bar',
+  'layouts.subtab.tabbarHiddenHint': 'Tab bar is configured per layout. Pick a layout in the context picker above.',
+
+  'layouts.context.label':      'Context',
+  'layouts.context.global':     'Global',
+  'layouts.context.hintGlobal': 'Defaults for all layouts. Layouts can override individual values.',
+  'layouts.context.hintLayout': 'Values override the global default. ↩ Global resets a value.',
+
   // ── Endpoints ─────────────────────────────────────────────────────────────────
   'endpoints.title':    'Endpoints & Groups',
   'endpoints.subtitle': 'Group datapoints together – e.g. "All Lights". Groups can be inserted as a list widget in the dashboard.',

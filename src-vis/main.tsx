@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { createHashRouter, RouterProvider } from 'react-router-dom';
+import { createHashRouter, RouterProvider, Navigate } from 'react-router-dom';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import './index.css';
@@ -10,7 +10,6 @@ import { ThemeProvider } from './ThemeProvider';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
-import { AdminTheme } from './pages/admin/AdminTheme';
 import { AdminSettings } from './pages/admin/AdminSettings';
 import { AdminEditor } from './pages/admin/AdminEditor';
 import { AdminWidgets } from './pages/admin/AdminWidgets';
@@ -28,7 +27,7 @@ const router = createHashRouter([
     children: [
       { index: true, element: <AdminDashboard /> },
       { path: 'editor', element: <AdminEditor /> },
-      { path: 'theme', element: <AdminTheme /> },
+      { path: 'theme', element: <Navigate to="/admin/layouts?tab=theme" replace /> },
       { path: 'widgets', element: <AdminWidgets /> },
       { path: 'layouts', element: <AdminLayouts /> },
       { path: 'settings', element: <AdminSettings /> },
