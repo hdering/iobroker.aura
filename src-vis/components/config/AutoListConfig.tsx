@@ -211,9 +211,15 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
       });
       setResults(found);
       setSearched(true);
-      // Pre-select only relevant DPs; non-relevant start deselected
-      setSelected(new Set(found.filter(d => d.isRelevant).map(d => d.id)));
-      setShowOthers(false);
+      const relevantFound = found.filter(d => d.isRelevant);
+      if (relevantFound.length > 0) {
+        setSelected(new Set(relevantFound.map(d => d.id)));
+        setShowOthers(false);
+      } else {
+        // No relevant DPs → select all and show them so the user sees what was found
+        setSelected(new Set(found.map(d => d.id)));
+        setShowOthers(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -388,7 +394,7 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
               </span>
               <div className="flex gap-2">
                 <button className="text-[10px] hover:opacity-70" style={{ color: 'var(--accent)' }}
-                  onClick={() => setSelected(new Set(relevant.map(d => d.id)))}>{t('common.all')}</button>
+                  onClick={() => { setSelected(new Set(results.map(d => d.id))); setShowOthers(true); }}>{t('common.all')}</button>
                 <button className="text-[10px] hover:opacity-70" style={{ color: 'var(--text-secondary)' }}
                   onClick={() => setSelected(new Set())}>{t('common.none')}</button>
               </div>
