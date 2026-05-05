@@ -722,40 +722,31 @@ function PortalDropdown({
 }) {
   const portalTarget = usePortalTarget();
   const panelRef = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
 
-  // Step 1: position panel offscreen so we can measure it
-  useEffect(() => {
-    if (anchorRef.current) {
-      const rect = anchorRef.current.getBoundingClientRect();
-      setPos({ top: rect.bottom + 4, left: rect.right });
-    }
-  }, [anchorRef]);
+  // Re-clamp after every render so expanding submenus don't overflow the viewport
+  useLayoutEffect(() => {
+    const panel = panelRef.current;
+    const anchor = anchorRef.current;
+    if (!panel || !anchor) return;
 
-  // Step 2: after render, clamp so panel stays within viewport
-  useEffect(() => {
-    if (!pos || !panelRef.current || !anchorRef.current) return;
-    const panel = panelRef.current.getBoundingClientRect();
-    const anchor = anchorRef.current.getBoundingClientRect();
+    const panelRect = panel.getBoundingClientRect();
+    const anchorRect = anchor.getBoundingClientRect();
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const GAP = 4;
 
-    // Horizontal: default is right-aligned to anchor (left = anchor.right - panel.width)
-    let left = anchor.right - panel.width;
-    if (left < GAP) left = GAP;                               // clamp left edge
-    if (left + panel.width > vw - GAP) left = vw - GAP - panel.width; // clamp right edge
+    let left = anchorRect.right - panelRect.width;
+    if (left < GAP) left = GAP;
+    if (left + panelRect.width > vw - GAP) left = vw - GAP - panelRect.width;
 
-    // Vertical: default below anchor; if not enough room, open above
-    let top = anchor.bottom + GAP;
-    if (top + panel.height > vh - GAP) {
-      top = anchor.top - panel.height - GAP;
-    }
+    let top = anchorRect.bottom + GAP;
+    if (top + panelRect.height > vh - GAP) top = anchorRect.top - panelRect.height - GAP;
     if (top < GAP) top = GAP;
 
-    setPos({ top, left });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pos?.top, pos?.left]);  // run once after initial position is set
+    panel.style.top = `${top}px`;
+    panel.style.left = `${left}px`;
+    panel.style.visibility = 'visible';
+  });
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -772,11 +763,11 @@ function PortalDropdown({
       ref={panelRef}
       className="fixed z-[9999] rounded-lg shadow-2xl"
       style={{
-        top: pos?.top ?? -9999,
-        left: pos?.left ?? -9999,
+        top: -9999,
+        left: -9999,
         background: 'var(--app-surface)',
         border: '1px solid var(--app-border)',
-        visibility: pos ? 'visible' : 'hidden',
+        visibility: 'hidden',
       }}
       onMouseDown={(e) => e.stopPropagation()}
     >
