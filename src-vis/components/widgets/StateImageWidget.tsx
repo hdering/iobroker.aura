@@ -2,6 +2,7 @@ import { CircleDot } from 'lucide-react';
 import { useDatapoint } from '../../hooks/useDatapoint';
 import type { WidgetProps } from '../../types';
 import { getWidgetIcon } from '../../utils/widgetIconMap';
+import { resolveAssetUrl } from '../../utils/assetUrl';
 import { contentPositionClass } from '../../utils/widgetUtils';
 import { StatusBadges } from './StatusBadges';
 import { CustomGridView } from './CustomGridView';
@@ -23,7 +24,7 @@ function StateDisplay({ cfg, size }: { cfg: StateCfg; size: number }) {
   if (cfg.type === 'base64' && cfg.base64) {
     return (
       <img
-        src={cfg.base64}
+        src={resolveAssetUrl(cfg.base64)}
         style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0 }}
         alt=""
       />

@@ -2081,9 +2081,12 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
   const [iconPickerOpen, setIconPickerOpen] = useState(false);
   const [iconPickerTrueOpen,  setIconPickerTrueOpen]  = useState(false);
   const [iconPickerFalseOpen, setIconPickerFalseOpen] = useState(false);
-  const [wcIconPickerState, setWcIconPickerState] = useState<'closed' | 'tilted' | 'open' | null>(null);
+  const [wcIconPickerState,  setWcIconPickerState]  = useState<'closed' | 'tilted' | 'open' | null>(null);
+  const [wcImagePickerState, setWcImagePickerState] = useState<'closed' | 'tilted' | 'open' | null>(null);
+  const [siImagePickerState, setSiImagePickerState] = useState<'true' | 'false' | null>(null);
   const [selectedCustomCell,   setSelectedCustomCell]   = useState<number | null>(null);
-  const [customCellPickerOpen, setCustomCellPickerOpen] = useState(false);
+  const [customCellPickerOpen,      setCustomCellPickerOpen]      = useState(false);
+  const [customCellImagePickerOpen, setCustomCellImagePickerOpen] = useState(false);
   const [draftIconSize, setDraftIconSize] = useState<number | null>(null);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
   const Widget = getWidgetMap()[config.type as keyof ReturnType<typeof getWidgetMap>];
@@ -4328,31 +4331,48 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                       {/* Base64 image */}
                       {currentType === 'base64' && (
                         <div className="space-y-1.5">
-                          <input type="file" accept="image/*"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (!file) return;
-                              const reader = new FileReader();
-                              reader.onload = () => setO({ [`${st}Base64`]: reader.result as string });
-                              reader.readAsDataURL(file);
-                            }}
-                            className="w-full text-[11px] cursor-pointer"
-                            style={{ color: 'var(--text-secondary)' }} />
-                          <textarea
-                            rows={2}
-                            value={currentBase64 ?? ''}
-                            onChange={(e) => {
-                              const v = e.target.value.trim();
-                              setO({ [`${st}Base64`]: v || undefined });
-                            }}
-                            placeholder="oder data:image/… einfügen"
-                            className="w-full text-[10px] rounded-lg px-2.5 py-1.5 focus:outline-none resize-none font-mono"
-                            style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }} />
+                          <div className="flex gap-1">
+                            <input type="file" accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                const reader = new FileReader();
+                                reader.onload = () => setO({ [`${st}Base64`]: reader.result as string });
+                                reader.readAsDataURL(file);
+                              }}
+                              className="flex-1 text-[11px] cursor-pointer"
+                              style={{ color: 'var(--text-secondary)' }} />
+                            <button
+                              onClick={() => setWcImagePickerState(st)}
+                              className="px-2 rounded-lg hover:opacity-80 shrink-0"
+                              style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+                              title="Lokale Datei vom Server wählen">
+                              <FolderOpen size={13} />
+                            </button>
+                          </div>
+                          {(currentBase64 ?? '').startsWith('aura-file:') ? (
+                            <p className="text-[10px] truncate" style={{ color: 'var(--accent)' }}>
+                              {(currentBase64 as string).slice('aura-file:'.length).split('/').pop()}
+                            </p>
+                          ) : (
+                            <textarea
+                              rows={2}
+                              value={currentBase64 ?? ''}
+                              onChange={(e) => {
+                                const v = e.target.value.trim();
+                                setO({ [`${st}Base64`]: v || undefined });
+                              }}
+                              placeholder="oder data:image/… einfügen"
+                              className="w-full text-[10px] rounded-lg px-2.5 py-1.5 focus:outline-none resize-none font-mono"
+                              style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }} />
+                          )}
                           {currentBase64 && (
                             <div className="flex items-center gap-2">
-                              <img src={currentBase64}
-                                style={{ width: 32, height: 32, objectFit: 'contain', border: '1px solid var(--app-border)', borderRadius: 4 }}
-                                alt="" />
+                              {!currentBase64.startsWith('aura-file:') && (
+                                <img src={currentBase64}
+                                  style={{ width: 32, height: 32, objectFit: 'contain', border: '1px solid var(--app-border)', borderRadius: 4 }}
+                                  alt="" />
+                              )}
                               <button onClick={() => setO({ [`${st}Base64`]: undefined })}
                                 className="text-[10px] hover:opacity-70"
                                 style={{ color: 'var(--accent-red, #ef4444)' }}>
@@ -4531,33 +4551,48 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                       {/* Base64 image */}
                       {currentType === 'base64' && (
                         <div className="space-y-1.5">
-                          {/* File upload */}
-                          <input type="file" accept="image/*"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (!file) return;
-                              const reader = new FileReader();
-                              reader.onload = () => setO({ [`${prefix}Base64`]: reader.result as string });
-                              reader.readAsDataURL(file);
-                            }}
-                            className="w-full text-[11px] cursor-pointer"
-                            style={{ color: 'var(--text-secondary)' }} />
-                          {/* Paste base64 string */}
-                          <textarea
-                            rows={2}
-                            value={currentBase64 ?? ''}
-                            onChange={(e) => {
-                              const v = e.target.value.trim();
-                              setO({ [`${prefix}Base64`]: v || undefined });
-                            }}
-                            placeholder="oder data:image/… einfügen"
-                            className="w-full text-[10px] rounded-lg px-2.5 py-1.5 focus:outline-none resize-none font-mono"
-                            style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }} />
+                          <div className="flex gap-1">
+                            <input type="file" accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                const reader = new FileReader();
+                                reader.onload = () => setO({ [`${prefix}Base64`]: reader.result as string });
+                                reader.readAsDataURL(file);
+                              }}
+                              className="flex-1 text-[11px] cursor-pointer"
+                              style={{ color: 'var(--text-secondary)' }} />
+                            <button
+                              onClick={() => setSiImagePickerState(prefix)}
+                              className="px-2 rounded-lg hover:opacity-80 shrink-0"
+                              style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+                              title="Lokale Datei vom Server wählen">
+                              <FolderOpen size={13} />
+                            </button>
+                          </div>
+                          {(currentBase64 ?? '').startsWith('aura-file:') ? (
+                            <p className="text-[10px] truncate" style={{ color: 'var(--accent)' }}>
+                              {(currentBase64 as string).slice('aura-file:'.length).split('/').pop()}
+                            </p>
+                          ) : (
+                            <textarea
+                              rows={2}
+                              value={currentBase64 ?? ''}
+                              onChange={(e) => {
+                                const v = e.target.value.trim();
+                                setO({ [`${prefix}Base64`]: v || undefined });
+                              }}
+                              placeholder="oder data:image/… einfügen"
+                              className="w-full text-[10px] rounded-lg px-2.5 py-1.5 focus:outline-none resize-none font-mono"
+                              style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }} />
+                          )}
                           {currentBase64 && (
                             <div className="flex items-center gap-2">
-                              <img src={currentBase64}
-                                style={{ width: 32, height: 32, objectFit: 'contain', border: '1px solid var(--app-border)', borderRadius: 4 }}
-                                alt="" />
+                              {!currentBase64.startsWith('aura-file:') && (
+                                <img src={currentBase64}
+                                  style={{ width: 32, height: 32, objectFit: 'contain', border: '1px solid var(--app-border)', borderRadius: 4 }}
+                                  alt="" />
+                              )}
                               <button onClick={() => setO({ [`${prefix}Base64`]: undefined })}
                                 className="text-[10px] hover:opacity-70"
                                 style={{ color: 'var(--accent-red, #ef4444)' }}>
@@ -4984,16 +5019,32 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                           <>
                             <div>
                               <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Bild-URL oder Base64</label>
-                              <input
-                                type="text"
-                                value={selCell.imageUrl ?? ''}
-                                onChange={(e) => setCell(sel, { imageUrl: e.target.value || undefined })}
-                                placeholder="https://… oder data:image/png;base64,…"
-                                className={inputCls} style={inputSty}
-                              />
-                              <p className="text-[10px] mt-1" style={{ color: 'var(--text-secondary)' }}>
-                                Tipp: Auch Base64-kodierte Bilder werden unterstützt — z.&nbsp;B. kleine Icons oder Logos ohne externen Server.
-                              </p>
+                              <div className="flex gap-1">
+                                <input
+                                  type="text"
+                                  value={selCell.imageUrl ?? ''}
+                                  onChange={(e) => setCell(sel, { imageUrl: e.target.value || undefined })}
+                                  placeholder="https://… oder data:image/png;base64,…"
+                                  className={`flex-1 ${inputCls}`} style={inputSty}
+                                />
+                                <button
+                                  onClick={() => setCustomCellImagePickerOpen(true)}
+                                  className="px-2 rounded-lg hover:opacity-80 shrink-0"
+                                  style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+                                  title="Lokale Datei vom Server wählen">
+                                  <FolderOpen size={13} />
+                                </button>
+                              </div>
+                              {(selCell.imageUrl ?? '').startsWith('aura-file:') && (
+                                <p className="text-[10px] mt-1 truncate" style={{ color: 'var(--accent)' }}>
+                                  {(selCell.imageUrl as string).slice('aura-file:'.length).split('/').pop()}
+                                </p>
+                              )}
+                              {!(selCell.imageUrl ?? '').startsWith('aura-file:') && (
+                                <p className="text-[10px] mt-1" style={{ color: 'var(--text-secondary)' }}>
+                                  Tipp: Auch Base64-kodierte Bilder werden unterstützt — z.&nbsp;B. kleine Icons oder Logos ohne externen Server.
+                                </p>
+                              )}
                             </div>
                             <div>
                               <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Darstellung</label>
@@ -5680,6 +5731,62 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
             }
           }}
           onClose={() => setImageFilePicker(false)}
+        />
+      )}
+
+      {/* StateImage image file picker */}
+      {siImagePickerState !== null && (
+        <DatapointPicker
+          modes={['files']}
+          defaultMode="files"
+          acceptMime={['image/*']}
+          currentValue={(config.options?.[`${siImagePickerState}Base64`] as string) ?? ''}
+          onPickResult={(r) => {
+            if (r.kind === 'file') {
+              onConfigChange({ ...config, options: { ...(config.options ?? {}), [`${siImagePickerState}Base64`]: `aura-file:${r.path}` } });
+            }
+            setSiImagePickerState(null);
+          }}
+          onClose={() => setSiImagePickerState(null)}
+        />
+      )}
+
+      {/* Custom-Grid image file picker */}
+      {customCellImagePickerOpen && selectedCustomCell !== null && (() => {
+        const cells: CustomGrid = ((config.options?.customGrid as CustomGrid | undefined) ?? DEFAULT_CUSTOM_GRID);
+        const idx = selectedCustomCell;
+        return (
+          <DatapointPicker
+            modes={['files']}
+            defaultMode="files"
+            acceptMime={['image/*']}
+            currentValue={cells[idx]?.imageUrl ?? ''}
+            onPickResult={(r) => {
+              if (r.kind === 'file') {
+                const next = cells.map((c, i) => i === idx ? { ...c, imageUrl: `aura-file:${r.path}` } : c);
+                onConfigChange({ ...config, options: { ...config.options, customGrid: next } });
+              }
+              setCustomCellImagePickerOpen(false);
+            }}
+            onClose={() => setCustomCellImagePickerOpen(false)}
+          />
+        );
+      })()}
+
+      {/* WindowContact image file picker */}
+      {wcImagePickerState !== null && (
+        <DatapointPicker
+          modes={['files']}
+          defaultMode="files"
+          acceptMime={['image/*']}
+          currentValue={(config.options?.[`${wcImagePickerState}Base64`] as string) ?? ''}
+          onPickResult={(r) => {
+            if (r.kind === 'file') {
+              onConfigChange({ ...config, options: { ...(config.options ?? {}), [`${wcImagePickerState}Base64`]: `aura-file:${r.path}` } });
+            }
+            setWcImagePickerState(null);
+          }}
+          onClose={() => setWcImagePickerState(null)}
         />
       )}
 

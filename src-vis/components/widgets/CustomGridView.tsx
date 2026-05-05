@@ -5,6 +5,7 @@
 import React from 'react';
 import { useDatapoint } from '../../hooks/useDatapoint';
 import type { WidgetConfig, CustomCell, CustomGrid } from '../../types';
+import { resolveAssetUrl } from '../../utils/assetUrl';
 
 // ── Default grid (title top-left, large value + unit in middle row) ──────────
 
@@ -70,7 +71,7 @@ function ImageCellView({ cell, index }: { cell: CustomCell; index: number }) {
   return (
     <div className={`aura-custom-cell-${index}`} style={{ ...cellWrapStyle(cell), padding: 0 }}>
       <img
-        src={cell.imageUrl}
+        src={resolveAssetUrl(cell.imageUrl)}
         alt=""
         style={{
           width: '100%',
