@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.5.85",
+    "version": "0.5.86",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -105,6 +105,10 @@
       }
     ],
     "news": {
+      "0.5.86": {
+        "en": "feat: add FilePicker (image/*) for local ioBroker files in image config fields",
+        "de": "feat: add FilePicker (image/*) for local ioBroker files in image config fields"
+      },
       "0.5.85": {
         "en": "Release v0.5.85",
         "de": "Release v0.5.85"
