@@ -4,21 +4,16 @@ import { usePortalTarget } from '../../contexts/PortalTargetContext';
 import { useT } from '../../i18n';
 import {
   ChevronDown, ChevronRight, Copy, Trash2, Pencil,
-  Plus, Database, X, Check, RotateCcw,
-  ArrowRightLeft, Download, Upload,
+  Database, X, Check, RotateCcw,
+  ArrowRightLeft, Download,
 } from 'lucide-react';
 import { useDashboardStore, useActiveLayout, type Tab } from '../../store/dashboardStore';
 import { DatapointPicker } from '../../components/config/DatapointPicker';
 import { WidgetPreview } from '../../components/config/WidgetPreview';
 import type { WidgetConfig, WidgetType, WidgetLayout } from '../../types';
-import { WIDGET_REGISTRY, WIDGET_BY_TYPE, WIDGET_GROUPS, getEffectiveSize, type WidgetGroup } from '../../widgetRegistry';
-import { applyDpNameFilter } from '../../utils/dpNameFilter';
+import { WIDGET_REGISTRY } from '../../widgetRegistry';
 import { useConfigStore } from '../../store/configStore';
 import { exportWidget } from '../../utils/widgetExportImport';
-import { detectType } from '../../utils/widgetDetection';
-import { findMainDpForSecondary } from '../../utils/dpTemplates';
-import { ensureDatapointCache } from '../../hooks/useDatapointList';
-import { ImportWidgetDialog } from '../../components/config/ImportWidgetDialog';
 
 // ── Meta (derived from central registry) ─────────────────────────────────────
 
@@ -595,264 +590,6 @@ function TypeSection({
   );
 }
 
-// ── New Widget Dialog ─────────────────────────────────────────────────────────
-
-const RECENT_TYPES_KEY = 'aura-recent-widget-types';
-const MAX_RECENT = 5;
-
-function getRecentTypes(): WidgetType[] {
-  try { return JSON.parse(localStorage.getItem(RECENT_TYPES_KEY) ?? '[]') as WidgetType[]; }
-  catch { return []; }
-}
-function pushRecentType(type: WidgetType) {
-  const prev = getRecentTypes().filter((t) => t !== type);
-  localStorage.setItem(RECENT_TYPES_KEY, JSON.stringify([type, ...prev].slice(0, MAX_RECENT)));
-}
-
-const ADDABLE_WIDGETS = WIDGET_REGISTRY.filter((w) => w.addMode !== 'wizard-only');
-
-function NewWidgetDialog({
-  tabs,
-  onAdd,
-  onClose,
-}: {
-  tabs: Tab[];
-  onAdd: (tabId: string, widget: WidgetConfig) => void;
-  onClose: () => void;
-}) {
-  const t = useT();
-  const widgetDefaults = useConfigStore((s) => s.widgetDefaults);
-  const [type, setType] = useState<WidgetType>('value');
-  const [groupFilter, setGroupFilter] = useState<'all' | WidgetGroup>('all');
-  const [layout, setLayout] = useState<WidgetLayout>('default');
-  const [title, setTitle] = useState('');
-  const [datapoint, setDatapoint] = useState('');
-  const [unit, setUnit] = useState('');
-  const [targetTabId, setTargetTabId] = useState(tabs[0]?.id ?? '');
-  const [showPicker, setShowPicker] = useState(false);
-  const [recentTypes, setRecentTypes] = useState<WidgetType[]>(() => getRecentTypes());
-
-  const filteredWidgets = groupFilter === 'all'
-    ? ADDABLE_WIDGETS
-    : ADDABLE_WIDGETS.filter((w) => w.widgetGroup === groupFilter);
-
-  const def = WIDGET_REGISTRY.find((w) => w.type === type)!;
-  const addMode = WIDGET_BY_TYPE[type].addMode;
-  const noDatapoint = addMode !== 'datapoint';
-  const canAdd = addMode === 'datapoint' ? !!datapoint.trim() : true;
-
-  const selectType = (t: WidgetType) => { setType(t); setDatapoint(''); };
-
-  const handleAdd = () => {
-    if (!canAdd || !targetTabId) return;
-    pushRecentType(type);
-    setRecentTypes(getRecentTypes());
-    onAdd(targetTabId, {
-      id: `w-${Date.now()}`,
-      type,
-      layout,
-      title: title || def.label,
-      datapoint: noDatapoint ? '' : datapoint.trim(),
-      gridPos: { x: 0, y: 9999, ...getEffectiveSize(type, widgetDefaults) },
-      options: { icon: def.iconName, ...(unit ? { unit } : {}) },
-    });
-    onClose();
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div
-        className="rounded-xl w-full max-w-xl shadow-2xl p-6 space-y-4"
-        style={{ background: 'linear-gradient(var(--app-surface), var(--app-surface)), var(--app-bg)', border: '1px solid var(--app-border)' }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <h2 className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>{t('editor.manual.title')}</h2>
-          <button onClick={onClose} className="hover:opacity-60" style={{ color: 'var(--text-secondary)' }}>
-            <X size={18} />
-          </button>
-        </div>
-
-        {/* Recently used */}
-        {recentTypes.length > 0 && (
-          <div>
-            <p className="text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
-              {t('editor.manual.recentlyUsed')}
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {recentTypes.map((rt) => {
-                const meta = WIDGET_BY_TYPE[rt];
-                if (!meta) return null;
-                const isSelected = type === rt;
-                return (
-                  <button
-                    key={rt}
-                    onClick={() => selectType(rt)}
-                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium hover:opacity-80 transition-opacity"
-                    style={{
-                      background: isSelected ? meta.color + '22' : 'var(--app-bg)',
-                      color: isSelected ? meta.color : 'var(--text-secondary)',
-                      border: `1px solid ${isSelected ? meta.color : 'var(--app-border)'}`,
-                    }}
-                  >
-                    <meta.Icon size={11} />
-                    {meta.shortLabel}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Category filter + widget tiles */}
-        <div>
-          <div className="flex gap-1 mb-2.5 flex-wrap">
-            <button
-              onClick={() => setGroupFilter('all')}
-              className="px-2.5 py-1 rounded-md text-xs font-medium transition-colors"
-              style={{
-                background: groupFilter === 'all' ? 'var(--accent)' : 'var(--app-bg)',
-                color: groupFilter === 'all' ? 'white' : 'var(--text-secondary)',
-                border: '1px solid var(--app-border)',
-              }}
-            >
-              {t('common.all')}
-            </button>
-            {WIDGET_GROUPS.map((g) => (
-              <button
-                key={g.id}
-                onClick={() => setGroupFilter(g.id)}
-                className="px-2.5 py-1 rounded-md text-xs font-medium transition-colors"
-                style={{
-                  background: groupFilter === g.id ? 'var(--accent)' : 'var(--app-bg)',
-                  color: groupFilter === g.id ? 'white' : 'var(--text-secondary)',
-                  border: '1px solid var(--app-border)',
-                }}
-              >
-                {g.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-5 gap-1.5 max-h-44 overflow-y-auto aura-scroll pr-0.5">
-            {filteredWidgets.map((w) => {
-              const isSelected = type === w.type;
-              return (
-                <button
-                  key={w.type}
-                  onClick={() => selectType(w.type)}
-                  className="flex flex-col items-center gap-1 p-2 rounded-lg hover:opacity-80 transition-all"
-                  style={{
-                    background: isSelected ? w.color + '22' : 'var(--app-bg)',
-                    border: `1px solid ${isSelected ? w.color : 'var(--app-border)'}`,
-                    color: isSelected ? w.color : 'var(--text-secondary)',
-                  }}
-                >
-                  <w.Icon size={15} />
-                  <span style={{ fontSize: '10px', lineHeight: '1.2' }} className="text-center leading-tight">{w.shortLabel}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Tab + Layout */}
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('widgets.targetTab')}</label>
-            <select value={targetTabId} onChange={(e) => setTargetTabId(e.target.value)}
-              className={inputCls} style={inputStyle}>
-              {tabs.map((tab) => <option key={tab.id} value={tab.id}>{tab.name}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('wf.edit.layout')}</label>
-            <select value={layout} onChange={(e) => setLayout(e.target.value as WidgetLayout)}
-              className={inputCls} style={inputStyle}>
-              <option value="default">{t('editor.layouts.standard')}</option>
-              {type !== 'gauge' && <option value="card">{t('editor.layouts.card')}</option>}
-              {type !== 'gauge' && type !== 'chart' && <option value="compact">{t('editor.layouts.compact')}</option>}
-              {type !== 'gauge' && type !== 'chart' && <option value="minimal">{t('editor.layouts.minimal')}</option>}
-            </select>
-          </div>
-        </div>
-
-        {/* Title */}
-        <div>
-          <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('editor.tabMgmt.name')}</label>
-          <input value={title} onChange={(e) => setTitle(e.target.value)}
-            placeholder={def.label}
-            className={inputCls} style={inputStyle} />
-        </div>
-
-        {/* Datapoint */}
-        {addMode === 'datapoint' && (
-          <div>
-            <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('editor.manual.datapointId')}</label>
-            <div className="flex gap-1.5">
-              <input value={datapoint} onChange={(e) => setDatapoint(e.target.value)}
-                placeholder="z.B. hm-rpc.0.ABC123.STATE"
-                className="flex-1 text-xs rounded-lg px-2.5 py-2 font-mono focus:outline-none min-w-0"
-                style={inputStyle} />
-              <button onClick={() => setShowPicker(true)}
-                className="px-2 rounded-lg hover:opacity-80 shrink-0"
-                style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
-                <Database size={13} />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Unit */}
-        {(type === 'value' || type === 'chart') && (
-          <div>
-            <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('editor.manual.unit')}</label>
-            <input value={unit} onChange={(e) => setUnit(e.target.value)}
-              placeholder={t('endpoints.dp.unitPh')}
-              className={inputCls} style={inputStyle} />
-          </div>
-        )}
-
-        {/* Actions */}
-        <div className="flex justify-end gap-2 pt-1">
-          <button onClick={onClose}
-            className="px-4 py-2 text-sm rounded-lg hover:opacity-80"
-            style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
-            {t('editor.manual.cancel')}
-          </button>
-          <button onClick={handleAdd} disabled={!canAdd}
-            className="px-4 py-2 text-sm font-medium text-white rounded-lg hover:opacity-80 disabled:opacity-30"
-            style={{ background: 'var(--accent)' }}>
-            {t('editor.manual.add')}
-          </button>
-        </div>
-
-        {showPicker && (
-          <DatapointPicker
-            currentValue={datapoint}
-            onSelect={(id, dpUnit, dpName, role, dpType) => {
-              setDatapoint(id);
-              if (!title.trim() && dpName) setTitle(applyDpNameFilter(dpName));
-              if (!unit && dpUnit) setUnit(dpUnit);
-              if (role || dpType) {
-                const det = detectType({ id, name: dpName ?? id, role, type: dpType, unit: dpUnit, rooms: [], funcs: [], logging: [] });
-                setType(det.type);
-                if (!unit && !dpUnit && det.unit) setUnit(det.unit);
-              }
-              // If selected DP is secondary (e.g. ACTUAL_TEMPERATURE), promote primary (SET_TEMPERATURE)
-              void ensureDatapointCache().then((entries) => {
-                const upgrade = findMainDpForSecondary(id, entries);
-                if (upgrade) { setDatapoint(upgrade.mainDpId); setType(upgrade.template.widgetType); }
-              }).catch(() => {});
-            }}
-            onClose={() => setShowPicker(false)}
-          />
-        )}
-      </div>
-    </div>
-  );
-}
 // ── Default Sizes Dialog ──────────────────────────────────────────────────────
 
 function DefaultSizesDialog({ onClose }: { onClose: () => void }) {
@@ -906,11 +643,9 @@ function DefaultSizesDialog({ onClose }: { onClose: () => void }) {
 
 export function AdminWidgets() {
   const t = useT();
-  const { addWidgetToTab, updateWidgetInTab, removeWidgetInTab, addWidgetToLayoutTab, removeWidgetFromLayoutTab, activeLayoutId } = useDashboardStore();
+  const { updateWidgetInTab, removeWidgetInTab, addWidgetToLayoutTab, removeWidgetFromLayoutTab, activeLayoutId } = useDashboardStore();
   const tabs = useActiveLayout().tabs;
-  const [showCreate, setShowCreate] = useState(false);
   const [showSizes, setShowSizes] = useState(false);
-  const [showImport, setShowImport] = useState(false);
   const [search, setSearch] = useState('');
 
   // Flatten all widgets with their tab
@@ -979,20 +714,6 @@ export function AdminWidgets() {
           >
             <RotateCcw size={15} /> {t('widgets.defaultSizes')}
           </button>
-          <button
-            onClick={() => setShowImport(true)}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl hover:opacity-80"
-            style={{ background: 'var(--app-surface)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
-          >
-            <Upload size={15} /> {t('widgets.import')}
-          </button>
-          <button
-            onClick={() => setShowCreate(true)}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-xl hover:opacity-80"
-            style={{ background: 'var(--accent)' }}
-          >
-            <Plus size={15} /> {t('editor.manual.title')}
-          </button>
         </div>
       </div>
 
@@ -1025,14 +746,7 @@ export function AdminWidgets() {
       {allEntries.length === 0 ? (
         <div className="text-center py-16 rounded-xl" style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}>
           <p className="font-medium mb-2" style={{ color: 'var(--text-primary)' }}>{t('widgets.noWidgets')}</p>
-          <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>{t('widgets.noWidgetsHint')}</p>
-          <button
-            onClick={() => setShowCreate(true)}
-            className="px-4 py-2 text-sm font-medium text-white rounded-xl hover:opacity-80"
-            style={{ background: 'var(--accent)' }}
-          >
-            {t('widgets.createFirst')}
-          </button>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('widgets.noWidgetsHint')}</p>
         </div>
       ) : filteredEntries.length === 0 ? (
         <p className="text-center py-12 text-sm" style={{ color: 'var(--text-secondary)' }}>
@@ -1054,22 +768,6 @@ export function AdminWidgets() {
             />
           ))}
         </div>
-      )}
-
-      {showCreate && (
-        <NewWidgetDialog
-          tabs={tabs}
-          onAdd={(tabId, widget) => addWidgetToTab(tabId, widget)}
-          onClose={() => setShowCreate(false)}
-        />
-      )}
-
-      {showImport && (
-        <ImportWidgetDialog
-          tabs={tabs}
-          onAdd={(widget, tabId) => addWidgetToTab(tabId ?? tabs[0]?.id ?? '', widget)}
-          onClose={() => setShowImport(false)}
-        />
       )}
 
       {showSizes && (
