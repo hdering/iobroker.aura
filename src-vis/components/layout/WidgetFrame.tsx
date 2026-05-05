@@ -2178,8 +2178,10 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
     if (!groupDefId || groupChildren.length === 0) return;
     const maxBottom = Math.max(...groupChildren.map((c) => c.gridPos.y + c.gridPos.h));
     const innerH = maxBottom * (groupCellSize + groupGridGap) - groupGridGap;
-    const titleBarH = config.title ? 36 : 0;
-    const newH = Math.ceil((titleBarH + innerH + 8 + groupGridGap) / (groupCellSize + groupGridGap));
+    // In editMode the title bar is always rendered (min-height 36px); +1 for its border-bottom when titled.
+    // +12 = 8 (p-1 padding top+bottom) + 4 (widget border-width compensation).
+    const titleBarH = config.title ? (isTransparent ? 36 : 37) : 36;
+    const newH = Math.ceil((titleBarH + innerH + 12 + groupGridGap) / (groupCellSize + groupGridGap));
     onConfigChange({ ...config, gridPos: { ...config.gridPos, h: newH } });
   };
 
@@ -2198,8 +2200,8 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
     // auto-fit height using compacted positions
     const maxBottom = Math.max(...next.map((c) => c.gridPos.y + c.gridPos.h));
     const innerH = maxBottom * (groupCellSize + groupGridGap) - groupGridGap;
-    const titleBarH = config.title ? 36 : 0;
-    const newH = Math.ceil((titleBarH + innerH + 8 + groupGridGap) / (groupCellSize + groupGridGap));
+    const titleBarH = config.title ? (isTransparent ? 36 : 37) : 36;
+    const newH = Math.ceil((titleBarH + innerH + 12 + groupGridGap) / (groupCellSize + groupGridGap));
     onConfigChange({ ...config, gridPos: { ...config.gridPos, h: newH } });
     setShowGroupTypePicker(false);
     openPanelFor(null);
