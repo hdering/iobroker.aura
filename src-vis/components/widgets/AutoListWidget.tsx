@@ -93,6 +93,13 @@ function isDimmerRole(role?: string) {
   return r.includes('level') || r.includes('dimmer') || r.includes('brightness');
 }
 
+/** Returns true when the role explicitly describes a numeric value — these must
+ *  never be rendered as a switch even if their live value happens to be 0 or 1. */
+function isNumericRole(role?: string) {
+  const r = (role ?? '').toLowerCase();
+  return r.startsWith('value.') || r === 'value' || r.startsWith('level.') || r === 'level';
+}
+
 export function resolveName(name: string | Record<string, string> | undefined, fallback: string): string {
   if (!name) return fallback;
   if (typeof name === 'string') return name;
@@ -251,7 +258,7 @@ function EntryValue({ entry, val, writable, setState }: {
 }) {
   const hasLabels = !!(entry.trueLabel || entry.falseLabel);
   const isBool = typeof val === 'boolean';
-  const isBoolLike = isBool || (typeof val === 'number' && (val === 0 || val === 1));
+  const isBoolLike = (isBool || (typeof val === 'number' && (val === 0 || val === 1))) && !isNumericRole(entry.role);
   const on = val === true || val === 1;
 
   // Role-based display for sensors (window, door, motion, smoke, …)
@@ -337,7 +344,7 @@ function CardEntryValue({ entry, val, writable, setState }: {
 }) {
   const hasLabels = !!(entry.trueLabel || entry.falseLabel);
   const isBool = typeof val === 'boolean';
-  const isBoolLike = isBool || (typeof val === 'number' && (val === 0 || val === 1));
+  const isBoolLike = (isBool || (typeof val === 'number' && (val === 0 || val === 1))) && !isNumericRole(entry.role);
   const on = val === true || val === 1;
 
   // Role-based display for sensors
