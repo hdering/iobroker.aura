@@ -1,26 +1,32 @@
-import { Palette, Type, LayoutGrid, SlidersHorizontal, Code2, AlignJustify } from 'lucide-react';
+import { Palette, Type, LayoutGrid, SlidersHorizontal, Code2, AlignJustify, Monitor } from 'lucide-react';
 import { useT } from '../../../../i18n';
 
-export type SubTab = 'theme' | 'typo' | 'grid' | 'guidelines' | 'css' | 'tabbar';
+export type SubTab = 'theme' | 'typo' | 'grid' | 'guidelines' | 'css' | 'tabbar' | 'frontend';
 
-const ALL_TABS: { id: SubTab; labelKey: string; icon: React.ElementType }[] = [
+const ALL_TABS: { id: SubTab; labelKey: string; icon: React.ElementType; globalOnly?: boolean }[] = [
   { id: 'theme',      labelKey: 'layouts.subtab.theme',      icon: Palette },
   { id: 'typo',       labelKey: 'layouts.subtab.typo',       icon: Type },
   { id: 'grid',       labelKey: 'layouts.subtab.grid',       icon: LayoutGrid },
   { id: 'guidelines', labelKey: 'layouts.subtab.guidelines', icon: SlidersHorizontal },
   { id: 'css',        labelKey: 'layouts.subtab.css',        icon: Code2 },
   { id: 'tabbar',     labelKey: 'layouts.subtab.tabbar',     icon: AlignJustify },
+  { id: 'frontend',   labelKey: 'layouts.subtab.frontend',   icon: Monitor, globalOnly: true },
 ];
 
 interface SubTabsNavProps {
   active: SubTab;
   onChange: (tab: SubTab) => void;
   hideTabBar: boolean;
+  contextId: string | null;
 }
 
-export function SubTabsNav({ active, onChange, hideTabBar }: SubTabsNavProps) {
+export function SubTabsNav({ active, onChange, hideTabBar, contextId }: SubTabsNavProps) {
   const t = useT();
-  const tabs = ALL_TABS.filter((tab) => !(hideTabBar && tab.id === 'tabbar'));
+  const tabs = ALL_TABS.filter((tab) => {
+    if (hideTabBar && tab.id === 'tabbar') return false;
+    if (tab.globalOnly && contextId !== null) return false;
+    return true;
+  });
 
   return (
     <div className="flex gap-1 flex-wrap mt-2">

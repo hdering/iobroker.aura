@@ -224,6 +224,7 @@ export const en: Record<TranslationKey, string> = {
   'layouts.subtab.css':         'Custom CSS',
   'layouts.subtab.tabbar':      'Tab bar',
   'layouts.subtab.tabbarHiddenHint': 'Tab bar is configured per layout. Pick a layout in the context picker above.',
+  'layouts.subtab.frontend':    'Frontend',
 
   'layouts.context.label':      'Context',
   'layouts.context.global':     'Global',
