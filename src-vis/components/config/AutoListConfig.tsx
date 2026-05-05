@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { RefreshCw, Search, Check, X, ChevronDown, Settings2, ChevronRight, ChevronUp, Ban, Plus } from 'lucide-react';
+import { RefreshCw, Search, Check, X, ChevronDown, Settings2, ChevronRight, ChevronUp, Ban, Plus, PlusCircle } from 'lucide-react';
 import { MultiSelect } from './MultiSelect';
 import { DatapointPicker } from './DatapointPicker';
 import type { WidgetConfig } from '../../types';
@@ -7,6 +7,47 @@ import { discoverDatapoints, loadFilterOptions } from '../widgets/AutoListWidget
 import type { AutoListOptions, AutoListEntry, DiscoveredDp } from '../widgets/AutoListWidget';
 import { useT } from '../../i18n';
 import { ensureDatapointCache } from '../../hooks/useDatapointList';
+
+const PRESETS_ID: { label: string; value: string }[] = [
+  { label: 'endet auf .POWER',  value: '/\\.POWER$/i'  },
+  { label: 'endet auf .STATE',  value: '/\\.STATE$/i'  },
+  { label: 'endet auf .SET',    value: '/\\.SET$/i'    },
+  { label: 'enthält .ENERGY',   value: '/\\.ENERGY/i'  },
+  { label: 'endet auf .ACTUAL', value: '/\\.ACTUAL$/i' },
+];
+
+const PRESETS_EXCLUDE: { label: string; value: string }[] = [
+  { label: '.info.',      value: '.info.'             },
+  { label: '.connection', value: '.connection'        },
+  { label: 'powerSave',   value: '/powerSaveMode/i'  },
+  { label: 'powerFactor', value: '/powerFactor/i'    },
+  { label: '_REMOTE_',    value: '_REMOTE_'           },
+  { label: 'Indikatoren', value: '/\\.indicator\\./i' },
+];
+
+function appendPattern(current: string, value: string): string {
+  const trimmed = current.trim();
+  return trimmed ? `${trimmed}, ${value}` : value;
+}
+
+function PresetChips({ presets, onAdd }: { presets: { label: string; value: string }[]; onAdd: (v: string) => void }) {
+  return (
+    <div className="flex flex-wrap gap-1 mt-1">
+      {presets.map(p => (
+        <button
+          key={p.value}
+          type="button"
+          onClick={() => onAdd(p.value)}
+          title={p.value}
+          className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] hover:opacity-80 transition-opacity"
+          style={{ background: 'var(--app-border)', color: 'var(--text-secondary)' }}>
+          <PlusCircle size={8} />
+          {p.label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 // ── Per-entry config row ───────────────────────────────────────────────────────
 
@@ -229,13 +270,14 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
         <MultiSelect label={t('autolist.func')} options={availFuncs} selected={selFuncs}
           onChange={v => { setSelFuncs(v); resetSearch(); }} loading={optLoading} />
         <div>
-          <label className="text-xs mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('autolist.idContains')}</label>
-          <input className={iCls} style={iSty} placeholder="shelly  oder  /\.POWER$/i" value={idPat}
+          <label className="text-xs mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('autolist.idContains')} <span className="opacity-60">(kommagetrennt, OR)</span></label>
+          <input className={iCls} style={iSty} placeholder="shelly, /\.POWER$/i" value={idPat}
             onChange={e => { setIdPat(e.target.value); resetSearch(); }}
             onKeyDown={e => e.key === 'Enter' && canSearch && search()} />
           <p className="text-[9px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-            Text = Teilstring · <span className="font-mono">/regex/</span> für reguläre Ausdrücke
+            Text = Teilstring · <span className="font-mono">/regex/flags</span> möglich
           </p>
+          <PresetChips presets={PRESETS_ID} onAdd={v => { setIdPat(p => appendPattern(p, v)); resetSearch(); }} />
         </div>
         <div className="col-span-2">
           <MultiSelect label="Typen" options={availTypes} selected={selTypes}
@@ -255,13 +297,14 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
           </label>
           <input
             className={iCls} style={iSty}
-            placeholder=".info., .connection  oder  /powerSaveMode|powerFactor/i"
+            placeholder=".info., .connection, /powerSaveMode/i"
             value={excludePats}
             onChange={e => { setExcludePats(e.target.value); resetSearch(); }}
           />
           <p className="text-[9px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-            Text = Teilstring · <span className="font-mono">/regex/</span> als Token möglich
+            Text = Teilstring · <span className="font-mono">/regex/flags</span> möglich
           </p>
+          <PresetChips presets={PRESETS_EXCLUDE} onAdd={v => { setExcludePats(p => appendPattern(p, v)); resetSearch(); }} />
         </div>
         <div>
           <div className="flex items-center justify-between mb-1">

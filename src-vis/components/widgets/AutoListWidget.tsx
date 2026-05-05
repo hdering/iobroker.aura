@@ -164,7 +164,7 @@ export async function discoverDatapoints(
 
   // Role filter: exact match (same as DatapointPicker) with OR semantics for multiple values.
   const roleFilter    = (opts.filterRoles ?? '').split(',').map(s => s.trim()).filter(Boolean);
-  const idPattern     = opts.filterIdPattern?.trim() ?? '';
+  const idPatterns    = (opts.filterIdPattern ?? '').split(',').map(s => s.trim()).filter(Boolean);
   const roomFilter    = (opts.filterRooms ?? '').split(',').map(s => s.trim()).filter(Boolean);
   const funcFilter    = (opts.filterFuncs ?? '').split(',').map(s => s.trim()).filter(Boolean);
   const typeFilter    = (opts.filterTypes ?? '').split(',').map(s => s.trim()).filter(Boolean);
@@ -176,7 +176,7 @@ export async function discoverDatapoints(
     .filter(({ id, value: obj }) => {
       const role = obj.common.role ?? '';
       if (roleFilter.length > 0 && !roleFilter.includes(role)) return false;
-      if (idPattern && !matchesIdPattern(id, idPattern)) return false;
+      if (idPatterns.length > 0 && !idPatterns.some(p => matchesIdPattern(id, p))) return false;
       if (adapterFilter.length > 0) {
         const prefix = id.split('.').slice(0, 2).join('.');
         if (!adapterFilter.includes(prefix)) return false;
