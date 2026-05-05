@@ -244,8 +244,8 @@ export function Dashboard({ readonly = false, editMode = false, onLayoutChange, 
                 if (children.length > 0) {
                   const maxBottom = Math.max(...children.map((c) => c.gridPos.y + c.gridPos.h));
                   const innerH = maxBottom * (cellSize + MARGIN) - MARGIN;
-                  const titleBarH = w.title ? 36 : 0;
-                  minH = Math.ceil((titleBarH + innerH + 8 + MARGIN) / (cellSize + MARGIN));
+                  const titleBarH = w.title ? 37 : 36;
+                  minH = Math.ceil((titleBarH + innerH + 10 + MARGIN) / (cellSize + MARGIN));
                 }
               }
               return {

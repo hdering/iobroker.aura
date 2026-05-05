@@ -77,8 +77,8 @@ export function GroupWidget({ config, editMode, onConfigChange }: WidgetProps) {
     const maxBottom = Math.max(...next.map((c) => c.gridPos.y + c.gridPos.h));
     const innerH = maxBottom * (cellSize + gridGap) - gridGap;
     const titleBarH = config.title ? 37 : (editMode ? 36 : 0);
-    // 8 = p-1 top(4) + bottom(4); +4 compensates for --widget-border-width (up to 2px each side)
-    return Math.ceil((titleBarH + innerH + 12 + gridGap) / (cellSize + gridGap));
+    // 10 = p-1 top(4) + bottom(4) + widget border 1px each side(2)
+    return Math.ceil((titleBarH + innerH + 10 + gridGap) / (cellSize + gridGap));
   };
 
   const fitHeightToChildren = (next: WidgetConfig[]) => {
