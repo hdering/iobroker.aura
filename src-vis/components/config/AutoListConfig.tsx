@@ -230,9 +230,12 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
           onChange={v => { setSelFuncs(v); resetSearch(); }} loading={optLoading} />
         <div>
           <label className="text-xs mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('autolist.idContains')}</label>
-          <input className={iCls} style={iSty} placeholder={t('autolist.idPh')} value={idPat}
+          <input className={iCls} style={iSty} placeholder="shelly  oder  /\.POWER$/i" value={idPat}
             onChange={e => { setIdPat(e.target.value); resetSearch(); }}
             onKeyDown={e => e.key === 'Enter' && canSearch && search()} />
+          <p className="text-[9px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+            Text = Teilstring · <span className="font-mono">/regex/</span> für reguläre Ausdrücke
+          </p>
         </div>
         <div className="col-span-2">
           <MultiSelect label="Typen" options={availTypes} selected={selTypes}
@@ -252,10 +255,13 @@ export function AutoListConfig({ config, onConfigChange }: Props) {
           </label>
           <input
             className={iCls} style={iSty}
-            placeholder="z.B. .info., .connection, _REMOTE_"
+            placeholder=".info., .connection  oder  /powerSaveMode|powerFactor/i"
             value={excludePats}
             onChange={e => { setExcludePats(e.target.value); resetSearch(); }}
           />
+          <p className="text-[9px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+            Text = Teilstring · <span className="font-mono">/regex/</span> als Token möglich
+          </p>
         </div>
         <div>
           <div className="flex items-center justify-between mb-1">

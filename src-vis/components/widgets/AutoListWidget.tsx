@@ -63,6 +63,23 @@ export interface DiscoveredDp {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
+/**
+ * Match id against a pattern that is either:
+ *   - plain text  → case-insensitive substring match
+ *   - /regex/flags → RegExp test (default flag: i)
+ */
+export function matchesIdPattern(id: string, pattern: string): boolean {
+  const p = pattern.trim();
+  if (p.startsWith('/')) {
+    const lastSlash = p.lastIndexOf('/');
+    const body  = p.slice(1, lastSlash > 0 ? lastSlash : undefined);
+    const flags = lastSlash > 0 ? p.slice(lastSlash + 1) : 'i';
+    try { return new RegExp(body, flags || 'i').test(id); }
+    catch { return false; }
+  }
+  return id.toLowerCase().includes(p.toLowerCase());
+}
+
 function compareVals(a: ioBrokerState['val'], b: ioBrokerState['val']): number {
   if (a === null || a === undefined) return 1;
   if (b === null || b === undefined) return -1;
@@ -147,19 +164,19 @@ export async function discoverDatapoints(
 
   // Role filter: exact match (same as DatapointPicker) with OR semantics for multiple values.
   const roleFilter    = (opts.filterRoles ?? '').split(',').map(s => s.trim()).filter(Boolean);
-  const idPattern     = opts.filterIdPattern?.trim().toLowerCase() ?? '';
+  const idPattern     = opts.filterIdPattern?.trim() ?? '';
   const roomFilter    = (opts.filterRooms ?? '').split(',').map(s => s.trim()).filter(Boolean);
   const funcFilter    = (opts.filterFuncs ?? '').split(',').map(s => s.trim()).filter(Boolean);
   const typeFilter    = (opts.filterTypes ?? '').split(',').map(s => s.trim()).filter(Boolean);
   const adapterFilter = (opts.filterAdapters ?? '').split(',').map(s => s.trim()).filter(Boolean);
-  const excludePats   = (opts.excludeIdPatterns ?? '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+  const excludePats   = (opts.excludeIdPatterns ?? '').split(',').map(s => s.trim()).filter(Boolean);
   const excludeIdsSet = new Set<string>(opts.excludeIds ?? []);
 
   return stateResult.rows
     .filter(({ id, value: obj }) => {
       const role = obj.common.role ?? '';
       if (roleFilter.length > 0 && !roleFilter.includes(role)) return false;
-      if (idPattern && !id.toLowerCase().includes(idPattern)) return false;
+      if (idPattern && !matchesIdPattern(id, idPattern)) return false;
       if (adapterFilter.length > 0) {
         const prefix = id.split('.').slice(0, 2).join('.');
         if (!adapterFilter.includes(prefix)) return false;
@@ -167,8 +184,7 @@ export async function discoverDatapoints(
       const type = (obj.common.type as string | undefined) ?? '';
       if (typeFilter.length > 0 && !typeFilter.includes(type)) return false;
       if (excludeIdsSet.has(id)) return false;
-      const idLower = id.toLowerCase();
-      if (excludePats.some(p => idLower.includes(p))) return false;
+      if (excludePats.some(p => matchesIdPattern(id, p))) return false;
 
       // Traverse the state ID and all parent paths to find room/func memberships.
       // e.g. for "hm-rpc.0.ABC.1.STATE" check:
