@@ -12,6 +12,8 @@ import { reconnectSocket, getObjectViewDirect, getStateDirect, setStateDirect } 
 import { saveAll, saveToIoBroker, BACKUP_TS_KEY } from '../../store/persistManager';
 import { Eye, EyeOff, AlertTriangle, RefreshCw, Tablet, Edit3, Check, X, Trash2, History } from 'lucide-react';
 import { useT } from '../../i18n';
+import { BrowserThemeSyncSection } from './layouts/sections/BrowserThemeSyncSection';
+import { FrontendSection } from './layouts/sections/FrontendSection';
 
 // ── Shared primitives ──────────────────────────────────────────────────────────
 
@@ -657,7 +659,13 @@ export function AdminSettings() {
         </Card>
       </div>
 
-      {/* Row 1: Clients + Expert + DP-Namen */}
+      {/* Row 1: Browser-Theme + Frontend */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <BrowserThemeSyncSection />
+        <FrontendSection />
+      </div>
+
+      {/* Row 2: Clients + Expert + DP-Namen */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <ClientsCard />
         <ExpertSettings />

@@ -7,7 +7,6 @@ import { LayoutsListSection } from './layouts/sections/LayoutsListSection';
 import { ContextPickerStrip } from './layouts/sections/ContextPickerStrip';
 import { SubTabsNav, type SubTab } from './layouts/sections/SubTabsNav';
 
-import { BrowserThemeSyncSection } from './layouts/sections/BrowserThemeSyncSection';
 import { ThemePresetSection } from './layouts/sections/ThemePresetSection';
 import { ThemeVarsSection } from './layouts/sections/ThemeVarsSection';
 import { TypographySpacingSection } from './layouts/sections/TypographySpacingSection';
@@ -16,7 +15,6 @@ import { WizardMaxDpsSection } from './layouts/sections/WizardMaxDpsSection';
 import { GuidelinesSection } from './layouts/sections/GuidelinesSection';
 import { CustomCssSection } from './layouts/sections/CustomCssSection';
 import { TabBarSection } from './layouts/sections/TabBarSection';
-import { FrontendSection } from './layouts/sections/FrontendSection';
 
 // ── ActiveSection ─────────────────────────────────────────────────────────────
 
@@ -29,7 +27,6 @@ function ActiveSection({ subTab, contextId, onContextChange }: {
     case 'theme':
       return (
         <div className="space-y-6">
-          {contextId === null && <BrowserThemeSyncSection />}
           <ThemePresetSection contextId={contextId} onContextChange={onContextChange} />
           <ThemeVarsSection contextId={contextId} onContextChange={onContextChange} />
         </div>
@@ -49,8 +46,6 @@ function ActiveSection({ subTab, contextId, onContextChange }: {
       return <CustomCssSection contextId={contextId} onContextChange={onContextChange} />;
     case 'tabbar':
       return <TabBarSection contextId={contextId} />;
-    case 'frontend':
-      return <FrontendSection />;
     default:
       return null;
   }
@@ -87,19 +82,16 @@ export function AdminLayouts() {
   }, [layouts, rawContextId, searchParams, setSearchParams]);
 
   const subTab: SubTab = (() => {
-    const valid: SubTab[] = ['theme', 'typo', 'grid', 'guidelines', 'css', 'tabbar', 'frontend'];
+    const valid: SubTab[] = ['theme', 'typo', 'grid', 'guidelines', 'css', 'tabbar'];
     if (!tabParam || !valid.includes(tabParam)) return 'theme';
     if (tabParam === 'tabbar' && contextId === null) return 'theme';
-    if (tabParam === 'frontend' && contextId !== null) return 'theme';
     return tabParam;
   })();
 
   const setContext = (id: string | null) => {
     const next = new URLSearchParams(searchParams);
     next.set('ctx', id ?? 'global');
-    const tab = next.get('tab');
-    if (id === null && tab === 'tabbar') next.set('tab', 'theme');
-    if (id !== null && tab === 'frontend') next.set('tab', 'theme');
+    if (id === null && next.get('tab') === 'tabbar') next.set('tab', 'theme');
     setSearchParams(next, { replace: true });
   };
 
@@ -140,7 +132,7 @@ export function AdminLayouts() {
         }}
       >
         <ContextPickerStrip contextId={contextId} onChange={setContext} />
-        <SubTabsNav active={subTab} onChange={setSubTab} hideTabBar={contextId === null} contextId={contextId} />
+        <SubTabsNav active={subTab} onChange={setSubTab} hideTabBar={contextId === null} />
       </div>
 
       {/* Context hint banner */}

@@ -222,7 +222,6 @@ export const de = {
   'layouts.subtab.css':         'Custom CSS',
   'layouts.subtab.tabbar':      'Tab-Leiste',
   'layouts.subtab.tabbarHiddenHint': 'Tab-Leiste wird pro Layout konfiguriert. Wähle ein Layout im Picker oben.',
-  'layouts.subtab.frontend':    'Frontend',
 
   'layouts.context.label':      'Kontext',
   'layouts.context.global':     'Global',
