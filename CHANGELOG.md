@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.5.83 (2026-05-05)
+
+Release v0.5.83
+
 ## v0.5.82 (2026-05-05)
 
 - fix: PortalDropdown re-clamps on submenu expand to prevent viewport overflow
@@ -56,6 +60,7 @@ Release v0.5.80
 - feat: Klick-Aktion ÔÇö neue Popups, Auto-Select, Schlie├ƒen-Fix
 - fix: Klick-Aktion ÔÇö Tab-Navigation + Auto-Select f├╝r Dimmer/Thermostat
 - feat: Widget-Klick-Aktion ÔÇö Popups + Navigation per Widget konfigurierbar
+
 
 
 
