@@ -153,13 +153,6 @@ export function AdminLayouts() {
       {/* Active Section */}
       <ActiveSection subTab={subTab} contextId={contextId} onContextChange={setContext} />
 
-      {/* URL-Schema reference */}
-      <div className="rounded-xl p-4 text-xs space-y-1" style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)', color: 'var(--text-secondary)' }}>
-        <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{t('layouts.urlSchema')}</p>
-        <p><span className="font-mono" style={{ color: 'var(--accent)' }}>#/</span> — {t('layouts.default')}</p>
-        <p><span className="font-mono" style={{ color: 'var(--accent)' }}>#/view/:slug</span> — {t('layouts.specific')}</p>
-        <p><span className="font-mono" style={{ color: 'var(--accent)' }}>#/view/:slug/tab/:tabSlug</span> — {t('layouts.specificTab')}</p>
-      </div>
     </div>
   );
 }
