@@ -746,6 +746,7 @@ export const en: Record<TranslationKey, string> = {
   'widget.header':        'Section Title',
   'widget.group':         'Group',
   'widget.httpRequest':   'HTTP Action',
+  'widget.button':        'Button',
 
   // ── Weather Widget ────────────────────────────────────────────────────────────
   'weather.sunny':       'Sunny',

@@ -70,6 +70,7 @@ import { MediaplayerWidget } from '../widgets/MediaplayerWidget';
 import { SliderWidget } from '../widgets/SliderWidget';
 import { ChipsWidget } from '../widgets/ChipsWidget';
 import { HttpRequestWidget } from '../widgets/HttpRequestWidget';
+import { ButtonWidget } from '../widgets/ButtonWidget';
 import { IconPickerModal } from '../config/IconPickerModal';
 import { ClickActionEditor } from '../config/ClickActionEditor';
 import { WidgetClickPopup } from '../widgets/popup/WidgetClickPopup';
@@ -114,6 +115,7 @@ function getWidgetMap() {
     slider:        SliderWidget,
     chips:         ChipsWidget,
     httpRequest:   HttpRequestWidget,
+    button:        ButtonWidget,
   } as const;
 }
 
@@ -2832,6 +2834,10 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
               ] : config.type === 'slider' ? [
                 { value: 'default', label: t('wf.edit.layout.standard') },
                 { value: 'custom',  label: 'Custom' },
+              ] : config.type === 'button' ? [
+                { value: 'default', label: t('wf.edit.layout.standard') },
+                { value: 'compact', label: t('wf.edit.layout.compact') },
+                { value: 'minimal', label: t('wf.edit.layout.minimal') },
               ] : config.type === 'group' ? [
                 { value: 'default', label: t('wf.edit.layout.standard') },
               ] : config.type === 'trash' || config.type === 'trashSchedule' ? [
@@ -4856,6 +4862,31 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                           placeholder="Wirklich senden?" />
                       </div>
                     )}
+                  </>
+                );
+              })()}
+
+              {config.type === 'button' && (() => {
+                const o = config.options ?? {};
+                const setO = (patch: Record<string, unknown>) =>
+                  onConfigChange({ ...config, options: { ...o, ...patch } });
+                return (
+                  <>
+                    <div>
+                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Button-Beschriftung (leer = Widget-Titel)</label>
+                      <input type="text" value={(o.buttonLabel as string) || ''}
+                        onChange={(e) => setO({ buttonLabel: e.target.value })}
+                        className={inputCls} style={inputStyle}
+                        placeholder={config.title || 'Button'} />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <label className="text-[11px] flex-1" style={{ color: 'var(--text-secondary)' }}>Farbe</label>
+                      <input type="color"
+                        value={(o.buttonColor as string) || '#6366f1'}
+                        onChange={(e) => setO({ buttonColor: e.target.value })}
+                        className="w-8 h-7 rounded cursor-pointer p-0.5"
+                        style={{ background: 'var(--app-bg)', border: '1px solid var(--app-border)' }} />
+                    </div>
                   </>
                 );
               })()}

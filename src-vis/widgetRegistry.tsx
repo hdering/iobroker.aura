@@ -13,7 +13,7 @@
 import {
   Zap, TrendingUp, SlidersHorizontal, Thermometer, BarChart2, List,
   Clock, CalendarDays, Heading2, Layers2, Cloud, Gauge, Camera, ImageIcon, MonitorDot, Droplets, Truck, AlignJustify, Table2,
-  DoorOpen, ShieldAlert, ToggleRight, LineChart, Code2, CalendarClock, Music, CalendarCheck2, Tag, Globe,
+  DoorOpen, ShieldAlert, ToggleRight, LineChart, Code2, CalendarClock, Music, CalendarCheck2, Tag, Globe, MousePointerClick,
   type LucideIcon,
 } from 'lucide-react';
 import type { WidgetType } from './types';
@@ -248,6 +248,14 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 12,           defaultH: 6,
     addMode: 'free',        widgetGroup: 'layout',
     mock: { t: 'Gruppe', v: '' },
+  },
+  {
+    type: 'button',
+    label: 'Button',        shortLabel: 'Button',
+    Icon: MousePointerClick, iconName: 'MousePointerClick', color: '#6366f1',
+    defaultW: 4,            defaultH: 3,
+    addMode: 'free',        widgetGroup: 'layout',
+    mock: { t: 'Öffnen', v: '' },
   },
   {
     type: 'jsontable',

@@ -744,6 +744,7 @@ export const de = {
   'widget.header':        'Abschnittstitel',
   'widget.group':         'Gruppe',
   'widget.httpRequest':   'HTTP-Aktion',
+  'widget.button':        'Button',
 
   // ── Weather Widget ────────────────────────────────────────────────────────────
   'weather.sunny':       'Sonnig',
