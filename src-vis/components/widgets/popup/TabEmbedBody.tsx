@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import ReactGridLayout from 'react-grid-layout';
 import { AlertTriangle } from 'lucide-react';
 import { usePopupConfigStore } from '../../../store/popupConfigStore';
@@ -57,6 +57,12 @@ export function TabEmbedBody({ viewId, triggerWidget }: Props) {
     roRef.current = ro;
   }, []);
 
+  const naturalMinWidth = useMemo(() => {
+    if (!view || view.widgets.length === 0) return 280;
+    const maxCol = Math.max(...view.widgets.map(w => (w.gridPos.x ?? 0) + (w.gridPos.w ?? 4)));
+    return maxCol * (snapX + MARGIN) + MARGIN;
+  }, [view, snapX, MARGIN]);
+
   const cols = containerWidth > 0
     ? Math.max(2, Math.floor((containerWidth - MARGIN) / (snapX + MARGIN)))
     : 12;
@@ -93,7 +99,7 @@ export function TabEmbedBody({ viewId, triggerWidget }: Props) {
   }));
 
   return (
-    <div ref={containerRefCallback} className="p-3" style={{ minWidth: 0 }}>
+    <div ref={containerRefCallback} className="p-3" style={{ minWidth: naturalMinWidth }}>
       {containerWidth > 0 && (
         <ReactGridLayout
           className="layout"

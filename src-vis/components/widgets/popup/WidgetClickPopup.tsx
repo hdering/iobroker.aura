@@ -112,8 +112,8 @@ export function WidgetClickPopup({ widget, action: rawAction, onClose, allWidget
         style={{
           background: 'var(--app-surface)',
           border: '1px solid var(--app-border)',
-          maxWidth: isIframe ? undefined : (customWidth ? `min(90vw, ${customWidth}px)` : 'min(90vw, 600px)'),
-          width: isIframe ? undefined : '100%',
+          width: isIframe ? undefined : (customWidth ? `min(90vw, ${customWidth}px)` : undefined),
+          maxWidth: isIframe ? undefined : (customWidth ? undefined : 'min(90vw, 600px)'),
           maxHeight: isIframe ? undefined : (customHeight ? `min(85vh, ${customHeight}px)` : '85vh'),
         }}
         onClick={(e) => e.stopPropagation()}
