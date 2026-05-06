@@ -337,7 +337,7 @@ function TypeDefaultsSection() {
 
 export function AdminPopups() {
   return (
-    <div className="max-w-3xl mx-auto px-6 py-8 space-y-10">
+    <div className="px-6 py-8 space-y-10">
       <div>
         <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Popups</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
