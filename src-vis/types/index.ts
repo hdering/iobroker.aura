@@ -133,7 +133,9 @@ export type ClickAction =
   | { kind: 'popup-widget';    widgetId?: string }
   | { kind: 'link-tab';        layoutId: string; tabId: string }
   | { kind: 'link-external';   url: string;   newTab?: boolean }
-  | { kind: 'link-widget';     layoutId: string; tabId: string; widgetId: string };
+  | { kind: 'link-widget';     layoutId: string; tabId: string; widgetId: string }
+  | { kind: 'popup-group';     groupId: string }
+  | { kind: 'popup-tab';       tabId: string };
 
 // options.clickAction?: ClickAction
 // options.popupTitle?: string      – override header title in popup

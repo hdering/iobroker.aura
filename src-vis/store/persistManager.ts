@@ -10,6 +10,7 @@ export const IOBROKER_STATE_MAP = {
   'aura-config':          'aura.0.config.app-config',
   'aura-global-settings': 'aura.0.config.global-settings',
   'aura-group-defs':      'aura.0.config.group-defs',
+  'aura-popup-config':    'aura.0.config.popup-config',
 } as const;
 
 export type SyncStoreKey = keyof typeof IOBROKER_STATE_MAP;

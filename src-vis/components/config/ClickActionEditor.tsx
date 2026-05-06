@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Database } from 'lucide-react';
 import type { WidgetConfig, ClickAction } from '../../types';
 import { useDashboardStore } from '../../store/dashboardStore';
+import { usePopupConfigStore } from '../../store/popupConfigStore';
 import { DatapointPicker } from './DatapointPicker';
 
 function defaultActionForConfig(config: WidgetConfig): ClickAction | null {
@@ -39,7 +40,7 @@ const MODE_GROUPS: { label: string; modes: ClickAction['kind'][] }[] = [
   },
   {
     label: 'Popup',
-    modes: ['popup-dimmer', 'popup-thermostat', 'popup-switch', 'popup-shutter', 'popup-mediaplayer', 'popup-image', 'popup-iframe', 'popup-json', 'popup-html', 'popup-widget'],
+    modes: ['popup-dimmer', 'popup-thermostat', 'popup-switch', 'popup-shutter', 'popup-mediaplayer', 'popup-image', 'popup-iframe', 'popup-json', 'popup-html', 'popup-widget', 'popup-group'],
   },
   {
     label: 'Navigation',
@@ -69,6 +70,8 @@ function modeLabel(kind: ClickAction['kind']): string {
     case 'popup-json':        return 'Popup: JSON';
     case 'popup-html':        return 'Popup: HTML';
     case 'popup-widget':      return 'Popup: Widget-Inhalt';
+    case 'popup-group':       return 'Popup: Gruppe';
+    case 'popup-tab':         return 'Popup: View';
     case 'link-tab':          return 'Sprung: Tab';
     case 'link-external':     return 'Sprung: Externe URL';
     case 'link-widget':       return 'Sprung: Widget';
@@ -138,6 +141,7 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
       case 'popup-json':        setAction({ kind: 'popup-json' }); break;
       case 'popup-html':        setAction({ kind: 'popup-html' }); break;
       case 'popup-widget':      setAction({ kind: 'popup-widget' }); break;
+      case 'popup-group':       setAction({ kind: 'popup-group', groupId: '' }); break;
       case 'link-tab': {
         const firstLayout = layouts[0];
         const firstTab = firstLayout?.tabs[0];
@@ -154,6 +158,8 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
       }
     }
   };
+
+  const popupGroups = usePopupConfigStore((s) => s.groups);
 
   const isPopup = action.kind.startsWith('popup-');
 
@@ -436,6 +442,28 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
           </div>
         );
       })()}
+
+      {action.kind === 'popup-group' && (
+        <div>
+          <label className={labelCls} style={labelStyle}>Popup-Gruppe</label>
+          <select
+            value={action.groupId}
+            onChange={(e) => setAction({ ...action, groupId: e.target.value })}
+            className={inputCls}
+            style={inputStyle}
+          >
+            <option value="">— Gruppe wählen —</option>
+            {popupGroups.map((g) => (
+              <option key={g.id} value={g.id}>{g.name}</option>
+            ))}
+          </select>
+          {popupGroups.length === 0 && (
+            <p className="text-[11px] mt-1" style={{ color: 'var(--text-secondary)' }}>
+              Noch keine Gruppen konfiguriert. Unter Admin → Popups anlegen.
+            </p>
+          )}
+        </div>
+      )}
 
       {action.kind === 'link-tab' && (
         <div className="space-y-3">

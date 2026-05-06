@@ -75,6 +75,7 @@ import { IconPickerModal } from '../config/IconPickerModal';
 import { ClickActionEditor } from '../config/ClickActionEditor';
 import { WidgetClickPopup } from '../widgets/popup/WidgetClickPopup';
 import { useNavigationStore } from '../../store/navigationStore';
+import { usePopupConfigStore } from '../../store/popupConfigStore';
 
 // Stable empty array – avoids creating a new reference on every render when no conditions are set
 const NO_CONDITIONS: WidgetCondition[] = [];
@@ -2137,8 +2138,25 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
     }).filter(([, v]) => v !== undefined && v !== ''),
   ) as React.CSSProperties;
 
-  // ── Click action ──────────────────────────────────────────────────────────
-  const clickAction = (config.options?.clickAction as ClickAction | undefined) ?? { kind: 'none' as const };
+  // ── Click action (3-level popup resolution) ───────────────────────────────
+  // Ebene 3: explicit widget-level action (stored in options.clickAction)
+  // Ebene 2: popup-group → resolve via popupConfigStore
+  // Ebene 1: type default → resolve via popupConfigStore when no explicit action
+  const popupGroups = usePopupConfigStore((s) => s.groups);
+  const popupTypeDefaults = usePopupConfigStore((s) => s.typeDefaults);
+  const rawClickAction = (config.options?.clickAction as ClickAction | undefined) ?? { kind: 'none' as const };
+  const clickAction: ClickAction = (() => {
+    if (rawClickAction.kind === 'popup-group') {
+      const group = popupGroups.find((g) => g.id === rawClickAction.groupId);
+      if (group?.tabId) return { kind: 'popup-tab', tabId: group.tabId };
+      return { kind: 'none' };
+    }
+    if (rawClickAction.kind === 'none') {
+      const tabId = popupTypeDefaults[config.type];
+      if (tabId) return { kind: 'popup-tab', tabId };
+    }
+    return rawClickAction;
+  })();
   const hasClickAction = clickAction.kind !== 'none';
 
   const handleWidgetClick = (e: React.MouseEvent) => {

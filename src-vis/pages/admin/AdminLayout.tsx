@@ -3,7 +3,7 @@ import { useConfigSync } from '../../hooks/useConfigSync';
 import { version as appVersion } from '../../../package.json';
 import { PortalTargetContext, PortalThemeContext } from '../../contexts/PortalTargetContext';
 import { Navigate, Outlet, NavLink } from 'react-router-dom';
-import { LayoutDashboard, Settings, LogOut, PenSquare, Save, Undo2, Layers, Layers2, Sun, Moon, ExternalLink, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Settings, LogOut, PenSquare, Save, Undo2, Layers, Layers2, Sun, Moon, ExternalLink, Menu, X, AppWindow } from 'lucide-react';
 import { useAuthStore, logout } from '../../store/authStore';
 import { useThemeStore } from '../../store/themeStore';
 import { getTheme, ADMIN_DARK_THEME } from '../../themes';
@@ -11,6 +11,7 @@ import { isDirty, saveAll, revertAll, subscribeDirty, saveToIoBroker, configureB
 import { useDashboardStore } from '../../store/dashboardStore';
 import { useGroupStore } from '../../store/groupStore';
 import { useConfigStore } from '../../store/configStore';
+import { usePopupConfigStore } from '../../store/popupConfigStore';
 import { loadConfigFromIoBroker, applyRaw } from '../../utils/configLoader';
 import { useAdminPrefsStore } from '../../store/adminPrefsStore';
 import { useIoBroker } from '../../hooks/useIoBroker';
@@ -39,6 +40,7 @@ function useSaveState() {
       () => useThemeStore.persist.rehydrate(),
       () => useGroupStore.persist.rehydrate(),
       () => useConfigStore.persist.rehydrate(),
+      () => usePopupConfigStore.persist.rehydrate(),
       () => { const v = localStorage.getItem('aura-group-defs'); if (v) applyRaw('aura-group-defs', v); },
     ]);
   };
@@ -174,6 +176,7 @@ export function AdminLayout() {
     { to: '/admin/editor', label: t('admin.nav.editor'), icon: PenSquare },
     { to: '/admin/layouts', label: t('admin.nav.layouts'), icon: Layers2 },
     { to: '/admin/widgets', label: t('admin.nav.widgets'), icon: Layers },
+    { to: '/admin/popups', label: t('admin.nav.popups'), icon: AppWindow },
     { to: '/admin/settings', label: t('admin.nav.settings'), icon: Settings },
   ];
 

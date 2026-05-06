@@ -13,6 +13,7 @@ import { IframePopupBody } from './IframePopupBody';
 import { JsonPopupBody } from './JsonPopupBody';
 import { HtmlPopupBody } from './HtmlPopupBody';
 import { WidgetEmbedBody } from './WidgetEmbedBody';
+import { TabEmbedBody } from './TabEmbedBody';
 
 interface Props {
   widget: WidgetConfig;
@@ -36,6 +37,7 @@ function getTitle(widget: WidgetConfig, action: ClickAction): string {
     case 'popup-json':        return 'JSON';
     case 'popup-html':        return 'HTML';
     case 'popup-widget':      return 'Widget';
+    case 'popup-tab':         return widget.title || '';
     default:                  return '';
   }
 }
@@ -80,6 +82,8 @@ export function WidgetClickPopup({ widget, action, onClose, allWidgets = [] }: P
         return <HtmlPopupBody action={action} />;
       case 'popup-widget':
         return <WidgetEmbedBody widget={widget} action={action} allWidgets={allWidgets} />;
+      case 'popup-tab':
+        return <TabEmbedBody tabId={action.tabId} />;
       default:
         return null;
     }

@@ -14,6 +14,7 @@ import { AdminSettings } from './pages/admin/AdminSettings';
 import { AdminEditor } from './pages/admin/AdminEditor';
 import { AdminWidgets } from './pages/admin/AdminWidgets';
 import { AdminLayouts } from './pages/admin/AdminLayouts';
+import { AdminPopups } from './pages/admin/AdminPopups';
 
 const router = createHashRouter([
   { path: '/', element: <App /> },
@@ -30,6 +31,7 @@ const router = createHashRouter([
       { path: 'theme', element: <Navigate to="/admin/layouts?tab=theme" replace /> },
       { path: 'widgets', element: <AdminWidgets /> },
       { path: 'layouts', element: <AdminLayouts /> },
+      { path: 'popups', element: <AdminPopups /> },
       { path: 'settings', element: <AdminSettings /> },
     ],
   },

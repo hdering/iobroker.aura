@@ -29,6 +29,7 @@ export const de = {
   'admin.nav.editor':       'Dashboard-Editor',
   'admin.nav.layouts':      'Layouts',
   'admin.nav.widgets':      'Widgets',
+  'admin.nav.popups':       'Popups',
   'admin.nav.theme':        'Theme & CSS',
   'admin.nav.settings':     'Einstellungen',
   'admin.nav.openFrontend': 'Frontend öffnen',

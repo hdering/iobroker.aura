@@ -14,6 +14,7 @@ import { useThemeStore } from '../store/themeStore';
 import { useGroupStore } from '../store/groupStore';
 import { useConfigStore } from '../store/configStore';
 import { useGlobalSettingsStore } from '../store/globalSettingsStore';
+import { usePopupConfigStore } from '../store/popupConfigStore';
 
 type StoreKey = SyncStoreKey | 'aura-global-settings';
 
@@ -29,6 +30,7 @@ export function rehydrateAll(includeGlobalSettings = true): void {
   useThemeStore.persist.rehydrate();
   useGroupStore.persist.rehydrate();
   useConfigStore.persist.rehydrate();
+  usePopupConfigStore.persist.rehydrate();
   if (includeGlobalSettings) useGlobalSettingsStore.persist.rehydrate();
 }
 

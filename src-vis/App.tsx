@@ -21,13 +21,15 @@ import type { Tab } from './store/dashboardStore';
 import type { FrontendSettings } from './store/configStore';
 
 import { applyRaw } from './utils/configLoader';
+import { usePopupConfigStore } from './store/popupConfigStore';
 
 const STORE_REHYDRATORS: Record<string, () => void> = {
-  'aura-dashboard':  () => useDashboardStore.persist.rehydrate(),
-  'aura-theme':      () => useThemeStore.persist.rehydrate(),
-  'aura-groups':     () => useGroupStore.persist.rehydrate(),
-  'aura-config':     () => useConfigStore.persist.rehydrate(),
-  'aura-group-defs': () => { const v = localStorage.getItem('aura-group-defs'); if (v) applyRaw('aura-group-defs', v); },
+  'aura-dashboard':    () => useDashboardStore.persist.rehydrate(),
+  'aura-theme':        () => useThemeStore.persist.rehydrate(),
+  'aura-groups':       () => useGroupStore.persist.rehydrate(),
+  'aura-config':       () => useConfigStore.persist.rehydrate(),
+  'aura-group-defs':   () => { const v = localStorage.getItem('aura-group-defs'); if (v) applyRaw('aura-group-defs', v); },
+  'aura-popup-config': () => usePopupConfigStore.persist.rehydrate(),
 };
 
 // ── HeaderClock ────────────────────────────────────────────────────────────
