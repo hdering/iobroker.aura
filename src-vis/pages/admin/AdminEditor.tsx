@@ -468,13 +468,15 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
                       );
                     })}
                   </div>
-                  {/* Hint for the selected further-widget */}
-                  {selectedFurther?.hint && (
-                    <p className="mt-2 text-xs rounded-lg px-3 py-2"
-                      style={{ color: 'var(--text-secondary)', background: 'var(--app-bg)', border: '1px solid var(--app-border)' }}>
-                      {selectedFurther.hint}
-                    </p>
-                  )}
+                  {/* Hint for the selected further-widget – always reserve space to avoid layout shift */}
+                  <div className="mt-2" style={{ minHeight: '2.25rem' }}>
+                    {selectedFurther?.hint && (
+                      <p className="text-xs rounded-lg px-3 py-2"
+                        style={{ color: 'var(--text-secondary)', background: 'var(--app-bg)', border: '1px solid var(--app-border)' }}>
+                        {selectedFurther.hint}
+                      </p>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
