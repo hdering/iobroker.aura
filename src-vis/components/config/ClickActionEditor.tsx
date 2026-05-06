@@ -118,7 +118,8 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
   // Persist the derived default on first open, or migrate legacy popup kinds
   useEffect(() => {
     if (!rawStoredAction) {
-      const def = defaultActionForConfig(config);
+      const def = defaultActionForConfig(config)
+        ?? (popupTypeDefaults[config.type] ? { kind: 'popup-view' as const, viewId: popupTypeDefaults[config.type] } : null);
       if (def) setAction(def);
     } else if (rawStoredAction !== storedAction) {
       setAction(storedAction!);
@@ -158,8 +159,6 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
 
   const popupViews = usePopupConfigStore((s) => s.views);
   const popupTypeDefaults = usePopupConfigStore((s) => s.typeDefaults);
-  const typeDefaultViewId = !rawStoredAction ? popupTypeDefaults[config.type] : undefined;
-  const typeDefaultView = typeDefaultViewId ? popupViews.find((v) => v.id === typeDefaultViewId) : undefined;
 
   const isPopup = action.kind.startsWith('popup-');
 
@@ -191,11 +190,6 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
             </optgroup>
           ))}
         </select>
-        {typeDefaultView && (
-          <p className="text-[11px] mt-1.5 px-2 py-1.5 rounded-lg" style={{ background: 'var(--accent)18', color: 'var(--accent)', border: '1px solid var(--accent)44' }}>
-            Typ-Standard aktiv: <strong>{typeDefaultView.name}</strong>. Wähle „Aus", um den Popup für dieses Widget zu deaktivieren.
-          </p>
-        )}
       </div>
 
       {/* ── Mode-specific fields ── */}
