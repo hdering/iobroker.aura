@@ -17,7 +17,7 @@ export function ButtonWidget({ config }: WidgetProps) {
   if (layout === 'compact') {
     return (
       <div className="flex items-center gap-2.5 h-full px-1">
-        {showIcon && WidgetIcon && <WidgetIcon size={18} style={{ color, flexShrink: 0 }} />}
+        {showIcon && WidgetIcon && <WidgetIcon size={iconSize} style={{ color, flexShrink: 0 }} />}
         <span className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{label}</span>
         <span className="ml-auto text-xs" style={{ color: 'var(--text-secondary)' }}>›</span>
       </div>
