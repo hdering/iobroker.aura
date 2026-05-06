@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSuperAdmin } from '../../hooks/useSuperAdmin';
 import { Plus, Trash2, Check, Pencil, Layers, RotateCcw } from 'lucide-react';
 import { usePopupConfigStore, BUILTIN_VIEW_IDS, BUILTIN_VIEWS } from '../../store/popupConfigStore';
 import { WIDGET_REGISTRY } from '../../widgetRegistry';
@@ -32,6 +33,7 @@ function ViewSelect({ value, onChange }: { value: string; onChange: (v: string) 
 
 function PopupViewsSection() {
   const navigate = useNavigate();
+  const isSuperAdmin = useSuperAdmin();
   const { views, addView, removeView, updateViewName, copyView, restoreBuiltin, deletedBuiltinIds } = usePopupConfigStore();
 
   const [newViewName, setNewViewName] = useState('');
@@ -175,19 +177,21 @@ function PopupViewsSection() {
                 </button>
               </>
             )}
-            <button
-              onClick={() => removeView(view.id)}
-              className="flex items-center justify-center w-6 h-6 shrink-0 rounded hover:opacity-70 transition-opacity"
-              style={{ color: 'var(--accent-red, #ef4444)' }}
-              title="View löschen"
-            >
-              <Trash2 size={11} />
-            </button>
+            {(!isBuiltin || isSuperAdmin) && (
+              <button
+                onClick={() => removeView(view.id)}
+                className="flex items-center justify-center w-6 h-6 shrink-0 rounded hover:opacity-70 transition-opacity"
+                style={{ color: 'var(--accent-red, #ef4444)' }}
+                title="View löschen"
+              >
+                <Trash2 size={11} />
+              </button>
+            )}
           </div>
         );})}
 
-        {/* Deleted builtins */}
-        {deletedBuiltinIds.length > 0 && (
+        {/* Deleted builtins — only visible in super-admin mode */}
+        {isSuperAdmin && deletedBuiltinIds.length > 0 && (
           <div className="mt-3 space-y-1.5">
             <p className="text-[11px] px-1" style={{ color: 'var(--text-secondary)' }}>Gelöschte Standard-Views</p>
             {deletedBuiltinIds.map((id) => {

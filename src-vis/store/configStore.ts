@@ -31,6 +31,8 @@ export interface FrontendSettings {
   guidelinesWidth: number;
   guidelinesHeight: number;
   guidelinesShowInFrontend: boolean;
+  // Super-admin access (empty = feature disabled)
+  superAdminKey: string;
 }
 
 interface ConfigState {
@@ -68,6 +70,7 @@ export const DEFAULT_FRONTEND: FrontendSettings = {
   guidelinesWidth: 1280,
   guidelinesHeight: 800,
   guidelinesShowInFrontend: false,
+  superAdminKey: '',
 };
 
 export const useConfigStore = create<ConfigState>()(

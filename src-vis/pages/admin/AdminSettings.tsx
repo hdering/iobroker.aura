@@ -639,6 +639,21 @@ export function AdminSettings() {
           </form>
         </Card>
 
+        {/* Super-Admin-Schlüssel */}
+        <Card title="Super-Admin-Schlüssel">
+          <p className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>
+            Schützt Standard-Views vor versehentlichem Löschen. Besuche <code className="font-mono">/admin/popups?key=…</code> um den Modus zu aktivieren. Leer lassen = deaktiviert.
+          </p>
+          <input
+            type="text"
+            value={frontend.superAdminKey}
+            onChange={(e) => updateFrontend({ superAdminKey: e.target.value })}
+            placeholder="Geheimer Schlüssel"
+            className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none font-mono"
+            style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
+          />
+        </Card>
+
         {/* Backup */}
         <Card title={t('settings.backup.title')}>
           <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
