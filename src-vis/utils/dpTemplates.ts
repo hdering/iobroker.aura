@@ -329,32 +329,6 @@ export const DP_TEMPLATES: DpTemplate[] = [
     ],
   },
 
-  // ── MEDIAPLAYER ──────────────────────────────────────────────────────────
-  {
-    id: 'mediaplayer',
-    label: 'Mediaplayer',
-    icon: '🎵',
-    widgetType: 'mediaplayer',
-    category: 'special',
-    secondaryDps: [
-      { optionKey: 'titleDp',     siblingNames: ['currentTitle', 'current_title', 'TITLE', 'title', 'Title', 'name', 'trackName', 'track_name', 'song', 'media_title'] },
-      { optionKey: 'artistDp',    siblingNames: ['currentArtist', 'current_artist', 'ARTIST', 'artist', 'Artist', 'artistName', 'artist_name', 'media_artist'] },
-      { optionKey: 'albumDp',     siblingNames: ['currentAlbum', 'current_album', 'ALBUM', 'album', 'Album', 'albumName', 'album_name', 'media_album'] },
-      { optionKey: 'coverDp',     siblingNames: ['imageURL', 'image_url', 'imageUrl', 'coverUrl', 'cover_url', 'albumArt', 'album_art', 'artwork', 'cover', 'COVER', 'media_image_url', 'images_0_url'] },
-      { optionKey: 'sourceDp',    siblingNames: ['roomName', 'room_name', 'source', 'SOURCE', 'playerName', 'player_name', 'zone', 'ZONE', 'device', 'renderer'] },
-      { optionKey: 'playStateDp', siblingNames: ['state', 'STATE', 'playState', 'play_state', 'status', 'STATUS', 'playerState', 'player_state', 'playing', 'PLAYING', 'playbackState', 'media_content_type'] },
-      { optionKey: 'volumeDp',    siblingNames: ['volume', 'VOLUME', 'Volume', 'vol', 'VOL', 'volumeLevel', 'volume_level', 'currentVolume', 'current_volume', 'mixerVolume', 'media_volume_level'] },
-      { optionKey: 'muteDp',      siblingNames: ['muted', 'MUTED', 'Muted', 'mute', 'MUTE', 'muteState', 'media_volume_muted'] },
-      { optionKey: 'playDp',      siblingNames: ['play', 'PLAY', 'Play', 'cmd_play', 'cmdPlay'] },
-      { optionKey: 'pauseDp',     siblingNames: ['pause', 'PAUSE', 'Pause', 'cmd_pause', 'cmdPause'] },
-      { optionKey: 'stopDp',      siblingNames: ['stop', 'STOP', 'Stop', 'cmd_stop', 'cmdStop'] },
-      { optionKey: 'nextDp',      siblingNames: ['next', 'NEXT', 'Next', 'cmd_next', 'cmdNext', 'skipForward', 'skip_forward'] },
-      { optionKey: 'prevDp',      siblingNames: ['prev', 'PREV', 'Prev', 'previous', 'PREVIOUS', 'Previous', 'cmd_prev', 'cmdPrev', 'skipBack', 'skip_back'] },
-      { optionKey: 'shuffleDp',   siblingNames: ['shuffle', 'SHUFFLE', 'Shuffle', 'shuffleMode', 'shuffle_mode'] },
-      { optionKey: 'repeatDp',    siblingNames: ['repeat', 'REPEAT', 'Repeat', 'repeatMode', 'repeat_mode'] },
-    ],
-  },
-
   // ── MESSWERTE ────────────────────────────────────────────────────────────
   {
     id: 'value_temperature',
