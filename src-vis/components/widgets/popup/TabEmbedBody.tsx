@@ -60,7 +60,7 @@ export function TabEmbedBody({ viewId, triggerWidget }: Props) {
   const naturalMinWidth = useMemo(() => {
     if (!view || view.widgets.length === 0) return 280;
     const maxCol = Math.max(...view.widgets.map(w => (w.gridPos.x ?? 0) + (w.gridPos.w ?? 4)));
-    return maxCol * (snapX + MARGIN) + MARGIN;
+    return maxCol * (snapX + MARGIN) + MARGIN + 24;
   }, [view, snapX, MARGIN]);
 
   const cols = containerWidth > 0
