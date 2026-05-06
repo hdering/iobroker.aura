@@ -908,6 +908,8 @@ export const en: Record<TranslationKey, string> = {
   'sl.style.orientation':      'Orientation',
   'sl.style.horizontal':       'Horizontal',
   'sl.style.vertical':         'Vertical',
+  'sl.style.barStyle':         'Bar style',
+  'sl.style.barSize':          'Bar width (%)',
   'sl.style.thickness':        'Track thickness (px)',
   'sl.style.color':            'Slider color',
   'sl.style.commitOnRelease':  'Write value only on release',

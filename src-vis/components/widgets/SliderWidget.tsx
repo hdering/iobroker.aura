@@ -45,6 +45,8 @@ export function SliderWidget({ config }: WidgetProps) {
   const showMinMax      = !!o.showMinMax;
   const actions         = (o.actions as SliderAction[] | undefined) ?? [];
   const titleAlign      = (o.titleAlign as string) ?? 'left';
+  const barStyle        = !!o.barStyle;
+  const barSize         = (o.barSize as number) ?? 100;
 
   const { value: rawVal } = useDatapoint(config.datapoint);
   const numericVal = typeof rawVal === 'number' ? rawVal
@@ -52,6 +54,7 @@ export function SliderWidget({ config }: WidgetProps) {
 
   const [pending, setPending] = useState<number | null>(null);
   const displayVal = pending ?? numericVal;
+  const fillRatio  = Math.max(0, Math.min(1, (displayVal - min) / (max - min)));
 
   const writeStepped = (v: number) => {
     const stepped = Math.round(v / step) * step;
@@ -78,6 +81,26 @@ export function SliderWidget({ config }: WidgetProps) {
 
   const { battery, reach, batteryIcon, reachIcon, statusBadges } = useStatusFields(config);
 
+  // ── Bar-style pointer handling ──────────────────────────────────────────────
+  const getBarValue = (e: React.PointerEvent<HTMLDivElement>) => {
+    const rect  = e.currentTarget.getBoundingClientRect();
+    const ratio = isVertical
+      ? 1 - (e.clientY - rect.top)  / rect.height
+      :     (e.clientX - rect.left) / rect.width;
+    return min + Math.max(0, Math.min(1, ratio)) * (max - min);
+  };
+
+  const onBarPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    onSliderChange(getBarValue(e));
+  };
+
+  const onBarPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!(e.buttons & 1)) return;
+    onSliderChange(getBarValue(e));
+  };
+
+  // ── Elements ────────────────────────────────────────────────────────────────
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const vertAttrs: any = isVertical ? { orient: 'vertical' } : {};
 
@@ -101,6 +124,57 @@ export function SliderWidget({ config }: WidgetProps) {
       } as unknown as CSSProperties}
       className="nodrag h-1.5 rounded-full appearance-none cursor-pointer"
     />
+  );
+
+  const barTrack = (
+    <div
+      className="nodrag relative rounded-2xl overflow-hidden cursor-pointer select-none"
+      style={{
+        width:      isVertical ? `${barSize}%` : '100%',
+        height:     isVertical ? '100%'        : `${barSize}%`,
+        background: `color-mix(in srgb, ${sliderColor} 20%, var(--app-bg))`,
+      }}
+      onPointerDown={onBarPointerDown}
+      onPointerMove={onBarPointerMove}
+      onPointerUp={onSliderRelease}
+    >
+      {/* Fill */}
+      {isVertical ? (
+        <div
+          className="absolute bottom-0 left-0 right-0 rounded-t-2xl"
+          style={{ height: `${fillRatio * 100}%`, background: sliderColor }}
+        />
+      ) : (
+        <div
+          className="absolute top-0 left-0 bottom-0 rounded-r-2xl"
+          style={{ width: `${fillRatio * 100}%`, background: sliderColor }}
+        />
+      )}
+      {/* Handle line */}
+      {isVertical ? (
+        <div
+          className="absolute pointer-events-none rounded-full"
+          style={{
+            top: `${(1 - fillRatio) * 100}%`,
+            transform: 'translateY(6px)',
+            left: '20%', right: '20%',
+            height: '3px',
+            background: 'rgba(255,255,255,0.85)',
+          }}
+        />
+      ) : (
+        <div
+          className="absolute pointer-events-none rounded-full"
+          style={{
+            left: `${fillRatio * 100}%`,
+            transform: 'translateX(-9px)',
+            top: '20%', bottom: '20%',
+            width: '3px',
+            background: 'rgba(255,255,255,0.85)',
+          }}
+        />
+      )}
+    </div>
   );
 
   const actionsEl = actions.length > 0 ? (
@@ -133,7 +207,7 @@ export function SliderWidget({ config }: WidgetProps) {
         value={valueStr}
         extraFields={{ value: String(displayVal), unit, min: String(min), max: String(max), battery, reach }}
         extraComponents={{
-          slider:          sliderEl,
+          slider:          barStyle ? barTrack : sliderEl,
           actions:         actionsEl,
           'battery-icon':  batteryIcon,
           'reach-icon':    reachIcon,
@@ -150,8 +224,8 @@ export function SliderWidget({ config }: WidgetProps) {
           <p className="text-sm font-semibold shrink-0" style={{ color: 'var(--text-primary)' }}>{valueStr}</p>
         )}
         {showMinMax && <span className="text-xs shrink-0" style={{ color: 'var(--text-secondary)' }}>{max}</span>}
-        <div className="flex-1 flex items-center justify-center min-h-0">
-          {sliderEl}
+        <div className={`flex-1 flex items-center justify-center min-h-0${barStyle ? ' w-full' : ''}`}>
+          {barStyle ? barTrack : sliderEl}
         </div>
         {showMinMax && <span className="text-xs shrink-0" style={{ color: 'var(--text-secondary)' }}>{min}</span>}
         {actionsEl}
@@ -170,7 +244,10 @@ export function SliderWidget({ config }: WidgetProps) {
       </div>
       <div className="flex-1 flex items-center gap-2 min-h-0">
         {showMinMax && <span className="text-xs shrink-0" style={{ color: 'var(--text-secondary)' }}>{min}</span>}
-        <div className="flex-1">{sliderEl}</div>
+        {barStyle
+          ? <div className="flex-1 self-stretch flex items-center">{barTrack}</div>
+          : <div className="flex-1">{sliderEl}</div>
+        }
         {showMinMax && <span className="text-xs shrink-0" style={{ color: 'var(--text-secondary)' }}>{max}</span>}
       </div>
       {actionsEl}

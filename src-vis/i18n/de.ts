@@ -906,6 +906,8 @@ export const de = {
   'sl.style.orientation':      'Ausrichtung',
   'sl.style.horizontal':       'Horizontal',
   'sl.style.vertical':         'Vertikal',
+  'sl.style.barStyle':         'Bar-Stil',
+  'sl.style.barSize':          'Bar-Breite (%)',
   'sl.style.thickness':        'Track-Breite (px)',
   'sl.style.color':            'Slider-Farbe',
   'sl.style.commitOnRelease':  'Wert erst beim Loslassen schreiben',

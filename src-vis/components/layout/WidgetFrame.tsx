@@ -1222,21 +1222,50 @@ function SliderEditPanel({
               </p>
             )}
           </div>
-          {/* Track-Breite */}
-          <div className="flex items-center gap-1">
-            <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
-              {t('sl.style.thickness' as never)}
-            </span>
+          {/* Bar-Stil */}
+          <label className="flex items-center gap-2 cursor-pointer">
             <input
-              type="number"
-              min={2}
-              max={24}
-              value={(o.sliderThickness as number) ?? 6}
-              onChange={(e) => setO({ sliderThickness: Number(e.target.value) })}
-              className="text-xs rounded-lg px-2 py-1.5 focus:outline-none"
-              style={numInputStyle}
+              type="checkbox"
+              checked={!!o.barStyle}
+              onChange={(e) => setO({ barStyle: e.target.checked || undefined })}
+              className="rounded"
             />
-          </div>
+            <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+              {t('sl.style.barStyle' as never)}
+            </span>
+          </label>
+          {/* Bar-Breite oder Track-Breite */}
+          {o.barStyle ? (
+            <div className="flex items-center gap-1">
+              <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
+                {t('sl.style.barSize' as never)}
+              </span>
+              <input
+                type="number"
+                min={5}
+                max={100}
+                value={(o.barSize as number) ?? 100}
+                onChange={(e) => setO({ barSize: Number(e.target.value) })}
+                className="text-xs rounded-lg px-2 py-1.5 focus:outline-none"
+                style={numInputStyle}
+              />
+            </div>
+          ) : (
+            <div className="flex items-center gap-1">
+              <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
+                {t('sl.style.thickness' as never)}
+              </span>
+              <input
+                type="number"
+                min={2}
+                max={24}
+                value={(o.sliderThickness as number) ?? 6}
+                onChange={(e) => setO({ sliderThickness: Number(e.target.value) })}
+                className="text-xs rounded-lg px-2 py-1.5 focus:outline-none"
+                style={numInputStyle}
+              />
+            </div>
+          )}
           {/* Farbe */}
           <div>
             <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
