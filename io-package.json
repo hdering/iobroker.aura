@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.6.0",
+    "version": "0.6.1",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -105,6 +105,10 @@
       }
     ],
     "news": {
+      "0.6.1": {
+        "en": "feat: AdminPopups 2-column layout (views left, type-defaults right); feat: remove width cap from Admin Widgets and Popups pages; Revert \"feat: popup uses full width, grid scales to fill container\"; feat: popup uses full width, grid scales to fill container",
+        "de": "feat: AdminPopups 2-column layout (views left, type-defaults right); feat: remove width cap from Admin Widgets and Popups pages; Revert \"feat: popup uses full width, grid scales to fill container\"; feat: popup uses full width, grid scales to fill container"
+      },
       "0.6.0": {
         "en": "fix: add 24px padding buffer to popup naturalMinWidth; feat: auto-size popup to content width; refactor: replace legacy popup-* click action kinds with popup-view+builtin; feat: allow direct editing of builtin views in super-admin mode; feat: super-admin mode via secret URL key for builtin view protection; feat: restore deleted standard popup views; feat: auto-fill popup placeholder options + show all keys in toolbar; fix: always show {{dp}} placeholder pill in view editor toolbar; feat: show all used {{key}} placeholders in popup view editor toolbar; feat: generalize popup placeholder substitution to all widget options; feat: standard views read-only — copy-only workflow; feat: popup phase 2 — {{dp}} substitution + predefined standard views; refactor: remove popup groups, expose popup-view directly in click action; feat: grid-based popup view editor with drag/resize positioning; feat: popup views as standalone mini-dashboards (Phase 1); feat: implement 3-level popup configuration system",
         "de": "fix: add 24px padding buffer to popup naturalMinWidth; feat: auto-size popup to content width; refactor: replace legacy popup-* click action kinds with popup-view+builtin; feat: allow direct editing of builtin views in super-admin mode; feat: super-admin mode via secret URL key for builtin view protection; feat: restore deleted standard popup views; feat: auto-fill popup placeholder options + show all keys in toolbar; fix: always show {{dp}} placeholder pill in view editor toolbar; feat: show all used {{key}} placeholders in popup view editor toolbar; feat: generalize popup placeholder substitution to all widget options; feat: standard views read-only — copy-only workflow; feat: popup phase 2 — {{dp}} substitution + predefined standard views; refactor: remove popup groups, expose popup-view directly in click action; feat: grid-based popup view editor with drag/resize positioning; feat: popup views as standalone mini-dashboards (Phase 1); feat: implement 3-level popup configuration system"
