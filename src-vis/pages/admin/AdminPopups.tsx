@@ -337,15 +337,17 @@ function TypeDefaultsSection() {
 
 export function AdminPopups() {
   return (
-    <div className="px-6 py-8 space-y-10">
+    <div className="px-6 py-8 space-y-8">
       <div>
         <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Popups</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
           Eigene Popup-Views erstellen und als Standard für Widget-Typen zuweisen
         </p>
       </div>
-      <PopupViewsSection />
-      <TypeDefaultsSection />
+      <div className="grid grid-cols-2 gap-8 items-start">
+        <PopupViewsSection />
+        <TypeDefaultsSection />
+      </div>
     </div>
   );
 }
