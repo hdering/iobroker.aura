@@ -2138,20 +2138,12 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
     }).filter(([, v]) => v !== undefined && v !== ''),
   ) as React.CSSProperties;
 
-  // ── Click action (3-level popup resolution) ───────────────────────────────
-  // Ebene 3: explicit widget-level action (stored in options.clickAction)
-  // Ebene 2: popup-group → resolve via popupConfigStore
+  // ── Click action (2-level popup resolution) ───────────────────────────────
+  // Ebene 2: explicit widget-level action (stored in options.clickAction)
   // Ebene 1: type default → resolve via popupConfigStore when no explicit action
-  const popupGroups = usePopupConfigStore((s) => s.groups);
   const popupTypeDefaults = usePopupConfigStore((s) => s.typeDefaults);
   const rawClickAction = (config.options?.clickAction as ClickAction | undefined) ?? { kind: 'none' as const };
   const clickAction: ClickAction = (() => {
-    if (rawClickAction.kind === 'popup-group') {
-      const group = popupGroups.find((g) => g.id === rawClickAction.groupId);
-      const viewId = group?.viewId ?? (group as unknown as { tabId?: string })?.tabId ?? '';
-      if (viewId) return { kind: 'popup-view', viewId };
-      return { kind: 'none' };
-    }
     if (rawClickAction.kind === 'none') {
       const viewId = popupTypeDefaults[config.type];
       if (viewId) return { kind: 'popup-view', viewId };

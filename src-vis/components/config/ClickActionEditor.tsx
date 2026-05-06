@@ -40,7 +40,7 @@ const MODE_GROUPS: { label: string; modes: ClickAction['kind'][] }[] = [
   },
   {
     label: 'Popup',
-    modes: ['popup-dimmer', 'popup-thermostat', 'popup-switch', 'popup-shutter', 'popup-mediaplayer', 'popup-image', 'popup-iframe', 'popup-json', 'popup-html', 'popup-widget', 'popup-group'],
+    modes: ['popup-dimmer', 'popup-thermostat', 'popup-switch', 'popup-shutter', 'popup-mediaplayer', 'popup-image', 'popup-iframe', 'popup-json', 'popup-html', 'popup-widget', 'popup-view'],
   },
   {
     label: 'Navigation',
@@ -70,7 +70,6 @@ function modeLabel(kind: ClickAction['kind']): string {
     case 'popup-json':        return 'Popup: JSON';
     case 'popup-html':        return 'Popup: HTML';
     case 'popup-widget':      return 'Popup: Widget-Inhalt';
-    case 'popup-group':       return 'Popup: Gruppe';
     case 'popup-view':        return 'Popup: View';
     case 'link-tab':          return 'Sprung: Tab';
     case 'link-external':     return 'Sprung: Externe URL';
@@ -141,7 +140,7 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
       case 'popup-json':        setAction({ kind: 'popup-json' }); break;
       case 'popup-html':        setAction({ kind: 'popup-html' }); break;
       case 'popup-widget':      setAction({ kind: 'popup-widget' }); break;
-      case 'popup-group':       setAction({ kind: 'popup-group', groupId: '' }); break;
+      case 'popup-view':        setAction({ kind: 'popup-view', viewId: '' }); break;
       case 'link-tab': {
         const firstLayout = layouts[0];
         const firstTab = firstLayout?.tabs[0];
@@ -159,7 +158,7 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
     }
   };
 
-  const popupGroups = usePopupConfigStore((s) => s.groups);
+  const popupViews = usePopupConfigStore((s) => s.views);
 
   const isPopup = action.kind.startsWith('popup-');
 
@@ -443,23 +442,23 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
         );
       })()}
 
-      {action.kind === 'popup-group' && (
+      {action.kind === 'popup-view' && (
         <div>
-          <label className={labelCls} style={labelStyle}>Popup-Gruppe</label>
+          <label className={labelCls} style={labelStyle}>Popup-View</label>
           <select
-            value={action.groupId}
-            onChange={(e) => setAction({ ...action, groupId: e.target.value })}
+            value={action.viewId}
+            onChange={(e) => setAction({ ...action, viewId: e.target.value })}
             className={inputCls}
             style={inputStyle}
           >
-            <option value="">— Gruppe wählen —</option>
-            {popupGroups.map((g) => (
-              <option key={g.id} value={g.id}>{g.name}</option>
+            <option value="">— View wählen —</option>
+            {popupViews.map((v) => (
+              <option key={v.id} value={v.id}>{v.name}</option>
             ))}
           </select>
-          {popupGroups.length === 0 && (
+          {popupViews.length === 0 && (
             <p className="text-[11px] mt-1" style={{ color: 'var(--text-secondary)' }}>
-              Noch keine Gruppen konfiguriert. Unter Admin → Popups anlegen.
+              Noch keine Views konfiguriert. Unter Admin → Popups anlegen.
             </p>
           )}
         </div>

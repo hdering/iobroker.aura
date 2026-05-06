@@ -9,25 +9,13 @@ export interface PopupView {
   widgets: WidgetConfig[];
 }
 
-export interface PopupGroup {
-  id: string;
-  name: string;
-  viewId: string;
-}
-
 interface PopupConfigState {
   typeDefaults: Record<string, string>;  // WidgetType → viewId
-  groups: PopupGroup[];
   views: PopupView[];
 
   // Type defaults
   setTypeDefault: (widgetType: string, viewId: string) => void;
   removeTypeDefault: (widgetType: string) => void;
-
-  // Groups
-  addGroup: (name: string, viewId: string) => void;
-  updateGroup: (id: string, patch: Partial<Omit<PopupGroup, 'id'>>) => void;
-  removeGroup: (id: string) => void;
 
   // Views
   addView: (name: string) => string;
@@ -42,7 +30,6 @@ export const usePopupConfigStore = create<PopupConfigState>()(
   persist(
     (set) => ({
       typeDefaults: {},
-      groups: [],
       views: [],
 
       setTypeDefault: (widgetType, viewId) =>
@@ -55,19 +42,6 @@ export const usePopupConfigStore = create<PopupConfigState>()(
           return { typeDefaults: next };
         }),
 
-      addGroup: (name, viewId) =>
-        set((s) => ({
-          groups: [...s.groups, { id: `pg-${Date.now()}`, name, viewId }],
-        })),
-
-      updateGroup: (id, patch) =>
-        set((s) => ({
-          groups: s.groups.map((g) => (g.id === id ? { ...g, ...patch } : g)),
-        })),
-
-      removeGroup: (id) =>
-        set((s) => ({ groups: s.groups.filter((g) => g.id !== id) })),
-
       addView: (name) => {
         const id = `pv-${Date.now()}`;
         set((s) => ({ views: [...s.views, { id, name, widgets: [] }] }));
@@ -77,11 +51,9 @@ export const usePopupConfigStore = create<PopupConfigState>()(
       removeView: (viewId) =>
         set((s) => ({
           views: s.views.filter((v) => v.id !== viewId),
-          // clean up references
           typeDefaults: Object.fromEntries(
             Object.entries(s.typeDefaults).filter(([, vid]) => vid !== viewId),
           ),
-          groups: s.groups.map((g) => g.viewId === viewId ? { ...g, viewId: '' } : g),
         })),
 
       updateViewName: (viewId, name) =>

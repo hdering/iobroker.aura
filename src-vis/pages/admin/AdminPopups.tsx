@@ -264,131 +264,6 @@ function TypeDefaultsSection() {
   );
 }
 
-// ── Groups section ────────────────────────────────────────────────────────────
-
-function GroupsSection() {
-  const { groups, addGroup, updateGroup, removeGroup } = usePopupConfigStore();
-  const [adding, setAdding] = useState(false);
-  const [newName, setNewName] = useState('');
-  const [newViewId, setNewViewId] = useState('');
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingName, setEditingName] = useState('');
-
-  const handleAdd = () => {
-    if (!newName.trim()) return;
-    addGroup(newName.trim(), newViewId);
-    setNewName('');
-    setNewViewId('');
-    setAdding(false);
-  };
-
-  const commitEdit = (id: string) => {
-    if (editingName.trim()) updateGroup(id, { name: editingName.trim() });
-    setEditingId(null);
-  };
-
-  return (
-    <section>
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Popup-Gruppen</h2>
-        {!adding && (
-          <button
-            onClick={() => { setAdding(true); setNewName(''); setNewViewId(''); }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium hover:opacity-80 transition-opacity"
-            style={{ background: 'var(--accent)', color: '#fff' }}
-          >
-            <Plus size={13} /> Gruppe hinzufügen
-          </button>
-        )}
-      </div>
-
-      <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--app-border)' }}>
-        <div
-          className="grid gap-3 px-4 py-2 text-[11px] font-medium"
-          style={{ gridTemplateColumns: '180px 1fr 28px', background: 'var(--app-surface)', borderBottom: '1px solid var(--app-border)', color: 'var(--text-secondary)' }}
-        >
-          <span>Name</span><span>Popup-View</span><span />
-        </div>
-
-        {groups.length === 0 && !adding && (
-          <div className="px-4 py-6 text-xs text-center" style={{ color: 'var(--text-secondary)' }}>
-            Noch keine Gruppen konfiguriert.
-          </div>
-        )}
-
-        {groups.map((g) => (
-          <div
-            key={g.id}
-            className="grid items-center gap-3 px-4 py-2"
-            style={{ gridTemplateColumns: '180px 1fr 28px', borderBottom: '1px solid var(--app-border)', background: 'var(--app-bg)' }}
-          >
-            {editingId === g.id ? (
-              <input
-                autoFocus
-                type="text"
-                value={editingName}
-                onChange={(e) => setEditingName(e.target.value)}
-                onBlur={() => commitEdit(g.id)}
-                onKeyDown={(e) => { if (e.key === 'Enter') commitEdit(g.id); if (e.key === 'Escape') setEditingId(null); }}
-                className={inputCls}
-                style={inputStyle}
-              />
-            ) : (
-              <button
-                className="flex items-center gap-1.5 text-xs text-left hover:opacity-70 transition-opacity"
-                style={{ color: 'var(--text-primary)' }}
-                onClick={() => { setEditingId(g.id); setEditingName(g.name); }}
-                title="Umbenennen"
-              >
-                <span className="truncate">{g.name}</span>
-                <Pencil size={11} style={{ flexShrink: 0, color: 'var(--text-secondary)' }} />
-              </button>
-            )}
-            <ViewSelect value={g.viewId} onChange={(v) => updateGroup(g.id, { viewId: v })} />
-            <button
-              onClick={() => removeGroup(g.id)}
-              className="flex items-center justify-center w-7 h-7 rounded-lg hover:opacity-80 transition-opacity"
-              style={{ color: 'var(--accent-red, #ef4444)', background: 'var(--app-bg)', border: '1px solid var(--app-border)' }}
-            >
-              <Trash2 size={13} />
-            </button>
-          </div>
-        ))}
-
-        {adding && (
-          <div
-            className="grid items-center gap-3 px-4 py-2"
-            style={{ gridTemplateColumns: '180px 1fr 28px', background: 'var(--app-bg)' }}
-          >
-            <input
-              autoFocus
-              type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') setAdding(false); }}
-              placeholder="Gruppenname"
-              className={inputCls}
-              style={inputStyle}
-            />
-            <ViewSelect value={newViewId} onChange={setNewViewId} />
-            <button
-              onClick={handleAdd}
-              disabled={!newName.trim()}
-              className="flex items-center justify-center w-7 h-7 rounded-lg hover:opacity-80 disabled:opacity-40 transition-opacity"
-              style={{ background: 'var(--accent)', color: '#fff' }}
-            >
-              <Check size={13} />
-            </button>
-          </div>
-        )}
-      </div>
-      <p className="text-[11px] mt-2" style={labelStyle}>
-        Widgets können einer Gruppe beitreten (Klick-Aktion → Popup: Gruppe). Umbenennen bricht keine Widget-Zuordnungen.
-      </p>
-    </section>
-  );
-}
-
 // ── AdminPopups ───────────────────────────────────────────────────────────────
 
 export function AdminPopups() {
@@ -397,12 +272,11 @@ export function AdminPopups() {
       <div>
         <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Popups</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
-          Eigene Popup-Views erstellen und als Standard für Typen oder Gruppen zuweisen
+          Eigene Popup-Views erstellen und als Standard für Widget-Typen zuweisen
         </p>
       </div>
       <PopupViewsSection />
       <TypeDefaultsSection />
-      <GroupsSection />
     </div>
   );
 }

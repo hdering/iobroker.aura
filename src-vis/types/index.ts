@@ -134,7 +134,6 @@ export type ClickAction =
   | { kind: 'link-tab';        layoutId: string; tabId: string }
   | { kind: 'link-external';   url: string;   newTab?: boolean }
   | { kind: 'link-widget';     layoutId: string; tabId: string; widgetId: string }
-  | { kind: 'popup-group';     groupId: string }
   | { kind: 'popup-view';      viewId: string };
 
 // options.clickAction?: ClickAction
