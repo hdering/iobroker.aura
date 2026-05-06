@@ -1,21 +1,23 @@
 import type { WidgetProps } from '../../types';
 import { getWidgetIcon } from '../../utils/widgetIconMap';
-import { MousePointerClick } from 'lucide-react';
 import { contentPositionClass } from '../../utils/widgetUtils';
 
 export function ButtonWidget({ config }: WidgetProps) {
   const o = config.options ?? {};
-  const label    = (o.buttonLabel as string) || config.title || 'Button';
-  const color    = (o.buttonColor as string) || 'var(--accent)';
-  const iconSize = (o.iconSize    as number) || 28;
-  const layout   = config.layout ?? 'default';
+  const label     = (o.buttonLabel as string) || config.title || 'Button';
+  const color     = (o.buttonColor as string) || 'var(--accent)';
+  const iconSize  = (o.iconSize    as number) || 28;
+  const showTitle = o.showTitle !== false;
+  const showIcon  = o.showIcon  !== false;
+  const layout    = config.layout ?? 'default';
 
-  const WidgetIcon = getWidgetIcon(o.icon as string | undefined, MousePointerClick);
+  const iconName  = o.icon as string | undefined;
+  const WidgetIcon = iconName ? getWidgetIcon(iconName, (() => null) as never) : null;
 
   if (layout === 'compact') {
     return (
       <div className="flex items-center gap-2.5 h-full px-1">
-        <WidgetIcon size={18} style={{ color, flexShrink: 0 }} />
+        {showIcon && WidgetIcon && <WidgetIcon size={18} style={{ color, flexShrink: 0 }} />}
         <span className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{label}</span>
         <span className="ml-auto text-xs" style={{ color: 'var(--text-secondary)' }}>›</span>
       </div>
@@ -25,19 +27,27 @@ export function ButtonWidget({ config }: WidgetProps) {
   if (layout === 'minimal') {
     return (
       <div className="flex items-center justify-center h-full">
-        <WidgetIcon size={iconSize} style={{ color }} />
+        {showIcon && WidgetIcon
+          ? <WidgetIcon size={iconSize} style={{ color }} />
+          : <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{label}</span>
+        }
       </div>
     );
   }
 
-  // default / card — centered icon + label
+  // default / card — title at top, then centered icon + label
   const posClass = contentPositionClass(o.contentPosition as string | undefined);
   return (
-    <div className={`flex flex-col gap-2 h-full ${posClass}`}>
-      <WidgetIcon size={iconSize} style={{ color }} />
-      <span className="text-sm font-medium text-center leading-tight" style={{ color: 'var(--text-primary)' }}>
-        {label}
-      </span>
+    <div className="flex flex-col h-full gap-1">
+      {showTitle && config.title && (
+        <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{config.title}</p>
+      )}
+      <div className={`flex flex-col gap-2 flex-1 ${posClass}`}>
+        {showIcon && WidgetIcon && <WidgetIcon size={iconSize} style={{ color }} />}
+        <span className="text-sm font-medium text-center leading-tight" style={{ color: 'var(--text-primary)' }}>
+          {label}
+        </span>
+      </div>
     </div>
   );
 }
