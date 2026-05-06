@@ -2188,9 +2188,10 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
   // Ebene 2: explicit widget-level action (stored in options.clickAction)
   // Ebene 1: type default → resolve via popupConfigStore when no explicit action
   const popupTypeDefaults = usePopupConfigStore((s) => s.typeDefaults);
-  const rawClickAction = (config.options?.clickAction as ClickAction | undefined) ?? { kind: 'none' as const };
+  const storedClickAction = config.options?.clickAction as ClickAction | undefined;
+  const rawClickAction = storedClickAction ?? { kind: 'none' as const };
   const clickAction: ClickAction = (() => {
-    if (rawClickAction.kind === 'none') {
+    if (storedClickAction === undefined) {
       const viewId = popupTypeDefaults[config.type];
       if (viewId) return { kind: 'popup-view', viewId };
     }
