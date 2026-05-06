@@ -1,27 +1,21 @@
 import { AlertTriangle } from 'lucide-react';
-import type { WidgetConfig } from '../../../types';
-import { useDashboardStore } from '../../../store/dashboardStore';
+import { usePopupConfigStore } from '../../../store/popupConfigStore';
 import { getWidgetMap } from '../widgetMap';
+import type { WidgetConfig } from '../../../types';
 
 interface Props {
-  tabId: string;
+  viewId: string;
 }
 
-export function TabEmbedBody({ tabId }: Props) {
-  const layouts = useDashboardStore((s) => s.layouts);
+export function TabEmbedBody({ viewId }: Props) {
+  const view = usePopupConfigStore((s) => s.views.find((v) => v.id === viewId));
 
-  let widgets: WidgetConfig[] = [];
-  for (const layout of layouts) {
-    const tab = layout.tabs.find((t) => t.id === tabId);
-    if (tab) { widgets = tab.widgets; break; }
-  }
-
-  if (widgets.length === 0) {
+  if (!view || view.widgets.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-48 gap-2" style={{ color: 'var(--text-secondary)' }}>
         <AlertTriangle size={24} style={{ color: 'var(--accent-red, #ef4444)' }} />
-        <span className="text-sm">View nicht gefunden oder leer</span>
-        <span className="text-xs opacity-60 font-mono">{tabId}</span>
+        <span className="text-sm">{view ? 'View ist leer' : 'View nicht gefunden'}</span>
+        <span className="text-xs opacity-60 font-mono">{viewId}</span>
       </div>
     );
   }
@@ -33,7 +27,7 @@ export function TabEmbedBody({ tabId }: Props) {
       className="p-4 space-y-3 overflow-auto"
       style={{ width: 'min(90vw, 520px)', maxHeight: '70vh' }}
     >
-      {widgets.map((w) => {
+      {view.widgets.map((w) => {
         const Widget = wm[w.type as keyof typeof wm];
         if (!Widget) {
           return (

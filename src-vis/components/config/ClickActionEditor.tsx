@@ -71,7 +71,7 @@ function modeLabel(kind: ClickAction['kind']): string {
     case 'popup-html':        return 'Popup: HTML';
     case 'popup-widget':      return 'Popup: Widget-Inhalt';
     case 'popup-group':       return 'Popup: Gruppe';
-    case 'popup-tab':         return 'Popup: View';
+    case 'popup-view':        return 'Popup: View';
     case 'link-tab':          return 'Sprung: Tab';
     case 'link-external':     return 'Sprung: Externe URL';
     case 'link-widget':       return 'Sprung: Widget';

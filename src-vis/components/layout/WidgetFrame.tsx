@@ -2148,12 +2148,13 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
   const clickAction: ClickAction = (() => {
     if (rawClickAction.kind === 'popup-group') {
       const group = popupGroups.find((g) => g.id === rawClickAction.groupId);
-      if (group?.tabId) return { kind: 'popup-tab', tabId: group.tabId };
+      const viewId = group?.viewId ?? (group as unknown as { tabId?: string })?.tabId ?? '';
+      if (viewId) return { kind: 'popup-view', viewId };
       return { kind: 'none' };
     }
     if (rawClickAction.kind === 'none') {
-      const tabId = popupTypeDefaults[config.type];
-      if (tabId) return { kind: 'popup-tab', tabId };
+      const viewId = popupTypeDefaults[config.type];
+      if (viewId) return { kind: 'popup-view', viewId };
     }
     return rawClickAction;
   })();

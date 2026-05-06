@@ -37,7 +37,7 @@ function getTitle(widget: WidgetConfig, action: ClickAction): string {
     case 'popup-json':        return 'JSON';
     case 'popup-html':        return 'HTML';
     case 'popup-widget':      return 'Widget';
-    case 'popup-tab':         return widget.title || '';
+    case 'popup-view':        return widget.title || '';
     default:                  return '';
   }
 }
@@ -82,8 +82,8 @@ export function WidgetClickPopup({ widget, action, onClose, allWidgets = [] }: P
         return <HtmlPopupBody action={action} />;
       case 'popup-widget':
         return <WidgetEmbedBody widget={widget} action={action} allWidgets={allWidgets} />;
-      case 'popup-tab':
-        return <TabEmbedBody tabId={action.tabId} />;
+      case 'popup-view':
+        return <TabEmbedBody viewId={action.viewId} />;
       default:
         return null;
     }
