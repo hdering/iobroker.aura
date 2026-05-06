@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.6.5 (2026-05-06)
+
+- fix: chart in popup-view with {{dp}} now auto-detects and loads history
+
 ## v0.6.4 (2026-05-06)
 
 - fix: center popup body content horizontally and vertically
@@ -140,6 +144,7 @@ Release v0.5.80
 - feat: Klick-Aktion ÔÇö neue Popups, Auto-Select, Schlie├ƒen-Fix
 - fix: Klick-Aktion ÔÇö Tab-Navigation + Auto-Select f├╝r Dimmer/Thermostat
 - feat: Widget-Klick-Aktion ÔÇö Popups + Navigation per Widget konfigurierbar
+
 
 
 
