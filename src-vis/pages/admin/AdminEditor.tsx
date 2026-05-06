@@ -248,8 +248,8 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
   if (step === 1) {
     return (
       <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-        <div className="rounded-xl w-full max-w-4xl shadow-2xl overflow-y-auto"
-          style={{ maxHeight: '95vh', background: 'linear-gradient(var(--app-surface), var(--app-surface)), var(--app-bg)', border: '1px solid var(--app-border)' }}
+        <div className="rounded-xl w-full max-w-5xl shadow-2xl flex flex-col"
+          style={{ maxHeight: '96vh', background: 'linear-gradient(var(--app-surface), var(--app-surface)), var(--app-bg)', border: '1px solid var(--app-border)' }}
           onClick={(e) => e.stopPropagation()}>
 
           {/* Header */}
@@ -363,7 +363,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
           </div>
 
           {/* Template grid */}
-          <div className="px-6 pb-2">
+          <div className="px-6 pb-2 overflow-y-auto flex-1">
             <div className="py-2 space-y-3">
 
               {/* "Alle"-Ansicht: Kategorien nebeneinander, je eine Spalte mit vertikaler Template-Liste */}
