@@ -203,7 +203,7 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
         </select>
         {isTypeDefaultActive && (
           <p className="text-[11px] mt-1.5 px-2 py-1.5 rounded-lg" style={{ background: 'var(--accent)18', color: 'var(--accent)', border: '1px solid var(--accent)44' }}>
-            Vom Typ-Standard geerbt – ändert sich automatisch mit der Admin-Einstellung. Wähle „Aus" zum Deaktivieren.
+            Vom Typ-Standard geerbt – ändert sich automatisch mit der Admin-Einstellung. Wähle &bdquo;Aus&rdquo; zum Deaktivieren.
           </p>
         )}
         {rawStoredAction && popupTypeDefaults[config.type] && (
