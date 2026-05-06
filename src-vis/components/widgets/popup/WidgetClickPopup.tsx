@@ -140,7 +140,7 @@ export function WidgetClickPopup({ widget, action: rawAction, onClose, allWidget
         )}
 
         {/* Body */}
-        <div className="overflow-auto" style={{ flex: isIframe ? 'none' : '1 1 auto' }}>
+        <div className="overflow-auto flex items-center justify-center" style={{ flex: isIframe ? 'none' : '1 1 auto' }}>
           {body}
         </div>
       </div>
