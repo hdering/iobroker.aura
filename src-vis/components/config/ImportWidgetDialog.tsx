@@ -4,6 +4,7 @@ import type { WidgetConfig, WidgetType } from '../../types';
 import { WIDGET_BY_TYPE } from '../../widgetRegistry';
 import { DatapointPicker } from './DatapointPicker';
 import { useT } from '../../i18n';
+import { importGroupDefs } from '../../utils/widgetExportImport';
 
 const inputCls = 'w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none';
 const inputStyle: React.CSSProperties = {
@@ -25,6 +26,7 @@ export function ImportWidgetDialog({
   const t = useT();
   const [jsonText, setJsonText] = useState('');
   const [parsed, setParsed] = useState<WidgetConfig | null>(null);
+  const [groupDefs, setGroupDefs] = useState<Record<string, WidgetConfig[]>>({});
   const [parseError, setParseError] = useState('');
   const [targetTabId, setTargetTabId] = useState(tabs?.[0]?.id ?? '');
   const [datapoint, setDatapoint] = useState('');
@@ -35,11 +37,14 @@ export function ImportWidgetDialog({
     try {
       const obj = JSON.parse(text);
       if (!obj.type || typeof obj.type !== 'string') throw new Error(t('import.invalidWidget'));
-      setParsed(obj as WidgetConfig);
-      setDatapoint(obj.datapoint ?? '');
+      const { groupDefs: defs, ...widgetConfig } = obj as WidgetConfig & { groupDefs?: Record<string, WidgetConfig[]> };
+      setParsed(widgetConfig as WidgetConfig);
+      setGroupDefs(defs ?? {});
+      setDatapoint(widgetConfig.datapoint ?? '');
       setParseError('');
     } catch (e) {
       setParsed(null);
+      setGroupDefs({});
       setParseError((e as Error).message);
     }
   };
@@ -54,15 +59,16 @@ export function ImportWidgetDialog({
 
   const handleAdd = () => {
     if (!parsed) return;
-    onAdd(
-      {
-        ...parsed,
-        id: `w-${Date.now()}`,
-        datapoint: datapoint.trim(),
-        gridPos: { ...parsed.gridPos, x: 0, y: 9999 },
-      },
-      targetTabId || undefined,
-    );
+    let widgetConfig: WidgetConfig = {
+      ...parsed,
+      id: `w-${Date.now()}`,
+      datapoint: datapoint.trim(),
+      gridPos: { ...parsed.gridPos, x: 0, y: 9999 },
+    };
+    if (Object.keys(groupDefs).length > 0) {
+      widgetConfig = importGroupDefs(widgetConfig, groupDefs);
+    }
+    onAdd(widgetConfig, targetTabId || undefined);
     onClose();
   };
 

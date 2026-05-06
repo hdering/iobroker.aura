@@ -48,7 +48,7 @@ export interface WidgetMeta {
   widgetGroup: WidgetGroup;
   /** Mock data shown in WidgetPreview thumbnails */
   mock: { t: string; v: string; u?: string; sub?: string };
-  /** Short hint shown in AddWidgetDialog – when to use this type */
+  /** Short hint shown in ManualWidgetDialog – when to use this type */
   hint?: string;
 }
 
