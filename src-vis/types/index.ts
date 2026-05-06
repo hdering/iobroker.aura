@@ -46,7 +46,8 @@ export type WidgetType =
   | 'mediaplayer'
   | 'slider'
   | 'chips'
-  | 'trashSchedule';
+  | 'trashSchedule'
+  | 'httpRequest';
 
 export type WidgetLayout = 'default' | 'card' | 'compact' | 'minimal' | 'agenda' | 'flow' | 'battery' | 'production' | 'consumption' | 'loadpoints' | 'custom' | 'count';
 

@@ -69,6 +69,7 @@ import { DatePickerWidget, FORMAT_LABELS, type DateOutputFormat } from '../widge
 import { MediaplayerWidget } from '../widgets/MediaplayerWidget';
 import { SliderWidget } from '../widgets/SliderWidget';
 import { ChipsWidget } from '../widgets/ChipsWidget';
+import { HttpRequestWidget } from '../widgets/HttpRequestWidget';
 import { IconPickerModal } from '../config/IconPickerModal';
 import { ClickActionEditor } from '../config/ClickActionEditor';
 import { WidgetClickPopup } from '../widgets/popup/WidgetClickPopup';
@@ -112,6 +113,7 @@ function getWidgetMap() {
     mediaplayer:   MediaplayerWidget,
     slider:        SliderWidget,
     chips:         ChipsWidget,
+    httpRequest:   HttpRequestWidget,
   } as const;
 }
 
@@ -2071,7 +2073,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
       setOpenPanel(panel);
     }
   };
-  const [pickerTarget, setPickerTarget] = useState<'datapoint' | 'actualDatapoint' | 'localTempDatapoint' | 'shutter_activityDp' | 'shutter_directionDp' | 'shutter_stopDp' | 'gauge_pointer2Dp' | 'gauge_pointer3Dp' | 'windowcontact_batteryDp' | 'wc_lockDp' | 'status_batteryDp' | 'status_unreachDp' | 'camera_wakeUpDp' | 'camera_slot' | 'html_dp' | 'mp_dp' | 'mp_chip' | 'sl_action' | 'chips_chip' | 'chips_checkDp' | null>(null);
+  const [pickerTarget, setPickerTarget] = useState<'datapoint' | 'actualDatapoint' | 'localTempDatapoint' | 'shutter_activityDp' | 'shutter_directionDp' | 'shutter_stopDp' | 'gauge_pointer2Dp' | 'gauge_pointer3Dp' | 'windowcontact_batteryDp' | 'wc_lockDp' | 'status_batteryDp' | 'status_unreachDp' | 'camera_wakeUpDp' | 'camera_slot' | 'html_dp' | 'mp_dp' | 'mp_chip' | 'sl_action' | 'chips_chip' | 'chips_checkDp' | 'http_response_dp' | null>(null);
   const [imageFilePicker, setImageFilePicker] = useState(false);
   const [cameraSlotPickerIdx, setCameraSlotPickerIdx] = useState(0);
   const [mpPickerKey, setMpPickerKey] = useState('');
@@ -4723,6 +4725,136 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                 );
               })()}
 
+              {/* ── HTTP-Aktion Widget ─────────────────────────────────────── */}
+              {config.type === 'httpRequest' && (() => {
+                const o = config.options ?? {};
+                const setO = (patch: Record<string, unknown>) =>
+                  onConfigChange({ ...config, options: { ...o, ...patch } });
+                const method = (o.method as string) || 'GET';
+                return (
+                  <>
+                    {/* Method */}
+                    <div>
+                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Methode</label>
+                      <div className="flex gap-1">
+                        {(['GET', 'POST'] as const).map((m) => (
+                          <button key={m} onClick={() => setO({ method: m })}
+                            className="flex-1 text-[11px] py-1 rounded-lg transition-colors"
+                            style={{
+                              background: method === m ? 'var(--accent)' : 'var(--app-bg)',
+                              color:      method === m ? '#fff' : 'var(--text-secondary)',
+                              border:     `1px solid ${method === m ? 'var(--accent)' : 'var(--app-border)'}`,
+                            }}>
+                            {m}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* URL */}
+                    <div>
+                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>URL</label>
+                      <input type="text" value={(o.url as string) || ''}
+                        onChange={(e) => setO({ url: e.target.value })}
+                        className={inputCls}
+                        style={inputStyle}
+                        placeholder="http://192.168.1.x/api/…" />
+                    </div>
+
+                    {/* POST body */}
+                    {method === 'POST' && (
+                      <>
+                        <div>
+                          <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Content-Type</label>
+                          <input type="text" value={(o.contentType as string) || 'application/json'}
+                            onChange={(e) => setO({ contentType: e.target.value })}
+                            className={inputCls}
+                            style={inputStyle}
+                            placeholder="application/json" />
+                        </div>
+                        <div>
+                          <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Body (optional)</label>
+                          <textarea rows={3} value={(o.body as string) || ''}
+                            onChange={(e) => setO({ body: e.target.value })}
+                            className={inputCls}
+                            style={inputStyle}
+                            placeholder={'{"key": "value"}'} />
+                        </div>
+                      </>
+                    )}
+
+                    {/* Response → DP */}
+                    <div>
+                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Antwort-Datenpunkt (optional)</label>
+                      <div className="flex gap-1">
+                        <input type="text" value={(o.responseDatapoint as string) || ''}
+                          onChange={(e) => setO({ responseDatapoint: e.target.value })}
+                          className={`${inputCls} flex-1`}
+                          style={inputStyle}
+                          placeholder="0_userdata.0.http.response" />
+                        <button onClick={() => setPickerTarget('http_response_dp')}
+                          className="px-2 rounded-lg text-xs hover:opacity-80 shrink-0"
+                          style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}>
+                          <Database size={13} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Button label */}
+                    <div>
+                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Button-Beschriftung (leer = Widget-Titel)</label>
+                      <input type="text" value={(o.buttonLabel as string) || ''}
+                        onChange={(e) => setO({ buttonLabel: e.target.value })}
+                        className={inputCls}
+                        style={inputStyle}
+                        placeholder={config.title || 'Senden'} />
+                    </div>
+
+                    {/* Button color */}
+                    <div className="flex items-center gap-2">
+                      <label className="text-[11px] flex-1" style={{ color: 'var(--text-secondary)' }}>Button-Farbe</label>
+                      <input type="color"
+                        value={(o.buttonColor as string) || '#0ea5e9'}
+                        onChange={(e) => setO({ buttonColor: e.target.value })}
+                        className="w-8 h-7 rounded cursor-pointer p-0.5"
+                        style={{ background: 'var(--app-bg)', border: '1px solid var(--app-border)' }} />
+                    </div>
+
+                    {/* Show status */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Letzten Status anzeigen</span>
+                      <button onClick={() => setO({ showStatus: !(o.showStatus ?? true) })}
+                        className="relative w-8 h-4 rounded-full transition-colors"
+                        style={{ background: (o.showStatus ?? true) ? 'var(--accent)' : 'var(--app-border)' }}>
+                        <span className="absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform"
+                          style={{ left: (o.showStatus ?? true) ? '18px' : '2px' }} />
+                      </button>
+                    </div>
+
+                    {/* Confirm action */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Bestätigung anfordern</span>
+                      <button onClick={() => setO({ confirmAction: !o.confirmAction })}
+                        className="relative w-8 h-4 rounded-full transition-colors"
+                        style={{ background: o.confirmAction ? 'var(--accent)' : 'var(--app-border)' }}>
+                        <span className="absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform"
+                          style={{ left: o.confirmAction ? '18px' : '2px' }} />
+                      </button>
+                    </div>
+                    {o.confirmAction && (
+                      <div>
+                        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>Bestätigungs-Text (optional)</label>
+                        <input type="text" value={(o.confirmText as string) || ''}
+                          onChange={(e) => setO({ confirmText: e.target.value })}
+                          className={inputCls}
+                          style={inputStyle}
+                          placeholder="Wirklich senden?" />
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+
               {/* ── Status-Datenpunkte (gemeinsam für alle Sensor-/Aktor-Typen) ── */}
               {['switch', 'dimmer', 'thermostat', 'shutter', 'windowcontact', 'binarysensor', 'stateimage'].includes(config.type) && (() => {
                 const o = config.options ?? {};
@@ -5591,6 +5723,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
             pickerTarget === 'mp_chip' ? (() => { const chips = (config.options?.chips as Array<{ dp: string }>) ?? []; return chips[mpChipIdx]?.dp ?? ''; })() :
             pickerTarget === 'chips_chip' ? (() => { const chips = (config.options?.chips as Array<{ dp: string }>) ?? []; return chips[chipsChipIdx]?.dp ?? ''; })() :
             pickerTarget === 'chips_checkDp' ? ((config.options?.checkDp as string) ?? '') :
+            pickerTarget === 'http_response_dp' ? ((config.options?.responseDatapoint as string) ?? '') :
             pickerTarget === 'sl_action' ? (() => { const acts = (config.options?.actions as Array<{ dp: string }>) ?? []; return acts[slActionIdx]?.dp ?? ''; })() :
             pickerTarget === 'camera_slot' ? (() => {
               const key = (config.layout ?? 'minimal') === 'default' ? 'infoItems' : 'customSlots';
@@ -5687,6 +5820,8 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
               onConfigChange({ ...config, options: { ...config.options, unreachDp: id } });
             } else if (pickerTarget === 'camera_wakeUpDp') {
               onConfigChange({ ...config, options: { ...config.options, wakeUpDp: id } });
+            } else if (pickerTarget === 'http_response_dp') {
+              onConfigChange({ ...config, options: { ...config.options, responseDatapoint: id } });
             } else if (pickerTarget === 'html_dp') {
               onConfigChange({ ...config, options: { ...config.options, htmlDatapoint: id } });
             } else if (pickerTarget === 'mp_dp') {
