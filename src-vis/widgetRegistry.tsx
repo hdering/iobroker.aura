@@ -50,6 +50,8 @@ export interface WidgetMeta {
   mock: { t: string; v: string; u?: string; sub?: string };
   /** Short hint shown in ManualWidgetDialog – when to use this type */
   hint?: string;
+  /** Option keys pre-filled with {{key}} placeholders when adding this widget inside a popup view editor */
+  popupDefaults?: Record<string, string>;
 }
 
 export const WIDGET_GROUPS: { id: WidgetGroup; label: string }[] = [
@@ -76,6 +78,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     addMode: 'datapoint',    widgetGroup: 'control',
     mock: { t: 'Wohnzimmer', v: '45', u: '%' },
     hint: 'Rollladen-Position (0–100 %) steuern und anzeigen',
+    popupDefaults: { activityDp: '{{activityDp}}', directionDp: '{{directionDp}}', stopDp: '{{stopDp}}', batteryDp: '{{batteryDp}}', unreachDp: '{{unreachDp}}' },
   },
   {
     type: 'dimmer',
@@ -103,6 +106,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     addMode: 'datapoint',   widgetGroup: 'control',
     mock: { t: 'Heizung', v: '21.0', sub: 'Ist: 19.5°' },
     hint: 'Soll-Temperatur einstellen und Ist-Temperatur anzeigen',
+    popupDefaults: { setpointDp: '{{dp}}' },
   },
   {
     type: 'value',
@@ -371,6 +375,13 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
 export const WIDGET_BY_TYPE = Object.fromEntries(
   WIDGET_REGISTRY.map((m) => [m.type, m]),
 ) as Record<WidgetType, WidgetMeta>;
+
+/** All {{key}} placeholder names available in popup views (union of all popupDefaults keys + dp) */
+export const ALL_POPUP_PLACEHOLDER_KEYS: string[] = (() => {
+  const keys = new Set<string>(['dp']);
+  WIDGET_REGISTRY.forEach((m) => Object.keys(m.popupDefaults ?? {}).forEach((k) => keys.add(k)));
+  return [...keys].sort();
+})();
 
 /**
  * Returns the effective default size for a widget type.

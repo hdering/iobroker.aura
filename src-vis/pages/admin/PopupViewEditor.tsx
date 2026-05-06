@@ -6,7 +6,7 @@ import { usePopupConfigStore, BUILTIN_VIEW_IDS } from '../../store/popupConfigSt
 import { useEffectiveSettings } from '../../hooks/useEffectiveSettings';
 import { WidgetFrame } from '../../components/layout/WidgetFrame';
 import { ActiveLayoutContext } from '../../contexts/ActiveLayoutContext';
-import { WIDGET_REGISTRY } from '../../widgetRegistry';
+import { WIDGET_REGISTRY, ALL_POPUP_PLACEHOLDER_KEYS } from '../../widgetRegistry';
 import type { WidgetConfig, WidgetType } from '../../types';
 
 const DEFAULT_MARGIN = 10;
@@ -76,17 +76,6 @@ export function PopupViewEditor() {
 
   const widgets = view.widgets;
 
-  const usedPlaceholders = (() => {
-    const keys = new Set<string>(['dp']);
-    const re = /\{\{(\w+)\}\}/g;
-    const scan = (s: unknown) => { if (typeof s === 'string') { let m; re.lastIndex = 0; while ((m = re.exec(s))) keys.add(m[1]); } };
-    widgets.forEach((w) => {
-      scan(w.datapoint);
-      scan(w.title);
-      Object.values(w.options ?? {}).forEach(scan);
-    });
-    return [...keys].sort();
-  })();
 
   const layout = widgets.map((w) => ({
     i: w.id,
@@ -108,13 +97,14 @@ export function PopupViewEditor() {
   };
 
   const handleAddWidget = () => {
+    const meta = WIDGET_REGISTRY.find((m) => m.type === addType);
     const widget: WidgetConfig = {
       id: `pw-${Date.now()}`,
       type: addType,
       title: '',
-      datapoint: '',
+      datapoint: '{{dp}}',
       gridPos: { x: 0, y: 9999, w: 6, h: 4 },
-      options: {},
+      options: { ...(meta?.popupDefaults ?? {}) },
     };
     addWidgetToView(viewId, widget);
   };
@@ -138,19 +128,17 @@ export function PopupViewEditor() {
           <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
             {view.name}
           </span>
-          {usedPlaceholders.length > 0 && (
-            <div className="flex items-center gap-1 flex-wrap" title="Platzhalter aus dem auslösenden Widget">
-              {usedPlaceholders.map((key) => (
-                <span
-                  key={key}
-                  className="text-[10px] px-1.5 py-0.5 rounded font-mono"
-                  style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
-                >
-                  {`{{${key}}}`}
-                </span>
-              ))}
-            </div>
-          )}
+          <div className="flex items-center gap-1 flex-wrap" title="Verfügbare Platzhalter aus dem auslösenden Widget">
+            {ALL_POPUP_PLACEHOLDER_KEYS.map((key) => (
+              <span
+                key={key}
+                className="text-[10px] px-1.5 py-0.5 rounded font-mono"
+                style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+              >
+                {`{{${key}}}`}
+              </span>
+            ))}
+          </div>
           <div className="flex-1" />
           <select
             value={addType}
