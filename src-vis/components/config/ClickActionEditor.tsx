@@ -129,6 +129,11 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
     onConfigChange({ ...config, options: { ...o, ...patch } });
   };
 
+  const resetToTypeDefault = () => {
+    const { clickAction: _removed, ...rest } = o as Record<string, unknown>;
+    onConfigChange({ ...config, options: rest });
+  };
+
   const setMode = (kind: ClickAction['kind']) => {
     switch (kind) {
       case 'none':        setAction({ kind: 'none' }); break;
@@ -200,6 +205,15 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
           <p className="text-[11px] mt-1.5 px-2 py-1.5 rounded-lg" style={{ background: 'var(--accent)18', color: 'var(--accent)', border: '1px solid var(--accent)44' }}>
             Vom Typ-Standard geerbt – ändert sich automatisch mit der Admin-Einstellung. Wähle „Aus" zum Deaktivieren.
           </p>
+        )}
+        {rawStoredAction && popupTypeDefaults[config.type] && (
+          <button
+            onClick={resetToTypeDefault}
+            className="text-[11px] mt-1.5 w-full px-2 py-1.5 rounded-lg text-left hover:opacity-80 transition-opacity"
+            style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+          >
+            ↩ Auf Typ-Standard zurücksetzen
+          </button>
         )}
       </div>
 
