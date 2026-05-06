@@ -52,7 +52,13 @@ export const BUILTIN_VIEWS: PopupView[] = [
     name: 'Standard: Rolladen',
     widgets: [
       bw('pw-bi-shutter-1', 'value',   'Position', 0, 0, 12, 3),
-      bw('pw-bi-shutter-2', 'shutter', '',          0, 3, 12, 6),
+      bw('pw-bi-shutter-2', 'shutter', '',          0, 3, 12, 6, {
+        activityDp:  '{{activityDp}}',
+        directionDp: '{{directionDp}}',
+        stopDp:      '{{stopDp}}',
+        batteryDp:   '{{batteryDp}}',
+        unreachDp:   '{{unreachDp}}',
+      }),
     ],
   },
   {

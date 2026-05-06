@@ -8,22 +8,22 @@ import type { WidgetConfig } from '../../../types';
 
 const DEFAULT_MARGIN = 10;
 
-// ── {{dp}} substitution ───────────────────────────────────────────────────────
+// ── {{key}} substitution ──────────────────────────────────────────────────────
 
-function sub(value: string, dp: string): string {
-  if (!dp || !value.includes('{{dp}}')) return value;
-  return value.replace(/\{\{dp\}\}/g, dp);
+function subAll(value: string, map: Record<string, string>): string {
+  if (!value) return value;
+  return value.replace(/\{\{(\w+)\}\}/g, (_, key) => map[key] ?? `{{${key}}}`);
 }
 
-function substituteWidget(w: WidgetConfig, dp: string): WidgetConfig {
-  if (!dp) return w;
+function substituteWidget(w: WidgetConfig, map: Record<string, string>): WidgetConfig {
+  if (Object.keys(map).length === 0) return w;
   return {
     ...w,
-    datapoint: sub(w.datapoint, dp),
-    title: sub(w.title, dp),
+    datapoint: subAll(w.datapoint, map),
+    title: subAll(w.title, map),
     options: w.options
       ? Object.fromEntries(
-          Object.entries(w.options).map(([k, v]) => [k, typeof v === 'string' ? sub(v, dp) : v]),
+          Object.entries(w.options).map(([k, v]) => [k, typeof v === 'string' ? subAll(v, map) : v]),
         )
       : w.options,
   };
@@ -33,10 +33,10 @@ function substituteWidget(w: WidgetConfig, dp: string): WidgetConfig {
 
 interface Props {
   viewId: string;
-  triggerDp?: string;
+  triggerWidget?: WidgetConfig;
 }
 
-export function TabEmbedBody({ viewId, triggerDp = '' }: Props) {
+export function TabEmbedBody({ viewId, triggerWidget }: Props) {
   const view = usePopupConfigStore((s) => s.views.find((v) => v.id === viewId));
   const settings = useEffectiveSettings();
   const cellSize = settings.gridRowHeight ?? 60;
@@ -71,8 +71,17 @@ export function TabEmbedBody({ viewId, triggerDp = '' }: Props) {
     );
   }
 
+  const subMap: Record<string, string> = triggerWidget
+    ? {
+        dp: triggerWidget.datapoint,
+        ...Object.fromEntries(
+          Object.entries(triggerWidget.options ?? {}).filter((e): e is [string, string] => typeof e[1] === 'string'),
+        ),
+      }
+    : {};
+
   const wm = getWidgetMap();
-  const widgets = view.widgets.map((w) => substituteWidget(w, triggerDp));
+  const widgets = view.widgets.map((w) => substituteWidget(w, subMap));
 
   const layout = widgets.map((w) => ({
     i: w.id,
