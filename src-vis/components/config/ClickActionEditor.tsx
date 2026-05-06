@@ -100,7 +100,6 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
   const o = config.options ?? {};
   const rawStoredAction = o.clickAction as ClickAction | undefined;
   const storedAction = rawStoredAction ? normalizeAction(rawStoredAction) : undefined;
-  const action: ClickAction = storedAction ?? defaultActionForConfig(config) ?? { kind: 'none' as const };
   const popupTitle     = (o.popupTitle     as string)  ?? '';
   const popupHideTitle = !!(o.popupHideTitle);
   const popupWidth     = (o.popupWidth  as number | undefined);
@@ -115,11 +114,10 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
     onConfigChange({ ...config, options: { ...o, clickAction: patch } });
   };
 
-  // Persist the derived default on first open, or migrate legacy popup kinds
+  // Persist the derived default on first open for built-in types, or migrate legacy popup kinds
   useEffect(() => {
     if (!rawStoredAction) {
-      const def = defaultActionForConfig(config)
-        ?? (popupTypeDefaults[config.type] ? { kind: 'popup-view' as const, viewId: popupTypeDefaults[config.type] } : null);
+      const def = defaultActionForConfig(config);
       if (def) setAction(def);
     } else if (rawStoredAction !== storedAction) {
       setAction(storedAction!);
@@ -160,6 +158,14 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
   const popupViews = usePopupConfigStore((s) => s.views);
   const popupTypeDefaults = usePopupConfigStore((s) => s.typeDefaults);
 
+  // Dynamic type default: not stored, so admin changes propagate to all unmodified widgets
+  const typeDefaultViewId = !storedAction && !defaultActionForConfig(config) ? popupTypeDefaults[config.type] : undefined;
+  const action: ClickAction = storedAction
+    ?? defaultActionForConfig(config)
+    ?? (typeDefaultViewId ? { kind: 'popup-view' as const, viewId: typeDefaultViewId } : null)
+    ?? { kind: 'none' as const };
+  const isTypeDefaultActive = !!typeDefaultViewId;
+
   const isPopup = action.kind.startsWith('popup-');
 
   // Layout/Tab/Widget selectors for link modes
@@ -190,6 +196,11 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
             </optgroup>
           ))}
         </select>
+        {isTypeDefaultActive && (
+          <p className="text-[11px] mt-1.5 px-2 py-1.5 rounded-lg" style={{ background: 'var(--accent)18', color: 'var(--accent)', border: '1px solid var(--accent)44' }}>
+            Vom Typ-Standard geerbt – ändert sich automatisch mit der Admin-Einstellung. Wähle „Aus" zum Deaktivieren.
+          </p>
+        )}
       </div>
 
       {/* ── Mode-specific fields ── */}
