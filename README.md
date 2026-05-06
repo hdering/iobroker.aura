@@ -184,6 +184,13 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.6.6 (2026-05-06)
+- feat: reset-to-type-default button in click action editor
+- fix: type-default popup-view follows admin changes for unmodified widgets
+- fix: auto-set type-default popup-view on first editor open
+- feat: allow per-widget opt-out of type-level popup default
+
+
 ### 0.6.5 (2026-05-06)
 - fix: chart in popup-view with {{dp}} now auto-detects and loads history
 
@@ -927,6 +934,7 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 
 
 

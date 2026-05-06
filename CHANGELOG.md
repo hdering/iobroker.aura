@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.6.6 (2026-05-06)
+
+- feat: reset-to-type-default button in click action editor
+- fix: type-default popup-view follows admin changes for unmodified widgets
+- fix: auto-set type-default popup-view on first editor open
+- feat: allow per-widget opt-out of type-level popup default
+
 ## v0.6.5 (2026-05-06)
 
 - fix: chart in popup-view with {{dp}} now auto-detects and loads history
@@ -144,6 +151,7 @@ Release v0.5.80
 - feat: Klick-Aktion ÔÇö neue Popups, Auto-Select, Schlie├ƒen-Fix
 - fix: Klick-Aktion ÔÇö Tab-Navigation + Auto-Select f├╝r Dimmer/Thermostat
 - feat: Widget-Klick-Aktion ÔÇö Popups + Navigation per Widget konfigurierbar
+
 
 
 

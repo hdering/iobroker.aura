@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.6.5",
+    "version": "0.6.6",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -105,6 +105,10 @@
       }
     ],
     "news": {
+      "0.6.6": {
+        "en": "feat: reset-to-type-default button in click action editor; fix: type-default popup-view follows admin changes for unmodified widgets; fix: auto-set type-default popup-view on first editor open; feat: allow per-widget opt-out of type-level popup default",
+        "de": "feat: reset-to-type-default button in click action editor; fix: type-default popup-view follows admin changes for unmodified widgets; fix: auto-set type-default popup-view on first editor open; feat: allow per-widget opt-out of type-level popup default"
+      },
       "0.6.5": {
         "en": "fix: chart in popup-view with {{dp}} now auto-detects and loads history",
         "de": "fix: chart in popup-view with {{dp}} now auto-detects and loads history"
