@@ -15,6 +15,17 @@ import { HtmlPopupBody } from './HtmlPopupBody';
 import { WidgetEmbedBody } from './WidgetEmbedBody';
 import { TabEmbedBody } from './TabEmbedBody';
 
+function normalizeAction(action: ClickAction): ClickAction {
+  switch (action.kind) {
+    case 'popup-dimmer':      return { kind: 'popup-view', viewId: 'pv-builtin-dimmer' };
+    case 'popup-thermostat':  return { kind: 'popup-view', viewId: 'pv-builtin-thermostat' };
+    case 'popup-switch':      return { kind: 'popup-view', viewId: 'pv-builtin-switch' };
+    case 'popup-shutter':     return { kind: 'popup-view', viewId: 'pv-builtin-shutter' };
+    case 'popup-mediaplayer': return { kind: 'popup-view', viewId: 'pv-builtin-mediaplayer' };
+    default:                  return action;
+  }
+}
+
 interface Props {
   widget: WidgetConfig;
   action: ClickAction;
@@ -42,7 +53,8 @@ function getTitle(widget: WidgetConfig, action: ClickAction): string {
   }
 }
 
-export function WidgetClickPopup({ widget, action, onClose, allWidgets = [] }: Props) {
+export function WidgetClickPopup({ widget, action: rawAction, onClose, allWidgets = [] }: Props) {
+  const action = normalizeAction(rawAction);
   // Prefer the frontend container so the popup inherits per-layout scoped CSS vars.
   // Falls back to the portal target (admin context) or document.body.
   const adminTarget = usePortalTarget();

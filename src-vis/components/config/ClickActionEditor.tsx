@@ -5,26 +5,26 @@ import { useDashboardStore } from '../../store/dashboardStore';
 import { usePopupConfigStore } from '../../store/popupConfigStore';
 import { DatapointPicker } from './DatapointPicker';
 
+function normalizeAction(action: ClickAction): ClickAction {
+  switch (action.kind) {
+    case 'popup-dimmer':      return { kind: 'popup-view', viewId: 'pv-builtin-dimmer' };
+    case 'popup-thermostat':  return { kind: 'popup-view', viewId: 'pv-builtin-thermostat' };
+    case 'popup-switch':      return { kind: 'popup-view', viewId: 'pv-builtin-switch' };
+    case 'popup-shutter':     return { kind: 'popup-view', viewId: 'pv-builtin-shutter' };
+    case 'popup-mediaplayer': return { kind: 'popup-view', viewId: 'pv-builtin-mediaplayer' };
+    default:                  return action;
+  }
+}
+
 function defaultActionForConfig(config: WidgetConfig): ClickAction | null {
   switch (config.type) {
-    case 'dimmer':
-      return { kind: 'popup-dimmer' };
-    case 'thermostat':
-      return {
-        kind: 'popup-thermostat',
-        setpointDp: config.datapoint || undefined,
-        modeDp:     (config.options?.actualDatapoint as string | undefined) || undefined,
-      };
-    case 'switch':
-      return { kind: 'popup-switch' };
-    case 'shutter':
-      return { kind: 'popup-shutter' };
-    case 'mediaplayer':
-      return { kind: 'popup-mediaplayer' };
-    case 'slider':
-      return { kind: 'popup-widget', widgetId: '' };
-    default:
-      return null;
+    case 'dimmer':      return { kind: 'popup-view', viewId: 'pv-builtin-dimmer' };
+    case 'thermostat':  return { kind: 'popup-view', viewId: 'pv-builtin-thermostat' };
+    case 'switch':      return { kind: 'popup-view', viewId: 'pv-builtin-switch' };
+    case 'shutter':     return { kind: 'popup-view', viewId: 'pv-builtin-shutter' };
+    case 'mediaplayer': return { kind: 'popup-view', viewId: 'pv-builtin-mediaplayer' };
+    case 'slider':      return { kind: 'popup-widget', widgetId: '' };
+    default:            return null;
   }
 }
 
@@ -40,7 +40,7 @@ const MODE_GROUPS: { label: string; modes: ClickAction['kind'][] }[] = [
   },
   {
     label: 'Popup',
-    modes: ['popup-dimmer', 'popup-thermostat', 'popup-switch', 'popup-shutter', 'popup-mediaplayer', 'popup-image', 'popup-iframe', 'popup-json', 'popup-html', 'popup-widget', 'popup-view'],
+    modes: ['popup-view', 'popup-image', 'popup-iframe', 'popup-json', 'popup-html', 'popup-widget'],
   },
   {
     label: 'Navigation',
@@ -60,20 +60,21 @@ const labelStyle: React.CSSProperties = { color: 'var(--text-secondary)' };
 function modeLabel(kind: ClickAction['kind']): string {
   switch (kind) {
     case 'none':              return 'Aus';
-    case 'popup-dimmer':      return 'Popup: Dimmer';
-    case 'popup-thermostat':  return 'Popup: Thermostat';
-    case 'popup-switch':      return 'Popup: Schalter';
-    case 'popup-shutter':     return 'Popup: Rolladen';
-    case 'popup-mediaplayer': return 'Popup: Mediaplayer';
+    case 'popup-view':        return 'Popup: View';
     case 'popup-image':       return 'Popup: Bild';
     case 'popup-iframe':      return 'Popup: Webseite (iframe)';
     case 'popup-json':        return 'Popup: JSON';
     case 'popup-html':        return 'Popup: HTML';
     case 'popup-widget':      return 'Popup: Widget-Inhalt';
-    case 'popup-view':        return 'Popup: View';
     case 'link-tab':          return 'Sprung: Tab';
     case 'link-external':     return 'Sprung: Externe URL';
     case 'link-widget':       return 'Sprung: Widget';
+    // legacy kinds (normalized at render time)
+    case 'popup-dimmer':      return 'Popup: Dimmer';
+    case 'popup-thermostat':  return 'Popup: Thermostat';
+    case 'popup-switch':      return 'Popup: Schalter';
+    case 'popup-shutter':     return 'Popup: Rolladen';
+    case 'popup-mediaplayer': return 'Popup: Mediaplayer';
   }
 }
 
@@ -97,8 +98,8 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: 
 
 export function ClickActionEditor({ config, onConfigChange }: Props) {
   const o = config.options ?? {};
-  // If no action is stored yet, derive a sensible default from widget type
-  const storedAction = o.clickAction as ClickAction | undefined;
+  const rawStoredAction = o.clickAction as ClickAction | undefined;
+  const storedAction = rawStoredAction ? normalizeAction(rawStoredAction) : undefined;
   const action: ClickAction = storedAction ?? defaultActionForConfig(config) ?? { kind: 'none' as const };
   const popupTitle     = (o.popupTitle     as string)  ?? '';
   const popupHideTitle = !!(o.popupHideTitle);
@@ -114,11 +115,13 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
     onConfigChange({ ...config, options: { ...o, clickAction: patch } });
   };
 
-  // Persist the derived default on first open so run-mode picks it up
+  // Persist the derived default on first open, or migrate legacy popup kinds
   useEffect(() => {
-    if (!storedAction) {
+    if (!rawStoredAction) {
       const def = defaultActionForConfig(config);
       if (def) setAction(def);
+    } else if (rawStoredAction !== storedAction) {
+      setAction(storedAction!);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -129,18 +132,13 @@ export function ClickActionEditor({ config, onConfigChange }: Props) {
 
   const setMode = (kind: ClickAction['kind']) => {
     switch (kind) {
-      case 'none':              setAction({ kind: 'none' }); break;
-      case 'popup-dimmer':      setAction({ kind: 'popup-dimmer' }); break;
-      case 'popup-thermostat':  setAction({ kind: 'popup-thermostat' }); break;
-      case 'popup-switch':      setAction({ kind: 'popup-switch' }); break;
-      case 'popup-shutter':     setAction({ kind: 'popup-shutter' }); break;
-      case 'popup-mediaplayer': setAction({ kind: 'popup-mediaplayer' }); break;
-      case 'popup-image':       setAction({ kind: 'popup-image' }); break;
-      case 'popup-iframe':      setAction({ kind: 'popup-iframe', url: '' }); break;
-      case 'popup-json':        setAction({ kind: 'popup-json' }); break;
-      case 'popup-html':        setAction({ kind: 'popup-html' }); break;
-      case 'popup-widget':      setAction({ kind: 'popup-widget' }); break;
-      case 'popup-view':        setAction({ kind: 'popup-view', viewId: '' }); break;
+      case 'none':        setAction({ kind: 'none' }); break;
+      case 'popup-view':  setAction({ kind: 'popup-view', viewId: '' }); break;
+      case 'popup-image': setAction({ kind: 'popup-image' }); break;
+      case 'popup-iframe': setAction({ kind: 'popup-iframe', url: '' }); break;
+      case 'popup-json':  setAction({ kind: 'popup-json' }); break;
+      case 'popup-html':  setAction({ kind: 'popup-html' }); break;
+      case 'popup-widget': setAction({ kind: 'popup-widget' }); break;
       case 'link-tab': {
         const firstLayout = layouts[0];
         const firstTab = firstLayout?.tabs[0];
