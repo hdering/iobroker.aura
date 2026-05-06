@@ -73,7 +73,6 @@ export const DP_TEMPLATE_CATEGORIES: DpTemplateCategory[] = [
   { id: 'lighting',  label: 'Licht'             },
   { id: 'switching', label: 'Schalten'          },
   { id: 'security',  label: 'Sicherheit'        },
-  { id: 'energy',    label: 'Energie'           },
   { id: 'sensor',    label: 'Messwerte'         },
   { id: 'special',   label: 'Sonstiges'         },
 ];
@@ -110,35 +109,8 @@ export const DP_TEMPLATES: DpTemplate[] = [
   // ── BESCHATTUNG ───────────────────────────────────────────────────────────
   {
     id: 'shutter',
-    label: 'Rollladen',
+    label: 'Rollladen / Markise',
     icon: '🪟',
-    widgetType: 'shutter',
-    category: 'shading',
-    secondaryDps: [
-      {
-        // HomeMatic: WORKING (classic), ACTIVITY_STATE (HmIP), PROCESS (some models)
-        // Shelly: state  |  zigbee/deconz: moving
-        optionKey: 'activityDp',
-        siblingNames: ['WORKING', 'working', 'ACTIVITY_STATE', 'activity_state', 'PROCESS', 'process', 'state', 'moving', 'activity', 'ACTIVITY'],
-      },
-      {
-        // HomeMatic: DIRECTION  |  (Shelly/zigbee have no dedicated direction DP)
-        optionKey: 'directionDp',
-        siblingNames: ['DIRECTION', 'direction'],
-      },
-      {
-        // HomeMatic: STOP  |  Shelly: Pause
-        optionKey: 'stopDp',
-        siblingNames: ['STOP', 'stop', 'Pause', 'pause'],
-      },
-      { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow', 'BATTERY_LOW'] },
-      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
-    ],
-  },
-  {
-    id: 'awning',
-    label: 'Markise',
-    icon: '⛱',
     widgetType: 'shutter',
     category: 'shading',
     secondaryDps: [
@@ -212,18 +184,6 @@ export const DP_TEMPLATES: DpTemplate[] = [
       { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
     ],
   },
-  {
-    id: 'switch_light',
-    label: 'Lichtschalter',
-    icon: '💡',
-    widgetType: 'switch',
-    category: 'lighting',
-    secondaryDps: [
-      { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow', 'BATTERY_LOW'] },
-      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
-    ],
-  },
-
   // ── SCHALTEN ─────────────────────────────────────────────────────────────
   {
     id: 'switch',
@@ -236,33 +196,11 @@ export const DP_TEMPLATES: DpTemplate[] = [
       { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
     ],
   },
-  {
-    id: 'socket',
-    label: 'Steckdose',
-    icon: '🔌',
-    widgetType: 'switch',
-    category: 'switching',
-    secondaryDps: [
-      { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow', 'BATTERY_LOW'] },
-      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
-    ],
-  },
-  {
-    id: 'fan',
-    label: 'Ventilator',
-    icon: '🌀',
-    widgetType: 'switch',
-    category: 'switching',
-    secondaryDps: [
-      { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow', 'BATTERY_LOW'] },
-      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
-    ],
-  },
 
   // ── SICHERHEIT ───────────────────────────────────────────────────────────
   {
-    id: 'sensor_door',
-    label: 'Tür',
+    id: 'sensor_contact',
+    label: 'Fenster / Tür',
     icon: '🚪',
     widgetType: 'windowcontact',
     category: 'security',
@@ -272,86 +210,18 @@ export const DP_TEMPLATES: DpTemplate[] = [
     ],
   },
   {
-    id: 'sensor_window',
-    label: 'Fenster',
-    icon: '🪟',
-    widgetType: 'windowcontact',
-    category: 'security',
-    secondaryDps: [
-      { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow'] },
-      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE'] },
-    ],
-  },
-  {
-    id: 'sensor_motion',
-    label: 'Bewegung',
+    id: 'sensor_binary',
+    label: 'Binärsensor',
     icon: '👁',
     widgetType: 'binarysensor',
     category: 'security',
-    defaultOptions: { sensorType: 'motion' },
     secondaryDps: [
       { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow'] },
       { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE'] },
-    ],
-  },
-  {
-    id: 'sensor_smoke',
-    label: 'Rauchmelder',
-    icon: '🚨',
-    widgetType: 'binarysensor',
-    category: 'security',
-    defaultOptions: { sensorType: 'smoke' },
-    secondaryDps: [
-      { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow'] },
-      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE'] },
-    ],
-  },
-
-  // ── ENERGIE ──────────────────────────────────────────────────────────────
-  {
-    id: 'value_power',
-    label: 'Leistung (W)',
-    icon: '⚡',
-    widgetType: 'value',
-    category: 'energy',
-    secondaryDps: [
-      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
-    ],
-  },
-  {
-    id: 'value_energy',
-    label: 'Energie (kWh)',
-    icon: '🔋',
-    widgetType: 'value',
-    category: 'energy',
-    secondaryDps: [
-      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
     ],
   },
 
   // ── MESSWERTE ────────────────────────────────────────────────────────────
-  {
-    id: 'value_temperature',
-    label: 'Temperatur',
-    icon: '🌡',
-    widgetType: 'value',
-    category: 'sensor',
-    secondaryDps: [
-      { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow', 'BATTERY_LOW'] },
-      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
-    ],
-  },
-  {
-    id: 'value_humidity',
-    label: 'Luftfeuchte',
-    icon: '💧',
-    widgetType: 'value',
-    category: 'sensor',
-    secondaryDps: [
-      { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow', 'BATTERY_LOW'] },
-      { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
-    ],
-  },
   {
     id: 'value',
     label: 'Messwert',
@@ -380,7 +250,7 @@ export function findTemplateByRole(role?: string, valueType?: string): DpTemplat
   if (r === 'level.blind' || r === 'level.curtain' || r.includes('blind') || r.includes('shutter') || r.includes('cover'))
     return DP_TEMPLATES.find((t) => t.id === 'shutter')!;
   if (r.includes('awning'))
-    return DP_TEMPLATES.find((t) => t.id === 'awning')!;
+    return DP_TEMPLATES.find((t) => t.id === 'shutter')!;
 
   // Climate
   if (r === 'level.temperature' || r.startsWith('heating') || (r.includes('temperature') && r.includes('level')))
@@ -395,31 +265,20 @@ export function findTemplateByRole(role?: string, valueType?: string): DpTemplat
     return DP_TEMPLATES.find((t) => t.id === 'dimmer')!;
 
   // Window / door contacts
-  if (r.startsWith('sensor.door') || r === 'door')
-    return DP_TEMPLATES.find((t) => t.id === 'sensor_door')!;
-  if (r.startsWith('sensor.window') || r === 'window')
-    return DP_TEMPLATES.find((t) => t.id === 'sensor_window')!;
-  if (r.startsWith('sensor.motion') || r === 'motion' || r.includes('presence'))
-    return DP_TEMPLATES.find((t) => t.id === 'sensor_motion')!;
-  if (r.startsWith('sensor.smoke') || r.includes('smoke') || r.includes('alarm.fire') || r.includes('alarm'))
-    return DP_TEMPLATES.find((t) => t.id === 'sensor_smoke')!;
+  if (r.startsWith('sensor.door') || r === 'door' || r.startsWith('sensor.window') || r === 'window')
+    return DP_TEMPLATES.find((t) => t.id === 'sensor_contact')!;
+  if (r.startsWith('sensor.motion') || r === 'motion' || r.includes('presence') || r.startsWith('sensor.smoke') || r.includes('smoke') || r.includes('alarm.fire') || r.includes('alarm'))
+    return DP_TEMPLATES.find((t) => t.id === 'sensor_binary')!;
 
-  // Switch sub-types
-  if (r === 'switch.light')
-    return DP_TEMPLATES.find((t) => t.id === 'switch_light')!;
-  if (r === 'switch.power' || r.startsWith('socket') || r === 'indicator.power')
-    return DP_TEMPLATES.find((t) => t.id === 'socket')!;
-  if (r === 'switch' || r.startsWith('switch.') || r === 'button' || r.startsWith('indicator.') || r.startsWith('sensor.') || valueType === 'boolean')
+  // Switch sub-types — all map to the single 'switch' template
+  if (r === 'switch.light' || r === 'switch.power' || r.startsWith('socket') || r === 'indicator.power' ||
+      r === 'switch' || r.startsWith('switch.') || r === 'button' || r.startsWith('indicator.') || r.startsWith('sensor.') || valueType === 'boolean')
     return DP_TEMPLATES.find((t) => t.id === 'switch')!;
 
-  // Value sub-types — note: value.temperature is a plain sensor, NOT a thermostat setpoint
-  if (r === 'value.temperature' || r === 'temperature')
-    return DP_TEMPLATES.find((t) => t.id === 'value_temperature')!;
-  if (r === 'value.humidity' || r === 'humidity')
-    return DP_TEMPLATES.find((t) => t.id === 'value_humidity')!;
-  if (r === 'value.power' || r === 'value.power.consumption' || r.includes('energy'))
-    return DP_TEMPLATES.find((t) => t.id === 'value_energy')!;
-  if (r.startsWith('value.') || r === 'value' || valueType === 'number')
+  // Value sub-types — all map to the single 'value' template
+  if (r === 'value.temperature' || r === 'temperature' || r === 'value.humidity' || r === 'humidity' ||
+      r === 'value.power' || r === 'value.power.consumption' || r.includes('energy') ||
+      r.startsWith('value.') || r === 'value' || valueType === 'number')
     return DP_TEMPLATES.find((t) => t.id === 'value')!;
 
   return null;
