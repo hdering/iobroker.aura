@@ -101,6 +101,7 @@ interface PopupConfigState {
 
   // Builtins
   ensureBuiltins: () => void;
+  restoreBuiltin: (viewId: string) => void;
   copyView: (sourceId: string) => string;
 }
 
@@ -202,6 +203,21 @@ export const usePopupConfigStore = create<PopupConfigState>()(
           return {
             views: [...s.views, ...missingViews],
             typeDefaults: { ...defaultsToAdd, ...s.typeDefaults },
+          };
+        }),
+
+      restoreBuiltin: (viewId) =>
+        set((s) => {
+          const builtin = BUILTIN_VIEWS.find((v) => v.id === viewId);
+          if (!builtin) return s;
+          const defaultsToRestore: Record<string, string> = {};
+          for (const [type, vid] of Object.entries(BUILTIN_TYPE_DEFAULTS)) {
+            if (vid === viewId && !s.typeDefaults[type]) defaultsToRestore[type] = viewId;
+          }
+          return {
+            views: [...s.views, builtin],
+            deletedBuiltinIds: s.deletedBuiltinIds.filter((id) => id !== viewId),
+            typeDefaults: { ...defaultsToRestore, ...s.typeDefaults },
           };
         }),
     }),

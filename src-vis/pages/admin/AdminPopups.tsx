@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Trash2, Check, Pencil, Layers } from 'lucide-react';
-import { usePopupConfigStore, BUILTIN_VIEW_IDS } from '../../store/popupConfigStore';
+import { Plus, Trash2, Check, Pencil, Layers, RotateCcw } from 'lucide-react';
+import { usePopupConfigStore, BUILTIN_VIEW_IDS, BUILTIN_VIEWS } from '../../store/popupConfigStore';
 import { WIDGET_REGISTRY } from '../../widgetRegistry';
 
 // ── Shared styles ─────────────────────────────────────────────────────────────
@@ -32,7 +32,7 @@ function ViewSelect({ value, onChange }: { value: string; onChange: (v: string) 
 
 function PopupViewsSection() {
   const navigate = useNavigate();
-  const { views, addView, removeView, updateViewName, copyView } = usePopupConfigStore();
+  const { views, addView, removeView, updateViewName, copyView, restoreBuiltin, deletedBuiltinIds } = usePopupConfigStore();
 
   const [newViewName, setNewViewName] = useState('');
   const [addingView, setAddingView] = useState(false);
@@ -185,6 +185,36 @@ function PopupViewsSection() {
             </button>
           </div>
         );})}
+
+        {/* Deleted builtins */}
+        {deletedBuiltinIds.length > 0 && (
+          <div className="mt-3 space-y-1.5">
+            <p className="text-[11px] px-1" style={{ color: 'var(--text-secondary)' }}>Gelöschte Standard-Views</p>
+            {deletedBuiltinIds.map((id) => {
+              const builtin = BUILTIN_VIEWS.find((v) => v.id === id);
+              if (!builtin) return null;
+              return (
+                <div
+                  key={id}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl opacity-60"
+                  style={{ background: 'var(--app-surface)', border: '1px dashed var(--app-border)' }}
+                >
+                  <span className="text-xs flex-1 truncate line-through" style={{ color: 'var(--text-secondary)' }}>
+                    {builtin.name}
+                  </span>
+                  <button
+                    onClick={() => restoreBuiltin(id)}
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium hover:opacity-80 transition-opacity shrink-0 opacity-100"
+                    style={{ background: 'var(--app-bg)', border: '1px solid var(--app-border)', color: 'var(--text-primary)' }}
+                    title="Wiederherstellen"
+                  >
+                    <RotateCcw size={11} /> Wiederherstellen
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );
