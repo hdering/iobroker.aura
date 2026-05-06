@@ -471,6 +471,17 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
             </div>
           </div>
 
+          {/* Hint for selected further-widget – outside scroll area to prevent layout shift */}
+          <div className="px-6 pb-2" style={{ minHeight: '2rem' }}>
+            <p className="text-xs rounded-lg px-3 py-1.5"
+              style={{
+                visibility: selectedFurther?.hint ? 'visible' : 'hidden',
+                color: 'var(--text-secondary)', background: 'var(--app-bg)', border: '1px solid var(--app-border)',
+              }}>
+              {selectedFurther?.hint ?? ' '}
+            </p>
+          </div>
+
           {/* Footer */}
           <div className="flex items-center justify-between px-6 py-4"
             style={{ borderTop: '1px solid var(--app-border)' }}>
