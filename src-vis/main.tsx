@@ -15,6 +15,7 @@ import { AdminEditor } from './pages/admin/AdminEditor';
 import { AdminWidgets } from './pages/admin/AdminWidgets';
 import { AdminLayouts } from './pages/admin/AdminLayouts';
 import { AdminPopups } from './pages/admin/AdminPopups';
+import { PopupViewEditor } from './pages/admin/PopupViewEditor';
 
 const router = createHashRouter([
   { path: '/', element: <App /> },
@@ -32,6 +33,7 @@ const router = createHashRouter([
       { path: 'widgets', element: <AdminWidgets /> },
       { path: 'layouts', element: <AdminLayouts /> },
       { path: 'popups', element: <AdminPopups /> },
+      { path: 'popups/:viewId', element: <PopupViewEditor /> },
       { path: 'settings', element: <AdminSettings /> },
     ],
   },
