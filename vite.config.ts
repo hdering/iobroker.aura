@@ -37,17 +37,21 @@ function ioBrokerDevPlugin(): Plugin {
             'x-xss-protection', 'cross-origin-resource-policy',
             'cross-origin-embedder-policy', 'cross-origin-opener-policy',
           ]);
+          const fwdHeaders: Record<string, string> = {
+            'Accept': req.headers['accept'] as string || 'text/html,*/*',
+            'Accept-Language': req.headers['accept-language'] as string || 'en',
+            'User-Agent': 'Mozilla/5.0 (ioBroker-Aura)',
+          };
+          for (const k of ['content-type', 'content-length']) {
+            if (req.headers[k]) fwdHeaders[k.split('-').map((p: string) => p[0].toUpperCase() + p.slice(1)).join('-')] = req.headers[k] as string;
+          }
           const proxyReq = lib.request({
             hostname: target.hostname,
             port: target.port || (target.protocol === 'https:' ? 443 : 80),
             path: target.pathname + target.search,
-            method: 'GET',
+            method: req.method || 'GET',
             timeout: 15000,
-            headers: {
-              'Accept': 'text/html,*/*',
-              'Accept-Language': 'en',
-              'User-Agent': 'Mozilla/5.0 (ioBroker-Aura)',
-            },
+            headers: fwdHeaders,
             rejectUnauthorized: false,
           } as http.RequestOptions, (proxyRes) => {
             if ((proxyRes.statusCode === 301 || proxyRes.statusCode === 302) && proxyRes.headers.location) {
@@ -70,7 +74,7 @@ function ioBrokerDevPlugin(): Plugin {
           });
           proxyReq.on('timeout', () => { proxyReq.destroy(); if (!res.headersSent) { res.writeHead(504); res.end('Proxy timeout'); } });
           proxyReq.on('error', (e) => { if (!res.headersSent) { res.writeHead(502); res.end(e.message); } });
-          proxyReq.end();
+          req.pipe(proxyReq, { end: true });
         } catch {
           res.writeHead(400); res.end('Invalid URL');
         }

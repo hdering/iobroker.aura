@@ -40,7 +40,8 @@ export function HttpRequestWidget({ config }: WidgetProps) {
         init.body = body;
         init.headers = { 'Content-Type': contentType };
       }
-      const res  = await fetch(url, init);
+      const proxyUrl = '/proxy?url=' + encodeURIComponent(url);
+      const res  = await fetch(proxyUrl, init);
       const text = await res.text();
       if (responseDatapoint) setState(responseDatapoint, text);
       if (res.ok) {
