@@ -184,6 +184,25 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.6.0 (2026-05-06)
+- fix: add 24px padding buffer to popup naturalMinWidth
+- feat: auto-size popup to content width
+- refactor: replace legacy popup-* click action kinds with popup-view+builtin
+- feat: allow direct editing of builtin views in super-admin mode
+- feat: super-admin mode via secret URL key for builtin view protection
+- feat: restore deleted standard popup views
+- feat: auto-fill popup placeholder options + show all keys in toolbar
+- fix: always show {{dp}} placeholder pill in view editor toolbar
+- feat: show all used {{key}} placeholders in popup view editor toolbar
+- feat: generalize popup placeholder substitution to all widget options
+- feat: standard views read-only — copy-only workflow
+- feat: popup phase 2 — {{dp}} substitution + predefined standard views
+- refactor: remove popup groups, expose popup-view directly in click action
+- feat: grid-based popup view editor with drag/resize positioning
+- feat: popup views as standalone mini-dashboards (Phase 1)
+- feat: implement 3-level popup configuration system
+
+
 ### 0.5.90 (2026-05-06)
 - chore: delete unused AddWidgetDialog.tsx, fix stale comment in widgetRegistry
 - fix: show hint for selected DP template (was only showing for further-widgets)
@@ -885,6 +904,7 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 
 
 

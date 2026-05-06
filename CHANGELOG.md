@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.6.0 (2026-05-06)
+
+- fix: add 24px padding buffer to popup naturalMinWidth
+- feat: auto-size popup to content width
+- refactor: replace legacy popup-* click action kinds with popup-view+builtin
+- feat: allow direct editing of builtin views in super-admin mode
+- feat: super-admin mode via secret URL key for builtin view protection
+- feat: restore deleted standard popup views
+- feat: auto-fill popup placeholder options + show all keys in toolbar
+- fix: always show {{dp}} placeholder pill in view editor toolbar
+- feat: show all used {{key}} placeholders in popup view editor toolbar
+- feat: generalize popup placeholder substitution to all widget options
+- feat: standard views read-only — copy-only workflow
+- feat: popup phase 2 — {{dp}} substitution + predefined standard views
+- refactor: remove popup groups, expose popup-view directly in click action
+- feat: grid-based popup view editor with drag/resize positioning
+- feat: popup views as standalone mini-dashboards (Phase 1)
+- feat: implement 3-level popup configuration system
+
 ## v0.5.90 (2026-05-06)
 
 - chore: delete unused AddWidgetDialog.tsx, fix stale comment in widgetRegistry
@@ -102,6 +121,7 @@ Release v0.5.80
 - feat: Klick-Aktion ÔÇö neue Popups, Auto-Select, Schlie├ƒen-Fix
 - fix: Klick-Aktion ÔÇö Tab-Navigation + Auto-Select f├╝r Dimmer/Thermostat
 - feat: Widget-Klick-Aktion ÔÇö Popups + Navigation per Widget konfigurierbar
+
 
 
 
