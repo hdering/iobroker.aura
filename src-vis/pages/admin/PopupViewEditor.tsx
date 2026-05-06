@@ -76,6 +76,18 @@ export function PopupViewEditor() {
 
   const widgets = view.widgets;
 
+  const usedPlaceholders = (() => {
+    const keys = new Set<string>();
+    const re = /\{\{(\w+)\}\}/g;
+    const scan = (s: unknown) => { if (typeof s === 'string') { let m; re.lastIndex = 0; while ((m = re.exec(s))) keys.add(m[1]); } };
+    widgets.forEach((w) => {
+      scan(w.datapoint);
+      scan(w.title);
+      Object.values(w.options ?? {}).forEach(scan);
+    });
+    return [...keys].sort();
+  })();
+
   const layout = widgets.map((w) => ({
     i: w.id,
     x: w.gridPos.x ?? 0,
@@ -126,13 +138,19 @@ export function PopupViewEditor() {
           <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
             {view.name}
           </span>
-          <span
-            className="text-[10px] px-1.5 py-0.5 rounded font-mono"
-            style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
-            title="Platzhalter für den Datenpunkt des auslösenden Widgets"
-          >
-            {'{{dp}}'}
-          </span>
+          {usedPlaceholders.length > 0 && (
+            <div className="flex items-center gap-1 flex-wrap" title="Platzhalter aus dem auslösenden Widget">
+              {usedPlaceholders.map((key) => (
+                <span
+                  key={key}
+                  className="text-[10px] px-1.5 py-0.5 rounded font-mono"
+                  style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+                >
+                  {`{{${key}}}`}
+                </span>
+              ))}
+            </div>
+          )}
           <div className="flex-1" />
           <select
             value={addType}
