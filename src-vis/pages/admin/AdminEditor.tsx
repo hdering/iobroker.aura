@@ -284,12 +284,10 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
                 <Database size={15} />
               </button>
             </div>
-            {templateId && selectedTemplate && (
-              <p className="mt-1.5 text-xs flex items-center gap-1" style={{ color: 'var(--accent)' }}>
-                <Check size={11} />
-                Erkannt als: <strong>{selectedTemplate.label}</strong>
-              </p>
-            )}
+            <p className="mt-1.5 text-xs flex items-center gap-1" style={{ color: 'var(--accent)', visibility: templateId && selectedTemplate ? 'visible' : 'hidden' }}>
+              <Check size={11} />
+              Erkannt als: <strong>{selectedTemplate?.label ?? ' '}</strong>
+            </p>
           </div>
 
           {/* Recently used */}
