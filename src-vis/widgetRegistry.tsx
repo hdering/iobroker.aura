@@ -48,6 +48,8 @@ export interface WidgetMeta {
   widgetGroup: WidgetGroup;
   /** Mock data shown in WidgetPreview thumbnails */
   mock: { t: string; v: string; u?: string; sub?: string };
+  /** Short hint shown in AddWidgetDialog – when to use this type */
+  hint?: string;
 }
 
 export const WIDGET_GROUPS: { id: WidgetGroup; label: string }[] = [
@@ -64,6 +66,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 8,            defaultH: 4,
     addMode: 'datapoint',   widgetGroup: 'control',
     mock: { t: 'Wohnzimmer', v: 'AN' },
+    hint: 'Ein/Aus-Schalter für Boolean-Datenpunkte (z.B. Lampe, Steckdose)',
   },
   {
     type: 'shutter',
@@ -72,6 +75,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 8,             defaultH: 5,
     addMode: 'datapoint',    widgetGroup: 'control',
     mock: { t: 'Wohnzimmer', v: '45', u: '%' },
+    hint: 'Rollladen-Position (0–100 %) steuern und anzeigen',
   },
   {
     type: 'dimmer',
@@ -80,6 +84,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 10,           defaultH: 5,
     addMode: 'datapoint',   widgetGroup: 'control',
     mock: { t: 'Licht', v: '75', u: '%' },
+    hint: 'Licht dimmen – Helligkeitsregler 0–100 % mit Ein/Aus-Taste',
   },
   {
     type: 'slider',
@@ -88,6 +93,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 8,            defaultH: 4,
     addMode: 'datapoint',   widgetGroup: 'control',
     mock: { t: 'Lautstärke', v: '50', u: '%' },
+    hint: 'Beliebigen Zahlenwert per Schieberegler einstellen',
   },
   {
     type: 'thermostat',
@@ -96,6 +102,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 10,           defaultH: 6,
     addMode: 'datapoint',   widgetGroup: 'control',
     mock: { t: 'Heizung', v: '21.0', sub: 'Ist: 19.5°' },
+    hint: 'Soll-Temperatur einstellen und Ist-Temperatur anzeigen',
   },
   {
     type: 'value',
@@ -104,6 +111,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 8,            defaultH: 4,
     addMode: 'datapoint',   widgetGroup: 'control',
     mock: { t: 'Temperatur', v: '21.5', u: '°C' },
+    hint: 'Einen Datenpunktwert als Zahl/Text anzeigen (read-only)',
   },
   {
     type: 'gauge',
@@ -112,6 +120,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 8,            defaultH: 5,
     addMode: 'datapoint',   widgetGroup: 'control',
     mock: { t: 'Gauge', v: '72', u: 'kW' },
+    hint: 'Zahlenwert als Tachonadel/Kreisbogen visualisieren',
   },
   {
     type: 'chart',
@@ -120,6 +129,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 12,           defaultH: 5,
     addMode: 'datapoint',   widgetGroup: 'control',
     mock: { t: 'Verbrauch', v: '245', u: 'W' },
+    hint: 'Verlauf eines einzelnen Datenpunkts als einfaches Diagramm',
   },
   {
     type: 'echart',
@@ -128,6 +138,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 12,           defaultH: 5,
     addMode: 'datapoint',   widgetGroup: 'control',
     mock: { t: 'EChart', v: '' },
+    hint: 'Erweitertes Diagramm mit mehreren Datenpunkten und Optionen',
   },
   {
     type: 'echartsPreset',
@@ -136,6 +147,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 12,           defaultH: 5,
     addMode: 'free',        widgetGroup: 'control',
     mock: { t: 'eCharts', v: '' },
+    hint: 'Vorkonfiguriertes eCharts-Diagramm per JSON-Preset',
   },
   {
     type: 'list',
@@ -144,6 +156,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 10,             defaultH: 6,
     addMode: 'free',          widgetGroup: 'control',
     mock: { t: 'Statische Liste', v: '' },
+    hint: 'Manuell gepflegte Liste mit frei konfigurierbaren Datenpunkt-Links',
   },
   {
     type: 'autolist',
@@ -152,6 +165,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 10,           defaultH: 6,
     addMode: 'free',        widgetGroup: 'control',
     mock: { t: 'Dynamische Liste', v: '' },
+    hint: 'Datenpunkte automatisch aus einem ioBroker-Ordner auflisten',
   },
   {
     type: 'clock',
@@ -160,6 +174,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 8,            defaultH: 4,
     addMode: 'free',        widgetGroup: 'special',
     mock: { t: 'Uhrzeit', v: '12:34' },
+    hint: 'Aktuelle Uhrzeit und Datum anzeigen (kein Datenpunkt nötig)',
   },
   {
     type: 'weather',
@@ -168,6 +183,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 10,           defaultH: 5,
     addMode: 'free',        widgetGroup: 'special',
     mock: { t: 'Wetter', v: '18°', sub: '⛅ Bewölkt' },
+    hint: 'Wetterdaten vom ioBroker-Wetter-Adapter anzeigen',
   },
   {
     type: 'calendar',
@@ -176,6 +192,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 12,           defaultH: 6,
     addMode: 'wizard-only', widgetGroup: 'special',
     mock: { t: 'Kalender', v: '3' },
+    hint: 'Termine aus dem iCal-Adapter (nur per Tab-Wizard hinzufügbar)',
   },
   {
     type: 'evcc',
@@ -184,6 +201,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 12,           defaultH: 6,
     addMode: 'free',        widgetGroup: 'special',
     mock: { t: 'evcc', v: '' },
+    hint: 'evcc Wallbox-Ladesteuerung einbinden',
   },
   {
     type: 'camera',
@@ -192,6 +210,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 10,           defaultH: 5,
     addMode: 'free',        widgetGroup: 'special',
     mock: { t: 'Kamera', v: '' },
+    hint: 'Kamera-Livebild einbinden (go2rtc / MJPEG-Stream)',
   },
   {
     type: 'image',
@@ -200,6 +219,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 10,           defaultH: 5,
     addMode: 'free',        widgetGroup: 'special',
     mock: { t: 'Bild', v: '' },
+    hint: 'Statisches Bild, lokale Datei oder URL anzeigen',
   },
   {
     type: 'trash',
@@ -208,14 +228,16 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 10,             defaultH: 5,
     addMode: 'free',          widgetGroup: 'special',
     mock: { t: 'Müllabfuhr', v: '' },
+    hint: 'Nächste Müllabfuhr-Termine vom Trash-Adapter anzeigen',
   },
   {
     type: 'trashSchedule',
-    label: 'Müllabfuhr-Zeitplan', shortLabel: 'Müllabfuhr (Müllabfuhr-Zeitplan)',
+    label: 'Müllabfuhr-Zeitplan', shortLabel: 'Müllabfuhr-Zeitplan',
     Icon: CalendarCheck2,         iconName: 'CalendarCheck2', color: '#6b7280',
     defaultW: 10,                 defaultH: 5,
     addMode: 'datapoint',         widgetGroup: 'special',
     mock: { t: 'Müllabfuhr-Zeitplan', v: '' },
+    hint: 'Detaillierter Müllabfuhr-Kalender (Datenpunkt vom Trash-Adapter)',
   },
   {
     type: 'fill',
@@ -224,6 +246,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 8,                defaultH: 6,
     addMode: 'datapoint',       widgetGroup: 'control',
     mock: { t: 'Wassertank', v: '68', u: '%' },
+    hint: 'Füllstand (z.B. Wassertank, Heizöl) als Balken visualisieren',
   },
   {
     type: 'iframe',
@@ -232,6 +255,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 12,            defaultH: 6,
     addMode: 'free',         widgetGroup: 'special',
     mock: { t: 'iFrame', v: '' },
+    hint: 'Externe Webseite oder lokale URL einbetten',
   },
   {
     type: 'header',
@@ -240,6 +264,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 12,           defaultH: 1,
     addMode: 'free',        widgetGroup: 'layout',
     mock: { t: 'Abschnitt', v: '' },
+    hint: 'Trennlinie mit Überschrift zur Gliederung des Dashboards',
   },
   {
     type: 'group',
@@ -248,6 +273,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 12,           defaultH: 6,
     addMode: 'free',        widgetGroup: 'layout',
     mock: { t: 'Gruppe', v: '' },
+    hint: 'Mehrere Widgets in einem gemeinsamen Rahmen gruppieren',
   },
   {
     type: 'button',
@@ -256,6 +282,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 4,            defaultH: 3,
     addMode: 'free',        widgetGroup: 'layout',
     mock: { t: 'Öffnen', v: '' },
+    hint: 'Klick-Aktion auslösen (Datenpunkt schreiben, HTTP-Call, Szene …)',
   },
   {
     type: 'jsontable',
@@ -264,6 +291,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 12,           defaultH: 5,
     addMode: 'datapoint',   widgetGroup: 'special',
     mock: { t: 'JSON-Tabelle', v: '' },
+    hint: 'JSON-Array-Datenpunkt als formatierte Tabelle anzeigen',
   },
   {
     type: 'windowcontact',
@@ -272,6 +300,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 8,                 defaultH: 4,
     addMode: 'datapoint',        widgetGroup: 'control',
     mock: { t: 'Fenster', v: 'false' },
+    hint: 'Fenster- oder Türkontakt-Status anzeigen (offen/geschlossen)',
   },
   {
     type: 'binarysensor',
@@ -280,6 +309,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 8,            defaultH: 4,
     addMode: 'datapoint',   widgetGroup: 'control',
     mock: { t: 'Bewegung', v: 'false' },
+    hint: 'Allgemeinen Binärsensor anzeigen (z.B. Bewegungsmelder, Alarm)',
   },
   {
     type: 'stateimage',
@@ -288,6 +318,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 8,            defaultH: 4,
     addMode: 'datapoint',   widgetGroup: 'control',
     mock: { t: 'Garage', v: 'false' },
+    hint: 'Je nach Zustand (true/false) ein anderes Bild anzeigen',
   },
   {
     type: 'html',
@@ -296,6 +327,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 10,           defaultH: 5,
     addMode: 'free',        widgetGroup: 'special',
     mock: { t: 'HTML', v: '' },
+    hint: 'Beliebigen HTML/CSS-Code frei einbetten',
   },
   {
     type: 'datepicker',
@@ -304,6 +336,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 10,           defaultH: 4,
     addMode: 'datapoint',   widgetGroup: 'special',
     mock: { t: 'Datum', v: '01.01.2025' },
+    hint: 'Datum/Uhrzeit auswählen und als Datenpunkt speichern',
   },
   {
     type: 'mediaplayer',
@@ -312,6 +345,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 14,           defaultH: 6,
     addMode: 'free',        widgetGroup: 'control',
     mock: { t: 'Ocean Planet', v: 'Ethereal Nights' },
+    hint: 'Mediaplayer steuern (Sonos, Squeezeserver, Spotify …)',
   },
   {
     type: 'chips',
@@ -320,6 +354,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 10,                  defaultH: 3,
     addMode: 'free',               widgetGroup: 'control',
     mock: { t: 'Szenen', v: '' },
+    hint: 'Kompakte Schaltflächen-Leiste für Szenen und häufige Aktionen',
   },
   {
     type: 'httpRequest',
@@ -328,6 +363,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
     defaultW: 8,                   defaultH: 3,
     addMode: 'free',               widgetGroup: 'control',
     mock: { t: 'HTTP-Aktion', v: '' },
+    hint: 'HTTP GET/POST-Anfrage per Klick auslösen (z.B. Webhook)',
   },
 ];
 

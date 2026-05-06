@@ -200,7 +200,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
       id: `w-${Date.now()}`,
       type,
       layout,
-      title: finalTitle || (isList && selectedGroup ? selectedGroup.name : def.label),
+      title: finalTitle || (isList && selectedGroup ? selectedGroup.name : templateLabel || def.label),
       datapoint: dpId,
       gridPos: { x: 0, y: 9999, ...getEffectiveSize(type, widgetDefaults) },
       options: {
@@ -447,6 +447,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
                       const active = templateId === w.type;
                       return (
                         <button key={w.type} type="button"
+                          title={w.hint}
                           onClick={() => selectTemplate(w.type, w.type)}
                           className="flex items-center gap-2.5 rounded-xl transition-all hover:scale-[1.02] active:scale-95 text-left"
                           style={{
@@ -458,12 +459,19 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
                           <w.Icon size={18} color={active ? 'var(--accent)' : w.color} style={{ flexShrink: 0 }} />
                           <span className="leading-tight font-medium truncate"
                             style={{ fontSize: 12, color: active ? 'var(--accent)' : 'var(--text-secondary)' }}>
-                            {w.shortLabel}
+                            {w.label}
                           </span>
                         </button>
                       );
                     })}
                   </div>
+                  {/* Hint for the selected further-widget */}
+                  {selectedFurther?.hint && (
+                    <p className="mt-2 text-xs rounded-lg px-3 py-2"
+                      style={{ color: 'var(--text-secondary)', background: 'var(--app-bg)', border: '1px solid var(--app-border)' }}>
+                      {selectedFurther.hint}
+                    </p>
+                  )}
                 </div>
               )}
             </div>
