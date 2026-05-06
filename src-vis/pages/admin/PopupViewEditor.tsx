@@ -2,7 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ReactGridLayout from 'react-grid-layout';
 import { ArrowLeft, Plus } from 'lucide-react';
-import { usePopupConfigStore } from '../../store/popupConfigStore';
+import { usePopupConfigStore, BUILTIN_VIEW_IDS } from '../../store/popupConfigStore';
 import { useEffectiveSettings } from '../../hooks/useEffectiveSettings';
 import { WidgetFrame } from '../../components/layout/WidgetFrame';
 import { ActiveLayoutContext } from '../../contexts/ActiveLayoutContext';
@@ -14,7 +14,7 @@ const DEFAULT_MARGIN = 10;
 export function PopupViewEditor() {
   const { viewId } = useParams<{ viewId: string }>();
   const navigate = useNavigate();
-  const { views, addWidgetToView, removeWidgetFromView, updateWidgetInView } = usePopupConfigStore();
+  const { views, addWidgetToView, removeWidgetFromView, updateWidgetInView, copyView } = usePopupConfigStore();
 
   const view = views.find((v) => v.id === viewId);
   const settings = useEffectiveSettings();
@@ -46,6 +46,30 @@ export function PopupViewEditor() {
     return (
       <div className="flex items-center justify-center h-64 text-sm" style={{ color: 'var(--text-secondary)' }}>
         View nicht gefunden: {viewId}
+      </div>
+    );
+  }
+
+  if (BUILTIN_VIEW_IDS.has(viewId)) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 gap-4">
+        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+          Standard-Views können nicht direkt bearbeitet werden.
+        </p>
+        <button
+          onClick={() => { const id = copyView(viewId); navigate(`/admin/popups/${id}`); }}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium hover:opacity-80 transition-opacity"
+          style={{ background: 'var(--accent)', color: '#fff' }}
+        >
+          <Plus size={14} /> Als Kopie bearbeiten
+        </button>
+        <button
+          onClick={() => navigate('/admin/popups')}
+          className="text-xs hover:opacity-70 transition-opacity"
+          style={{ color: 'var(--text-secondary)' }}
+        >
+          Zurück
+        </button>
       </div>
     );
   }

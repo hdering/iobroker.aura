@@ -95,6 +95,7 @@ interface PopupConfigState {
 
   // Builtins
   ensureBuiltins: () => void;
+  copyView: (sourceId: string) => string;
 }
 
 export const usePopupConfigStore = create<PopupConfigState>()(
@@ -161,6 +162,22 @@ export const usePopupConfigStore = create<PopupConfigState>()(
               : v,
           ),
         })),
+
+      copyView: (sourceId) => {
+        const newId = `pv-${Date.now()}`;
+        set((s) => {
+          const source = s.views.find((v) => v.id === sourceId)
+                      ?? BUILTIN_VIEWS.find((v) => v.id === sourceId);
+          if (!source) return s;
+          const copy: PopupView = {
+            id: newId,
+            name: `${source.name} (Kopie)`,
+            widgets: source.widgets.map((w, i) => ({ ...w, id: `pw-${Date.now()}-${i}` })),
+          };
+          return { views: [...s.views, copy] };
+        });
+        return newId;
+      },
 
       ensureBuiltins: () =>
         set((s) => {

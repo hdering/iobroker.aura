@@ -32,7 +32,7 @@ function ViewSelect({ value, onChange }: { value: string; onChange: (v: string) 
 
 function PopupViewsSection() {
   const navigate = useNavigate();
-  const { views, addView, removeView, updateViewName } = usePopupConfigStore();
+  const { views, addView, removeView, updateViewName, copyView } = usePopupConfigStore();
 
   const [newViewName, setNewViewName] = useState('');
   const [addingView, setAddingView] = useState(false);
@@ -146,23 +146,35 @@ function PopupViewsSection() {
               {view.widgets.length} Widget{view.widgets.length !== 1 ? 's' : ''}
             </span>
 
-            <button
-              onClick={() => navigate(`/admin/popups/${view.id}`)}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium hover:opacity-80 transition-opacity shrink-0"
-              style={{ background: 'var(--app-bg)', border: '1px solid var(--app-border)', color: 'var(--text-primary)' }}
-              title="View bearbeiten"
-            >
-              <Layers size={11} /> Bearbeiten
-            </button>
-
-            <button
-              onClick={() => { setEditingNameId(view.id); setEditingName(view.name); }}
-              className="flex items-center justify-center w-6 h-6 shrink-0 rounded hover:opacity-70 transition-opacity"
-              style={{ color: 'var(--text-secondary)' }}
-              title="Umbenennen"
-            >
-              <Pencil size={11} />
-            </button>
+            {isBuiltin ? (
+              <button
+                onClick={() => { const id = copyView(view.id); navigate(`/admin/popups/${id}`); }}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium hover:opacity-80 transition-opacity shrink-0"
+                style={{ background: 'var(--app-bg)', border: '1px solid var(--app-border)', color: 'var(--text-primary)' }}
+                title="Als Kopie bearbeiten"
+              >
+                <Plus size={11} /> Kopieren
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => navigate(`/admin/popups/${view.id}`)}
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium hover:opacity-80 transition-opacity shrink-0"
+                  style={{ background: 'var(--app-bg)', border: '1px solid var(--app-border)', color: 'var(--text-primary)' }}
+                  title="View bearbeiten"
+                >
+                  <Layers size={11} /> Bearbeiten
+                </button>
+                <button
+                  onClick={() => { setEditingNameId(view.id); setEditingName(view.name); }}
+                  className="flex items-center justify-center w-6 h-6 shrink-0 rounded hover:opacity-70 transition-opacity"
+                  style={{ color: 'var(--text-secondary)' }}
+                  title="Umbenennen"
+                >
+                  <Pencil size={11} />
+                </button>
+              </>
+            )}
             <button
               onClick={() => removeView(view.id)}
               className="flex items-center justify-center w-6 h-6 shrink-0 rounded hover:opacity-70 transition-opacity"
