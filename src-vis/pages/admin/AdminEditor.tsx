@@ -475,10 +475,10 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
           <div className="px-6 pb-2" style={{ minHeight: '2rem' }}>
             <p className="text-xs rounded-lg px-3 py-1.5"
               style={{
-                visibility: selectedFurther?.hint ? 'visible' : 'hidden',
+                visibility: (selectedTemplate?.hint ?? selectedFurther?.hint) ? 'visible' : 'hidden',
                 color: 'var(--text-secondary)', background: 'var(--app-bg)', border: '1px solid var(--app-border)',
               }}>
-              {selectedFurther?.hint ?? ' '}
+              {selectedTemplate?.hint ?? selectedFurther?.hint ?? ' '}
             </p>
           </div>
 
