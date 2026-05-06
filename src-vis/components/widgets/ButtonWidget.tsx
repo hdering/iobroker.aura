@@ -1,6 +1,7 @@
 import type { WidgetProps } from '../../types';
 import { getWidgetIcon } from '../../utils/widgetIconMap';
 import { contentPositionClass } from '../../utils/widgetUtils';
+import { CustomGridView } from './CustomGridView';
 
 export function ButtonWidget({ config }: WidgetProps) {
   const o = config.options ?? {};
@@ -13,6 +14,21 @@ export function ButtonWidget({ config }: WidgetProps) {
 
   const iconName  = o.icon as string | undefined;
   const WidgetIcon = iconName ? getWidgetIcon(iconName, (() => null) as never) : null;
+
+  if (layout === 'custom') {
+    const iconEl = showIcon && WidgetIcon
+      ? <WidgetIcon size={iconSize} style={{ color }} />
+      : null;
+    return (
+      <div className="relative w-full h-full">
+        <CustomGridView
+          config={config}
+          value={label}
+          extraComponents={iconEl ? { icon: iconEl } : {}}
+        />
+      </div>
+    );
+  }
 
   if (layout === 'compact') {
     return (

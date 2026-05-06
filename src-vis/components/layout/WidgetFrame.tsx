@@ -2838,6 +2838,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                 { value: 'default', label: t('wf.edit.layout.standard') },
                 { value: 'compact', label: t('wf.edit.layout.compact') },
                 { value: 'minimal', label: t('wf.edit.layout.minimal') },
+                { value: 'custom',  label: 'Custom' },
               ] : config.type === 'group' ? [
                 { value: 'default', label: t('wf.edit.layout.standard') },
               ] : config.type === 'trash' || config.type === 'trashSchedule' ? [
@@ -5087,6 +5088,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                   binarysensor:  [{ key: 'icon', label: 'Status-Icon' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
                   stateimage:    [{ key: 'icon', label: 'Zustands-Icon' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
                   httpRequest:   [{ key: 'button', label: 'HTTP-Button' }],
+                  button:        [{ key: 'icon', label: 'Button-Icon' }],
                   mediaplayer:   [
                     { key: 'play-pause',     label: '▶ / ⏸ Play / Pause' },
                     { key: 'prev',           label: '⏮ Vorheriger Titel' },
