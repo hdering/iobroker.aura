@@ -102,6 +102,8 @@ export interface DpTemplate {
    * main datapoint (e.g. user selects ACTUAL_TEMPERATURE → promotes SET_TEMPERATURE).
    */
   primarySiblingNames?: string[];
+  /** Short hint shown in ManualWidgetDialog – when to use this template */
+  hint?: string;
 }
 
 export const DP_TEMPLATES: DpTemplate[] = [
@@ -113,6 +115,7 @@ export const DP_TEMPLATES: DpTemplate[] = [
     icon: '🪟',
     widgetType: 'shutter',
     category: 'shading',
+    hint: 'Für alle positionsgesteuerten Beschattungsgeräte: Rollladen, Jalousie, Rollo, Markise – Datenpunkt liefert 0–100 %',
     secondaryDps: [
       {
         optionKey: 'activityDp',
@@ -138,6 +141,7 @@ export const DP_TEMPLATES: DpTemplate[] = [
     icon: '🌡',
     widgetType: 'thermostat',
     category: 'climate',
+    hint: 'Für Heizkörper-Thermostate (HmIP-eTRV, Zigbee TRV …) – Datenpunkt ist der Soll-Temperatur-Setpoint; Ist-Temperatur wird automatisch erkannt',
     primarySiblingNames: [
       // Homematic classic (HM-CC-RT-DN, HM-TC-IT-WM)
       'SET_TEMPERATURE', 'set_temperature', 'SET_TEMP', 'set_temp',
@@ -179,6 +183,7 @@ export const DP_TEMPLATES: DpTemplate[] = [
     icon: '🔆',
     widgetType: 'dimmer',
     category: 'lighting',
+    hint: 'Für dimmbare Leuchten – Datenpunkt steuert die Helligkeit (0–100 %); eignet sich auch für Lautstärke und andere Pegelwerte',
     secondaryDps: [
       { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow', 'BATTERY_LOW'] },
       { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
@@ -191,6 +196,7 @@ export const DP_TEMPLATES: DpTemplate[] = [
     icon: '🔘',
     widgetType: 'switch',
     category: 'switching',
+    hint: 'Für alles mit Ein/Aus: Lichtschalter, Steckdose, Ventilator, Szene – Datenpunkt ist ein Boolean (true/false)',
     secondaryDps: [
       { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow', 'BATTERY_LOW'] },
       { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
@@ -204,6 +210,7 @@ export const DP_TEMPLATES: DpTemplate[] = [
     icon: '🚪',
     widgetType: 'windowcontact',
     category: 'security',
+    hint: 'Für Reed-Kontakte an Fenstern oder Türen – zeigt offen/geschlossen mit passendem Icon und Statusfarbe',
     secondaryDps: [
       { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow'] },
       { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE'] },
@@ -215,6 +222,7 @@ export const DP_TEMPLATES: DpTemplate[] = [
     icon: '👁',
     widgetType: 'binarysensor',
     category: 'security',
+    hint: 'Für Bewegungsmelder, Rauchmelder, Wassermelder und andere Alarm-/Statussensoren – zeigt aktiv/inaktiv mit konfigurierbarem Icon',
     secondaryDps: [
       { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow'] },
       { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE'] },
@@ -228,6 +236,7 @@ export const DP_TEMPLATES: DpTemplate[] = [
     icon: '📊',
     widgetType: 'value',
     category: 'sensor',
+    hint: 'Für jeden Zahlenwert: Temperatur, Luftfeuchte, Leistung (W), Energie (kWh), CO₂ oder beliebiger Sensor – nur Anzeige, kein Schreiben',
     secondaryDps: [
       { optionKey: 'batteryDp', siblingNames: ['LOWBAT', 'LOW_BAT', 'lowBat', 'low_bat', 'battery_low', 'batteryLow', 'BATTERY_LOW'] },
       { optionKey: 'unreachDp', siblingNames: ['UNREACH', 'unreach', 'UNREACHABLE', 'unreachable', 'offline', 'OFFLINE'] },
