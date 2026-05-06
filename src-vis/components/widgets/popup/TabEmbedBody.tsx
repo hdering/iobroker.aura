@@ -4,14 +4,39 @@ import { AlertTriangle } from 'lucide-react';
 import { usePopupConfigStore } from '../../../store/popupConfigStore';
 import { useEffectiveSettings } from '../../../hooks/useEffectiveSettings';
 import { getWidgetMap } from '../widgetMap';
+import type { WidgetConfig } from '../../../types';
 
 const DEFAULT_MARGIN = 10;
 
-interface Props {
-  viewId: string;
+// ── {{dp}} substitution ───────────────────────────────────────────────────────
+
+function sub(value: string, dp: string): string {
+  if (!dp || !value.includes('{{dp}}')) return value;
+  return value.replace(/\{\{dp\}\}/g, dp);
 }
 
-export function TabEmbedBody({ viewId }: Props) {
+function substituteWidget(w: WidgetConfig, dp: string): WidgetConfig {
+  if (!dp) return w;
+  return {
+    ...w,
+    datapoint: sub(w.datapoint, dp),
+    title: sub(w.title, dp),
+    options: w.options
+      ? Object.fromEntries(
+          Object.entries(w.options).map(([k, v]) => [k, typeof v === 'string' ? sub(v, dp) : v]),
+        )
+      : w.options,
+  };
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
+interface Props {
+  viewId: string;
+  triggerDp?: string;
+}
+
+export function TabEmbedBody({ viewId, triggerDp = '' }: Props) {
   const view = usePopupConfigStore((s) => s.views.find((v) => v.id === viewId));
   const settings = useEffectiveSettings();
   const cellSize = settings.gridRowHeight ?? 60;
@@ -47,7 +72,9 @@ export function TabEmbedBody({ viewId }: Props) {
   }
 
   const wm = getWidgetMap();
-  const layout = view.widgets.map((w) => ({
+  const widgets = view.widgets.map((w) => substituteWidget(w, triggerDp));
+
+  const layout = widgets.map((w) => ({
     i: w.id,
     x: w.gridPos.x ?? 0,
     y: w.gridPos.y ?? 9999,
@@ -70,7 +97,7 @@ export function TabEmbedBody({ viewId }: Props) {
           margin={[MARGIN, MARGIN]}
           containerPadding={[0, 0]}
         >
-          {view.widgets.map((w) => {
+          {widgets.map((w) => {
             const Widget = wm[w.type as keyof typeof wm];
             return (
               <div key={w.id}>

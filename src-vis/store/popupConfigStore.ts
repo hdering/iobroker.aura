@@ -9,9 +9,77 @@ export interface PopupView {
   widgets: WidgetConfig[];
 }
 
+// ── Builtin predefined views ──────────────────────────────────────────────────
+// Use {{dp}} as placeholder for the triggering widget's main datapoint.
+// Stable IDs ensure ensureBuiltins() is idempotent across app updates.
+
+function bw(
+  id: string,
+  type: WidgetConfig['type'],
+  title: string,
+  x: number, y: number, w: number, h: number,
+  options: Record<string, unknown> = {},
+): WidgetConfig {
+  return { id, type, title, datapoint: '{{dp}}', gridPos: { x, y, w, h }, options };
+}
+
+export const BUILTIN_VIEWS: PopupView[] = [
+  {
+    id: 'pv-builtin-dimmer',
+    name: 'Standard: Dimmer',
+    widgets: [
+      bw('pw-bi-dimmer-1', 'value',  'Helligkeit', 0, 0, 12, 3),
+      bw('pw-bi-dimmer-2', 'dimmer', '',           0, 3, 12, 5),
+    ],
+  },
+  {
+    id: 'pv-builtin-thermostat',
+    name: 'Standard: Thermostat',
+    widgets: [
+      bw('pw-bi-thermo-1', 'value',      'Temperatur', 0, 0, 12, 3),
+      bw('pw-bi-thermo-2', 'thermostat', '',           0, 3, 12, 6, { setpointDp: '{{dp}}' }),
+    ],
+  },
+  {
+    id: 'pv-builtin-switch',
+    name: 'Standard: Schalter',
+    widgets: [
+      bw('pw-bi-switch-1', 'switch', '', 0, 0, 12, 4),
+    ],
+  },
+  {
+    id: 'pv-builtin-shutter',
+    name: 'Standard: Rolladen',
+    widgets: [
+      bw('pw-bi-shutter-1', 'value',   'Position', 0, 0, 12, 3),
+      bw('pw-bi-shutter-2', 'shutter', '',          0, 3, 12, 6),
+    ],
+  },
+  {
+    id: 'pv-builtin-mediaplayer',
+    name: 'Standard: Mediaplayer',
+    widgets: [
+      bw('pw-bi-media-1', 'mediaplayer', '', 0, 0, 12, 8),
+    ],
+  },
+];
+
+const BUILTIN_TYPE_DEFAULTS: Record<string, string> = {
+  dimmer:      'pv-builtin-dimmer',
+  thermostat:  'pv-builtin-thermostat',
+  switch:      'pv-builtin-switch',
+  shutter:     'pv-builtin-shutter',
+  mediaplayer: 'pv-builtin-mediaplayer',
+};
+
+export const BUILTIN_VIEW_IDS = new Set(BUILTIN_VIEWS.map((v) => v.id));
+
+// ── Store ─────────────────────────────────────────────────────────────────────
+
 interface PopupConfigState {
   typeDefaults: Record<string, string>;  // WidgetType → viewId
   views: PopupView[];
+  deletedBuiltinIds: string[];           // builtin IDs the user explicitly deleted
 
   // Type defaults
   setTypeDefault: (widgetType: string, viewId: string) => void;
@@ -24,6 +92,9 @@ interface PopupConfigState {
   addWidgetToView: (viewId: string, widget: WidgetConfig) => void;
   removeWidgetFromView: (viewId: string, widgetId: string) => void;
   updateWidgetInView: (viewId: string, widgetId: string, patch: Partial<WidgetConfig>) => void;
+
+  // Builtins
+  ensureBuiltins: () => void;
 }
 
 export const usePopupConfigStore = create<PopupConfigState>()(
@@ -31,6 +102,7 @@ export const usePopupConfigStore = create<PopupConfigState>()(
     (set) => ({
       typeDefaults: {},
       views: [],
+      deletedBuiltinIds: [],
 
       setTypeDefault: (widgetType, viewId) =>
         set((s) => ({ typeDefaults: { ...s.typeDefaults, [widgetType]: viewId } })),
@@ -54,6 +126,10 @@ export const usePopupConfigStore = create<PopupConfigState>()(
           typeDefaults: Object.fromEntries(
             Object.entries(s.typeDefaults).filter(([, vid]) => vid !== viewId),
           ),
+          // Remember deleted builtins so ensureBuiltins doesn't re-add them
+          deletedBuiltinIds: BUILTIN_VIEW_IDS.has(viewId)
+            ? [...s.deletedBuiltinIds, viewId]
+            : s.deletedBuiltinIds,
         })),
 
       updateViewName: (viewId, name) =>
@@ -85,10 +161,33 @@ export const usePopupConfigStore = create<PopupConfigState>()(
               : v,
           ),
         })),
+
+      ensureBuiltins: () =>
+        set((s) => {
+          const existingIds = new Set(s.views.map((v) => v.id));
+          const deletedSet  = new Set(s.deletedBuiltinIds);
+          const missingViews = BUILTIN_VIEWS.filter(
+            (v) => !existingIds.has(v.id) && !deletedSet.has(v.id),
+          );
+          const defaultsToAdd: Record<string, string> = {};
+          for (const [type, viewId] of Object.entries(BUILTIN_TYPE_DEFAULTS)) {
+            if (!s.typeDefaults[type] && !deletedSet.has(viewId)) {
+              defaultsToAdd[type] = viewId;
+            }
+          }
+          if (missingViews.length === 0 && Object.keys(defaultsToAdd).length === 0) return s;
+          return {
+            views: [...s.views, ...missingViews],
+            typeDefaults: { ...defaultsToAdd, ...s.typeDefaults },
+          };
+        }),
     }),
     {
       name: 'aura-popup-config',
       storage: createJSONStorage(() => managedStorage),
+      onRehydrateStorage: () => (state) => {
+        state?.ensureBuiltins();
+      },
     },
   ),
 );

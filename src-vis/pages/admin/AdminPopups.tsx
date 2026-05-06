@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Trash2, Check, Pencil, Layers } from 'lucide-react';
-import { usePopupConfigStore } from '../../store/popupConfigStore';
+import { usePopupConfigStore, BUILTIN_VIEW_IDS } from '../../store/popupConfigStore';
 import { WIDGET_REGISTRY } from '../../widgetRegistry';
 
 // ── Shared styles ─────────────────────────────────────────────────────────────
@@ -108,7 +108,9 @@ function PopupViewsSection() {
           </div>
         )}
 
-        {views.map((view) => (
+        {views.map((view) => {
+          const isBuiltin = BUILTIN_VIEW_IDS.has(view.id);
+          return (
           <div
             key={view.id}
             className="flex items-center gap-2 px-4 py-3 rounded-xl"
@@ -128,6 +130,15 @@ function PopupViewsSection() {
             ) : (
               <span className="text-xs font-semibold flex-1 truncate" style={{ color: 'var(--text-primary)' }}>
                 {view.name}
+              </span>
+            )}
+
+            {isBuiltin && (
+              <span
+                className="text-[9px] px-1.5 py-0.5 rounded shrink-0 font-medium"
+                style={{ background: 'var(--accent)22', color: 'var(--accent)', border: '1px solid var(--accent)44' }}
+              >
+                Standard
               </span>
             )}
 
@@ -161,7 +172,7 @@ function PopupViewsSection() {
               <Trash2 size={11} />
             </button>
           </div>
-        ))}
+        );})}
       </div>
     </section>
   );

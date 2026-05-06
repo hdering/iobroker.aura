@@ -102,6 +102,13 @@ export function PopupViewEditor() {
           <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
             {view.name}
           </span>
+          <span
+            className="text-[10px] px-1.5 py-0.5 rounded font-mono"
+            style={{ background: 'var(--app-bg)', color: 'var(--text-secondary)', border: '1px solid var(--app-border)' }}
+            title="Platzhalter für den Datenpunkt des auslösenden Widgets"
+          >
+            {'{{dp}}'}
+          </span>
           <div className="flex-1" />
           <select
             value={addType}
