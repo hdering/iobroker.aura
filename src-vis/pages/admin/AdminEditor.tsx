@@ -385,6 +385,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
                           return (
                             <button key={tpl.id} type="button"
                               onClick={() => selectTemplate(tpl.id, tpl.widgetType)}
+                              onDoubleClick={() => { selectTemplate(tpl.id, tpl.widgetType); setStep(2); }}
                               className="flex items-center gap-2 rounded-xl transition-all hover:scale-[1.02] active:scale-95 text-left w-full"
                               style={{
                                 padding: '7px 10px',
@@ -417,6 +418,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
                       return (
                         <button key={tpl.id} type="button"
                           onClick={() => selectTemplate(tpl.id, tpl.widgetType)}
+                          onDoubleClick={() => { selectTemplate(tpl.id, tpl.widgetType); setStep(2); }}
                           className="flex items-center gap-2.5 rounded-xl transition-all hover:scale-[1.02] active:scale-95 text-left"
                           style={{
                             padding: '8px 12px',
@@ -449,6 +451,7 @@ function ManualWidgetDialog({ onAdd, onClose }: { onAdd: (w: WidgetConfig) => vo
                         <button key={w.type} type="button"
                           title={w.hint}
                           onClick={() => selectTemplate(w.type, w.type)}
+                          onDoubleClick={() => { selectTemplate(w.type, w.type); setStep(2); }}
                           className="flex items-center gap-2.5 rounded-xl transition-all hover:scale-[1.02] active:scale-95 text-left"
                           style={{
                             padding: '8px 12px',
