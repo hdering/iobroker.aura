@@ -77,7 +77,7 @@ export function PopupViewEditor() {
   const widgets = view.widgets;
 
   const usedPlaceholders = (() => {
-    const keys = new Set<string>();
+    const keys = new Set<string>(['dp']);
     const re = /\{\{(\w+)\}\}/g;
     const scan = (s: unknown) => { if (typeof s === 'string') { let m; re.lastIndex = 0; while ((m = re.exec(s))) keys.add(m[1]); } };
     widgets.forEach((w) => {
