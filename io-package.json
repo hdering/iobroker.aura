@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "aura",
-    "version": "0.5.88",
+    "version": "0.5.90",
     "titleLang": {
       "en": "Aura",
       "de": "Aura",
@@ -105,6 +105,10 @@
       }
     ],
     "news": {
+      "0.5.90": {
+        "en": "chore: delete unused AddWidgetDialog.tsx, fix stale comment in widgetRegistry; fix: show hint for selected DP template (was only showing for further-widgets); feat: add hint texts to all DP_TEMPLATES, show hint for both template and further-widget selection; feat: merge related templates in ManualWidgetDialog; feat: move mediaplayer to further widgets (remove from DP_TEMPLATES); fix: dialog step1 wider (max-w-5xl), flex layout — only template grid scrolls; fix: move further-widget hint outside scroll area to avoid layout shift and scrollbar; fix: reserve space for \"Erkannt als\" line to prevent layout shift; fix: remove inline hint from further-widgets to prevent scrollbar/layout shift; fix: use visibility instead of minHeight for hint area to prevent scrollbar; fix: reserve hint space in ManualWidgetDialog to prevent layout shift on double-click; feat: double-click on widget in ManualWidgetDialog advances to step 2; fix: widget naming in ManualWidgetDialog — template label as default title, full labels + hints for further widgets",
+        "de": "chore: delete unused AddWidgetDialog.tsx, fix stale comment in widgetRegistry; fix: show hint for selected DP template (was only showing for further-widgets); feat: add hint texts to all DP_TEMPLATES, show hint for both template and further-widget selection; feat: merge related templates in ManualWidgetDialog; feat: move mediaplayer to further widgets (remove from DP_TEMPLATES); fix: dialog step1 wider (max-w-5xl), flex layout — only template grid scrolls; fix: move further-widget hint outside scroll area to avoid layout shift and scrollbar; fix: reserve space for \"Erkannt als\" line to prevent layout shift; fix: remove inline hint from further-widgets to prevent scrollbar/layout shift; fix: use visibility instead of minHeight for hint area to prevent scrollbar; fix: reserve hint space in ManualWidgetDialog to prevent layout shift on double-click; feat: double-click on widget in ManualWidgetDialog advances to step 2; fix: widget naming in ManualWidgetDialog — template label as default title, full labels + hints for further widgets"
+      },
       "0.5.88": {
         "en": "feat: button widget — add custom layout support; fix: apply iconSize in button compact layout; fix: button widget — show title, hideable icon, no datapoint field; feat: add button widget type (layout group, click-action only)",
         "de": "feat: button widget — add custom layout support; fix: apply iconSize in button compact layout; fix: button widget — show title, hideable icon, no datapoint field; feat: add button widget type (layout group, click-action only)"

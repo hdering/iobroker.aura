@@ -184,6 +184,22 @@ npm run build:adapter
 
 ## Changelog
 
+### 0.5.90 (2026-05-06)
+- chore: delete unused AddWidgetDialog.tsx, fix stale comment in widgetRegistry
+- fix: show hint for selected DP template (was only showing for further-widgets)
+- feat: add hint texts to all DP_TEMPLATES, show hint for both template and further-widget selection
+- feat: merge related templates in ManualWidgetDialog
+- feat: move mediaplayer to further widgets (remove from DP_TEMPLATES)
+- fix: dialog step1 wider (max-w-5xl), flex layout — only template grid scrolls
+- fix: move further-widget hint outside scroll area to avoid layout shift and scrollbar
+- fix: reserve space for "Erkannt als" line to prevent layout shift
+- fix: remove inline hint from further-widgets to prevent scrollbar/layout shift
+- fix: use visibility instead of minHeight for hint area to prevent scrollbar
+- fix: reserve hint space in ManualWidgetDialog to prevent layout shift on double-click
+- feat: double-click on widget in ManualWidgetDialog advances to step 2
+- fix: widget naming in ManualWidgetDialog — template label as default title, full labels + hints for further widgets
+
+
 ### 0.5.88 (2026-05-06)
 - feat: button widget — add custom layout support
 - fix: apply iconSize in button compact layout
@@ -869,6 +885,7 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 
 
 

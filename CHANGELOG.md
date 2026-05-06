@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.5.90 (2026-05-06)
+
+- chore: delete unused AddWidgetDialog.tsx, fix stale comment in widgetRegistry
+- fix: show hint for selected DP template (was only showing for further-widgets)
+- feat: add hint texts to all DP_TEMPLATES, show hint for both template and further-widget selection
+- feat: merge related templates in ManualWidgetDialog
+- feat: move mediaplayer to further widgets (remove from DP_TEMPLATES)
+- fix: dialog step1 wider (max-w-5xl), flex layout — only template grid scrolls
+- fix: move further-widget hint outside scroll area to avoid layout shift and scrollbar
+- fix: reserve space for "Erkannt als" line to prevent layout shift
+- fix: remove inline hint from further-widgets to prevent scrollbar/layout shift
+- fix: use visibility instead of minHeight for hint area to prevent scrollbar
+- fix: reserve hint space in ManualWidgetDialog to prevent layout shift on double-click
+- feat: double-click on widget in ManualWidgetDialog advances to step 2
+- fix: widget naming in ManualWidgetDialog — template label as default title, full labels + hints for further widgets
+
 ## v0.5.88 (2026-05-06)
 
 - feat: button widget — add custom layout support
@@ -86,6 +102,7 @@ Release v0.5.80
 - feat: Klick-Aktion ÔÇö neue Popups, Auto-Select, Schlie├ƒen-Fix
 - fix: Klick-Aktion ÔÇö Tab-Navigation + Auto-Select f├╝r Dimmer/Thermostat
 - feat: Widget-Klick-Aktion ÔÇö Popups + Navigation per Widget konfigurierbar
+
 
 
 
