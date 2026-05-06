@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.6.7 (2026-05-06)
+
+- fix: escape quotes in JSX text to satisfy no-unescaped-entities lint rule
+
 ## v0.6.6 (2026-05-06)
 
 - feat: reset-to-type-default button in click action editor
@@ -151,6 +155,7 @@ Release v0.5.80
 - feat: Klick-Aktion ÔÇö neue Popups, Auto-Select, Schlie├ƒen-Fix
 - fix: Klick-Aktion ÔÇö Tab-Navigation + Auto-Select f├╝r Dimmer/Thermostat
 - feat: Widget-Klick-Aktion ÔÇö Popups + Navigation per Widget konfigurierbar
+
 
 
 
