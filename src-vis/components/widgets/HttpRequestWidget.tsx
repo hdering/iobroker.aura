@@ -6,6 +6,7 @@ import type { WidgetProps } from '../../types';
 import { getWidgetIcon } from '../../utils/widgetIconMap';
 import { contentPositionClass } from '../../utils/widgetUtils';
 import { ConfirmOverlay } from './ConfirmOverlay';
+import { CustomGridView } from './CustomGridView';
 
 type RequestStatus = 'idle' | 'loading' | 'ok' | 'error';
 
@@ -79,6 +80,21 @@ export function HttpRequestWidget({ config }: WidgetProps) {
       <span className="text-sm font-medium whitespace-nowrap">{buttonLabel}</span>
     </button>
   );
+
+  // ── CUSTOM ───────────────────────────────────────────────────────────────
+  if (layout === 'custom') {
+    return (
+      <div className="relative w-full h-full">
+        <CustomGridView
+          config={config}
+          value={statusLabel}
+          extraFields={{ status: statusLabel }}
+          extraComponents={{ button: btn }}
+        />
+        {pending && <ConfirmOverlay text={confirmText} onConfirm={confirm} onCancel={cancel} />}
+      </div>
+    );
+  }
 
   // ── MINIMAL ───────────────────────────────────────────────────────────────
   if (layout === 'minimal') {

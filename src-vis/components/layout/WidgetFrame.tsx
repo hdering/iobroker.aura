@@ -2824,6 +2824,11 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                 { value: 'custom',  label: 'Custom' },
               ] : config.type === 'chips' ? [
                 { value: 'default', label: t('wf.edit.layout.standard') },
+              ] : config.type === 'httpRequest' ? [
+                { value: 'default', label: t('wf.edit.layout.standard') },
+                { value: 'compact', label: t('wf.edit.layout.compact') },
+                { value: 'minimal', label: t('wf.edit.layout.minimal') },
+                { value: 'custom',  label: 'Custom' },
               ] : config.type === 'slider' ? [
                 { value: 'default', label: t('wf.edit.layout.standard') },
                 { value: 'custom',  label: 'Custom' },
@@ -5049,6 +5054,7 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                   windowcontact: [{ key: 'icon', label: 'Status-Icon' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'lock-icon', label: 'Schloss-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
                   binarysensor:  [{ key: 'icon', label: 'Status-Icon' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
                   stateimage:    [{ key: 'icon', label: 'Zustands-Icon' }, { key: 'battery-icon', label: 'Batterie-Icon' }, { key: 'reach-icon', label: 'Erreichbarkeit-Icon' }, { key: 'status-badges', label: 'Status-Badges (alle)' }],
+                  httpRequest:   [{ key: 'button', label: 'HTTP-Button' }],
                   mediaplayer:   [
                     { key: 'play-pause',     label: '▶ / ⏸ Play / Pause' },
                     { key: 'prev',           label: '⏮ Vorheriger Titel' },
@@ -5312,6 +5318,9 @@ export function WidgetFrame({ config, editMode, onRemove, onConfigChange, onDupl
                               { key: 'max',     label: 'Maximum' },
                               { key: 'battery', label: 'Batterie' },
                               { key: 'reach',   label: 'Erreichbarkeit' },
+                            ],
+                            httpRequest: [
+                              { key: 'status', label: 'Status (letzter Request)' },
                             ],
                           };
                           const options = FIELD_OPTIONS[config.type] ?? [];
