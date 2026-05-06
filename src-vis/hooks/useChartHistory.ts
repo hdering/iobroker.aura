@@ -67,14 +67,17 @@ export function useChartHistory(
   const mountedRef = useRef(true);
   useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; }; }, []);
 
+  // If no instance is explicitly configured, fall back to the first detected adapter
+  const effectiveInstance = historyInstance ?? adapters[0]?.instance;
+
   // ── Periodischer Refresh damit das Zeitfenster nicht einfriert ───────────
   useEffect(() => {
-    if (!datapointId || !historyInstance || !connected) return;
+    if (!datapointId || !effectiveInstance || !connected) return;
     const rangeMs = timeRange === 'custom' ? (customRangeMs ?? 86_400_000) : RANGE_MS[timeRange as Exclude<ChartTimeRange, 'custom'>];
     const interval = rangeMs <= 3_600_000 ? 60_000 : rangeMs <= 86_400_000 ? 300_000 : 900_000;
     const id = setInterval(() => setRefreshTick((t) => t + 1), interval);
     return () => clearInterval(id);
-  }, [datapointId, historyInstance, connected, timeRange, customRangeMs]);
+  }, [datapointId, effectiveInstance, connected, timeRange, customRangeMs]);
 
   // ── 1. Verfügbare Adapter aus Objekt-Metadaten ermitteln ──────────────────
   useEffect(() => {
@@ -97,7 +100,7 @@ export function useChartHistory(
 
   // ── 3. Verlaufsdaten laden ────────────────────────────────────────────────
   useEffect(() => {
-    if (!datapointId || !historyInstance || !connected) return;
+    if (!datapointId || !effectiveInstance || !connected) return;
     setLoading(true);
     const rangeMs = timeRange === 'custom'
       ? (customRangeMs ?? 86_400_000)
@@ -108,7 +111,7 @@ export function useChartHistory(
     getObjectDirect(datapointId).then((obj) => {
       const isNumeric = obj?.common?.type !== 'string';
       return getHistoryDirect(datapointId, {
-        instance:  historyInstance,
+        instance:  effectiveInstance,
         start,
         end,
         step,
@@ -126,7 +129,7 @@ export function useChartHistory(
     }).catch(() => {
       if (mountedRef.current) setLoading(false);
     });
-  }, [datapointId, historyInstance, timeRange, customRangeMs, connected, refreshTick]);
+  }, [datapointId, effectiveInstance, timeRange, customRangeMs, connected, refreshTick]);
 
   // ── 4. Live-Updates abonnieren ────────────────────────────────────────────
   useEffect(() => {
@@ -138,7 +141,7 @@ export function useChartHistory(
       if (typeof state.val !== 'number') return;
       const val = state.val as number;
       setCurrent(val);
-      if (historyInstance) {
+      if (effectiveInstance) {
         setHistory((prev) => {
           const cutoff  = Date.now() - cutoffMs;
           const trimmed = prev.filter((p) => p.t >= cutoff);
@@ -151,7 +154,7 @@ export function useChartHistory(
       }
     });
     return unsub;
-  }, [datapointId, connected, subscribe, historyInstance, timeRange, customRangeMs]);
+  }, [datapointId, connected, subscribe, effectiveInstance, timeRange, customRangeMs]);
 
   return { adapters, history, current, loading };
 }

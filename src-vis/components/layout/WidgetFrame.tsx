@@ -424,8 +424,10 @@ function ChartHistoryConfig({ config, onConfigChange }: { config: WidgetConfig; 
   const o  = config.options ?? {};
   const set = (patch: Record<string, unknown>) => onConfigChange({ ...config, options: { ...o, ...patch } });
 
+  const isTemplate = !!dp?.startsWith('{{');
+
   useEffect(() => {
-    if (!dp) { setAdapters([]); return; }
+    if (!dp || isTemplate) { setAdapters([]); return; }
     setChecking(true);
     getObjectDirect(dp).then((obj) => {
       const custom = obj?.common?.custom;
@@ -448,16 +450,31 @@ function ChartHistoryConfig({ config, onConfigChange }: { config: WidgetConfig; 
       <div className="h-px my-1" style={{ background: 'var(--app-border)' }} />
       <p className="text-[11px] font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>{t('wf.history.title')}</p>
 
-      {/* Adapter-Auswahl */}
-      {checking && (
+      {/* Adapter-Auswahl: Freitext wenn Datenpunkt ein Template-Platzhalter ist */}
+      {isTemplate && (
+        <div>
+          <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('wf.history.instance')}</label>
+          <input
+            type="text"
+            placeholder="z.B. history.0"
+            value={selectedInstance ?? ''}
+            onChange={(e) => set({ historyInstance: e.target.value || undefined })}
+            className="w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
+            style={{ background: 'var(--app-bg)', color: 'var(--text-primary)', border: '1px solid var(--app-border)' }}
+          />
+        </div>
+      )}
+
+      {/* Adapter-Auswahl: Auto-Detect wenn konkreter Datenpunkt */}
+      {!isTemplate && checking && (
         <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{t('wf.history.checking')}</p>
       )}
-      {!checking && adapters.length === 0 && (
+      {!isTemplate && !checking && adapters.length === 0 && (
         <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
           {t('wf.history.noAdapter')}
         </p>
       )}
-      {!checking && adapters.length > 0 && (
+      {!isTemplate && !checking && adapters.length > 0 && (
         <div>
           <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>{t('wf.history.instance')}</label>
           <select
