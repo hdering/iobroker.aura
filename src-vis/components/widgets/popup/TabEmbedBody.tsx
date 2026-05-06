@@ -40,6 +40,7 @@ export function TabEmbedBody({ viewId, triggerWidget }: Props) {
   const view = usePopupConfigStore((s) => s.views.find((v) => v.id === viewId));
   const settings = useEffectiveSettings();
   const cellSize = settings.gridRowHeight ?? 60;
+  const snapX    = settings.gridSnapX ?? settings.gridRowHeight ?? 60;
   const MARGIN   = settings.gridGap ?? DEFAULT_MARGIN;
 
   const roRef = useRef<ResizeObserver | null>(null);
@@ -56,10 +57,15 @@ export function TabEmbedBody({ viewId, triggerWidget }: Props) {
     roRef.current = ro;
   }, []);
 
-  const cols = useMemo(() => {
-    if (!view || view.widgets.length === 0) return 2;
-    return Math.max(1, Math.max(...view.widgets.map(w => (w.gridPos.x ?? 0) + (w.gridPos.w ?? 4))));
-  }, [view]);
+  const naturalMinWidth = useMemo(() => {
+    if (!view || view.widgets.length === 0) return 280;
+    const maxCol = Math.max(...view.widgets.map(w => (w.gridPos.x ?? 0) + (w.gridPos.w ?? 4)));
+    return maxCol * (snapX + MARGIN) + MARGIN + 24;
+  }, [view, snapX, MARGIN]);
+
+  const cols = containerWidth > 0
+    ? Math.max(2, Math.floor((containerWidth - MARGIN) / (snapX + MARGIN)))
+    : 12;
 
   if (!view || view.widgets.length === 0) {
     return (
@@ -93,7 +99,7 @@ export function TabEmbedBody({ viewId, triggerWidget }: Props) {
   }));
 
   return (
-    <div ref={containerRefCallback} className="p-3">
+    <div ref={containerRefCallback} className="p-3" style={{ minWidth: naturalMinWidth }}>
       {containerWidth > 0 && (
         <ReactGridLayout
           className="layout"
