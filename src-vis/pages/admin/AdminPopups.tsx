@@ -149,14 +149,26 @@ function PopupViewsSection() {
             </span>
 
             {isBuiltin ? (
-              <button
-                onClick={() => { const id = copyView(view.id); navigate(`/admin/popups/${id}`); }}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium hover:opacity-80 transition-opacity shrink-0"
-                style={{ background: 'var(--app-bg)', border: '1px solid var(--app-border)', color: 'var(--text-primary)' }}
-                title="Als Kopie bearbeiten"
-              >
-                <Plus size={11} /> Kopieren
-              </button>
+              <>
+                {isSuperAdmin && (
+                  <button
+                    onClick={() => navigate(`/admin/popups/${view.id}`)}
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium hover:opacity-80 transition-opacity shrink-0"
+                    style={{ background: 'var(--app-bg)', border: '1px solid var(--app-border)', color: 'var(--text-primary)' }}
+                    title="Standard-View bearbeiten"
+                  >
+                    <Layers size={11} /> Bearbeiten
+                  </button>
+                )}
+                <button
+                  onClick={() => { const id = copyView(view.id); navigate(`/admin/popups/${id}`); }}
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium hover:opacity-80 transition-opacity shrink-0"
+                  style={{ background: 'var(--app-bg)', border: '1px solid var(--app-border)', color: 'var(--text-primary)' }}
+                  title="Als Kopie bearbeiten"
+                >
+                  <Plus size={11} /> Kopieren
+                </button>
+              </>
             ) : (
               <>
                 <button

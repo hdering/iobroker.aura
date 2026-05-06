@@ -7,6 +7,7 @@ import { useEffectiveSettings } from '../../hooks/useEffectiveSettings';
 import { WidgetFrame } from '../../components/layout/WidgetFrame';
 import { ActiveLayoutContext } from '../../contexts/ActiveLayoutContext';
 import { WIDGET_REGISTRY, ALL_POPUP_PLACEHOLDER_KEYS } from '../../widgetRegistry';
+import { useSuperAdmin } from '../../hooks/useSuperAdmin';
 import type { WidgetConfig, WidgetType } from '../../types';
 
 const DEFAULT_MARGIN = 10;
@@ -16,6 +17,7 @@ export function PopupViewEditor() {
   const navigate = useNavigate();
   const { views, addWidgetToView, removeWidgetFromView, updateWidgetInView, copyView } = usePopupConfigStore();
 
+  const isSuperAdmin = useSuperAdmin();
   const view = views.find((v) => v.id === viewId);
   const settings = useEffectiveSettings();
   const cellSize = settings.gridRowHeight ?? 60;
@@ -50,7 +52,7 @@ export function PopupViewEditor() {
     );
   }
 
-  if (BUILTIN_VIEW_IDS.has(viewId)) {
+  if (BUILTIN_VIEW_IDS.has(viewId) && !isSuperAdmin) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
