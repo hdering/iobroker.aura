@@ -2445,6 +2445,7 @@ check('a report from a browser is cut to shape, and a useless one is refused', (
         viewport: { w: '1280', h: 800 },
         presentation: { fontScale: 1.3, widgetPadding: 8 },
         grid: { rowHeight: 20, gap: 10, snapX: 20 },
+        hidden: ['w-2', '', 3],
         widgets: [{ id: 'w-1', type: 'list', rows: '14', px: 388.4, contentPx: 452, scrolls: 'ja' }],
     });
     assert.equal(tabId, 't1');
@@ -2457,7 +2458,18 @@ check('a report from a browser is cut to shape, and a useless one is refused', (
         px: 388,
         contentPx: 452,
         scrolls: true,
+        autoBox: false,
     });
+    // Whether the box sizes itself decides whether contentPx is a requirement, so
+    // it has to survive the trip through the store.
+    assert.equal(
+        renderReportEntry({
+            tabId: 't1',
+            widgets: [{ id: 'w-1', px: 120, contentPx: 120, autoBox: true }],
+        }).entry.widgets[0].autoBox,
+        true,
+    );
+    assert.deepEqual(entry.hidden, ['w-2'], 'condition-hidden ids arrive as a clean list of strings');
 });
 
 check('the store keeps one measurement per tab and drops the oldest over the cap', () => {
@@ -4199,11 +4211,110 @@ check('aura_rendered reports rendered height, overflow and the age of the measur
     assert.match(t, /Wohnzimmer \/ Start \/ Klima/);
     assert.match(t, /Flurtablet/);
     assert.match(t, /stack-a .*gerendert 230 px.*SCROLLT.*70 px/);
-    assert.match(t, /stack-b .*kein Überlauf/);
+    // The header promises an "Inhalt" column, so every line has to carry one —
+    // this was the column that was announced and never printed.
+    assert.match(t, /stack-b .*gerendert 110 px, Inhalt ≤ 110 px/);
     // The row count, not only the pixels: that is what gets written.
     assert.match(t, /stack-a .*→ h=\d+/);
-    // The estimate is only mentioned where it disagrees with the browser.
-    assert.match(t, /aura_measure schätzt \d+ px/);
+});
+
+// A card with reserve is the normal case, and it used to produce a finding per
+// widget: the comparison ran card height against minimum requirement, so every
+// deliberately tall card reported "N px zu wenig".
+adapter.states['info.rendered'] = JSON.stringify({
+    ts: Date.now(),
+    tabs: {
+        [klimaTabId]: {
+            ts: Date.now(),
+            tab: 'Wohnzimmer / Start / Klima',
+            viewport: { w: 1280, h: 800 },
+            presentation: { fontScale: 1, widgetPadding: 16 },
+            grid: { rowHeight: 20, gap: 10, snapX: 20 },
+            // Twice the height it needs, nothing scrolled away.
+            widgets: [{ id: 'stack-b', type: 'switch', rows: 20, px: 590, contentPx: 590, scrolls: false }],
+        },
+    },
+});
+const reserve = await client.callTool({ name: 'aura_rendered', arguments: {} });
+check('a card with reserve is not a deviation', () => {
+    const t = reserve.content[0].text;
+    assert.ok(!reserve.isError, t);
+    assert.match(t, /Inhalt ≤ 590 px/);
+    assert.doesNotMatch(t, /zu niedrig/);
+    assert.doesNotMatch(t, /weicht die Schätzung/);
+});
+
+// Everything the tab has but the browser never reported, plus a card that is in
+// the tree and measures nothing: both used to leave the table one line short.
+adapter.states['info.rendered'] = JSON.stringify({
+    ts: Date.now(),
+    tabs: {
+        [klimaTabId]: {
+            ts: Date.now(),
+            tab: 'Wohnzimmer / Start / Klima',
+            viewport: { w: 1280, h: 800 },
+            presentation: { fontScale: 1, widgetPadding: 16 },
+            grid: { rowHeight: 20, gap: 10, snapX: 20 },
+            widgets: [
+                { id: 'stack-a', type: 'switch', rows: 8, px: 230, contentPx: 230, scrolls: false },
+                { id: 'stack-b', type: 'switch', rows: 4, px: 0, contentPx: 0, scrolls: false },
+            ],
+        },
+    },
+});
+const silent = await client.callTool({ name: 'aura_rendered', arguments: {} });
+check('a widget that draws nothing gets a line instead of falling out of the table', () => {
+    const t = silent.content[0].text;
+    assert.ok(!silent.isError, t);
+    assert.match(t, /stack-b .*RENDERT NICHT.*0 px hoch/);
+    assert.match(t, /rendern nicht/);
+});
+
+const klimaTab = JSON.parse(adapter.states['config.dashboard']).state.layouts[0].sections[0].tabs[1];
+check('the tab is measured in full — a configured widget with no report is named', () => {
+    const t = silent.content[0].text;
+    // Every widget the tab has appears, whether the browser reported it or not.
+    for (const w of klimaTab.widgets) {
+        assert.match(t, new RegExp(w.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), `${w.id} missing from the table`);
+    }
+});
+delete adapter.states['info.rendered'];
+adapter.states['info.rendered'] = JSON.stringify({
+    ts: Date.now(),
+    tabs: {
+        [klimaTabId]: {
+            ts: Date.now(),
+            tab: 'Wohnzimmer / Start / Klima',
+            viewport: { w: 1280, h: 800 },
+            presentation: { fontScale: 1, widgetPadding: 16 },
+            grid: { rowHeight: 20, gap: 10, snapX: 20 },
+            hidden: ['stack-b'],
+            widgets: [{ id: 'stack-a', type: 'switch', rows: 8, px: 230, contentPx: 230, scrolls: false }],
+        },
+    },
+});
+const hiddenByCondition = await client.callTool({ name: 'aura_rendered', arguments: {} });
+check('a widget a condition took out of the layout says so, and is not a height problem', () => {
+    const t = hiddenByCondition.content[0].text;
+    assert.ok(!hiddenByCondition.isError, t);
+    assert.match(t, /stack-b .*RENDERT NICHT.*Bedingung/);
+});
+adapter.states['info.rendered'] = JSON.stringify({
+    ts: Date.now(),
+    tabs: {
+        [klimaTabId]: {
+            ts: Date.now(),
+            tab: 'Wohnzimmer / Start / Klima',
+            clientName: 'Flurtablet',
+            viewport: { w: 1280, h: 800 },
+            presentation: { fontScale: 1, widgetPadding: 16 },
+            grid: { rowHeight: 20, gap: 10, snapX: 20 },
+            widgets: [
+                { id: 'stack-a', type: 'switch', rows: 8, px: 230, contentPx: 300, scrolls: true },
+                { id: 'stack-b', type: 'switch', rows: 4, px: 110, contentPx: 110, scrolls: false },
+            ],
+        },
+    },
 });
 
 // The path form the listings print, handed straight back: this used to be

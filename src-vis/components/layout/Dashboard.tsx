@@ -217,6 +217,8 @@ export function Dashboard({
         };
     }, [activeTabId, editMode]);
 
+    const reflowHiddenIds = useReflowHiddenIds();
+
     // ── Rendered geometry → the MCP server (utils/renderReport.ts) ──────────
     // Only from the real frontend (viewTabs), never from the admin editor: its
     // preview column is narrower than the dashboard and would report heights
@@ -240,6 +242,11 @@ export function Dashboard({
                 presentation: { fontScale: settings.fontScale ?? 1, widgetPadding },
                 grid: { rowHeight: cellSize, gap: MARGIN, snapX },
                 widgets,
+                // A condition with „Reflow“ takes the card out of the grid entirely
+                // (it stays mounted off-screen). Without this list the server sees a
+                // widget it knows from the configuration simply not reported and
+                // cannot tell "hidden on purpose" from "drew nothing".
+                hidden: (tab.widgets ?? []).filter((w) => reflowHiddenIds.has(w.id)).map((w) => w.id),
             };
             const signature = reportSignature(report);
             if (signature === lastReportRef.current) return;
@@ -270,9 +277,9 @@ export function Dashboard({
         cellSize,
         MARGIN,
         snapX,
+        reflowHiddenIds,
     ]);
 
-    const reflowHiddenIds = useReflowHiddenIds();
     // Raw condition verdict (works in edit mode too) — drives group auto-shrink.
     const conditionReflowIds = useConditionReflowIds();
 

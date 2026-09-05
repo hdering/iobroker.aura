@@ -1031,8 +1031,14 @@ veraltet mit jedem CSS-Commit, und nichts sagt es. Der Weg jetzt:
 
 1. `src-vis/utils/renderReport.ts` misst nach dem Rendern jedes Grid-Item des
    **aktiven** Tabs: Renderhöhe, Inhaltshöhe (Renderhöhe plus das, was in einem
-   Scroller verschwindet) und ob überhaupt etwas scrollt. Die Widgets tragen dafür
-   `data-aura-widget` / `-type` / `-rows`, der Tab-Container `data-aura-tab-id`.
+   Scroller verschwindet), ob überhaupt etwas scrollt und ob die Karte ihre Höhe
+   vom Raster bekommt oder mit dem Inhalt wächst (`autoBox`). Die Widgets tragen
+   dafür `data-aura-widget` / `-type` / `-rows`, der Tab-Container
+   `data-aura-tab-id`. Auch eine Karte mit 0 px wird gemeldet — vorher fiel sie
+   heraus, und eine Gruppe, deren Kinder an einem gestoppten Adapter hängen,
+   verschwand kommentarlos aus der Antwort (zwölf Widgets im Tab, elf in der
+   Tabelle). Dazu kommt `hidden`: die Ids, die eine Bedingung mit „Reflow“ ganz
+   aus dem Raster nimmt.
 2. 1,2 s nach der letzten Änderung, und nur wenn sich etwas geändert hat, geht das
    per `sendTo('renderReport')` an den Adapter — derselbe Weg wie die Ladezeiten.
    Nur aus dem echten Frontend (`viewTabs`), nie aus dem Editor: dessen Vorschau
@@ -1043,19 +1049,45 @@ veraltet mit jedem CSS-Commit, und nichts sagt es. Der Weg jetzt:
    fliegt zuerst). Gemischt wird im Adapter und nicht im Browser: mehrere Clients
    melden, und ein Client, der selbst mischte, würde die Tabs der anderen
    überschreiben.
-4. `aura_rendered` liest das zurück, stellt die Schätzung daneben und nennt jede
-   Abweichung über 8 px. `aura_measure` sagt am Ende seiner Antwort, ob es für
-   diesen Tab eine echte Messung gibt.
+4. `aura_rendered` liest das zurück und druckt beide Spalten: **gerendert** (die
+   Kartenhöhe) und **Inhalt**. Jedes Widget, das der Tab hat, bekommt eine Zeile —
+   auch die, die nichts zeichnen; dort steht `RENDERT NICHT` samt Grund
+   (`notDrawnReason`: Bedingung mit Reflow, Fill-Tab-Overlay, oder gar nichts
+   gezeichnet). `aura_measure` sagt am Ende seiner Antwort, ob es für diesen Tab
+   eine echte Messung gibt.
 
 Die Grenze steht in der Antwort: gemeldet wird nur, was offen **war**. Ein Tab,
 den niemand aufgemacht hat, hat keine Messung — dann bittet man den Nutzer, ihn zu
 öffnen, statt eine Zahl zu erfinden.
 
+### Wann die Schätzung überhaupt widerlegt ist
+
+`estimateVerdict` in `measure.js` entscheidet das, und beide Antworten benutzen
+dieselbe Funktion (`aura_rendered` für die Zeile, `aura_measure` für seinen
+Schlusssatz). Sie existiert wegen der Fälle, in denen sie **nein** sagt: der
+naheliegende Vergleich — gemessene Höhe gegen Mindestbedarf — trifft auf jede
+Kachel zu, die mehr Platz bekommen hat, als sie braucht. Ein Tab ohne einen
+einzigen Überlauf produzierte damit 61 Meldungen. Ein Binärsensor mit `h=5` und
+„100 px zu wenig“ ist kein Befund, sondern Absicht.
+
+| Zustand der Karte                      | Was `Inhalt` bedeutet    | Was verglichen wird                                                          |
+| -------------------------------------- | ------------------------ | ---------------------------------------------------------------------------- |
+| scrollt                                | der echte Bedarf         | Bedarf gegen Schätzung, beide Richtungen                                     |
+| `autoBox` (wächst mit dem Inhalt)      | der echte Bedarf         | Bedarf gegen Schätzung, beide Richtungen                                     |
+| feste Rasterhöhe, nichts abgeschnitten | nur die Karte → `≤ … px` | nur „Schätzung über der Karte, die trotzdem nichts kappt“                    |
+| Höhenklasse `fills`                    | —                        | gar nichts — außer die Karte übertrifft die Mindesthöhe und scrollt trotzdem |
+
+Die dritte Zeile ist der Kern: eine Karte mit Reserve verrät nicht, wie viel von
+ihr leer ist. Der Browser sieht keinen Bedarf unterhalb der eigenen Höhe, also
+behauptet die Antwort auch keinen.
+
 Geprüft wird die Messung selbst gegen das echte DOM: `npm run test:render-report`
 (braucht wie die anderen DOM-Tests einen laufenden Dev-Server) rendert eine Liste,
-die passt, und eine, die überläuft, und vergleicht `px` zusätzlich mit der
-Rasterarithmetik. `window.__auraShot.rendered()` gibt dieselbe Messung im Browser
-aus.
+die passt, und eine, die überläuft, vergleicht `px` mit der Rasterarithmetik und
+prüft die beiden Regeln, an denen die Auswertung hängt: eine Karte mit 0 px steht
+trotzdem in der Messung, und `autoBox` unterscheidet die Rasterkachel von der
+Karte, die im Mobil-Stapel mit ihrem Inhalt wächst.
+`window.__auraShot.rendered()` gibt dieselbe Messung im Browser aus.
 
 ## Vier Höhenklassen statt einem „nicht gemessen"
 

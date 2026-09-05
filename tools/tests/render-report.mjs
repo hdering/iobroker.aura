@@ -11,11 +11,17 @@
 // wrong measurement here would be worse than none, because it is the number that
 // is supposed to settle the argument.
 //
-// Two things are tested, both against a layout the real Dashboard renders:
+// Four things are tested, all against a layout the real Dashboard renders:
 //   1. every grid item carries its id, type and row count in the DOM, so the
 //      walk finds the widgets at all;
 //   2. a list that is too short for its rows reports scrolls:true and a content
-//      height above the rendered one, and one with room to spare does not.
+//      height above the rendered one, and one with room to spare does not;
+//   3. `autoBox` separates the cards that size themselves from the ones the grid
+//      gives a height — it decides whether contentPx is a requirement or just
+//      the box, and without it the server called every card with reserve wrong;
+//   4. a card that draws nothing is still reported (px 0). It used to be dropped
+//      here, and a group whose children hang on a stopped adapter then went
+//      missing from the answer without a word.
 import { chromium } from 'playwright';
 
 const BASE = process.env.AURA_BASE ?? 'http://localhost:5174';
@@ -50,13 +56,25 @@ const page = await ctx.newPage();
 await page.goto(`${BASE}/?shot=1#/`, { waitUntil: 'domcontentloaded' });
 await page.waitForFunction(() => !!window.__auraShot?.ready, { timeout: 30000 });
 
+// A group whose definition does not exist has no children to stack: the card
+// sizes itself to content and that content is nothing. This is the shape the
+// answer used to lose — the tab had it, the table did not.
+const emptyGroup = {
+    id: 'leer',
+    type: 'group',
+    title: '',
+    datapoint: '',
+    gridPos: { x: 0, y: 60, w: 20, h: 6 },
+    options: { defId: 'gibtsnicht', showTitle: false },
+};
+
 await page.evaluate(
     ({ widgets, grid }) => {
         window.__auraShot.mock({ [widgets[0].options.entries[0].id]: 21.5 });
         window.__auraShot.showWidgets(widgets, { editMode: false, ...grid });
     },
     // „kurz“ has room for its four rows; „lang“ has twenty in the same box.
-    { widgets: [list('kurz', 4, 12), list('lang', 20, 12)], grid: GRID },
+    { widgets: [list('kurz', 4, 12), list('lang', 20, 12), emptyGroup], grid: GRID },
 );
 await page.waitForTimeout(400);
 
@@ -91,6 +109,35 @@ check('a list that is too short reports the overflow and how much is missing', (
     if (m.contentPx <= m.px) throw new Error(`content height not above rendered: ${JSON.stringify(m)}`);
 });
 
+check('a card the grid gives a height is not mistaken for one that sizes itself', () => {
+    // contentPx of a fixed box with nothing scrolled away is the box, not a
+    // requirement. autoBox is what tells the two apart, and on the desktop grid
+    // every card gets its height from the grid.
+    for (const id of ['kurz', 'lang', 'leer']) {
+        const m = byId[id];
+        if (!m) throw new Error(`${id} is missing from the measurement: ${JSON.stringify(measured)}`);
+        if (m.autoBox) throw new Error(`${id}: grid box reported as content-sized`);
+    }
+});
+
+// The rule that changed: the walk used to skip anything measuring 0 px, so a
+// group whose children hang on a stopped adapter left no trace in the answer.
+const zeroHeight = await page.evaluate(() => {
+    const el = document.createElement('div');
+    el.dataset.auraWidget = 'nullhoehe';
+    el.dataset.auraWidgetType = 'group';
+    el.dataset.auraWidgetRows = '6';
+    document.body.appendChild(el);
+    const found = window.__auraShot.rendered().find((m) => m.id === 'nullhoehe') ?? null;
+    el.remove();
+    return found;
+});
+check('a card with no height at all still gets an entry', () => {
+    if (!zeroHeight) throw new Error('a 0 px card was dropped from the measurement');
+    if (zeroHeight.px !== 0 || zeroHeight.contentPx !== 0)
+        throw new Error(`expected 0 px, got ${JSON.stringify(zeroHeight)}`);
+});
+
 check('the rendered height matches the grid arithmetic for the stored rows', () => {
     // h rows = h * rowHeight + (h - 1) * gap. This is the one number the server
     // computes without any measurement at all, so a mismatch here means the
@@ -100,6 +147,19 @@ check('the rendered height matches the grid arithmetic for the stored rows', () 
         const px = byId[id].px;
         if (Math.abs(px - expected) > 2) throw new Error(`${id}: ${px} px, expected ${expected} px`);
     }
+});
+
+// Below the mobile breakpoint the stacking branch gives the content-sized types
+// (group, mediaplayer, …) no height at all — there contentPx IS the requirement,
+// and the server may compare it with the estimate in both directions.
+await page.setViewportSize({ width: 420, height: 900 });
+await page.waitForTimeout(600);
+const mobile = Object.fromEntries((await page.evaluate(() => window.__auraShot.rendered())).map((m) => [m.id, m]));
+
+check('a card that sizes itself to its content is marked as such', () => {
+    if (!mobile.leer) throw new Error(`the group is missing on mobile: ${JSON.stringify(mobile)}`);
+    if (!mobile.leer.autoBox) throw new Error('the stacked group should size itself to its content');
+    if (mobile.kurz.autoBox) throw new Error('a list keeps its configured box in the stack');
 });
 
 await browser.close();

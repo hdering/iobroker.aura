@@ -27,12 +27,25 @@ export interface RenderedWidget {
     type: string;
     /** gridPos.h as configured, so the server can compare rows with pixels. */
     rows: number;
-    /** Rendered height of the grid item, in CSS pixels. */
+    /** Rendered height of the grid item, in CSS pixels. 0 = the card draws nothing. */
     px: number;
     /** Height the content would need — px plus whatever is scrolled away. */
     contentPx: number;
     /** Something inside the card scrolls vertically. */
     scrolls: boolean;
+    /**
+     * The box grows with its content instead of being given a height by the grid.
+     *
+     * This decides whether `contentPx` is an answer or just the box: where the
+     * card is content-sized (group, mediaplayer, the stacking weather layouts on
+     * mobile) it IS what the content needs, and so it is where something scrolls.
+     * On a fixed grid box with nothing scrolled away, `contentPx` equals the card
+     * and says only "at most this much" — the browser cannot see how much of a
+     * card with reserve is empty. Without this flag the server compared a card's
+     * height against a minimum requirement and called every deliberate reserve a
+     * deviation.
+     */
+    autoBox: boolean;
 }
 
 export interface RenderReport {
@@ -42,6 +55,13 @@ export interface RenderReport {
     presentation: { fontScale: number; widgetPadding: number };
     grid: { rowHeight: number; gap: number; snapX: number };
     widgets: RenderedWidget[];
+    /**
+     * Widgets of this tab a condition took out of the layout ("reflow"): they are
+     * mounted off-screen and are deliberately not part of the grid. Reported so
+     * that a widget missing from the measurement gets a reason instead of no line
+     * at all.
+     */
+    hidden: string[];
 }
 
 /** Screenshot harness runs offline and must not emit instance writes. */
@@ -75,18 +95,23 @@ function hiddenPxInside(card: HTMLElement): number {
 /**
  * Measure every widget of one rendered tab.
  *
+ * A card that measures 0 px is reported too, with px 0. It used to be dropped,
+ * and a group whose children all hang on a disabled adapter then vanished from
+ * the answer without a word — twelve widgets on the tab, eleven in the table.
+ * "Draws nothing" is the more useful output than no row.
+ *
  * @param root the element holding the tab's grid items
- * @returns one entry per widget that is actually laid out (hidden tabs measure 0)
+ * @returns one entry per widget in this tab's tree
  */
 export function measureRenderedWidgets(root: ParentNode): RenderedWidget[] {
     const out: RenderedWidget[] = [];
     for (const el of Array.from(root.querySelectorAll<HTMLElement>('[data-aura-widget]'))) {
         const id = el.dataset.auraWidget ?? '';
-        const px = Math.round(el.getBoundingClientRect().height);
-        if (!id || px <= 0) {
+        if (!id) {
             continue;
         }
-        const hidden = hiddenPxInside(el);
+        const px = Math.round(el.getBoundingClientRect().height);
+        const hidden = px > 0 ? hiddenPxInside(el) : 0;
         out.push({
             id,
             type: el.dataset.auraWidgetType ?? '',
@@ -94,6 +119,11 @@ export function measureRenderedWidgets(root: ParentNode): RenderedWidget[] {
             px,
             contentPx: px + hidden,
             scrolls: hidden > 1,
+            // Both branches of Dashboard give a fixed grid box its height inline
+            // (react-grid-layout on desktop, the explicit style on mobile) and
+            // leave it off for the content-sized ones. No inline height = the box
+            // is whatever the content made it.
+            autoBox: !el.style.height,
         });
     }
     return out;
@@ -105,13 +135,21 @@ export function reportSignature(report: RenderReport): string {
         report.tabId,
         report.viewport.w,
         report.viewport.h,
+        report.hidden.join(','),
         ...report.widgets.map((w) => `${w.id}:${w.px}:${w.contentPx}:${w.scrolls ? 1 : 0}`),
     ].join('|');
 }
 
-/** Fire-and-forget one report to the adapter. */
+/**
+ * Fire-and-forget one report to the adapter.
+ *
+ * A tab that has not painted yet measures zero everywhere; since zero-height
+ * cards are reported now, that would arrive as a table of nothing but "draws
+ * nothing" and overwrite a good measurement. One card with a height is the proof
+ * that the tab was on screen.
+ */
 export function sendRenderReport(report: RenderReport): void {
-    if (shotMode() || !report.widgets.length) {
+    if (shotMode() || !report.widgets.some((w) => w.px > 0)) {
         return;
     }
     const { clientId, clientName } = useConnectionStore.getState();
