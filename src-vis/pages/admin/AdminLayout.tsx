@@ -47,7 +47,13 @@ import { loadConfigFromIoBroker, applyRaw } from '../../utils/configLoader';
 import { markGroupDefsHydrated } from '../../store/groupDefsStore';
 import { markWidgetPresetsHydrated } from '../../store/widgetPresetsStore';
 import { useAdminPrefsStore } from '../../store/adminPrefsStore';
-import { useIoBroker, getObjectDirect, subscribeStateDirect, setStateDirect } from '../../hooks/useIoBroker';
+import {
+    useIoBroker,
+    getObjectDirect,
+    subscribeStateDirect,
+    setStateDirect,
+    sendToDirect,
+} from '../../hooks/useIoBroker';
 import { renameAllTimers } from '../../utils/publishTimerConfig';
 import { useVersionGuard } from '../../hooks/useVersionGuard';
 import { useT } from '../../i18n';
@@ -146,6 +152,23 @@ export function AdminLayout() {
             }
             setInstallSource(/github\.com|\.tar\.gz|tarball/i.test(installedFrom) ? 'github' : 'npm');
         });
+    }, [connected]);
+
+    // Update hint (issue #617): the adapter compares the installed version against
+    // the activated ioBroker repository and answers with its cached verdict. Purely
+    // informational — the badge links to the release notes, installing stays a job
+    // for the ioBroker adapter list.
+    const [newVersion, setNewVersion] = useState<string | null>(null);
+    useEffect(() => {
+        if (!connected) return;
+        let cancelled = false;
+        void sendToDirect<{ updateAvailable?: boolean; latest?: string | null }>(NS, 'updateInfo', {}).then((res) => {
+            if (cancelled || !res || typeof res !== 'object' || '__timeout' in res) return;
+            setNewVersion(res.updateAvailable && res.latest ? res.latest : null);
+        });
+        return () => {
+            cancelled = true;
+        };
     }, [connected]);
 
     useEffect(() => {
@@ -373,6 +396,22 @@ export function AdminLayout() {
                                         >
                                             {installSource}
                                         </span>
+                                    )}
+                                    {newVersion && (
+                                        <a
+                                            href="https://github.com/hdering/ioBroker.aura/releases"
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            title={t('admin.update.available', { v: newVersion })}
+                                            className="px-1 rounded font-semibold hover:opacity-80 transition-opacity"
+                                            style={{
+                                                fontSize: 8,
+                                                background: 'var(--accent)',
+                                                color: '#fff',
+                                            }}
+                                        >
+                                            ↑ {newVersion}
+                                        </a>
                                     )}
                                 </p>
                                 {dirty && (

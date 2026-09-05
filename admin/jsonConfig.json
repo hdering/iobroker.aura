@@ -311,6 +311,36 @@
       "lg": 4,
       "xl": 4
     },
+    "_updateHeader": {
+      "type": "header",
+      "text": {
+        "en": "Update notice",
+        "de": "Update-Hinweis"
+      },
+      "size": 2,
+      "xs": 12,
+      "sm": 12,
+      "md": 12,
+      "lg": 12,
+      "xl": 12
+    },
+    "updateNotify": {
+      "type": "checkbox",
+      "label": {
+        "en": "Announce new adapter versions in the frontend",
+        "de": "Neue Adapter-Versionen im Frontend melden"
+      },
+      "help": {
+        "en": "Posts a message (toast, bell, archive) once per new version found in your activated repository. The Aura admin shows the hint next to the version number either way. Default: off.",
+        "de": "Meldet einmal pro neuer Version aus dem aktivierten Repository über Toast, Glocke und Archiv. Der Aura-Admin zeigt den Hinweis ohnehin neben der Versionsnummer. Standard: aus."
+      },
+      "default": false,
+      "xs": 12,
+      "sm": 12,
+      "md": 6,
+      "lg": 4,
+      "xl": 4
+    },
     "_perfHeader": {
       "type": "header",
       "text": {

@@ -249,6 +249,19 @@ Gelesen/ungelesen gilt geräteübergreifend: eine auf dem Tablet bestätigte Mel
 
 **Admin → Frontend-Design → Header → Meldungs-Glocke im Header**. Zeigt die Anzahl unbestätigter Meldungen; ein Klick öffnet die letzten Einträge. Pro Layout überschreibbar wie die übrigen Header-Optionen.
 
+## Hinweis auf neue Adapter-Versionen
+
+Der Adapter vergleicht die installierte Version mit dem Repository, das im ioBroker-Admin aktiviert ist (stable, beta oder beides) — 30 Sekunden nach dem Start und danach alle sechs Stunden. Kein eigener Datenpunkt, kein externer Abruf.
+
+| Anzeige | |
+| --- | --- |
+| Admin-Seitenleiste | Neben der Versionsnummer erscheint `↑ <version>`; ein Klick öffnet die Release-Notes. Immer aktiv. |
+| Frontend | Meldung über Toast, Glocke und Verlauf. Standardmäßig aus. |
+
+Die Frontend-Meldung wird in der **Instanzkonfiguration im ioBroker-Admin** eingeschaltet: **Update-Hinweis → Neue Adapter-Versionen im Frontend melden**. Sie erscheint einmal pro Version — auch ein Adapter-Neustart wiederholt sie nicht — und wird durch den Hinweis auf die nächste Version ersetzt.
+
+Eine Vorabversion wird nie auf ein älteres Stable „aktualisiert": verglichen wird nach Semver, `0.55.0-beta.1` gilt als neuer als `0.54.2`.
+
 ## Meldung aus einer Bedingung
 
 Jede [Bedingung](./editor#bedingungen) kann eine Meldung auslösen — ohne Skript. **Meldung senden** einschalten, der Baukasten öffnet sich im Dialog. Es gibt drei Stellen:

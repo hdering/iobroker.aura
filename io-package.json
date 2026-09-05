@@ -222,6 +222,7 @@
     "perfWidgetTracking": false,
     "messageHistorySize": 100,
     "messageRetentionDays": 30,
+    "updateNotify": false,
     "mcpEnabled": false,
     "mcpToken": "",
     "mcpMode": "read",
