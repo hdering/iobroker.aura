@@ -72,7 +72,10 @@ Alle Optionen werden im Editor unter **Widget bearbeiten** gesetzt.
 | `calNameWidth` | `0` | Agenda: Breite der Kalender-Spalte in % der Zeile; `0` = automatisch (breitester sichtbarer Name, max. 45 %) |
 | `showCalName` | `true` | Kalendername anzeigen |
 | `calNameAlways` | `false` | Kalendername im Default-Layout auch bei nur einer Quelle; Agenda/Card/Compact zeigen ihn immer |
+| `calNameAlign` | `left` | `left` · `center` · `right`; wirkt, wo der Name eine eigene Zeile oder Spalte hat (Default, Card, Agenda mit festem `calNameWidth`) |
 | `showCalIcon` | `true` | Icon der Quelle anzeigen (nur Quellen mit `icon`) |
+| `calIconSize` | `0` | Größe des Kalender-Icons in px; `0` = Größe des Layouts (Default 12, Agenda/Card 11, Compact 13, Custom 20) |
+| `showCalDot` | `true` | Farbige Markierung vor dem Termin: Punkt (Default), Balken (Agenda). Card/Compact haben keine |
 | `showWeek` | `false` | Kalenderwoche anzeigen: Default/Agenda am ersten Termin der Woche, Card/Compact am angezeigten Termin |
 | `showDate` | `true` | Datum anzeigen |
 | `showEndTime` | `false` | Endzeit an das Datum anhängen (`Morgen, 09:00 – 10:30`); nur bei Terminen mit Uhrzeit, die am selben Tag enden |
@@ -80,6 +83,26 @@ Alle Optionen werden im Editor unter **Widget bearbeiten** gesetzt.
 | `showSummary` | `true` | Termin-Titel anzeigen (Card) |
 | `showMore` | `true` | „+N weitere" anzeigen (Card) |
 | `autoHeight` | `false` | Höhe folgt dem Inhalt statt der eingestellten Zellenhöhe (nicht bei Custom); die eingestellte Höhe wird dann überschrieben |
+
+### CSS-Klassen
+
+Für eigenes CSS unter [Einstellungen › CSS & JS](../einstellungen/css-js). Die Klassen sitzen genau auf dem jeweiligen Element, in allen Layouts.
+
+| Klasse | |
+| --- | --- |
+| `.aura-cal-name` | Kalendername |
+| `.aura-cal-summary` | Terminname |
+| `.aura-cal-date` | Datum / Uhrzeit |
+| `.aura-cal-location` | Ort |
+| `.aura-cal-dot` | Farbpunkt (Default); der nächste Termin zusätzlich `[data-calendar-dot="next"]` |
+| `.aura-cal-bar` | Farbbalken (Agenda) |
+| `.aura-cal-source-icon` | Icon der Kalenderquelle |
+| `.aura-cal-week` | Kalenderwoche |
+| `.aura-cal-badge` | Badge „läuft“ / „noch N T“ |
+| `.aura-cal-more` | „+N weitere“ (Card) |
+| `.aura-cal-event` | Terminzeile; zusätzlich `.aura-cal-event-today` bzw. `.aura-cal-event-next` |
+
+Eine Terminzeile trägt außerdem `[data-calendar-event]` mit `upcoming`, `today`, `next` oder `today,next`, die KW `[data-calendar-week]` mit `first` oder `repeat`.
 
 ### Mehrtägige Termine
 

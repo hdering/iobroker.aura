@@ -58,6 +58,7 @@ export const en: Record<TranslationKey, string> = {
     'admin.save.save': 'Save',
     'admin.save.saved': 'All changes saved',
     'admin.save.autoIn': 'Auto-saving in {s}s…',
+    'admin.update.available': 'Version {v} is available — open the release notes',
 
     // ── Editor settings ───────────────────────────────────────────────────────────
     'settings.editor.title': 'Editor',
@@ -924,6 +925,9 @@ export const en: Record<TranslationKey, string> = {
     'wf.cal.maxEntries': 'Max. Entries',
     'wf.cal.nameWidth': 'Calendar column width',
     'wf.cal.nameWidthAuto': 'automatic',
+    'wf.cal.nameAlign': 'Calendar name alignment',
+    'wf.cal.iconSize': 'Calendar icon size',
+    'wf.cal.iconSizeAuto': 'automatic',
 
     // Gauge config
     'wf.gauge.strokeWidth': 'Arc Width',

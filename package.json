@@ -151,6 +151,7 @@
     "test:calendar-end-time": "node tools/tests/calendar-end-time.mjs",
     "test:calendar-events": "node tools/tests/calendar-events.mjs",
     "test:calendar-icon-week": "node tools/tests/calendar-icon-week.mjs",
+    "test:calendar-name-style": "node tools/tests/calendar-name-style.mjs",
     "test:status-auto-height": "node tools/tests/status-overview-auto-height.mjs",
     "test:status-window": "node tools/tests/status-overview-window.mjs",
     "test:status-loading": "node tools/tests/status-overview-loading.mjs",

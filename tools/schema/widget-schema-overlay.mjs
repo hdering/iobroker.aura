@@ -588,6 +588,19 @@ export const WIDGET_OPTION_NOTES = {
         maxEvents: { description: 'Höchstzahl angezeigter Termine.' },
         showCalName: { description: 'Kalendernamen neben dem Termin anzeigen.' },
         showCalIcon: { description: 'Das je Kalender vergebene Icon vor dem Termin anzeigen.' },
+        calIconSize: {
+            description:
+                'Größe des Kalender-Icons in px. 0 = die Größe, die das jeweilige Layout vorgibt (Default 12, Agenda/Card 11, Compact 13, Custom 20).',
+        },
+        showCalDot: {
+            description:
+                'Farbige Markierung vor dem Termin anzeigen — im Default-Layout der Punkt, in Agenda der Balken. Card und Compact haben keine.',
+        },
+        calNameAlign: {
+            enum: ['left', 'center', 'right'],
+            description:
+                'Ausrichtung des Kalendernamens (left/center/right). Wirkt dort, wo der Name eine eigene Zeile oder Spalte hat: Default, Card und Agenda mit fester calNameWidth.',
+        },
         showWeek: {
             description:
                 'Kalenderwoche anzeigen — in Default und Agenda am ersten Termin jeder Woche, in Card und Compact am angezeigten Termin.',

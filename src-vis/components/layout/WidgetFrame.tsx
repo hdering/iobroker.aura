@@ -204,6 +204,7 @@ const VIS_FIELDS_PER_TYPE: Partial<Record<WidgetType, { key: string; label: stri
     calendar: [
         { key: 'showCalName', label: 'Kalender-Name' },
         { key: 'showCalIcon', label: 'Kalender-Icon' },
+        { key: 'showCalDot', label: 'Farbpunkt / Farbbalken' },
         { key: 'showSummary', label: 'Terminname' },
         { key: 'showDate', label: 'Datum / Uhrzeit' },
         { key: 'showLocation', label: 'Ort' },
@@ -777,6 +778,61 @@ function CalendarEditPanel({
                     />
                 </div>
             )}
+            {/* -- Ausrichtung des Kalendernamens (#618) -- */}
+            <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
+                    {t('wf.cal.nameAlign')}
+                </span>
+                <div className="flex gap-1">
+                    {(['left', 'center', 'right'] as const).map((p) => {
+                        const lbls: Record<string, string> = {
+                            left: t('wf.edit.posLeft'),
+                            center: t('wf.edit.posCenter'),
+                            right: t('wf.edit.posRight'),
+                        };
+                        const active = ((o.calNameAlign as string) ?? 'left') === p;
+                        return (
+                            <button
+                                key={p}
+                                onClick={() => setOpts({ calNameAlign: p })}
+                                className="text-[10px] px-2 py-0.5 rounded-full transition-colors"
+                                style={{
+                                    background: active ? 'var(--accent)' : 'var(--app-bg)',
+                                    color: active ? '#fff' : 'var(--text-secondary)',
+                                    border: `1px solid ${active ? 'var(--accent)' : 'var(--app-border)'}`,
+                                }}
+                            >
+                                {lbls[p]}
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* -- Größe des Kalender-Icons (#618) -- */}
+            <div>
+                <div className="flex items-center justify-between mb-1">
+                    <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
+                        {t('wf.cal.iconSize')}
+                    </label>
+                    <span className="text-[11px] tabular-nums" style={{ color: 'var(--text-primary)' }}>
+                        {((o.calIconSize as number) || 0) === 0
+                            ? t('wf.cal.iconSizeAuto')
+                            : `${o.calIconSize as number} px`}
+                    </span>
+                </div>
+                <input
+                    type="range"
+                    min={0}
+                    max={48}
+                    step={1}
+                    value={(o.calIconSize as number) || 0}
+                    onChange={(e) => setOpts({ calIconSize: Number(e.target.value) })}
+                    className="w-full h-1"
+                    style={{ accentColor: 'var(--accent)' }}
+                />
+            </div>
+
             <div>
                 <div className="flex items-center justify-between mb-1">
                     <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>

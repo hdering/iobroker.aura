@@ -588,6 +588,14 @@ function isUpcoming(event: CalEvent, daysAhead: number): boolean {
  *   .aura-cal-event-next         — the very next upcoming event (index 0)
  *   .aura-cal-source-icon        — the per-calendar icon of a row
  *   .aura-cal-week               — the calendar-week label of a row
+ *   .aura-cal-name               — the calendar name (#618)
+ *   .aura-cal-summary            — the event title
+ *   .aura-cal-date               — the date / time line
+ *   .aura-cal-location           — the location line
+ *   .aura-cal-dot                — the coloured dot (Default)
+ *   .aura-cal-bar                — the coloured bar (Agenda)
+ *   .aura-cal-badge              — the "läuft" / "noch N T" pill
+ *   .aura-cal-more               — the "+N weitere" line (Card)
  *
  * HTML data attributes:
  *   data-calendar-event="upcoming|today|next|today,next"
@@ -641,7 +649,7 @@ function RunningBadge({ ev, t, color, fontSize }: { ev: CalEventTagged; t: TFn; 
     if (!label) return null;
     return (
         <span
-            className="shrink-0 rounded whitespace-nowrap"
+            className="aura-cal-badge shrink-0 rounded whitespace-nowrap"
             style={{
                 color,
                 background: `${color}22`,
@@ -719,23 +727,28 @@ function AgendaCalName({
     color,
     fontSize,
     widthPercent,
+    align,
 }: {
     name: string;
     allNames: string[];
     color: string;
     fontSize: string;
     widthPercent: number;
+    align: React.CSSProperties['textAlign'];
 }) {
     if (widthPercent > 0) {
         return (
-            <span className="font-medium shrink-0 truncate" style={{ color, fontSize, width: `${widthPercent}%` }}>
+            <span
+                className="aura-cal-name font-medium shrink-0 truncate"
+                style={{ color, fontSize, width: `${widthPercent}%`, textAlign: align }}
+            >
                 {name}
             </span>
         );
     }
     return (
         <span
-            className="font-medium shrink-0 relative overflow-hidden"
+            className="aura-cal-name font-medium shrink-0 relative overflow-hidden"
             style={{ fontSize, maxWidth: CAL_NAME_MAX_SHARE }}
         >
             <span aria-hidden className="invisible grid">
@@ -745,7 +758,7 @@ function AgendaCalName({
                     </span>
                 ))}
             </span>
-            <span className="absolute inset-0 truncate" style={{ color }}>
+            <span className="absolute inset-0 truncate" style={{ color, textAlign: align }}>
                 {name}
             </span>
         </span>
@@ -942,6 +955,19 @@ export function CalendarWidget({ config, onLastChange }: WidgetProps) {
     const calNameWidth = Math.max(0, Math.min(60, (options.calNameWidth as number) || 0));
     /** Per-calendar icons; each source still decides whether it has one at all. */
     const showCalIcon = options.showCalIcon !== false;
+    /**
+     * Size of that icon. Every layout picked its own value to match its type size,
+     * so `0` keeps exactly that; a value overrides it everywhere (#618).
+     */
+    const calIconSizeOpt = Math.max(0, Math.min(64, (options.calIconSize as number) || 0));
+    const calIconPx = (fallback: number) => (calIconSizeOpt > 0 ? calIconSizeOpt : fallback);
+    /**
+     * The coloured marker in front of an event — a dot in Default, a bar in Agenda.
+     * Hiding it used to need `display:none` in custom CSS (#618).
+     */
+    const showCalDot = options.showCalDot !== false;
+    /** Alignment of the calendar name; the name also carries .aura-cal-name (#618). */
+    const calNameAlign = ((options.calNameAlign as string) || 'left') as React.CSSProperties['textAlign'];
     /** Calendar week, printed at the first entry of every week. */
     const showWeek = options.showWeek === true;
     /** Which visible rows open a new calendar week — the ones that get the label. */
@@ -1105,7 +1131,11 @@ export function CalendarWidget({ config, onLastChange }: WidgetProps) {
             perEventFields[`daycount${n}`] = ev.dayCount ? String(ev.dayCount) : '';
             const SrcIcon = ev.sourceIcon ? getWidgetIcon(ev.sourceIcon, CalendarDays) : null;
             perEventComponents[`cal-icon${n}`] = SrcIcon ? (
-                <SrcIcon size={20} style={{ color: ev.sourceColor ?? 'var(--accent)' }} />
+                <SrcIcon
+                    className="aura-cal-source-icon"
+                    size={calIconPx(20)}
+                    style={{ color: ev.sourceColor ?? 'var(--accent)' }}
+                />
             ) : null;
         });
         return (
@@ -1195,10 +1225,13 @@ export function CalendarWidget({ config, onLastChange }: WidgetProps) {
                 ) : (
                     <CalendarDays size={14} style={{ color, flexShrink: 0 }} />
                 )}
-                {showCalIcon && next && <CalSourceIcon ev={next} size={13} />}
+                {showCalIcon && next && <CalSourceIcon ev={next} size={calIconPx(13)} />}
                 {showWeek && next && <CalWeek label={weekLabel(next.start, t)} show fontSize={fs(10)} />}
                 {showCalName && next?.showSourceName && next.sourceName && (
-                    <span className="shrink-0 font-medium" style={{ color: next.sourceColor, fontSize: fs(9) }}>
+                    <span
+                        className="aura-cal-name shrink-0 font-medium"
+                        style={{ color: next.sourceColor, fontSize: fs(9), textAlign: calNameAlign }}
+                    >
                         {next.sourceName}
                     </span>
                 )}
@@ -1208,7 +1241,7 @@ export function CalendarWidget({ config, onLastChange }: WidgetProps) {
                     </span>
                 ) : next ? (
                     <span
-                        className="flex-1 font-medium truncate min-w-0"
+                        className="aura-cal-summary flex-1 font-medium truncate min-w-0"
                         style={{ color: important ? highlightColor : 'var(--text-primary)', fontSize: fs(12) }}
                     >
                         {next.summary}
@@ -1220,7 +1253,7 @@ export function CalendarWidget({ config, onLastChange }: WidgetProps) {
                 )}
                 {showBadge && next && <RunningBadge ev={next} t={t} color={color} fontSize={fs(10)} />}
                 {showDate && next && (
-                    <span className="shrink-0" style={{ color, fontSize: fs(12) }}>
+                    <span className="aura-cal-date shrink-0" style={{ color, fontSize: fs(12) }}>
                         {formatEventDate(next, t, showSpan, showEndTime)}
                     </span>
                 )}
@@ -1284,9 +1317,18 @@ export function CalendarWidget({ config, onLastChange }: WidgetProps) {
                                 if (!nameShown && !iconShown && !showWeek) return null;
                                 return (
                                     <div className="flex items-center gap-1" style={{ marginBottom: 2 }}>
-                                        {iconShown && <CalSourceIcon ev={next} size={11} />}
+                                        {iconShown && <CalSourceIcon ev={next} size={calIconPx(11)} />}
                                         {nameShown && (
-                                            <p style={{ color: next.sourceColor, fontSize: fs(9) }}>
+                                            <p
+                                                // Only a name that fills the row can move; the
+                                                // default keeps it packed next to the icon.
+                                                className={`aura-cal-name${calNameAlign === 'left' ? '' : ' flex-1 min-w-0'}`}
+                                                style={{
+                                                    color: next.sourceColor,
+                                                    fontSize: fs(9),
+                                                    textAlign: calNameAlign,
+                                                }}
+                                            >
                                                 {next.sourceName}
                                             </p>
                                         )}
@@ -1296,7 +1338,7 @@ export function CalendarWidget({ config, onLastChange }: WidgetProps) {
                             })()}
                             {showSummary && (
                                 <p
-                                    className="font-bold leading-tight"
+                                    className="aura-cal-summary font-bold leading-tight"
                                     style={{ color: important ? highlightColor : 'var(--accent)', fontSize: fs(20) }}
                                 >
                                     {important && !hideImportantIcon && (
@@ -1311,7 +1353,10 @@ export function CalendarWidget({ config, onLastChange }: WidgetProps) {
                             {(showDate || showBadge) && (
                                 <div className="flex items-center gap-1.5 flex-wrap" style={{ marginTop: 2 }}>
                                     {showDate && (
-                                        <p style={{ color: 'var(--text-secondary)', fontSize: fs(11) }}>
+                                        <p
+                                            className="aura-cal-date"
+                                            style={{ color: 'var(--text-secondary)', fontSize: fs(11) }}
+                                        >
                                             {formatEventDate(next, t, showSpan, showEndTime)}
                                         </p>
                                     )}
@@ -1329,7 +1374,7 @@ export function CalendarWidget({ config, onLastChange }: WidgetProps) {
                                 <div className="flex items-center gap-1" style={{ marginTop: 4 }}>
                                     <MapPin size={10} style={{ color: 'var(--text-secondary)' }} />
                                     <p
-                                        className="truncate"
+                                        className="aura-cal-location truncate"
                                         style={{ color: 'var(--text-secondary)', fontSize: fs(10) }}
                                     >
                                         {next.location}
@@ -1337,7 +1382,10 @@ export function CalendarWidget({ config, onLastChange }: WidgetProps) {
                                 </div>
                             )}
                             {showMore && visibleEvents.length > 1 && (
-                                <p style={{ color: 'var(--text-secondary)', fontSize: fs(10), marginTop: 6 }}>
+                                <p
+                                    className="aura-cal-more"
+                                    style={{ color: 'var(--text-secondary)', fontSize: fs(10), marginTop: 6 }}
+                                >
                                     {t('calendar.more', { count: visibleEvents.length - 1 })}
                                 </p>
                             )}
@@ -1425,14 +1473,16 @@ export function CalendarWidget({ config, onLastChange }: WidgetProps) {
                                                 : {}),
                                         }}
                                     >
-                                        <div
-                                            className="self-stretch rounded-full shrink-0 transition-all"
-                                            style={{
-                                                width: meta.isNext ? 3 : 2,
-                                                background: important ? highlightColor : ev.sourceColor,
-                                            }}
-                                        />
-                                        {showCalIcon && <CalSourceIcon ev={ev} size={11} />}
+                                        {showCalDot && (
+                                            <div
+                                                className="aura-cal-bar self-stretch rounded-full shrink-0 transition-all"
+                                                style={{
+                                                    width: meta.isNext ? 3 : 2,
+                                                    background: important ? highlightColor : ev.sourceColor,
+                                                }}
+                                            />
+                                        )}
+                                        {showCalIcon && <CalSourceIcon ev={ev} size={calIconPx(11)} />}
                                         {showWeek && (
                                             <CalWeek
                                                 label={weekLabel(ev.start, t)}
@@ -1447,10 +1497,11 @@ export function CalendarWidget({ config, onLastChange }: WidgetProps) {
                                                 color={ev.sourceColor}
                                                 fontSize={fs(9)}
                                                 widthPercent={calNameWidth}
+                                                align={calNameAlign}
                                             />
                                         )}
                                         <p
-                                            className="flex-1 truncate min-w-0"
+                                            className="aura-cal-summary flex-1 truncate min-w-0"
                                             style={{
                                                 color: important ? highlightColor : 'var(--text-primary)',
                                                 fontWeight: important || meta.isNext ? 700 : 500,
@@ -1479,7 +1530,7 @@ export function CalendarWidget({ config, onLastChange }: WidgetProps) {
                                         )}
                                         {showDate && (
                                             <p
-                                                className="shrink-0 tabular-nums"
+                                                className="aura-cal-date shrink-0 tabular-nums"
                                                 style={{
                                                     color: meta.isToday ? ev.sourceColor : 'var(--text-secondary)',
                                                     fontWeight: meta.isNext ? 600 : 400,
@@ -1570,21 +1621,25 @@ export function CalendarWidget({ config, onLastChange }: WidgetProps) {
                                             : {}),
                                     }}
                                 >
-                                    {meta.isNext ? (
-                                        <div
-                                            className="mt-1.5 shrink-0 w-2 h-2 rounded-full"
-                                            style={{
-                                                background: important ? highlightColor : ev.sourceColor,
-                                                boxShadow: `0 0 0 1.5px var(--app-surface), 0 0 0 3px ${important ? highlightColor : ev.sourceColor}`,
-                                            }}
-                                        />
-                                    ) : (
-                                        <div
-                                            className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0"
-                                            style={{ background: important ? highlightColor : ev.sourceColor }}
-                                        />
+                                    {showCalDot &&
+                                        (meta.isNext ? (
+                                            <div
+                                                className="aura-cal-dot mt-1.5 shrink-0 w-2 h-2 rounded-full"
+                                                data-calendar-dot="next"
+                                                style={{
+                                                    background: important ? highlightColor : ev.sourceColor,
+                                                    boxShadow: `0 0 0 1.5px var(--app-surface), 0 0 0 3px ${important ? highlightColor : ev.sourceColor}`,
+                                                }}
+                                            />
+                                        ) : (
+                                            <div
+                                                className="aura-cal-dot w-1.5 h-1.5 rounded-full mt-1.5 shrink-0"
+                                                style={{ background: important ? highlightColor : ev.sourceColor }}
+                                            />
+                                        ))}
+                                    {showCalIcon && (
+                                        <CalSourceIcon ev={ev} size={calIconPx(12)} style={{ marginTop: 2 }} />
                                     )}
-                                    {showCalIcon && <CalSourceIcon ev={ev} size={12} style={{ marginTop: 2 }} />}
                                     {showWeek && (
                                         <CalWeek
                                             label={weekLabel(ev.start, t)}
@@ -1598,12 +1653,19 @@ export function CalendarWidget({ config, onLastChange }: WidgetProps) {
                                             ev.showSourceName &&
                                             ev.sourceName &&
                                             (multiCal || calNameAlways) && (
-                                                <p style={{ color: ev.sourceColor, fontSize: fs(9) }}>
+                                                <p
+                                                    className="aura-cal-name"
+                                                    style={{
+                                                        color: ev.sourceColor,
+                                                        fontSize: fs(9),
+                                                        textAlign: calNameAlign,
+                                                    }}
+                                                >
                                                     {ev.sourceName}
                                                 </p>
                                             )}
                                         <p
-                                            className="leading-tight truncate"
+                                            className="aura-cal-summary leading-tight truncate"
                                             style={{
                                                 color: important ? highlightColor : 'var(--text-primary)',
                                                 fontWeight: important || meta.isNext ? 700 : 500,
@@ -1626,6 +1688,7 @@ export function CalendarWidget({ config, onLastChange }: WidgetProps) {
                                             <div className="flex items-center gap-1.5 flex-wrap">
                                                 {showDate && (
                                                     <p
+                                                        className="aura-cal-date"
                                                         style={{
                                                             color: meta.isToday
                                                                 ? ev.sourceColor
@@ -1651,7 +1714,7 @@ export function CalendarWidget({ config, onLastChange }: WidgetProps) {
                                             <div className="flex items-center gap-0.5">
                                                 <MapPin size={8} style={{ color: 'var(--text-secondary)' }} />
                                                 <p
-                                                    className="truncate"
+                                                    className="aura-cal-location truncate"
                                                     style={{ color: 'var(--text-secondary)', fontSize: fs(9) }}
                                                 >
                                                     {ev.location}

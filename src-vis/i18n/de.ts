@@ -56,6 +56,7 @@ export const de = {
     'admin.save.save': 'Speichern',
     'admin.save.saved': 'Alle Änderungen gespeichert',
     'admin.save.autoIn': 'Automatisch in {s}s…',
+    'admin.update.available': 'Version {v} ist verfügbar — Release-Notes öffnen',
 
     // ── Editor settings ───────────────────────────────────────────────────────────
     'settings.editor.title': 'Editor',
@@ -925,6 +926,9 @@ export const de = {
     'wf.cal.maxEntries': 'Max. Einträge',
     'wf.cal.nameWidth': 'Breite Kalender-Spalte',
     'wf.cal.nameWidthAuto': 'automatisch',
+    'wf.cal.nameAlign': 'Kalendername ausrichten',
+    'wf.cal.iconSize': 'Größe Kalender-Icon',
+    'wf.cal.iconSizeAuto': 'automatisch',
 
     // Gauge config
     'wf.gauge.strokeWidth': 'Bogenbreite',
