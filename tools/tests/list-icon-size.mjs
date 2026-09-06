@@ -70,20 +70,29 @@ async function show(entryPatch) {
         },
         [DP, entryPatch],
     );
-    await page.waitForTimeout(500);
+    await rowIconReady(ROOT);
 }
 
 /**
+ * The row icon comes from Iconify and appears a moment after the row — everything
+ * that reads its size has to wait for it, or it measures the row without one.
+ */
+const rowIconReady = (root) =>
+    page
+        .waitForFunction((sel) => !!document.querySelector(`${sel} svg.iconify`), root, { timeout: 10000 })
+        .catch(() => {});
+
+/**
  * The two rendered icon sizes. The switch is the only thing inside the pressed
- * button; the name icon is the remaining one — the widget's own header icon and the
- * filter chip sit in the header and are excluded by class / by being in a button.
+ * button; the name icon is the Iconify one outside every button — the widget's own
+ * header icon, the filter chip and the edit chrome are bundled Lucide components.
  */
 const sizes = (root) =>
     page.evaluate((sel) => {
         const box = (el) => (el ? Math.round(el.getBoundingClientRect().width) : null);
         const all = [...document.querySelectorAll(`${sel} svg, ${sel} img`)];
         return {
-            row: box(all.find((s) => !s.closest('button') && !s.classList.contains('aura-widget-icon'))),
+            row: box(all.find((s) => !s.closest('button') && s.classList.contains('iconify'))),
             sw: box(all.find((s) => s.closest('[aria-pressed]'))),
         };
     }, root);
@@ -159,6 +168,71 @@ await page.waitForTimeout(400);
 const after2 = (await opts()).entries[0];
 eq('the switch field writes switchIconSize', after2.switchIconSize, 40);
 eq('and leaves the row icon untouched', after2.iconSize, 12);
+
+// ── the dynamic list: an inherited row icon still has a per-row size ─────────
+// The rows come from a filter, so the row icon is usually configured once for the
+// whole list (tab "Icon"). Its size stays per row all the same — the editor hid the
+// field unless the row carried an icon of its own, so those rows had no reachable
+// size at all (follow-up of #616).
+const AUTO = '.aura-widget-w-auto';
+await page.keyboard.press('Escape');
+await page.keyboard.press('Escape');
+await page.waitForTimeout(300);
+await page.evaluate((dp) => {
+    window.__auraShot.mock({ [dp]: true });
+    window.__auraShot.mockServerState({ [dp]: true });
+    window.__auraShot.showWidgets(
+        [
+            {
+                id: 'w-auto',
+                type: 'autolist',
+                title: 'Dynamisch',
+                datapoint: '',
+                gridPos: { x: 0, y: 0, w: 14, h: 6 },
+                options: {
+                    showTitle: false,
+                    hideFilterButton: true,
+                    showDividers: false,
+                    syncIntervalMin: 999,
+                    // No icon of its own — this row draws the list-wide one.
+                    entries: [{ id: dp, label: 'Pflanzensensor' }],
+                    entryIcon: 'Droplet',
+                    entryIconSize: 19,
+                },
+            },
+        ],
+        { editMode: true },
+    );
+    window.__auraShot.setEditMode(true);
+}, DP);
+await rowIconReady(AUTO);
+eq('the row starts at the list-wide icon size', (await sizes(AUTO)).row, 19);
+
+const autoOpts = () => page.evaluate(() => window.__auraShot.widgetOptions('w-auto'));
+await page.locator('.aura-edit-chrome button').first().click();
+await page.locator('button:text-is("Bearbeiten")').click();
+const autoTrigger = page.locator('button:has-text("Datenpunkte verwalten")').first();
+await autoTrigger.waitFor({ timeout: 10000 });
+await autoTrigger.click();
+
+const autoDlg = page.locator('.aura-config-modal');
+await autoDlg.waitFor({ timeout: 10000 });
+await autoDlg.locator('text=Pflanzensensor').first().click();
+await page.waitForTimeout(400);
+
+const autoField = autoDlg.locator('input[title="Icon-Größe in px"]:visible').first();
+check('a row without an own icon has the size field', (await autoField.count()) > 0);
+eq('and it hints at the list-wide size', await autoField.getAttribute('placeholder'), '19');
+
+await autoField.fill('30');
+await page.waitForTimeout(400);
+eq('typing there writes the row size', (await autoOpts()).entries[0].iconSize, 30);
+eq('and leaves the list-wide size alone', (await autoOpts()).entryIconSize, 19);
+await page.keyboard.press('Escape');
+await page.keyboard.press('Escape');
+await page.waitForTimeout(500);
+await rowIconReady(AUTO);
+eq('the row icon renders at the size of the row', (await sizes(AUTO)).row, 30);
 
 check('no page errors', pageErrors.length === 0, pageErrors.join(' | '));
 

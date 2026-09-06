@@ -64,6 +64,13 @@ export function AutoEntryDetail({
         listOpts.valueTimeFormat !== undefined;
     // The on/off label pair is only ever read for boolean-ish entries.
     const showOnOffLabels = usesOnOffLabels(effective, lookupDatapointEntry(entry.id)?.type);
+    // The row icon may come from the list itself (dialog → tab "Icon"), the size of it
+    // stays per row — the widget reads `cIcon.iconSize ?? entry.iconSize ?? entryIconSize`.
+    // So the size field belongs next to an inherited icon as well (issue #616), else a
+    // row that draws the list icon has no reachable size at all.
+    const listIcon = listOpts.entryIcon as string | undefined;
+    const listIconSize = listOpts.entryIconSize as number | undefined;
+    const shownIcon = entry.icon ?? listIcon;
     // Second line: this entry's own datapoints replace the list-wide template, so the
     // section says which of the two is in effect here.
     const subDpCount = (entry.subDps ?? []).filter((s) => !!s?.id).length;
@@ -117,12 +124,24 @@ export function AutoEntryDetail({
                         <div className="relative" style={{ width: 40 }}>
                             <button
                                 onClick={() => setIconPickerOpen(true)}
-                                title={entry.icon || 'Icon wählen'}
+                                title={
+                                    entry.icon ||
+                                    (listIcon ? `${listIcon} — Icon der Liste (Tab „Icon“)` : 'Icon wählen')
+                                }
                                 className="w-full flex items-center justify-center rounded hover:opacity-80"
                                 style={{ ...iSty, height: 23 }}
                             >
                                 {entry.icon ? (
                                     <Icon icon={toIconifyId(entry.icon)} width={15} height={15} />
+                                ) : listIcon ? (
+                                    /* The list icon this row draws — faint, because it is not this
+                                       row's own; picking one here replaces it for this row. */
+                                    <Icon
+                                        icon={toIconifyId(listIcon)}
+                                        width={15}
+                                        height={15}
+                                        style={{ opacity: 0.45 }}
+                                    />
                                 ) : (
                                     <Plus size={13} style={{ color: 'var(--text-secondary)', opacity: 0.6 }} />
                                 )}
@@ -145,7 +164,7 @@ export function AutoEntryDetail({
                             )}
                         </div>
                     </div>
-                    {entry.icon && (
+                    {shownIcon && (
                         <div className="w-11 shrink-0">
                             <label className="text-[9px] block mb-0.5" style={{ color: 'var(--text-secondary)' }}>
                                 px
@@ -156,7 +175,7 @@ export function AutoEntryDetail({
                                 max={64}
                                 className={iCls}
                                 style={iSty}
-                                placeholder="13"
+                                placeholder={String(listIconSize ?? 13)}
                                 title="Icon-Größe in px"
                                 value={entry.iconSize ?? ''}
                                 onChange={(e) =>
