@@ -64,6 +64,7 @@
     "test:messages-ui": "node tools/tests/messages.mjs",
     "test:message-defaults": "node tools/tests/admin-message-defaults.mjs",
     "test:notify-rows": "node tools/tests/cond-notify-rows.mjs",
+    "test:cond-reorder": "node tools/tests/condition-reorder.mjs",
     "test:group-fit": "node tools/tests/group-fit.mjs",
     "test:widget-copy": "node tools/tests/widget-copy.mjs",
     "test:pin-lock": "node tools/tests/pin-lock.mjs",

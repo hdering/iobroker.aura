@@ -126,6 +126,9 @@ Alle zutreffenden Regeln werden der Reihe nach angewandt, **pro Eigenschaft gewi
 Regel, die nur die Textfarbe setzt, lässt den Hintergrund der vorherigen stehen. Die Reihenfolge im
 Editor entscheidet also.
 
+Die Reihenfolge ist nachträglich änderbar: Griff links im Kopf einer Regel ziehen oder die Pfeile
+rechts neben dem Papierkorb benutzen. Gilt in allen Bedingungs-Editoren.
+
 Ausblenden ist davon ausgenommen: hat eine Regel ausgeblendet, blendet keine spätere wieder ein.
 
 ## Bedingungen: Element-Ebene

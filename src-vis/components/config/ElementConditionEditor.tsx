@@ -5,6 +5,13 @@ import { ClauseRow, ColorField, newClause } from './ConditionEditor';
 import { ConfigModal } from './ConfigModal';
 import { IconPickerModal } from './IconPickerModal';
 import { MessageBuilder, emptyDraft } from './MessageBuilder';
+import {
+    useRuleReorder,
+    RuleDragHandle,
+    RuleMoveButtons,
+    type RuleReorderProps,
+    type RuleDragProps,
+} from './ruleReorder';
 import { getWidgetIcon } from '../../utils/widgetIconMap';
 import { OWN_DP_TOKEN } from '../../utils/conditionEval';
 import { ELEMENT_TARGETS } from '../../utils/rowConditions';
@@ -95,6 +102,8 @@ function RuleEditor({
     allowIconSize,
     allowNotify,
     sampleDp,
+    reorder,
+    dragProps,
 }: {
     rule: ElementConditionRule;
     onChange: (r: ElementConditionRule) => void;
@@ -110,6 +119,10 @@ function RuleEditor({
     allowNotify: boolean;
     /** A datapoint the message's `{{parent}}` & co. resolve against in the preview. */
     sampleDp?: string;
+    /** Position of this rule and how to move it (issue #623). */
+    reorder: RuleReorderProps;
+    /** Makes the card a drag source and a drop target. */
+    dragProps: RuleDragProps;
 }) {
     const [open, setOpen] = useState(true);
     const [showIcon, setShowIcon] = useState(false);
@@ -147,12 +160,17 @@ function RuleEditor({
     const swatches = [rule.color, rule.bg, rule.iconColor].filter(Boolean) as string[];
 
     return (
-        <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--app-border)' }}>
+        <div
+            className="rounded-xl overflow-hidden"
+            {...dragProps}
+            style={{ border: '1px solid var(--app-border)', ...dragProps.style }}
+        >
             <div
                 className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:opacity-80"
                 style={{ background: 'var(--app-surface)' }}
                 onClick={() => setOpen(!open)}
             >
+                <RuleDragHandle count={reorder.count} onDragStart={reorder.onDragStart} onDragEnd={reorder.onDragEnd} />
                 <span style={{ color: 'var(--text-secondary)' }}>
                     {open ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
                 </span>
@@ -181,6 +199,7 @@ function RuleEditor({
                         ))}
                     </div>
                 )}
+                <RuleMoveButtons {...reorder} />
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
@@ -555,6 +574,7 @@ export function ElementConditionEditor({
 }) {
     const update = (i: number, r: ElementConditionRule) => onChange(rules.map((x, j) => (j === i ? r : x)));
     const remove = (i: number) => onChange(rules.filter((_, j) => j !== i));
+    const { itemProps, reorderProps } = useRuleReorder(rules, onChange);
     const hint =
         ownHint ??
         `${OWN_DP_TOKEN} = eigener Wert (kein erneutes Eintragen des DP); Pille umschalten für einen anderen Datenpunkt.`;
@@ -588,6 +608,8 @@ export function ElementConditionEditor({
                     allowIconSize={allowIconSize}
                     allowNotify={allowNotify}
                     sampleDp={sampleDp}
+                    reorder={reorderProps(i)}
+                    dragProps={itemProps(i)}
                 />
             ))}
 

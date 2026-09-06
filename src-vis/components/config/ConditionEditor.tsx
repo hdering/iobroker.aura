@@ -25,6 +25,13 @@ import { useT, t } from '../../i18n';
 import { ColorPicker } from '../common/ColorPicker';
 import { ConfigModal } from './ConfigModal';
 import { MessageBuilder, emptyDraft } from './MessageBuilder';
+import {
+    useRuleReorder,
+    RuleDragHandle,
+    RuleMoveButtons,
+    type RuleReorderProps,
+    type RuleDragProps,
+} from './ruleReorder';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -861,6 +868,8 @@ function ConditionRule({
     sourceCtx,
     slots,
     current,
+    reorder,
+    dragProps,
 }: {
     condition: WidgetCondition;
     onChange: (c: WidgetCondition) => void;
@@ -869,6 +878,10 @@ function ConditionRule({
     sourceCtx?: DpSourceCtx;
     slots: ConditionSlot[];
     current?: ConditionSetCurrent;
+    /** Position of this rule and how to move it (issue #623). */
+    reorder: RuleReorderProps;
+    /** Makes the card a drag source and a drop target. */
+    dragProps: RuleDragProps;
 }) {
     const t = useT();
     const [open, setOpen] = useState(true);
@@ -906,13 +919,18 @@ function ConditionRule({
     const notifySampleDp = notifyPerRow ? sourceCtx?.listRefs?.[0] : sourceCtx?.ownDp;
 
     return (
-        <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--app-border)' }}>
+        <div
+            className="rounded-xl overflow-hidden"
+            {...dragProps}
+            style={{ border: '1px solid var(--app-border)', ...dragProps.style }}
+        >
             {/* Header */}
             <div
                 className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:opacity-80"
                 style={{ background: 'var(--app-surface)' }}
                 onClick={() => setOpen(!open)}
             >
+                <RuleDragHandle count={reorder.count} onDragStart={reorder.onDragStart} onDragEnd={reorder.onDragEnd} />
                 <span style={{ color: 'var(--text-secondary)' }}>
                     {open ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
                 </span>
@@ -938,6 +956,7 @@ function ConditionRule({
                             ))}
                     </div>
                 )}
+                <RuleMoveButtons {...reorder} />
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
@@ -1313,6 +1332,8 @@ export function ConditionEditor({
 
     const remove = (i: number) => onChange(conditions.filter((_, j) => j !== i));
 
+    const { itemProps, reorderProps } = useRuleReorder(conditions, onChange);
+
     return (
         <div className="p-3 space-y-2.5" style={{ width: '100%', ...style }} onMouseDown={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-1">
@@ -1340,6 +1361,8 @@ export function ConditionEditor({
                     sourceCtx={sourceCtx}
                     slots={slots}
                     current={current}
+                    reorder={reorderProps(i)}
+                    dragProps={itemProps(i)}
                 />
             ))}
 
