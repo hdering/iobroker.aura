@@ -46,6 +46,7 @@
     "format:check": "prettier --check src-vis main.js",
     "test": "node test/adapter.test.js && node test/client-tree.test.js && node test/messages.test.js && node test/update-check.test.js && node test/widget-map.test.js && node test/widget-schema.test.js && node tools/tests/mcp.mjs",
     "test:client-tree": "node test/client-tree.test.js",
+    "test:client-id": "node tools/tests/client-id-stability.mjs",
     "test:widget-map": "node test/widget-map.test.js",
     "recipes": "node tools/schema/gen-recipes.mjs",
     "recipes:check": "node tools/schema/gen-recipes.mjs --check",

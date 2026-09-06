@@ -33,6 +33,7 @@ require.cache[corePath] = {
 };
 
 const createAdapter = require('../main.js');
+const { sanitizeClientId } = createAdapter;
 
 // ── In-memory object store, keyed by adapter-relative id ─────────────────────
 function makeAdapter(initialObjects = {}) {
@@ -45,19 +46,40 @@ function makeAdapter(initialObjects = {}) {
         objects.set(id, obj);
     };
     a.setObjectNotExistsAsync = async (id, obj) => {
-        if (!objects.has(id)) objects.set(id, obj);
+        if (!objects.has(id)) {
+            objects.set(id, obj);
+        }
     };
     a.getObjectViewAsync = async (_design, type, params) => {
         const rows = [];
         for (const [id, obj] of objects) {
             const full = `aura.0.${id}`;
-            if (obj.type !== type) continue;
-            if (full < params.startkey || full > params.endkey) continue;
+            if (obj.type !== type) {
+                continue;
+            }
+            if (full < params.startkey || full > params.endkey) {
+                continue;
+            }
             rows.push({ id: full, value: obj });
         }
         return { rows };
     };
     a.getStateAsync = async () => null;
+
+    // Relay plumbing: the client relays read/write states and delete objects.
+    const states = new Map();
+    a._states = states;
+    a.setStateAsync = async (id, value) => {
+        states.set(id, value && typeof value === 'object' ? value : { val: value, ack: true });
+    };
+    a.delForeignObjectAsync = async (id) => {
+        const rel = id.startsWith('aura.0.') ? id.slice('aura.0.'.length) : id;
+        objects.delete(rel);
+    };
+    a.delForeignStateAsync = async (id) => {
+        const rel = id.startsWith('aura.0.') ? id.slice('aura.0.'.length) : id;
+        states.delete(rel);
+    };
     return a;
 }
 
@@ -96,7 +118,9 @@ const FULL_TREE = [
         const a = makeAdapter();
         const created = await a._ensureClientTree('c1', 'PC_Office');
         assert.strictEqual(created, true, 'first call must report the tree as newly built');
-        for (const id of FULL_TREE) assert.ok(a._objects.has(id), `missing object: ${id}`);
+        for (const id of FULL_TREE) {
+            assert.ok(a._objects.has(id), `missing object: ${id}`);
+        }
         assert.strictEqual(a._objects.get('clients.c1').common.name, 'PC_Office');
         console.log('✓ register path creates the full client tree');
     }
@@ -118,7 +142,9 @@ const FULL_TREE = [
         const a = makeAdapter(halfBuiltClient('c1'));
         const created = await a._ensureClientTree('c1');
         assert.strictEqual(created, true, 'a half-built tree must be reported as incomplete');
-        for (const id of FULL_TREE) assert.ok(a._objects.has(id), `missing object after heal: ${id}`);
+        for (const id of FULL_TREE) {
+            assert.ok(a._objects.has(id), `missing object after heal: ${id}`);
+        }
         console.log('✓ half-built client (resolution relay only) is completed');
     }
 
@@ -157,6 +183,71 @@ const FULL_TREE = [
         assert.deepStrictEqual(target.common.states, { 'home/living': 'Home / Living' });
         assert.ok(a._objects.has('clients.tablet.popup.open'), 'sync must also backfill popup.open');
         console.log('✓ startup sync heals half-built clients and fills the selector');
+    }
+
+    // ── #620: client ids are sanitised before they become object-id segments ──
+    {
+        assert.strictEqual(sanitizeClientId('Wohnzimmer Tablet'), 'wohnzimmer-tablet');
+        assert.strictEqual(sanitizeClientId('  Kitchen_TV  '), 'kitchen_tv');
+        assert.strictEqual(sanitizeClientId('a1b2c3d4e5f60718'), 'a1b2c3d4e5f60718', 'fingerprints pass through');
+        assert.strictEqual(sanitizeClientId('foo.bar'), 'foo-bar', 'dots must never nest the tree');
+        assert.strictEqual(sanitizeClientId('../../system.adapter'), 'system-adapter', 'no traversal');
+        assert.strictEqual(sanitizeClientId('---'), '', 'nothing but separators is not an id');
+        assert.strictEqual(sanitizeClientId(''), '');
+        assert.strictEqual(sanitizeClientId(null), '');
+        assert.strictEqual(sanitizeClientId('x'.repeat(80)).length, 40, 'ids are capped');
+        // The relay states live directly under clients.* and cannot be clients themselves.
+        for (const reserved of ['register', 'Resolution', 'deleteRequest']) {
+            assert.strictEqual(sanitizeClientId(reserved), '', `${reserved} must be rejected`);
+        }
+        console.log('✓ client ids are sanitised (#620)');
+    }
+
+    // ── #620: the register relay builds the tree under the sanitised id ──────
+    {
+        const a = makeAdapter();
+        await a.onStateChange('aura.0.clients.register', {
+            val: JSON.stringify({ clientId: 'Wohnzimmer Tablet', name: 'Wohnzimmer', userAgent: 'UA/1' }),
+            ack: false,
+        });
+        assert.ok(a._objects.has('clients.wohnzimmer-tablet.navigate.url'), 'tree must use the sanitised id');
+        assert.ok(!a._objects.has('clients.Wohnzimmer Tablet'), 'raw id must not create objects');
+        assert.strictEqual(a._states.get('clients.wohnzimmer-tablet.info.name').val, 'Wohnzimmer');
+        assert.strictEqual(a._states.get('clients.wohnzimmer-tablet.info.userAgent').val, 'UA/1');
+        assert.strictEqual(a._states.get('clients.register').val, '', 'relay clears itself');
+        console.log('✓ register relay uses the sanitised id');
+    }
+
+    // ── #620: a reserved id is rejected instead of colliding with the relay ──
+    {
+        const a = makeAdapter();
+        await a.onStateChange('aura.0.clients.register', {
+            val: JSON.stringify({ clientId: 'register', name: 'Nope' }),
+            ack: false,
+        });
+        assert.ok(!a._objects.has('clients.register.navigate.url'), 'a reserved id must build nothing');
+        assert.strictEqual(a._states.get('clients.register').val, '', 'relay still clears itself');
+        console.log('✓ reserved client ids are rejected');
+    }
+
+    // ── #620: renaming a device moves the tree — the old one is torn down ────
+    {
+        const a = makeAdapter();
+        await a.onStateChange('aura.0.clients.register', {
+            val: JSON.stringify({ clientId: 'a1b2c3d4e5f60718', name: 'Tablet' }),
+            ack: false,
+        });
+        await a.onStateChange('aura.0.clients.register', {
+            val: JSON.stringify({ clientId: 'kitchen-tablet', name: 'Tablet' }),
+            ack: false,
+        });
+        await a.onStateChange('aura.0.clients.deleteRequest', { val: 'a1b2c3d4e5f60718', ack: false });
+
+        assert.ok(a._objects.has('clients.kitchen-tablet.navigate.url'), 'the new tree must survive');
+        assert.ok(!a._objects.has('clients.a1b2c3d4e5f60718'), 'the old channel must be gone');
+        assert.ok(!a._objects.has('clients.a1b2c3d4e5f60718.navigate.url'), 'the old tree must be gone');
+        assert.ok(!a._states.has('clients.a1b2c3d4e5f60718.info.name'), 'the old name value must be gone');
+        console.log('✓ moving a device to a speaking id leaves no orphan tree');
     }
 
     console.log('\nAll client-tree tests passed.');

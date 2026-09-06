@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { setupPin } from '../../store/authStore';
 import { useActiveLayout } from '../../store/dashboardStore';
 
-import { useConnectionStore } from '../../store/connectionStore';
+import { useConnectionStore, sanitizeClientId } from '../../store/connectionStore';
 import { useConfigStore } from '../../store/configStore';
 import { useAdminPrefsStore, MAX_BACKUP_COUNT } from '../../store/adminPrefsStore';
 import { useGlobalSettingsStore } from '../../store/globalSettingsStore';
@@ -579,12 +579,14 @@ function DeviceIcon({ kind, ...props }: { kind: DeviceKind } & React.ComponentPr
 
 function ClientsCard() {
     const t = useT();
-    const { clientId: myClientId, clientName: myClientName, setClientName } = useConnectionStore();
+    const { clientId: myClientId, clientName: myClientName, setClientName, pinClientId } = useConnectionStore();
     const { showClientIdBadge, setShowClientIdBadge } = useGlobalSettingsStore();
     const [clients, setClients] = useState<ClientInfo[]>([]);
     const [loading, setLoading] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editValue, setEditValue] = useState('');
+    const [editIdValue, setEditIdValue] = useState('');
+    const [idError, setIdError] = useState('');
     const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
     const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -691,20 +693,56 @@ function ClientsCard() {
     const startEdit = (c: ClientInfo) => {
         setEditingId(c.clientId);
         setEditValue(c.clientId === myClientId && myClientName ? myClientName : c.name);
+        setEditIdValue(c.clientId);
+        setIdError('');
     };
 
     const cancelEdit = () => {
         setEditingId(null);
         setEditValue('');
+        setEditIdValue('');
+        setIdError('');
     };
 
-    const saveName = (c: ClientInfo) => {
+    const saveName = async (c: ClientInfo) => {
         const trimmed = editValue.trim();
         if (!trimmed) return;
+        const isMine = c.clientId === myClientId;
+
+        // Moving THIS device to a speaking id: the id is the object-id segment, so the
+        // tree cannot be renamed in place — register the new one, then drop the old.
+        // Only ever offered for the current device; a foreign client would have to be
+        // told about its new id and cannot be.
+        if (isMine && editIdValue.trim() !== c.clientId) {
+            const wanted = sanitizeClientId(editIdValue);
+            if (!wanted) {
+                setIdError(t('settings.clients.idInvalid'));
+                return;
+            }
+            if (wanted !== c.clientId) {
+                const taken = await getStateDirect(`${NS}.clients.${wanted}.info.name`);
+                if (taken && String(taken.val ?? '').length > 0) {
+                    setIdError(t('settings.clients.idTaken'));
+                    return;
+                }
+                pinClientId(wanted);
+                setClientName(trimmed);
+                setStateDirect(
+                    `${NS}.clients.register`,
+                    JSON.stringify({ clientId: wanted, name: trimmed, userAgent: navigator.userAgent }),
+                );
+                setStateDirect(`${NS}.clients.deleteRequest`, c.clientId);
+                cancelEdit();
+                // The adapter builds the new tree and tears down the old one via relays.
+                setTimeout(() => void load(), 1500);
+                return;
+            }
+        }
+
         // Write directly to ioBroker DP (works for all clients, not just current device)
         setStateDirect(`${c.channelId}.info.name`, trimmed);
         // For the current device, also persist to localStorage (used as fallback)
-        if (c.clientId === myClientId) setClientName(trimmed);
+        if (isMine) setClientName(trimmed);
         // Update local list immediately
         setClients((prev) => prev.map((x) => (x.clientId === c.clientId ? { ...x, name: trimmed } : x)));
         cancelEdit();
@@ -872,39 +910,80 @@ function ClientsCard() {
                                 {isEditing && (
                                     <div
                                         ref={expandedRef}
-                                        className="flex items-center gap-2 px-3 py-2.5"
+                                        className="px-3 py-2.5 space-y-2"
                                         style={{
                                             background: 'var(--app-surface)',
                                             borderTop: '1px solid var(--app-border)',
                                         }}
                                     >
-                                        <input
-                                            autoFocus
-                                            value={editValue}
-                                            onChange={(e) => setEditValue(e.target.value)}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter') saveName(c);
-                                                if (e.key === 'Escape') cancelEdit();
-                                            }}
-                                            placeholder={t('settings.client.namePh')}
-                                            className="flex-1 text-sm rounded-lg px-3 py-1.5 focus:outline-none"
-                                            style={inputStyle}
-                                        />
-                                        <button
-                                            onClick={() => saveName(c)}
-                                            disabled={!editValue.trim() || editValue.trim() === c.name}
-                                            className="hover:opacity-70 disabled:opacity-30"
-                                            style={{ color: 'var(--accent-green)' }}
-                                        >
-                                            <Check size={15} />
-                                        </button>
-                                        <button
-                                            onClick={cancelEdit}
-                                            className="hover:opacity-70"
-                                            style={{ color: 'var(--text-secondary)' }}
-                                        >
-                                            <X size={15} />
-                                        </button>
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                autoFocus
+                                                value={editValue}
+                                                onChange={(e) => setEditValue(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') void saveName(c);
+                                                    if (e.key === 'Escape') cancelEdit();
+                                                }}
+                                                placeholder={t('settings.client.namePh')}
+                                                className="flex-1 text-sm rounded-lg px-3 py-1.5 focus:outline-none"
+                                                style={inputStyle}
+                                            />
+                                            <button
+                                                onClick={() => void saveName(c)}
+                                                disabled={
+                                                    !editValue.trim() ||
+                                                    (editValue.trim() === c.name &&
+                                                        (!isMine || sanitizeClientId(editIdValue) === c.clientId))
+                                                }
+                                                className="hover:opacity-70 disabled:opacity-30"
+                                                style={{ color: 'var(--accent-green)' }}
+                                            >
+                                                <Check size={15} />
+                                            </button>
+                                            <button
+                                                onClick={cancelEdit}
+                                                className="hover:opacity-70"
+                                                style={{ color: 'var(--text-secondary)' }}
+                                            >
+                                                <X size={15} />
+                                            </button>
+                                        </div>
+                                        {isMine && (
+                                            <div>
+                                                <label
+                                                    className="text-[11px] block mb-1"
+                                                    style={{ color: 'var(--text-secondary)' }}
+                                                >
+                                                    {t('settings.clients.fixedId')}
+                                                </label>
+                                                <input
+                                                    value={editIdValue}
+                                                    onChange={(e) => {
+                                                        setEditIdValue(e.target.value);
+                                                        setIdError('');
+                                                    }}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') void saveName(c);
+                                                        if (e.key === 'Escape') cancelEdit();
+                                                    }}
+                                                    placeholder={t('settings.clients.fixedIdPh')}
+                                                    className="w-full text-xs font-mono rounded-lg px-3 py-1.5 focus:outline-none"
+                                                    style={inputStyle}
+                                                />
+                                                <p
+                                                    className="text-[10px] mt-1"
+                                                    style={{
+                                                        color: idError
+                                                            ? 'var(--accent-red, #ef4444)'
+                                                            : 'var(--text-secondary)',
+                                                        opacity: idError ? 1 : 0.7,
+                                                    }}
+                                                >
+                                                    {idError || t('settings.clients.fixedIdHint')}
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 

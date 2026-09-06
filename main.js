@@ -66,6 +66,25 @@ function fetchUrl(url, _depth = 0) {
 // the frontend only ever consumes finished entries from `messages.history` /
 // `messages.lastMessage`, so there is no second rule set to keep in sync.
 
+/**
+ * Normalise a client id before it becomes an object-id segment. Ids used to be
+ * pure hex fingerprints; since #620 a user can pin a speaking one ("kitchen-tablet"),
+ * so dots (which would nest the tree), whitespace and exotic characters have to go.
+ * Mirrors sanitizeClientId() in src-vis/store/connectionStore.ts — keep both in sync.
+ */
+const RESERVED_CLIENT_IDS = ['register', 'resolution', 'deleterequest'];
+
+function sanitizeClientId(raw) {
+    const clean = String(raw == null ? '' : raw)
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 40);
+    // The relay states live directly under clients.*, so those names cannot be clients.
+    return RESERVED_CLIENT_IDS.includes(clean) ? '' : clean;
+}
+
 const MESSAGE_SEVERITIES = ['info', 'success', 'warning', 'error'];
 
 const MESSAGE_POSITIONS = [
@@ -644,7 +663,11 @@ class Aura extends utils.Adapter {
                 return;
             }
 
-            const cId = String(reg.clientId);
+            const cId = sanitizeClientId(reg.clientId);
+            if (!cId) {
+                await this.setStateAsync('clients.register', '', true);
+                return;
+            }
             const displayName = reg.name ? String(reg.name) : cId.slice(0, 8);
 
             await this._ensureClientTree(cId, displayName);
@@ -676,7 +699,7 @@ class Aura extends utils.Adapter {
                 await this.setStateAsync('clients.resolution', '', true);
                 return;
             }
-            const cId = payload && payload.clientId ? String(payload.clientId) : '';
+            const cId = payload ? sanitizeClientId(payload.clientId) : '';
             const width = Number(payload && payload.width);
             const height = Number(payload && payload.height);
             const userAgent = payload && payload.userAgent ? String(payload.userAgent) : '';
@@ -710,7 +733,7 @@ class Aura extends utils.Adapter {
 
         // Client delete relay: frontend writes clientId → adapter deletes all child objects explicitly
         if (id.endsWith('clients.deleteRequest') && state && !state.ack && state.val) {
-            const clientId = String(state.val).trim();
+            const clientId = sanitizeClientId(state.val);
             if (clientId) {
                 const base = `${this.namespace}.clients.${clientId}`;
                 const toDelete = [
@@ -3859,6 +3882,7 @@ class Aura extends utils.Adapter {
 
 if (require.main !== module) {
     module.exports = (options) => new Aura(options);
+    module.exports.sanitizeClientId = sanitizeClientId;
 } else {
     new Aura();
 }

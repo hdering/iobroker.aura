@@ -85,6 +85,12 @@ export const en: Record<TranslationKey, string> = {
     'settings.clients.none': 'No devices registered yet.',
     'settings.clients.thisDevice': 'This Device',
     'settings.clients.copyId': 'Copy client ID',
+    'settings.clients.fixedId': 'Fixed ID for this device',
+    'settings.clients.fixedIdPh': 'e.g. living-room-tablet',
+    'settings.clients.fixedIdHint':
+        'Allowed: a-z, 0-9, - and _. The device moves to clients.<id>; the previous entry is removed.',
+    'settings.clients.idTaken': 'That ID is already taken.',
+    'settings.clients.idInvalid': 'Invalid ID - allowed are a-z, 0-9, - and _.',
     'settings.clients.showIdBadge': 'Show ID badge on every device',
     'settings.clients.justNow': 'just now',
     'settings.clients.minsAgo': '{n} min ago',
@@ -1202,6 +1208,9 @@ export const en: Record<TranslationKey, string> = {
     'cond.rules': 'Condition Rules',
     'cond.rulesHint': 'Colors change when conditions are met',
     'cond.noRules': 'No rules yet. Create a rule to get started.',
+    'cond.moveUp': 'Move up',
+    'cond.moveDown': 'Move down',
+    'cond.dragHint': 'Drag to reorder',
     'cond.newRule': 'New Rule',
 
     // ── Badges ───────────────────────────────────────────────────────────────────

@@ -21,7 +21,7 @@ import { useCustomCss } from './hooks/useCustomCss';
 import { useConfigSync } from './hooks/useConfigSync';
 import { useActiveSelectionSync } from './hooks/useActiveSelectionSync';
 import { useVersionGuard } from './hooks/useVersionGuard';
-import { useConnectionStore } from './store/connectionStore';
+import { useConnectionStore, legacyFingerprintId } from './store/connectionStore';
 import { useGlobalSettingsStore } from './store/globalSettingsStore';
 import { useConfigStore } from './store/configStore';
 import { useDashboardStore, resolveView, resolveTabBarSettings } from './store/dashboardStore';
@@ -352,7 +352,7 @@ export default function App() {
     const { frontend } = useConfigStore();
     const { setTheme } = useThemeStore();
     const { connected, subscribe } = useIoBroker();
-    const { clientId, clientName } = useConnectionStore();
+    const { clientId, clientIdPinned, clientName, pinClientId } = useConnectionStore();
 
     // Wire up passive frontend load-time metrics (initial load, FCP, long tasks).
     useEffect(() => {
@@ -874,18 +874,37 @@ export default function App() {
     // actually exists on the server. Latching it on the write itself meant a register
     // that never landed (socket just came up, tab suspended mid-write) was never retried
     // for the lifetime of the page, which on a kiosk tablet is weeks (#532).
-    const registeredRef = useRef(false);
+    // The ref remembers WHICH id was settled, not just that something was: adopting or
+    // pinning an id below changes clientId, and the effect has to run again for the new one.
+    const registeredRef = useRef<string | null>(null);
     useEffect(() => {
-        if (!connected || registeredRef.current) return;
+        if (!connected || registeredRef.current === clientId) return;
 
         let cancelled = false;
         void (async () => {
+            // Anchor the id in localStorage on first contact. Before that, adopt the id
+            // this device owned under the old user-agent-based fingerprint, so the update
+            // does not orphan an already-named device (#620). Once pinned, the id never
+            // moves again — browser updates and resolution changes no longer touch it.
+            if (!clientIdPinned) {
+                let adopt = clientId;
+                const legacy = legacyFingerprintId();
+                if (legacy !== clientId) {
+                    const legacyName = await getStateDirect(`${NS}.clients.${legacy}.info.name`);
+                    if (cancelled) return;
+                    if (legacyName && String(legacyName.val ?? '').length > 0) adopt = legacy;
+                }
+                pinClientId(adopt);
+                // Adopted a different id → the effect re-runs and registers under that one.
+                if (adopt !== clientId) return;
+            }
+
             const existing = await getStateDirect(`${NS}.clients.${clientId}.info.name`);
             if (cancelled) return;
             // Already registered → server name wins; leave it untouched. The userAgent /
             // resolution are still refreshed via the resolution relay on every connect.
             if (existing && String(existing.val ?? '').length > 0) {
-                registeredRef.current = true;
+                registeredRef.current = clientId;
                 return;
             }
 
@@ -900,7 +919,7 @@ export default function App() {
         return () => {
             cancelled = true;
         };
-    }, [connected, clientId, clientName]);
+    }, [connected, clientId, clientIdPinned, clientName, pinClientId]);
 
     // Report this client's viewport resolution: once on connect and (debounced)
     // whenever the window is resized or the device rotates. The adapter stores it

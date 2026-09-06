@@ -83,6 +83,12 @@ export const de = {
     'settings.clients.none': 'Noch keine Geräte registriert.',
     'settings.clients.thisDevice': 'Dieses Gerät',
     'settings.clients.copyId': 'Client-ID kopieren',
+    'settings.clients.fixedId': 'Feste ID für dieses Gerät',
+    'settings.clients.fixedIdPh': 'z.B. wohnzimmer-tablet',
+    'settings.clients.fixedIdHint':
+        'Erlaubt sind a–z, 0–9, - und _. Das Gerät zieht auf clients.<ID> um; der bisherige Eintrag wird entfernt.',
+    'settings.clients.idTaken': 'Diese ID ist bereits vergeben.',
+    'settings.clients.idInvalid': 'Ungültige ID – erlaubt sind a–z, 0–9, - und _.',
     'settings.clients.showIdBadge': 'ID-Badge auf jedem Gerät anzeigen',
     'settings.clients.justNow': 'gerade eben',
     'settings.clients.minsAgo': 'vor {n} min',
@@ -1205,6 +1211,9 @@ export const de = {
     'cond.rules': 'Bedingungsregeln',
     'cond.rulesHint': 'Farben ändern sich wenn Bedingungen erfüllt sind',
     'cond.noRules': 'Noch keine Regeln. Erstelle eine Regel um loszulegen.',
+    'cond.moveUp': 'Nach oben schieben',
+    'cond.moveDown': 'Nach unten schieben',
+    'cond.dragHint': 'Ziehen, um die Reihenfolge zu ändern',
     'cond.newRule': 'Neue Regel',
 
     // ── Marker ───────────────────────────────────────────────────────────────────
