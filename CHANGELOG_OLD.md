@@ -1,5 +1,9 @@
 # Changelog (older entries)
 
+## 0.52.1 (2026-09-01)
+- AI assistant (MCP, beta) - two new tools aimed at the same thing: dashboards that use what AURA can do. aura_recipes hands the model finished, valid widgets for the jobs that come up - a room as one list instead of a row of value tiles, a counter as consumption bars, a tile with colour thresholds and conditions, a status overview, a thermostat dial, a whole room tab. aura_review goes the other way and looks over a tab that already exists, naming what would make it better: tile rows that belong in one list, numbers with no good or bad range, a meter shown as its raw reading, a bar chart without an aggregation, a list with no second line - each finding names the widgets and the recipe that fixes it, and stays a suggestion. On top of that the instructions now send the model to a recipe and to an existing tab of the dashboard before it reads the schema, so a generated view no longer comes back as the bare minimum the schema accepts
+- Editor - the "AI prompt" dialog now pastes worked examples into the prompt (the same ones the MCP server hands out) and says what a good dashboard looks like, instead of only what is valid JSON. The old wording asked the model to leave options out, which is why generated views came back as bare tiles
+
 ## 0.52.0 (2026-09-01)
 - 🌟 **New feature:** Sections and tabs can be protected with a PIN - the content only appears once the code was entered, no matter whether the section menu, the tab bar, a widget click action or a bookmarked URL led there. Set per section and per tab in the dashboard editor; a section and a tab inside it sharing the same code ask only once
 - Dashboard editor - the section settings popover follows the admin theme again instead of showing up dark, and its marker editor starts collapsed like the tab settings
