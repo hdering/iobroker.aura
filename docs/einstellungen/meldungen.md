@@ -14,6 +14,8 @@ Der Verlauf lässt sich mit dem [Meldungen-Widget](../widgets/meldungen) auf jed
 | `aura.0.clients.<clientId>.messages.send` | Nur dieses Gerät |
 | `aura.0.layouts.<layout-slug>.messages.send` | Nur dieses Layout |
 
+Die `<clientId>` steht in Einstellungen → Verbundene Geräte und lässt sich dort fest vergeben (siehe [Client-ID](./settings#client-id)).
+
 Der Datenpunkt wird nach der Verarbeitung automatisch geleert. Ein Text ohne führende `{` wird zur Info-Meldung:
 
 ```js

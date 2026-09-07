@@ -48,6 +48,8 @@ Steht der Datenpunkt beim Laden der Seite schon auf dem Trigger-Wert, öffnet si
 | `aura.0.popup.open` | Alle Geräte |
 | `aura.0.clients.<clientId>.popup.open` | Nur dieses Gerät |
 
+Die `<clientId>` steht in Einstellungen → Verbundene Geräte und lässt sich dort fest vergeben (siehe [Client-ID](./settings#client-id)).
+
 Wert: Name oder ID einer Popup-View, oder JSON `{"view":"…","dp":"…","title":"…"}`. Der Datenpunkt wird nach dem Öffnen automatisch geleert.
 
 ```js
