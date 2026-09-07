@@ -6701,6 +6701,10 @@ export function WidgetFrame({
     const stopDrag = (e: React.MouseEvent | React.PointerEvent) => e.stopPropagation();
 
     const isHeader = config.type === 'header';
+    // The "framed" section-title style deliberately looks like a normal widget: card
+    // background, border, radius and the usual inner padding. Every other header style
+    // drops the card and draws straight onto the dashboard, so only those are "bare".
+    const isBareHeader = isHeader && (config.layout ?? 'default') !== 'framed';
     const isGroup = config.type === 'group';
     const isButton = config.type === 'button';
     const isTransparent = !!config.options?.transparent;
@@ -6840,7 +6844,7 @@ export function WidgetFrame({
     // the same padding the source has, so the mirror matches it.
     const framingType = config.type === 'mirror' && mirrorLcSource ? mirrorLcSource.type : config.type;
     const isNoPad =
-        isHeader ||
+        isBareHeader ||
         framingType === 'group' ||
         framingType === 'panels' ||
         framingType === 'iframe' ||
@@ -6851,26 +6855,26 @@ export function WidgetFrame({
     // bleed into this gutter need it to stay inside the card (.aura-bleed-* in
     // index.css) — with a small "Innenabstand der Widgets" a fixed bleed would
     // push the rows and the scrollbar past the card border (#590).
-    const padVar = { '--aura-widget-pad': `${isHeader || isNoPad ? 0 : widgetPadding}px` } as React.CSSProperties;
+    const padVar = { '--aura-widget-pad': `${isNoPad ? 0 : widgetPadding}px` } as React.CSSProperties;
 
     return (
         <div
             ref={focusRef}
-            className={`aura-widget aura-widget-${config.id} aura-widget-type-${config.type} relative h-full transition-all overflow-visible ${isHeader ? 'px-2 py-0' : isNoPad ? 'p-0' : ''} ${editMode ? 'ring-2 ring-accent/40 rounded-xl' : ''} ${!editMode && conditionResult.effect === 'pulse' ? 'animate-pulse' : ''} ${!editMode && conditionResult.effect === 'blink' ? 'animate-[blink_1s_step-end_infinite]' : ''} ${!editMode && conditionResult.effect === 'border' ? 'aura-cond-ring' : ''} ${conditionResult.bold ? 'aura-cond-bold' : ''} ${conditionResult.italic ? 'aura-cond-italic' : ''} ${partClasses} ${isFocused ? 'aura-widget-focused' : ''}`}
+            className={`aura-widget aura-widget-${config.id} aura-widget-type-${config.type} relative h-full transition-all overflow-visible ${isBareHeader ? 'px-2 py-0' : isNoPad ? 'p-0' : ''} ${editMode ? 'ring-2 ring-accent/40 rounded-xl' : ''} ${!editMode && conditionResult.effect === 'pulse' ? 'animate-pulse' : ''} ${!editMode && conditionResult.effect === 'blink' ? 'animate-[blink_1s_step-end_infinite]' : ''} ${!editMode && conditionResult.effect === 'border' ? 'aura-cond-ring' : ''} ${conditionResult.bold ? 'aura-cond-bold' : ''} ${conditionResult.italic ? 'aura-cond-italic' : ''} ${partClasses} ${isFocused ? 'aura-widget-focused' : ''}`}
             onClick={handleWidgetClick}
             style={
-                isHeader || isTransparent
+                isBareHeader || isTransparent
                     ? {
                           ...padVar,
-                          background: isHeader ? 'var(--header-bg, transparent)' : transparentBg,
+                          background: isBareHeader ? 'var(--header-bg, transparent)' : transparentBg,
                           borderRadius:
                               isTransparent && (editMode || transparencyStrength < 100) ? 'var(--widget-radius)' : 0,
                           boxShadow: 'none',
                           backdropFilter: 'none',
-                          borderWidth: isHeader ? 0 : editMode ? 1 : 'var(--widget-border-width)',
+                          borderWidth: isBareHeader ? 0 : editMode ? 1 : 'var(--widget-border-width)',
                           borderStyle: 'dashed',
                           borderColor: isTransparent && editMode ? 'var(--app-border)' : 'transparent',
-                          padding: isHeader || isNoPad ? undefined : widgetPadding,
+                          padding: isNoPad ? undefined : widgetPadding,
                           cursor: !editMode && hasClickAction ? 'pointer' : undefined,
                           // Inert at 1 — only a condition's "Deckkraft" effect sets the var.
                           opacity: 'var(--widget-opacity, 1)',
@@ -8370,6 +8374,7 @@ export function WidgetFrame({
                                                 <option value="default">{t('wf.edit.header.default')}</option>
                                                 <option value="compact">{t('wf.edit.header.compact')}</option>
                                                 <option value="minimal">{t('wf.edit.header.minimal')}</option>
+                                                <option value="framed">{t('wf.edit.header.framed')}</option>
                                             </select>
                                         </div>
                                     </>

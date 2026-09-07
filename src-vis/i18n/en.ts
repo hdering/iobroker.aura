@@ -866,6 +866,7 @@ export const en: Record<TranslationKey, string> = {
     'wf.edit.header.default': 'Default (Accent line + Title)',
     'wf.edit.header.compact': 'Compact (Left line)',
     'wf.edit.header.minimal': 'Minimal (Divider + Text)',
+    'wf.edit.header.framed': 'Framed (like a widget)',
 
     'wf.edit.layout.standard': 'Default',
     'wf.edit.layout.card': 'Card',

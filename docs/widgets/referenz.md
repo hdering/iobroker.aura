@@ -62,7 +62,7 @@ Nicht nur das Default-Layout verwenden: jedes Widget kann in **allen** unten gel
 
 | Widget | `type` | Layouts | Default-Grid (w×h) |
 | --- | --- | --- | --- |
-| [Abschnittstitel](./abschnittstitel) | `header` | `default` | 14×2 |
+| [Abschnittstitel](./abschnittstitel) | `header` | `default` · `card` · `compact` · `minimal` · `framed` | 14×2 |
 | [Button](./button) | `button` | `default` | 6×4 |
 | [Gruppe](./gruppe) | `group` | `default` | 12×6 |
 | [Panels](./panels) | `panels` | `default` | 12×6 |

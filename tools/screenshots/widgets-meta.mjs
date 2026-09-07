@@ -179,6 +179,7 @@ export const WIDGETS = [
     // ── Layout ──────────────────────────────────────────────────────────────
     { type: 'header', slug: 'abschnittstitel', label: 'Abschnittstitel', group: 'layout',
       hint: 'Trennlinie mit Überschrift zur Gliederung des Dashboards.',
+      layouts: ['default', 'card', 'compact', 'minimal', 'framed'],
       runtime: r(null, {}, { w: 14, h: 2, noDp: true, title: 'Wohnzimmer' }) },
     { type: 'button', slug: 'button', label: 'Button', group: 'layout',
       hint: 'Klick-Aktion auslösen (Datenpunkt schreiben, HTTP-Call, Szene …).',

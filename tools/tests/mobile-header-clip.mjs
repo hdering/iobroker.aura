@@ -113,6 +113,15 @@ const CASES = [
     ['1 Zeile ohne Untertitel', 1, 'default', '', 1],
     ['1 Zeile kompakt', 1, 'compact', '', 1],
     ['1 Zeile minimal', 1, 'minimal', '', 1],
+    // compact und minimal zeigen den Untertitel seit dem Fix ebenfalls — damit
+    // brauchen auch sie mehr als eine Rasterzeile Platz.
+    ['1 Zeile kompakt + Untertitel', 1, 'compact', 'Erdgeschoss', 1],
+    ['1 Zeile minimal + Untertitel', 1, 'minimal', 'Erdgeschoss', 1],
+    ['1 Zeile kompakt + Untertitel @1.6', 1, 'compact', 'Erdgeschoss', 1.6],
+    ['1 Zeile minimal + Untertitel @1.6', 1, 'minimal', 'Erdgeschoss', 1.6],
+    // "framed" bringt zusaetzlich den Innenabstand der Widget-Karte mit.
+    ['1 Zeile framed + Untertitel', 1, 'framed', 'Erdgeschoss', 1],
+    ['2 Zeilen framed + Untertitel @1.6', 2, 'framed', 'Erdgeschoss', 1.6],
     ['2 Zeilen + Untertitel', 2, 'default', 'Erdgeschoss', 1],
     ['1 Zeile + Untertitel @1.3', 1, 'default', 'Erdgeschoss', 1.3],
     ['1 Zeile + Untertitel @1.6', 1, 'default', 'Erdgeschoss', 1.6],

@@ -89,6 +89,7 @@
     "test:popup-bg": "node tools/tests/popup-background.mjs",
     "test:popup-pad": "node tools/tests/popup-padding.mjs",
     "test:mobile-header": "node tools/tests/mobile-header-clip.mjs",
+    "test:header-subtitle": "node tools/tests/header-subtitle.mjs",
     "test:fill-limits": "node tools/tests/fill-limits.mjs",
     "test:boot-splash": "node tools/tests/boot-splash-offline.mjs",
     "test:overview": "node tools/tests/admin-overview-layout.mjs",

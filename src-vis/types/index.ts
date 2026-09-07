@@ -101,6 +101,8 @@ export type WidgetLayout =
     | 'card'
     | 'compact'
     | 'minimal'
+    /** Section title drawn as a normal widget card (background, border, padding). */
+    | 'framed'
     | 'agenda'
     | 'flow'
     | 'battery'

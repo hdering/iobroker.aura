@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generatedFrom": "tools/screenshots/widgets-meta.mjs",
-  "generatedAt": "2026-09-04",
+  "generatedAt": "2026-09-07",
   "note": "SSoT for Aura widgets. Options are seeded semi-automatically (see build-widget-catalog.mjs).",
   "groups": [
     {
@@ -1550,7 +1550,11 @@
         "h": 2
       },
       "layouts": [
-        "default"
+        "default",
+        "card",
+        "compact",
+        "minimal",
+        "framed"
       ],
       "options": [],
       "crosscutting": [
