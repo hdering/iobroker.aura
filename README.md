@@ -115,6 +115,12 @@ So the path of any release is: `-nextN` test build → **Latest** (published, on
 
 _Older releases: see [CHANGELOG_OLD.md](CHANGELOG_OLD.md)._
 
+### 0.55.3 (2026-09-07)
+- Section title - new "framed" style that looks like a normal widget card, subtitle now shows in the compact and minimal styles too, the accent bar spans title and subtitle, and the title is no longer clipped at the top of the mobile view; the rule can now be hidden or given its own color, title and subtitle take their own color and text size, and the subtitle accepts the same value bindings as the HTML widget
+- Settings - deleting a connected device now removes its whole datapoint tree instead of leaving parts of it behind, works from the aura.0.clients.deleteRequest datapoint regardless of the ack flag, and a renamed or speaking client id is no longer cut after 8 characters in the object tree ([#624](https://github.com/hdering/ioBroker.aura/issues/624))
+- Settings - the frontend notice about a new adapter version now waits for a confirmation instead of fading away after a few seconds, and comes back after a reload until it is answered; the new "Update notice has to be confirmed" option turns that off ([#617](https://github.com/hdering/ioBroker.aura/issues/617))
+
+
 ### 0.55.2 (2026-09-07)
 - Input field - optional unit next to the field, in the Eingabefeld widget, the static and dynamic list rows and the Universal Widget cell ([#622](https://github.com/hdering/ioBroker.aura/issues/622))
 
@@ -242,12 +248,6 @@ _Older releases: see [CHANGELOG_OLD.md](CHANGELOG_OLD.md)._
 - Settings - the MCP token is now stored encrypted; a hand-typed token has to be entered once more after this update ([#610](https://github.com/hdering/ioBroker.aura/issues/610))
 
 
-### 0.52.2 (2026-09-01)
-- 🌟 **New feature:** Calendar - each calendar source can carry its own icon, shown in front of its entries ([#608](https://github.com/hdering/ioBroker.aura/issues/608))
-- 🌟 **New feature:** Calendar - optional calendar week, printed at the first entry of every week ([#608](https://github.com/hdering/ioBroker.aura/issues/608))
-- 🌟 **New feature:** Calendar - multi-day events can be shown as one entry per day ([#608](https://github.com/hdering/ioBroker.aura/issues/608))
-
-
 ## License
 
 MIT License
@@ -259,6 +259,7 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 
 
 
