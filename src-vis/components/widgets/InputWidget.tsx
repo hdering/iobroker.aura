@@ -44,6 +44,10 @@ export function InputWidget({ config }: WidgetProps) {
     // cell (default). When set, the field keeps this width and the submit button sits
     // directly next to it instead of being pushed to the far edge.
     const fixedWidth = Number(o.inputWidth) > 0 ? Number(o.inputWidth) : undefined;
+    // Unit shown next to the field (issue #622). Empty = nothing rendered, so the
+    // option is opt-in: existing widgets carry no unit and stay unchanged. Picking a
+    // datapoint prefills it from common.unit (see WidgetFrame's supportsUnit list).
+    const unit = ((o.unit as string) ?? '').trim();
     const WidgetIcon = getWidgetIcon(o.icon as string | undefined, TextCursorInput);
 
     const { value: rawVal } = useDatapoint(config.datapoint);
@@ -152,6 +156,15 @@ export function InputWidget({ config }: WidgetProps) {
     const fieldJustify: React.CSSProperties['justifyContent'] =
         fieldAlign === 'right' ? 'flex-end' : fieldAlign === 'center' ? 'center' : 'flex-start';
 
+    // Sits directly right of the field, vertically centred (a textarea is taller than
+    // one line, so `self-center` keeps the unit next to the first row instead of
+    // stretching over the whole box).
+    const unitEl = unit ? (
+        <span className="aura-input-unit shrink-0 self-center text-sm" style={{ color: 'var(--text-secondary)' }}>
+            {unit}
+        </span>
+    ) : null;
+
     const inputEl = multiline ? (
         <textarea
             className={`aura-widget-action ${inputClass} resize-none flex-1`}
@@ -210,11 +223,17 @@ export function InputWidget({ config }: WidgetProps) {
     const singleLineContent = fixedWidth ? (
         <div className="flex-1 min-w-0 flex items-center gap-2" style={{ justifyContent: fieldJustify }}>
             {inputEl}
+            {unitEl}
             {submitButton}
         </div>
     ) : (
         <>
-            <div className="flex-1 min-w-0 flex">{inputEl}</div>
+            {/* The unit rides inside the growing box so it stays glued to the field,
+                while the send button keeps its place at the far edge of the row. */}
+            <div className="flex-1 min-w-0 flex items-center gap-2">
+                {inputEl}
+                {unitEl}
+            </div>
             {submitButton}
         </>
     );
@@ -228,6 +247,7 @@ export function InputWidget({ config }: WidgetProps) {
                 <CustomGridView
                     config={config}
                     value={draft}
+                    unit={unit}
                     extraComponents={{
                         input: inputEl,
                         submit: renderSubmitButton(true),
@@ -295,7 +315,14 @@ export function InputWidget({ config }: WidgetProps) {
                 </div>
             )}
             <div className={`flex ${multiline ? 'flex-1 min-h-0' : 'items-center'} gap-2`}>
-                {multiline ? inputEl : singleLineContent}
+                {multiline ? (
+                    <>
+                        {inputEl}
+                        {unitEl}
+                    </>
+                ) : (
+                    singleLineContent
+                )}
             </div>
             {multiline && submitButton && <div className="flex justify-end shrink-0">{submitButton}</div>}
             {pending && <ConfirmOverlay text={confirmText} onConfirm={confirm} onCancel={cancel} />}

@@ -300,6 +300,7 @@ export interface CustomCell {
     submitMode?: 'submit' | 'live'; // 'input' cell: write on Enter/Send/blur ('submit', default) or on every keystroke ('live')
     showSubmit?: boolean; // 'input' cell: show the Send button in submit mode (default true)
     clearAfterSubmit?: boolean; // 'input' cell: command field — clear the field after sending and never show the DP value
+    inputUnit?: string; // 'input' cell: unit rendered right of the field (issue #622); empty = none. Named apart from the 'unit' cell type, which prints the widget's own unit.
     // 'progress' type
     showValue?: boolean; // 'progress' cell: overlay current value/percentage on top of bar
     // 'state-text' type — reuses trueColor/falseColor + color/text styling

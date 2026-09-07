@@ -169,6 +169,7 @@ Das Häkchen **Negativ darstellen (× −1)** kehrt das Vorzeichen um (gespeiche
 | `confirm` / `confirmText` | `false`  | Sicherheitsabfrage vor dem Senden (nur bei `submit`)                            |
 | `inputTextAlign`          | `left`   | `left` · `center` · `right`                                                     |
 | `inputReadOnly`           | `false`  | Schreibschutz — Wert wird angezeigt, aber nicht geschrieben                     |
+| `inputShowUnit`           | `false`  | Einheit des Eintrags rechts neben dem Feld anzeigen                              |
 
 Ein schreibgeschützter Datenpunkt ist immer schreibgeschützt, unabhängig von `inputReadOnly`.
 

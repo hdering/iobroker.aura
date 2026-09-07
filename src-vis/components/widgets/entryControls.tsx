@@ -396,6 +396,8 @@ export interface EntryControlConfig extends ValueTransformSettings, SwitchEntryC
     inputMultiline?: boolean;
     /** Multi-line: height of the text area in px. Unset = the layout's default. */
     inputHeight?: number;
+    /** Show the entry's unit right of the field. Default false (issue #622). */
+    inputShowUnit?: boolean;
 }
 
 type SetState = (id: string, v: boolean | number | string) => void;
@@ -1629,7 +1631,7 @@ export function InputControl({
     fullWidth,
     cond,
 }: {
-    entry: EntryControlConfig & { id: string };
+    entry: EntryControlConfig & { id: string; unit?: string };
     val: ioBrokerState['val'];
     setState: SetState;
     /** Card layouts stack vertically, so the field takes the whole cell there. */
@@ -1652,6 +1654,10 @@ export function InputControl({
     const clearAfterSubmit = !!entry.inputClearAfterSubmit && submitMode === 'submit' && !readOnly;
     const showSubmit = entry.inputShowSubmit !== false && submitMode === 'submit' && !readOnly;
     const width = Number(entry.inputWidth) > 0 ? Number(entry.inputWidth) : undefined;
+    // Unit next to the field (issue #622). Off by default so existing lists - where the
+    // unit is auto-filled from common.unit and only ever appeared behind a *value* -
+    // keep their input rows unchanged. The text itself is the entry's own unit.
+    const unit = entry.inputShowUnit && entry.unit ? entry.unit : '';
     const FieldTag = (multiline ? 'textarea' : 'input') as 'input';
 
     const dpString = val == null ? '' : String(val);
@@ -1776,6 +1782,14 @@ export function InputControl({
                 // the field would fire off the message. There the send is always explicit.
                 onBlur={submitMode === 'submit' && !clearAfterSubmit && !readOnly ? commit : undefined}
             />
+            {unit && (
+                <span
+                    className="aura-input-unit shrink-0 self-center text-xs"
+                    style={{ color: cond?.color ?? 'var(--text-secondary)', ...condTextStyle(cond) }}
+                >
+                    {unit}
+                </span>
+            )}
             {showSubmit && (
                 <button
                     type="button"

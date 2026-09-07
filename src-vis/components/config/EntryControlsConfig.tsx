@@ -64,7 +64,7 @@ function parseCommonStates(states: unknown): EntryStateMap[] {
 interface Props {
     // entry carries the list-entry id at runtime (StaticListEntry/AutoListEntry);
     // needed to scope sibling lookup for shutter auto-detection.
-    entry: EntryControlConfig & { id?: string };
+    entry: EntryControlConfig & { id?: string; unit?: string };
     onUpdate: (patch: Partial<EntryControlConfig>) => void;
     /** Drop the internal "Darstellung" caption - for callers whose own section
      *  heading already says it (the datapoint dialog's detail pane). */
@@ -2107,6 +2107,23 @@ export function EntryControlsConfig({ entry, onUpdate, hideLabel, autoLabel }: P
                             </select>
                         </div>
                     </div>
+                    {/* Einheit neben dem Feld (Issue #622). Der Text ist die Einheit des
+                        Eintrags - in der dynamischen Liste kommt sie beim Abgleich aus
+                        common.unit, in der statischen aus dem Feld "Einheit". */}
+                    <ToggleRow
+                        label="Einheit neben dem Feld"
+                        checked={!!entry.inputShowUnit}
+                        onChange={(v) => onUpdate({ inputShowUnit: v || undefined })}
+                    />
+                    {entry.inputShowUnit && !entry.unit && (
+                        <p
+                            className="text-[9px] leading-tight"
+                            style={{ color: 'var(--text-secondary)', opacity: 0.7 }}
+                        >
+                            Noch keine Einheit hinterlegt - sie kommt aus dem Feld {'„'}Einheit{'“'} des Eintrags bzw.
+                            beim Abgleich aus dem Datenpunkt.
+                        </p>
+                    )}
                     <p className="text-[9px] leading-tight" style={{ color: 'var(--text-secondary)', opacity: 0.7 }}>
                         {inputSubmitMode === 'live'
                             ? 'Jeder Tastenschlag schreibt sofort in den Datenpunkt.'

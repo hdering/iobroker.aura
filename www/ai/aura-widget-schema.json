@@ -1,7 +1,7 @@
 {
   "$meta": {
     "name": "AURA widget schema",
-    "auraVersion": "0.55.0",
+    "auraVersion": "0.55.1",
     "generator": "tools/schema/gen-widget-schema.mjs",
     "purpose": "Describes every AURA widget type so a JSON widget/tab config can be generated and pasted into the dashboard editor (\"Widget importieren\").",
     "usage": [
@@ -1304,6 +1304,10 @@
           "type": "boolean",
           "description": "'input' cell: command field — clear the field after sending and never show the DP value"
         },
+        "inputUnit": {
+          "type": "string",
+          "description": "'input' cell: unit rendered right of the field (issue #622); empty = none. Named apart from the 'unit' cell type, which prints the widget's own unit."
+        },
         "showValue": {
           "type": "boolean",
           "description": "'progress' cell: overlay current value/percentage on top of bar"
@@ -2510,6 +2514,10 @@
           "type": "number",
           "description": "Multi-line: height of the text area in px. Unset = the layout's default."
         },
+        "inputShowUnit": {
+          "type": "boolean",
+          "description": "Show the entry's unit right of the field. Default false (issue #622)."
+        },
         "id": {
           "type": "string",
           "required": true
@@ -3531,6 +3539,10 @@
           "type": "number",
           "description": "Multi-line: height of the text area in px. Unset = the layout's default."
         },
+        "inputShowUnit": {
+          "type": "boolean",
+          "description": "Show the entry's unit right of the field. Default false (issue #622)."
+        },
         "id": {
           "type": "string",
           "required": true
@@ -4169,6 +4181,10 @@
         "inputHeight": {
           "type": "number",
           "description": "Multi-line: height of the text area in px. Unset = the layout's default."
+        },
+        "inputShowUnit": {
+          "type": "boolean",
+          "description": "Show the entry's unit right of the field. Default false (issue #622)."
         }
       }
     },
@@ -8955,6 +8971,11 @@
           ],
           "default": "left",
           "description": "Ausrichtung des eingegebenen Texts."
+        },
+        "unit": {
+          "type": "string",
+          "default": "",
+          "description": "Einheit rechts neben dem Eingabefeld, z. B. \"°C\". Leer = keine Einheit."
         }
       }
     },

@@ -461,6 +461,7 @@ export const WIDGET_OPTION_NOTES = {
         inputWidth: { description: 'Breite des Eingabefelds in px. 0 = volle Breite.' },
         textAlign: { description: 'Ausrichtung des eingegebenen Texts.' },
         fieldAlign: { description: 'Ausrichtung des Eingabefelds in der Kachel.' },
+        unit: { description: 'Einheit rechts neben dem Eingabefeld, z. B. "°C". Leer = keine Einheit.' },
     },
     datepicker: {
         timeOnly: { description: 'Nur eine Uhrzeit statt eines Datums abfragen.' },

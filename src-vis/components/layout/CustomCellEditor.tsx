@@ -2037,18 +2037,34 @@ export function CustomCellEditor({
                             />
                         </button>
                     </div>
-                    <div>
-                        <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
-                            Platzhalter
-                        </label>
-                        <input
-                            type="text"
-                            value={cell.text ?? ''}
-                            onChange={(e) => onChange({ text: e.target.value || undefined })}
-                            placeholder="optional"
-                            className={inputCls}
-                            style={inputSty}
-                        />
+                    <div className="flex gap-2">
+                        <div style={{ flex: '2 1 0%', minWidth: 0 }}>
+                            <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
+                                Platzhalter
+                            </label>
+                            <input
+                                type="text"
+                                value={cell.text ?? ''}
+                                onChange={(e) => onChange({ text: e.target.value || undefined })}
+                                placeholder="optional"
+                                className={inputCls}
+                                style={inputSty}
+                            />
+                        </div>
+                        {/* Leer = keine Einheit — die Zelle sieht dann aus wie bisher. */}
+                        <div style={{ flex: '1 1 0%', minWidth: 0 }}>
+                            <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
+                                Einheit
+                            </label>
+                            <input
+                                type="text"
+                                value={cell.inputUnit ?? ''}
+                                onChange={(e) => onChange({ inputUnit: e.target.value || undefined })}
+                                placeholder="z.B. °C"
+                                className={inputCls}
+                                style={inputSty}
+                            />
+                        </div>
                     </div>
                     {!cell.multiline && (
                         <div>

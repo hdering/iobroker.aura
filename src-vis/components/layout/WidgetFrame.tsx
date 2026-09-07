@@ -18026,9 +18026,9 @@ export function WidgetFrame({
                                             </label>
                                             <Toggle on={multiline} onClick={() => set({ multiline: !multiline })} />
                                         </div>
-                                        {/* Platzhalter (70%) + Feldbreite (30%) nebeneinander */}
+                                        {/* Platzhalter (50%) + Einheit (20%) + Feldbreite (30%) nebeneinander */}
                                         <div className="flex gap-2">
-                                            <div style={{ flex: '7 1 0%', minWidth: 0 }}>
+                                            <div style={{ flex: '5 1 0%', minWidth: 0 }}>
                                                 <label
                                                     className="text-[11px] mb-1 block"
                                                     style={{ color: 'var(--text-secondary)' }}
@@ -18040,6 +18040,24 @@ export function WidgetFrame({
                                                     value={placeholder}
                                                     onChange={(e) => set({ placeholder: e.target.value || undefined })}
                                                     placeholder="z.B. Nachricht eingeben…"
+                                                    className={inputCls3}
+                                                    style={inputSty3}
+                                                />
+                                            </div>
+                                            {/* Leer = keine Einheit. Beim Auswählen eines Datenpunkts
+                                                wird common.unit vorbelegt (siehe supportsUnit). */}
+                                            <div style={{ flex: '2 1 0%', minWidth: 0 }}>
+                                                <label
+                                                    className="text-[11px] mb-1 block"
+                                                    style={{ color: 'var(--text-secondary)' }}
+                                                >
+                                                    Einheit
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={(o.unit as string) ?? ''}
+                                                    onChange={(e) => set({ unit: e.target.value || undefined })}
+                                                    placeholder="z.B. °C"
                                                     className={inputCls3}
                                                     style={inputSty3}
                                                 />
@@ -18657,7 +18675,9 @@ export function WidgetFrame({
                                 const typePatch: { type?: WidgetType } =
                                     allowTypeChange && detected ? { type: detected.type } : {};
                                 const effectiveType = (typePatch.type ?? config.type) as WidgetType;
-                                const supportsUnit = ['value', 'chart', 'gauge', 'fill'].includes(effectiveType);
+                                const supportsUnit = ['value', 'chart', 'gauge', 'fill', 'input'].includes(
+                                    effectiveType,
+                                );
                                 const unitAlreadySet = !!(config.options?.unit as string | undefined);
                                 const resolvedUnit = unit || detected?.unit;
                                 const unitPatch =

@@ -51,3 +51,4 @@ Im Modus `submit` wird der Wert per Senden-Button, Enter (einzeilig) bzw. Strg/C
 | `iconSize` | `20` | px |
 | `titleAlign` | `left` | `left` · `center` · `right` |
 | `textAlign` | `left` | `left` · `center` · `right` (Eingabetext) |
+| `unit` | — | Einheit rechts neben dem Feld; leer = keine. Wird beim Auswählen des Datenpunkts aus `common.unit` vorbelegt |

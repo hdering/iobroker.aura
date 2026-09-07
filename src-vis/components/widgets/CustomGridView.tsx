@@ -1056,6 +1056,9 @@ function InputCellView({ cell, index, cols, rows }: { cell: CustomCell; index: n
     // after each send. The DP is left untouched — clearing it would be a second state
     // change that consumers (scripts, notifications) would act on.
     const clearAfterSubmit = !!cell.clearAfterSubmit && submitMode === 'submit';
+    // Unit right of the field (issue #622). Empty = nothing rendered, so cells built
+    // before the option look exactly as they did.
+    const cellUnit = (cell.inputUnit ?? '').trim();
     const externalStr = value == null ? '' : String(value);
     const [draft, setDraft] = useState(clearAfterSubmit ? '' : externalStr);
     const [dirty, setDirty] = useState(false);
@@ -1160,6 +1163,20 @@ function InputCellView({ cell, index, cols, rows }: { cell: CustomCell; index: n
     // to the field would fire off the message. There the send is always explicit.
     const onBlurCommit = submitMode === 'submit' && !clearAfterSubmit ? commit : undefined;
 
+    // Same type scale as the field itself, one notch quieter in colour. `self-center`
+    // keeps it on the first line of a textarea instead of stretching down the box.
+    const unitEl = cellUnit ? (
+        <span
+            className="aura-input-unit shrink-0 self-center"
+            style={{
+                color: 'var(--text-secondary)',
+                fontSize: cell.fontSize ? `${cell.fontSize}px` : 12,
+            }}
+        >
+            {cellUnit}
+        </span>
+    ) : null;
+
     const submitBtn =
         submitMode === 'submit' && showSubmit ? (
             <button
@@ -1199,7 +1216,12 @@ function InputCellView({ cell, index, cols, rows }: { cell: CustomCell; index: n
                         className="nodrag focus:outline-none resize-none flex-1 w-full min-h-0"
                         style={{ ...inputSty, minHeight: 0 }}
                     />
-                    {submitBtn && <div className="flex justify-end w-full shrink-0">{submitBtn}</div>}
+                    {(unitEl || submitBtn) && (
+                        <div className="flex items-center justify-end gap-1 w-full shrink-0">
+                            {unitEl}
+                            {submitBtn}
+                        </div>
+                    )}
                 </>
             ) : (
                 <div className="flex items-center gap-1 w-full min-w-0">
@@ -1216,6 +1238,7 @@ function InputCellView({ cell, index, cols, rows }: { cell: CustomCell; index: n
                         className="nodrag focus:outline-none flex-1 min-w-0"
                         style={inputSty}
                     />
+                    {unitEl}
                     {submitBtn}
                 </div>
             )}

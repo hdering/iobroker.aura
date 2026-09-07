@@ -71,6 +71,20 @@ Das [Auswahlfeld](./auswahlfeld)-Widget als Zelle — mit denselben Einträgen, 
 
 Akzeptierte JSON-Formen und die Feldnamen-Erkennung: siehe [Auswahlfeld → JSON-Datenpunkt](./auswahlfeld#json-datenpunkt).
 
+### Eingabefeld (`input`)
+
+Das [Eingabefeld](./eingabefeld)-Widget als Zelle. `text` ist hier der Platzhalter.
+
+| Feld | Standard | |
+| --- | --- | --- |
+| `inputMode` | `text` | `text` · `number` (mit `min` / `max` / `step`) |
+| `multiline` | `false` | mehrzeiliges Textfeld |
+| `submitMode` | `submit` | `submit` (Enter / Feld verlassen / Senden-Button) · `live` (jeder Tastenschlag) |
+| `showSubmit` | `true` | Senden-Button anzeigen (nur bei `submit`) |
+| `clearAfterSubmit` | `false` | Befehlsfeld: nach dem Senden leeren, Datenpunkt-Wert nie anzeigen |
+| `inputUnit` | — | Einheit rechts neben dem Feld; leer = keine |
+| `confirmAction` / `confirmText` | `false` | Sicherheitsabfrage vor dem Senden |
+
 ### Bedienelement (`switch`)
 
 | Feld | | |
