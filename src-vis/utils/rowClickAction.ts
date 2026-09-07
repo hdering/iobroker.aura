@@ -40,6 +40,8 @@ export interface RowPopupOptions {
     rowPopupBackdropDim?: number;
     /** Popup surface colour; undefined = inherit view/global/theme. */
     rowPopupBackground?: string;
+    /** Innenabstand des Popups in px (0…40); undefined = View/Global. */
+    rowPopupPadding?: number;
 }
 
 /**

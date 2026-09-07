@@ -6,7 +6,9 @@ import {
     usePopupConfigStore,
     BUILTIN_VIEW_IDS,
     MAX_POPUP_TRANSPARENCY,
+    MAX_POPUP_PADDING,
     pctOrUndefined,
+    pxOrUndefined,
     DEFAULT_POPUP_BACKGROUND,
 } from '../../store/popupConfigStore';
 import { useEffectiveSettings } from '../../hooks/useEffectiveSettings';
@@ -97,6 +99,7 @@ export function PopupViewEditor() {
         setViewAutoCloseSec,
         setViewTransparency,
         setViewBackdropDim,
+        setViewPadding,
         setViewBackground,
     } = usePopupConfigStore();
 
@@ -316,6 +319,28 @@ export function PopupViewEditor() {
                         inheritLabel="global"
                         inline
                     />
+                    <label
+                        className="flex items-center gap-1.5 text-[11px]"
+                        style={{ color: 'var(--text-secondary)' }}
+                        title="Innenabstand zwischen Popup-Rand und den Widgets dieser View (px, leer = global)"
+                    >
+                        Innenabstand
+                        <input
+                            type="number"
+                            min={0}
+                            max={MAX_POPUP_PADDING}
+                            step={2}
+                            value={view.padding ?? ''}
+                            onChange={(e) => setViewPadding(viewId, pxOrUndefined(e.target.value))}
+                            placeholder="global"
+                            className="text-xs rounded-lg px-2 py-1.5 focus:outline-none w-16"
+                            style={{
+                                background: 'var(--app-bg)',
+                                color: 'var(--text-primary)',
+                                border: '1px solid var(--app-border)',
+                            }}
+                        />
+                    </label>
                     <select
                         value={addType}
                         onChange={(e) => setAddType(e.target.value as WidgetType)}

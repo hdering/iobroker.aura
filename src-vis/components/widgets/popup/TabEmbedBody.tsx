@@ -1,7 +1,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import ReactGridLayout from 'react-grid-layout/legacy';
 import { AlertTriangle } from 'lucide-react';
-import { usePopupConfigStore } from '../../../store/popupConfigStore';
+import { DEFAULT_POPUP_PADDING, usePopupConfigStore } from '../../../store/popupConfigStore';
 import { useEffectiveSettings } from '../../../hooks/useEffectiveSettings';
 import { useConditionStyle, type ConditionResult } from '../../../hooks/useConditionStyle';
 import { widgetSourceCtx } from '../../../utils/conditionSources';
@@ -303,9 +303,11 @@ interface Props {
      *  without a datapoint, like the universal widget). Falls back to the trigger
      *  widget's own datapoint. */
     dpOverride?: string;
+    /** Inner padding in px, already resolved through action > view > global (issue #621). */
+    padding?: number;
 }
 
-export function TabEmbedBody({ viewId, triggerWidget, dpOverride }: Props) {
+export function TabEmbedBody({ viewId, triggerWidget, dpOverride, padding = DEFAULT_POPUP_PADDING }: Props) {
     const view = usePopupConfigStore((s) => s.views.find((v) => v.id === viewId));
     const updateWidgetInView = usePopupConfigStore((s) => s.updateWidgetInView);
     const settings = useEffectiveSettings();
@@ -368,8 +370,9 @@ export function TabEmbedBody({ viewId, triggerWidget, dpOverride }: Props) {
         const maxCol = Math.max(...view.widgets.map((w) => (w.gridPos.x ?? 0) + (w.gridPos.w ?? 4)));
         // Leading empty columns are stripped at render (react-grid-layout compacts only
         // vertically), so the popup width tracks the used span — not the raw max column.
-        return (maxCol - minX) * (snapX + MARGIN) + MARGIN + 24;
-    }, [view, snapX, MARGIN]);
+        // The padding is this box's own, so a tighter setting really does buy row width.
+        return (maxCol - minX) * (snapX + MARGIN) + MARGIN + 2 * padding;
+    }, [view, snapX, MARGIN, padding]);
 
     const cols = containerWidth > 0 ? Math.max(2, Math.floor((containerWidth - MARGIN) / (snapX + MARGIN))) : 12;
 
@@ -443,7 +446,7 @@ export function TabEmbedBody({ viewId, triggerWidget, dpOverride }: Props) {
     });
 
     return (
-        <div ref={containerRefCallback} className="p-3" style={{ minWidth: naturalMinWidth }}>
+        <div ref={containerRefCallback} style={{ padding, minWidth: naturalMinWidth }}>
             {/* Render-free condition evaluators for every widget — kept mounted even
                 when a widget is reflowed out of the grid. */}
             <div style={{ display: 'none' }}>

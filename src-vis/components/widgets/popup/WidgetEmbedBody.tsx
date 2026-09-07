@@ -7,14 +7,17 @@ import { useDashboardStore } from '../../../store/dashboardStore';
 import { useConfigStore } from '../../../store/configStore';
 import { useWidgetRefreshNonce } from '../../../store/widgetRefreshStore';
 import { useResolvedTitle } from '../DynamicTitle';
+import { DEFAULT_POPUP_PADDING } from '../../../store/popupConfigStore';
 
 interface Props {
     widget: WidgetConfig;
     action: Extract<ClickAction, { kind: 'popup-widget' }>;
     allWidgets: WidgetConfig[];
+    /** Inner padding in px, resolved by WidgetClickPopup (issue #621). */
+    padding?: number;
 }
 
-export function WidgetEmbedBody({ widget, action, allWidgets }: Props) {
+export function WidgetEmbedBody({ widget, action, allWidgets, padding = DEFAULT_POPUP_PADDING }: Props) {
     const updateWidget = useDashboardStore((s) => s.updateWidget);
     // Grid pitch — read here (before any early return) so the hook order stays stable.
     const cellSize = useConfigStore((s) => s.frontend.gridRowHeight ?? 80);
@@ -73,7 +76,7 @@ export function WidgetEmbedBody({ widget, action, allWidgets }: Props) {
     // This keeps wide widgets — notably groups, whose column count is derived from
     // the rendered width — from re-squeezing their children when no popupWidth is set.
     // Small widgets still get the comfortable 500px minimum via max().
-    const EMBED_PAD = 32; // this box's 16px padding on both sides
+    const EMBED_PAD = 2 * padding; // this box's own padding on both sides
     const naturalW = target.gridPos.w * (cellSize + gridGap) - gridGap + EMBED_PAD;
     const naturalH = target.gridPos.h * (cellSize + gridGap) - gridGap + EMBED_PAD;
 
@@ -105,7 +108,7 @@ export function WidgetEmbedBody({ widget, action, allWidgets }: Props) {
                 height: popupHeight
                     ? `min(calc(85vh - 56px), ${popupHeight - 40}px)`
                     : `min(85vh, ${Math.max(500, naturalH)}px)`,
-                padding: 16,
+                padding,
                 overflow: 'auto',
                 ...cardStyle,
             }}

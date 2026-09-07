@@ -237,6 +237,7 @@ export function RowClickSection({
                             popupTransparency: opts.rowPopupTransparency,
                             popupBackdropDim: opts.rowPopupBackdropDim,
                             popupBackground: opts.rowPopupBackground,
+                            popupPadding: opts.rowPopupPadding,
                         },
                     }}
                     onConfigChange={(next) => {
@@ -251,6 +252,7 @@ export function RowClickSection({
                             rowPopupTransparency: o.popupTransparency as number | undefined,
                             rowPopupBackdropDim: o.popupBackdropDim as number | undefined,
                             rowPopupBackground: o.popupBackground as string | undefined,
+                            rowPopupPadding: o.popupPadding as number | undefined,
                         });
                     }}
                     hideNone

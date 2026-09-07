@@ -4,6 +4,7 @@ import { ensureDatapointCache, type DatapointEntry } from '../../../hooks/useDat
 import { loadDeviceModelIndex, resolveDeviceIdForDp, type DeviceModel } from '../../../utils/batteryLibrary';
 import { isRelevantDp } from '../../../utils/dpRelevance';
 import { PopupAutoHeightContext } from '../../../contexts/PopupAutoHeightContext';
+import { DEFAULT_POPUP_PADDING } from '../../../store/popupConfigStore';
 import { ListWidget, type StaticListEntry } from '../ListWidget';
 
 type DpsAction = Extract<ClickAction, { kind: 'popup-dps' }>;
@@ -32,7 +33,16 @@ function parentId(dpId: string): string {
  * sliders, multi-state displays and value formatting all come for free. Rows are
  * pinned to `clickAction: none` - a popup inside a popup helps nobody.
  */
-export function DeviceDpsBody({ widget, action }: { widget: WidgetConfig; action: DpsAction }) {
+export function DeviceDpsBody({
+    widget,
+    action,
+    padding = DEFAULT_POPUP_PADDING,
+}: {
+    widget: WidgetConfig;
+    action: DpsAction;
+    /** Inner padding in px, resolved by WidgetClickPopup (issue #621). */
+    padding?: number;
+}) {
     const dpId = action.dp || widget.datapoint || '';
     const scope = action.scope ?? 'parent';
     const relevantOnly = !!action.relevantOnly;
@@ -107,7 +117,7 @@ export function DeviceDpsBody({ widget, action }: { widget: WidgetConfig; action
     };
 
     return (
-        <div className="p-3" style={{ width: 'min(88vw, 520px)' }}>
+        <div style={{ padding, width: 'min(88vw, 520px)' }}>
             {/* Auto-height so the list renders every row and the popup body scrolls
                 as a whole instead of growing a second inner scrollbar. */}
             <PopupAutoHeightContext.Provider value={true}>

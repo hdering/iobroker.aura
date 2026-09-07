@@ -12,6 +12,8 @@ import {
     DEFAULT_POPUP_TRANSPARENCY,
     MAX_POPUP_TRANSPARENCY,
     DEFAULT_BACKDROP_DIM,
+    DEFAULT_POPUP_PADDING,
+    MAX_POPUP_PADDING,
     type PopupView,
     type PopupTrigger,
 } from '../../store/popupConfigStore';
@@ -996,18 +998,22 @@ function TypeDefaultsSection() {
 
 // ── Global settings section ───────────────────────────────────────────────────
 
-/** Slider + live percent readout for one of the global appearance defaults. */
+/** Slider + live readout for one of the global appearance defaults (percent or px). */
 function PercentSlider({
     label,
     hint,
     value,
     max,
+    step = 5,
+    unit = '%',
     onChange,
 }: {
     label: string;
     hint: string;
     value: number;
     max: number;
+    step?: number;
+    unit?: string;
     onChange: (v: number) => void;
 }) {
     return (
@@ -1017,14 +1023,14 @@ function PercentSlider({
                     {label}
                 </label>
                 <span className="text-[11px] font-mono" style={{ color: 'var(--text-primary)' }}>
-                    {value} %
+                    {value} {unit}
                 </span>
             </div>
             <input
                 type="range"
                 min={0}
                 max={max}
-                step={5}
+                step={step}
                 value={value}
                 onChange={(e) => onChange(Number(e.target.value))}
                 className="w-full"
@@ -1046,6 +1052,8 @@ function GlobalSettingsSection() {
     const setGlobalBackdropDim = usePopupConfigStore((s) => s.setGlobalBackdropDim);
     const globalPopupBackground = usePopupConfigStore((s) => s.globalPopupBackground);
     const setGlobalPopupBackground = usePopupConfigStore((s) => s.setGlobalPopupBackground);
+    const globalPopupPadding = usePopupConfigStore((s) => s.globalPopupPadding);
+    const setGlobalPopupPadding = usePopupConfigStore((s) => s.setGlobalPopupPadding);
     return (
         <section>
             <h2 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
@@ -1099,6 +1107,15 @@ function GlobalSettingsSection() {
                     value={globalPopupBackground}
                     onChange={setGlobalPopupBackground}
                     inheritLabel="Theme"
+                />
+                <PercentSlider
+                    label="Innenabstand"
+                    hint="Abstand zwischen Popup-Rand und den Widgets darin. 0 px = die Widgets reichen bis an den Rand."
+                    value={globalPopupPadding ?? DEFAULT_POPUP_PADDING}
+                    max={MAX_POPUP_PADDING}
+                    step={2}
+                    unit="px"
+                    onChange={setGlobalPopupPadding}
                 />
                 <p className="text-[11px] sm:col-span-3" style={labelStyle}>
                     Standardwerte für alle Popups. Werden durch View- und Klick-Aktions-Einstellungen überschrieben.

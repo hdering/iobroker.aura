@@ -1,7 +1,7 @@
 {
   "$meta": {
     "name": "AURA widget schema",
-    "auraVersion": "0.54.2",
+    "auraVersion": "0.55.0",
     "generator": "tools/schema/gen-widget-schema.mjs",
     "purpose": "Describes every AURA widget type so a JSON widget/tab config can be generated and pasted into the dashboard editor (\"Widget importieren\").",
     "usage": [
@@ -5909,6 +5909,10 @@
           "type": "boolean",
           "description": "Titelzeile des Zeilen-Popups ausblenden."
         },
+        "rowPopupPadding": {
+          "type": "number",
+          "description": "Innenabstand des Popups in px (0…40); undefined = View/Global."
+        },
         "rowPopupTitle": {
           "type": "string",
           "description": "Titel des Popups, das eine Zeile beim Antippen öffnet."
@@ -9575,6 +9579,10 @@
           "type": "boolean",
           "description": "Titelzeile des Zeilen-Popups ausblenden."
         },
+        "rowPopupPadding": {
+          "type": "number",
+          "description": "Innenabstand des Popups in px (0…40); undefined = View/Global."
+        },
         "rowPopupTitle": {
           "type": "string",
           "description": "Titel des Popups, das eine Zeile beim Antippen öffnet."
@@ -11213,6 +11221,10 @@
         "rowPopupHideTitle": {
           "type": "boolean",
           "description": "Titelzeile des Zeilen-Popups ausblenden."
+        },
+        "rowPopupPadding": {
+          "type": "number",
+          "description": "Innenabstand des Popups in px (0…40); undefined = View/Global."
         },
         "rowPopupTitle": {
           "type": "string",
