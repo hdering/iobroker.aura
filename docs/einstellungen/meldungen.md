@@ -262,6 +262,11 @@ Der Adapter vergleicht die installierte Version mit dem Repository, das im ioBro
 
 Die Frontend-Meldung wird in der **Instanzkonfiguration im ioBroker-Admin** eingeschaltet: **Update-Hinweis → Neue Adapter-Versionen im Frontend melden**. Sie erscheint einmal pro Version — auch ein Adapter-Neustart wiederholt sie nicht — und wird durch den Hinweis auf die nächste Version ersetzt.
 
+| Option | Wirkung |
+| --- | --- |
+| **Neue Adapter-Versionen im Frontend melden** | Schaltet die Meldung ein. Standard: aus. |
+| **Update-Hinweis muss bestätigt werden** | Der Toast bleibt stehen, bis jemand **Bestätigen** drückt, und kommt nach einem Neuladen zurück. Ausgeschaltet blendet er sich nach der Info-Dauer aus. Standard: an. |
+
 Eine Vorabversion wird nie auf ein älteres Stable „aktualisiert": verglichen wird nach Semver, `0.55.0-beta.1` gilt als neuer als `0.54.2`.
 
 ## Meldung aus einer Bedingung

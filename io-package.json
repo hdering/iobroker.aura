@@ -223,6 +223,7 @@
     "messageHistorySize": 100,
     "messageRetentionDays": 30,
     "updateNotify": false,
+    "updateNotifyAck": true,
     "mcpEnabled": false,
     "mcpToken": "",
     "mcpMode": "read",

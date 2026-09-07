@@ -190,6 +190,28 @@ function makeAdapter({ installed = '0.54.2', repos = {}, active = 'stable', conf
         console.log('✓ a new version is announced exactly once');
     }
 
+    // ── The notice waits for a confirmation, unless that is switched off ──────
+    {
+        const a = makeAdapter({
+            installed: '0.54.2',
+            repos: { stable: '0.55.0' },
+            config: { updateNotify: true },
+        });
+        await a._checkForUpdate();
+        assert.strictEqual(a._last().requireAck, true, 'confirmation is the default');
+        assert.strictEqual(a._last().durationSec, 0, 'and it never auto-closes');
+
+        const fading = makeAdapter({
+            installed: '0.54.2',
+            repos: { stable: '0.55.0' },
+            config: { updateNotify: true, updateNotifyAck: false },
+        });
+        await fading._checkForUpdate();
+        assert.strictEqual(fading._last().requireAck, false, 'switched off: no confirm button');
+        assert.ok(fading._last().durationSec > 0, 'and it fades like any other info message');
+        console.log('✓ the notice has to be confirmed unless the option says otherwise');
+    }
+
     // ── A newer version replaces the obsolete notice ─────────────────────────
     {
         const a = makeAdapter({

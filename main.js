@@ -2361,6 +2361,13 @@ class Aura extends utils.Adapter {
             JSON.stringify({
                 id,
                 severity: 'info',
+                // Confirmed by default: an info toast fades after eight seconds, and a
+                // notice raised exactly once per version must not be able to slip past
+                // while nobody is looking at the tablet. requireAck also pins
+                // durationSec to 0 and brings the notice back after a reload until
+                // somebody actually answers it. Switchable, because a wall display that
+                // nobody ever touches wants the opposite.
+                requireAck: this.config.updateNotifyAck !== false,
                 icon: 'mdi:package-up',
                 title: de ? 'Update verfügbar' : 'Update available',
                 text: de
