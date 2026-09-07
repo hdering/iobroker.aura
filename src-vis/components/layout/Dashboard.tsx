@@ -522,6 +522,16 @@ export function Dashboard({
                                                                     wl !== 'minimal' &&
                                                                     wl !== 'compact') ||
                                                                 usesContentAutoHeight(ew);
+                                                            // The section title draws no card and clips nothing, so with a
+                                                            // small row count its text sticks out of the box above and below
+                                                            // (centered). On the desktop grid that overflow is simply
+                                                            // visible; the mobile stack lives in a scroller, so the topmost
+                                                            // widget loses everything above the scroll box — the title looked
+                                                            // cut off by the tab bar. Grow the box to the text instead
+                                                            // of shrinking a deliberately tall header: minHeight, not height.
+                                                            const growToContent = ew.type === 'header';
+                                                            const boxHeight =
+                                                                w.gridPos.h * cellSize + (w.gridPos.h - 1) * MARGIN;
                                                             return (
                                                                 <div
                                                                     key={w.id}
@@ -531,17 +541,20 @@ export function Dashboard({
                                                                     style={
                                                                         autoHeight
                                                                             ? undefined
-                                                                            : {
-                                                                                  // 'panels' is a fixed-viewport carousel: its
-                                                                                  // slide track is absolutely positioned, so with
-                                                                                  // auto height the flex-1 viewport collapses to 0
-                                                                                  // (only title + dots show). It needs a definite
-                                                                                  // height like a normal widget — unlike group/
-                                                                                  // mediaplayer which size to their stacked content.
-                                                                                  height:
-                                                                                      w.gridPos.h * cellSize +
-                                                                                      (w.gridPos.h - 1) * MARGIN,
-                                                                              }
+                                                                            : growToContent
+                                                                              ? {
+                                                                                    height: boxHeight,
+                                                                                    minHeight: 'fit-content',
+                                                                                }
+                                                                              : {
+                                                                                    // 'panels' is a fixed-viewport carousel: its
+                                                                                    // slide track is absolutely positioned, so with
+                                                                                    // auto height the flex-1 viewport collapses to 0
+                                                                                    // (only title + dots show). It needs a definite
+                                                                                    // height like a normal widget — unlike group/
+                                                                                    // mediaplayer which size to their stacked content.
+                                                                                    height: boxHeight,
+                                                                                }
                                                                     }
                                                                 >
                                                                     <WidgetFrame
