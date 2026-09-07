@@ -212,6 +212,34 @@ for (const layout of ['default', 'compact', 'card', 'minimal']) {
     eq('static card shows the AUS text too', (await probe(labels)).text, 'AUS');
 }
 
+// ── 8b. switchStyle 'slide' next to the labels ──
+// Reported from a dashboard that had both side by side: three rows with
+// trueLabel/falseLabel drew a text pill, three without drew the toggle — same
+// displayType, same switchStyle, and nothing said that the labels had taken the
+// switch away. The pill stays the default (the config panel never stores
+// 'slide'), but a configuration that NAMES the style gets the style and the label.
+{
+    const labels = ['EIN', 'AUS'];
+    const entry = { displayType: 'switch', trueLabel: 'EIN', falseLabel: 'AUS' };
+
+    await show('list', 'default', entry, { [DP]: true });
+    const pill = await probe(labels);
+    eq('labels alone still draw the pill', pill.slide, false);
+    eq('and it carries the AN text', pill.text, 'EIN');
+
+    await show('list', 'default', { ...entry, switchStyle: 'slide' }, { [DP]: true });
+    const both = await probe(labels);
+    check('an explicit slide keeps the toggle', both.slide, JSON.stringify(both));
+    eq('and the label stands next to it', both.text, 'EIN');
+    eq('the toggle still writes', (await toggle(labels)).at(-1)?.val, false);
+
+    // The dynamic list draws the same row (the two paths are kept in parity).
+    await show('autolist', 'default', { ...entry, switchStyle: 'slide' }, { [DP]: false });
+    const auto = await probe(labels);
+    check('dynamic list: explicit slide keeps the toggle', auto.slide, JSON.stringify(auto));
+    eq('dynamic list: with the AUS label beside it', auto.text, 'AUS');
+}
+
 // ── 9. Confirmation gate ──
 {
     const entry = { confirm: true, confirmText: 'Steckdose schalten?', onValue: 'ON', offValue: 'OFF' };

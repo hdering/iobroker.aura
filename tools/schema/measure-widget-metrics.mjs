@@ -238,6 +238,62 @@ const energyBars = (n) =>
 const jsonRows = (n) => JSON.stringify(Array.from({ length: n }, (_, i) => ({ Name: `Zeile ${i + 1}`, Wert: i })));
 
 /**
+ * The forecast the weather widget would fetch, as a fixed answer.
+ *
+ * Measured against the real open-meteo endpoint the numbers would depend on the
+ * network and on the weather (a day with no rain draws no rain line). Eight days
+ * because the widget asks for forecastDays + 1, capped at 8, and fixed dates so
+ * a re-run measures the same rows.
+ */
+const WEATHER_JSON = {
+    current: {
+        temperature_2m: 21.5,
+        relative_humidity_2m: 62,
+        weather_code: 3,
+        wind_speed_10m: 12.4,
+        apparent_temperature: 20.8,
+        cloud_cover: 75,
+        precipitation: 0.2,
+    },
+    daily: {
+        time: Array.from({ length: 8 }, (_, i) => `2026-03-${String(2 + i).padStart(2, '0')}`),
+        weather_code: [3, 61, 80, 1, 2, 63, 71, 0],
+        temperature_2m_max: [18.4, 15.2, 17.8, 21.3, 22.6, 16.9, 12.4, 19.1],
+        temperature_2m_min: [7.2, 6.8, 8.1, 9.4, 10.2, 7.7, 2.3, 6.5],
+        precipitation_probability_max: [10, 80, 65, 5, 0, 70, 45, 0],
+        precipitation_sum: [0.2, 6.4, 3.1, 0, 0, 4.8, 2.2, 0],
+    },
+};
+
+/**
+ * `n` window contacts the status overview will discover, all of them open.
+ *
+ * Its rows come from the datapoint cache, not from the options — so the probe
+ * seeds twelve of them once (`ensureDatapointCache` holds its result for five
+ * minutes, so a second seeding would not be read) and the ROW COUNT is varied
+ * with `maxRows`, which is exactly how a dashboard makes this widget plannable.
+ * One category only: the default layout draws a heading per category with rows
+ * in it, and two categories would put an extra heading into the per-row slope.
+ */
+const CONTACT_COUNT = 12;
+const contactId = (i) => `hm-rpc.0.CONTACT${String(i).padStart(4, '0')}.1.STATE`;
+const contactRows = () =>
+    Array.from({ length: CONTACT_COUNT }, (_, i) => ({
+        id: contactId(i),
+        value: {
+            _id: contactId(i),
+            type: 'state',
+            common: { name: `Fenster ${i + 1}`, type: 'boolean', role: 'sensor.window', read: true, write: false },
+            native: {},
+        },
+    }));
+const contactStates = () => Object.fromEntries(Array.from({ length: CONTACT_COUNT }, (_, i) => [contactId(i), true]));
+// Into the base mock, not only into the seeding step: every render replaces the
+// server-state map, and a status overview whose values are missing from it sits
+// in its loading state for ever (which the walk-down would measure as a height).
+Object.assign(MOCK, contactStates());
+
+/**
  * Types whose content is countable from the configuration, so the height can be
  * given as base + per item. Everything else gets a minimum height only — a
  * status overview or a calendar discovers its content at runtime and cannot be
@@ -423,6 +479,153 @@ const COUNTED = [
         mock: (n) => ({ [DP_JSON]: jsonRows(n) }),
         build: () => ({ options: {} }),
     },
+    {
+        // Reported from use: weather was classed as "fills — überlaufen kann
+        // nichts" and at h=7 with four forecast days its content is 191 px in a
+        // 188 px card, i.e. it scrolls. It is not a fills type at all: it draws
+        // a header plus one row per forecast day, and `forecastDays` is in the
+        // configuration — so the height is countable, like a list's.
+        type: 'weather',
+        item: 'Vorhersagetag',
+        counts: [2, 4, 6],
+        build: (n) => ({ options: { forecastDays: n } }),
+        variantCounts: [2, 6],
+        variants: [{ key: 'card', layout: 'card', label: 'Layout "card"' }],
+        // „compact“ and „minimal“ draw the CURRENT conditions on one line and no
+        // forecast at all (measured: identical at two and at six days), and they
+        // scale that line into whatever box they get. Counting days for them
+        // would be a made-up number, and letting them fall back to the default
+        // layout's line — which is what an unmeasured layout does — would be
+        // worse: 92 px + 17 px a day for a widget that draws one line.
+        freeLayouts: ['compact', 'minimal', 'custom'],
+        modifiers: [
+            {
+                key: 'noForecast',
+                label: 'ohne Vorhersage (showForecast: false)',
+                when: { path: 'showForecast', equals: false },
+                build: (n) => ({ options: { forecastDays: n, showForecast: false } }),
+            },
+            {
+                key: 'noHeader',
+                label: 'ohne Kopfzeile (showTitle und showIcon aus)',
+                when: {
+                    all: [
+                        { path: 'showTitle', equals: false },
+                        { path: 'showIcon', equals: false },
+                    ],
+                },
+                build: (n) => ({ options: { forecastDays: n, showTitle: false, showIcon: false } }),
+            },
+            {
+                key: 'rainAmount',
+                label: 'Regenmenge je Tag (showRainAmount)',
+                when: { path: 'showRainAmount', equals: true },
+                build: (n) => ({ options: { forecastDays: n, showRainAmount: true } }),
+            },
+        ],
+        // Options that do not shift the number by a measurable delta but REPLACE
+        // the typography the number was measured with. A widget that sets one is
+        // reported with the measurement AND with the fact that it no longer
+        // holds — which is the whole point: the answer used to say "passt" for a
+        // configuration it had never measured (see notIncluded below).
+        voids: [
+            { path: 'tempFontSize', label: 'tempFontSize (Größe der Temperaturzeile)' },
+            { path: 'fontScale', label: 'options.fontScale (eigener Schriftfaktor des Widgets)' },
+            { path: 'forecastRowGap', label: 'forecastRowGap (Abstand der Vorhersagezeilen)' },
+            { path: 'showWarnings', label: 'showWarnings (Unwetterwarnungen, beliebig lang)' },
+            { path: 'forecastWrap', label: 'forecastWrap (Vorhersage umbrechen statt stapeln)' },
+        ],
+        notIncluded: [
+            'die eigene Typografie des Widgets: tempFontSize, options.fontScale und forecastRowGap gehen ' +
+                'unmittelbar in die Höhe ein und sind hier NICHT enthalten (gemessen mit den Standardwerten). ' +
+                'Aus dem Betrieb gemeldet: tempFontSize 1.5, fontScale 0.95 und forecastRowGap 0.4 brauchten ' +
+                '191 px, wo die Standarddarstellung passt — mit diesen Optionen die Höhe mit aura_rendered ' +
+                'im Browser prüfen',
+            'Unwetterwarnungen (showWarnings): sie kommen vom DWD, sind beliebig lang und scrollen in ihrem ' +
+                'eigenen Bereich',
+            'Layout „custom“ zeichnet, was customGrid beschreibt',
+            'ein Ort mit langem Namen bricht um und macht die Kopfzeile höher',
+        ],
+    },
+    {
+        // Its rows appear at runtime, so this type could not be sized at all —
+        // and the maxRows option describes itself as the answer to exactly that
+        // ("with a cap the height is known"), while aura_measure still said "not
+        // measured". With the cap the row count IS known, so it is countable.
+        type: 'statusoverview',
+        item: 'Zeile',
+        counts: [2, 4, 8],
+        // One category, the cap for the row count, and no "+N weitere" line:
+        // aura_measure adds that one itself (out.moreRow), so measuring it in
+        // would charge it twice.
+        build: (n) => ({
+            options: {
+                maxRows: n,
+                showMore: false,
+                catBattery: false,
+                catLight: false,
+                catUnreach: false,
+                catAlarm: false,
+            },
+        }),
+        variantCounts: [2, 8],
+        variants: [
+            { key: 'compact', layout: 'compact', label: 'Layout "compact"' },
+            { key: 'card', layout: 'card', label: 'Layout "card"' },
+            { key: 'minimal', layout: 'minimal', label: 'Layout "minimal"' },
+        ],
+        // „count“ draws the alert count and nothing else — no rows, so no slope.
+        freeLayouts: ['count'],
+        modifiers: [
+            {
+                key: 'noCount',
+                label: 'ohne Zähler-Chip (showCount: false)',
+                when: { path: 'showCount', equals: false },
+                build: (n) => ({
+                    options: {
+                        maxRows: n,
+                        showMore: false,
+                        showCount: false,
+                        catBattery: false,
+                        catLight: false,
+                        catUnreach: false,
+                        catAlarm: false,
+                    },
+                }),
+            },
+            {
+                key: 'noTitle',
+                label: 'ohne Titelzeile (showTitle: false)',
+                when: { path: 'showTitle', equals: false },
+                build: (n) => ({
+                    options: {
+                        maxRows: n,
+                        showMore: false,
+                        showTitle: false,
+                        catBattery: false,
+                        catLight: false,
+                        catUnreach: false,
+                        catAlarm: false,
+                    },
+                }),
+            },
+        ],
+        voids: [
+            { path: 'showOkCategories', label: 'showOkCategories (Überschrift auch für leere Kategorien)' },
+            { path: 'namePattern', label: 'namePattern (die Zeilenbeschriftung kann umbrechen)' },
+        ],
+        notIncluded: [
+            'gemessen mit Zeilen EINER Kategorie: im Layout „default“ zeichnet jede Kategorie, die Zeilen ' +
+                'hat, eine Überschrift dazu (und showOkCategories auch die leeren) — je weitere Kategorie ' +
+                'eine Zeile mehr',
+            'die Zeilen selbst stammen aus der Erkennung: ein langer Gerätename bricht um und macht seine ' +
+                'Zeile höher (namePattern/nameFilters kürzen ihn)',
+            'die Layouts „card“ und „minimal“ ordnen Kacheln bzw. Pillen nach der BREITE an — gemessen an ' +
+                'der Standardbreite (siehe atWidthPx). Auf einer breiteren Karte stehen mehrere in einer ' +
+                'Zeile und die Höhe je Zeile sinkt entsprechend',
+            'ohne maxRows ist die Zeilenzahl unbekannt — dann ist diese Rechnung keine Auskunft über die Höhe',
+        ],
+    },
 ];
 
 /** Datapoint per type where the default demo value would not do. */
@@ -496,6 +699,18 @@ const OPTIONS_FOR = {
         prevDp: DP_BOOL,
     },
     energiebilanz: { bars: energyBars(1) },
+    // The minimum of a status overview is the card with rows in it, not the
+    // all-clear: the probe seeds twelve contacts, so without a cap it would
+    // measure all twelve. Four, the same shape a fresh widget has on a
+    // dashboard with a handful of open windows.
+    statusoverview: {
+        maxRows: 4,
+        showMore: false,
+        catBattery: false,
+        catLight: false,
+        catUnreach: false,
+        catAlarm: false,
+    },
 };
 
 /**
@@ -519,6 +734,15 @@ const MIN_NOTES = {
             'die Fortschrittsleiste ändern die Höhe',
     ],
     chips: ['gemessen mit vier Chips in einer Reihe. Mehr Chips als in eine Reihe passen brechen um (wrapCols)'],
+    weather: [
+        'gemessen mit fünf Vorhersagetagen (der Standard). Mit bekanntem forecastDays rechnet aura_measure ' +
+            'genau: siehe counted.weather',
+    ],
+    statusoverview: [
+        'gemessen mit vier Zeilen EINER Kategorie (maxRows 4). Die Zeilen dieses Widgets entstehen erst zur ' +
+            'Laufzeit — mit maxRows steht die Zeilenzahl fest und aura_measure rechnet genau: siehe ' +
+            'counted.statusoverview',
+    ],
     carousel: ['gemessen mit vier Einträgen. Das Karussell rollt waagerecht, die Höhe hängt nicht an der Anzahl'],
 };
 
@@ -536,7 +760,6 @@ const SKIP = {
     universal: 'Höhe ergibt sich aus den Kindern',
     mirror: 'spiegelt ein anderes Widget',
     autolist: 'Zeilen entstehen erst zur Laufzeit aus Raum und Gewerk — wie list rechnen',
-    statusoverview: 'Zeilen entstehen erst zur Laufzeit',
     calendar: 'Zeilen entstehen erst zur Laufzeit aus den Terminen',
     messages: 'Zeilen entstehen erst zur Laufzeit',
     adapterlogs: 'Zeilen entstehen erst zur Laufzeit',
@@ -544,7 +767,6 @@ const SKIP = {
     trash: 'Zeilen entstehen erst zur Laufzeit',
     trashSchedule: 'Zeilen entstehen erst zur Laufzeit',
     evcc: 'Inhalt kommt aus einer evcc-Instanz',
-    weather: 'Inhalt kommt aus einer Wetter-Instanz',
     echartsPreset: 'rendert ein gespeichertes eCharts-Preset',
     timer: 'Zeilen entstehen erst zur Laufzeit',
     alarm: 'Zeilen entstehen erst zur Laufzeit',
@@ -625,6 +847,18 @@ const page = await ctx.newPage();
 const pageErrors = [];
 page.on('pageerror', (e) => pageErrors.push(e.message));
 
+// The weather widget fetches its forecast from open-meteo. Answered from the
+// fixture above instead: over the real endpoint the row heights would depend on
+// the network and on the actual weather.
+await ctx.route(/api\.open-meteo\.com/, (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(WEATHER_JSON) }),
+);
+// The DWD warnings are off by default; a probe that turns them on must not reach
+// out either.
+await ctx.route(/warnungen|dwd/i, (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }),
+);
+
 await page.goto(`${BASE}/?shot=1#/`, { waitUntil: 'domcontentloaded' });
 await page.waitForFunction(() => !!window.__auraShot?.ready, { timeout: 20000 });
 await page.evaluate(() => {
@@ -634,6 +868,18 @@ await page.evaluate(() => {
     // the type's minimum (52 px, the bare card).
     window.__auraShot.enableHistory(true);
 });
+// Datapoints for the types that discover their rows instead of reading them out
+// of the options (the status overview). Seeded once: the datapoint cache holds
+// its result for five minutes, so this has to be in place before the first such
+// widget renders — and the row count is varied with maxRows, not with the seed.
+await page.evaluate(
+    ({ rows, states }) => {
+        window.__auraShot.mockObjectView({ state: rows, channel: [], device: [], enum: [], instance: [] });
+        window.__auraShot.mock(states);
+        window.__auraShot.mockServerState(states);
+    },
+    { rows: contactRows(), states: contactStates() },
+);
 
 async function render(type, { rows, cols, datapoint, options, mock, layout, fontScale }) {
     const wid = `m${++widSeq}`;
@@ -1102,6 +1348,12 @@ for (const spec of COUNTED) {
     if (spec.notIncluded) {
         entry.notIncluded = spec.notIncluded;
     }
+    if (spec.voids) {
+        entry.voids = spec.voids;
+    }
+    if (spec.freeLayouts) {
+        entry.freeLayouts = spec.freeLayouts;
+    }
     counted[spec.type] = entry;
 }
 
@@ -1177,6 +1429,8 @@ const metrics = {
             'A minimum is the point where content starts to be lost, not a recommended size — defaultSize is that.',
             `A chart never loses content: eCharts and recharts paint into whatever box they get, so "nothing is cut off" is satisfied long before the chart is readable. Those types therefore carry a second number, minimum.<type>.usablePx — the height at which the plot surface first reaches ${MIN_PLOT_PX} px. That is a stated recommendation, not a measured cliff; everything else here is a cliff.`,
             'Every type is measured WITH content in it (OPTIONS_FOR). A type measured empty reports the height of its empty state, which is what chips, chart and echart used to do.',
+            'counted.<type>.voids names the options that do not shift the height by a delta but replace the typography the number was measured with (weather: tempFontSize, fontScale, forecastRowGap). A widget that sets one keeps the number as an order of magnitude, and aura_measure says the verdict is not a verdict — the browser (aura_rendered) is the only answer there.',
+            "counted.<type>.freeLayouts lists the layouts of a counted type whose height does NOT follow the item count: they draw a summary and scale it into any box (weather compact/minimal, the status overview's count). aura_measure reports those as [fills] instead of applying the default layout's line to them.",
             'Every number is measured at font scale 1 with 16 px widget padding (the reference above). aura_measure corrects for the dashboard it is asked about: the padding exactly (2 px of chrome per px of padding), the font scale from fontScalePx/addPx, which is exact at the two measured scales and an interpolation between and beyond them.',
         ],
     },

@@ -145,10 +145,10 @@ angewiesen, das JSON zum manuellen Import anzubieten.
 | `aura_dashboard`                      | Layouts, Bereiche, Tabs, Rastermaße, Spalten, Zielbildschirm                                                   | read         |
 | `aura_widget_types`                   | Alle Typen kompakt, mit `group=` auf eine Kategorie eingegrenzt                                                | read         |
 | `aura_widget_schema`                  | Optionen der genannten Typen, mit `brief=true` nur Namen und Typen                                             | read         |
-| `aura_tab`                            | Widgets eines Tabs inkl. `groupDefs`                                                                           | read         |
+| `aura_tab`                            | Widgets eines Tabs inkl. `groupDefs` (`groupDefs: summary/none`, `images: full`)                                | read         |
 | `aura_types`                          | Benannte Typen einzeln holen (`WidgetCondition`, `CustomCell` …) statt sie je Widget-Typ mitzuschleppen        | read         |
 | `aura_measure`                        | Zeilen in Pixel, gegen die gemessene Höhe des Typs — Layout, Optionen und Zeilendarstellung, plus Tab-URL      | read         |
-| `aura_rendered`                       | Was der Browser wirklich gezeichnet hat: Renderhöhe, Inhaltshöhe, scrollt ja/nein — je Tab, der offen war      | read         |
+| `aura_rendered`                       | Was der Browser wirklich gezeichnet hat: Renderhöhe, Inhaltshöhe, scrollt ja/nein — mit `probe: true` auch für einen Tab, den niemand offen hat | read         |
 | `aura_validate`                       | Prüfung gegen Schema, Live-Datenpunkte, die Objekte dahinter und die Darstellung der Zeilen                    | read         |
 | `aura_review`                         | Vorhandenes prüfen: Stil (`mode:"style"`) und Gesundheit (tote/leere/eingefrorene DPs, unwirksame Optionen)    | read         |
 | `aura_add_widget`                     | Ein Widget an Tab, Popup oder Gruppe anfügen                                                                   | write        |
@@ -1056,9 +1056,44 @@ veraltet mit jedem CSS-Commit, und nichts sagt es. Der Weg jetzt:
    gezeichnet). `aura_measure` sagt am Ende seiner Antwort, ob es für diesen Tab
    eine echte Messung gibt.
 
-Die Grenze steht in der Antwort: gemeldet wird nur, was offen **war**. Ein Tab,
-den niemand aufgemacht hat, hat keine Messung — dann bittet man den Nutzer, ihn zu
-öffnen, statt eine Zahl zu erfinden.
+### Der Tab, den niemand offen hat
+
+Genau das war die Lücke: aus der Praxis gemeldet, dass `aura_rendered` das beste
+Werkzeug hier ist (es fand zwei Fehler, die `aura_measure` nicht finden konnte) —
+aber nur Tabs messen konnte, die jemand offen hatte. Direkt nach dem Neuanlegen,
+wenn die Prüfung am nötigsten ist, gab es keine Messung; die Sitzung öffnete den
+Tab schließlich selbst über die öffentliche Adresse im Browser, sonst hätte sie
+den Nutzer bitten müssen.
+
+`probe: true` (mit `tab`) schließt sie:
+
+1. `aura_rendered` schreibt `{tabId, ts}` nach `aura.0.info.renderProbe`
+   (`requestRenderProbe` in `auraConfig.js`).
+2. Jedes lebende Frontend hört auf diesen Datenpunkt
+   (`src-vis/components/layout/RenderProbe.tsx`) und zeichnet den verlangten Tab
+   in einen Container, der bei `left: -20000px` parkt — **nicht** `display: none`
+   (dann hätte der Inhalt keine Höhe) und nicht `visibility: hidden`. Breite: die
+   echte Rasterbreite. Gerendert wird der normale `Dashboard`, also messen Probe
+   und Wirklichkeit dasselbe; der Bericht kommt aus Dashboards eigenem Effekt und
+   trägt `probe: true`.
+3. Der Tab, den dieser Browser gerade **zeigt**, wird nie geprobt: er meldet sich
+   selbst, und ein zweites Mount hätte zwei Elemente mit derselben
+   `data-aura-tab-id` im DOM.
+4. `aura_rendered` pollt `info.rendered` (bis 12 s, `AURA_PROBE_WAIT_MS`) und
+   antwortet mit der frischen Messung — oder sagt, dass kein Browser geantwortet
+   hat (dann muss das Dashboard irgendwo offen sein, auf welchem Tab ist egal).
+
+Zwei Typen zeichnet eine Probe absichtlich nicht (`utils/probeContext.tsx`,
+`PROBE_SKIP_TYPES`, ersetzt in `WidgetFrame`): **Kamera** und **iframe**. Eine
+Kamera startet beim Mounten einen Stream und schreibt beim Unmounten mit
+Wake-Up-Datenpunkt wieder `SLEEP` — eine Messung würde also eine Kamera
+ausschalten, die jemand anders gerade ansieht. Beide füllen ohnehin jede Höhe,
+ihre Höhe **ist** der Kasten. Die Antwort sagt das mit dazu.
+
+`npm run test:render-probe` prüft das im Browser: Container off-screen und
+ausgelayoutet, die Widgets des verlangten Tabs mit echten Höhen, die zu kurze
+Liste scrollt, die Kamera ist ein leerer Kasten, der sichtbare Tab bleibt
+einmal gemountet, und die Probe baut sich wieder ab.
 
 ### Wann die Schätzung überhaupt widerlegt ist
 
@@ -1089,7 +1124,7 @@ trotzdem in der Messung, und `autoBox` unterscheidet die Rasterkachel von der
 Karte, die im Mobil-Stapel mit ihrem Inhalt wächst.
 `window.__auraShot.rendered()` gibt dieselbe Messung im Browser aus.
 
-## Vier Höhenklassen statt einem „nicht gemessen"
+## Fünf Höhenklassen statt einem „nicht gemessen"
 
 Aus derselben Meldung: `aura_measure` meldete für drei völlig verschiedene Fälle
 dasselbe. Ein Player, der jede Höhe annimmt; eine Liste, die auf die Zeile genau
@@ -1099,15 +1134,65 @@ eine Zahl zu finden, die er nie gebraucht hätte.
 
 Jede Zeile der Antwort trägt jetzt ihre Klasse (`measure.js`, `heightClass`):
 
-| Klasse     | heißt                                                         | Beispiele                        |
-| ---------- | ------------------------------------------------------------- | -------------------------------- |
-| `fills`    | füllt die Karte, über der Mindesthöhe ist `h` frei            | mediaplayer, echart, fill, value |
-| `content`  | feste Inhaltshöhe — zu wenig heißt Scrollbalken               | list, jsontable                  |
-| `runtime`  | Zeilen entstehen erst zur Laufzeit, planbar nur mit `maxRows` | autolist, statusoverview, timer  |
-| `children` | die Höhe kommt von den Kindern                                | group, panels, universal, mirror |
+| Klasse     | heißt                                                             | Beispiele                        |
+| ---------- | ----------------------------------------------------------------- | -------------------------------- |
+| `fills`    | füllt die Karte, über der Mindesthöhe ist `h` frei                 | mediaplayer, echart, value, map  |
+| `content`  | feste Inhaltshöhe — zu wenig heißt Scrollbalken                    | list, jsontable, weather         |
+| `runtime`  | Zeilen entstehen erst zur Laufzeit, planbar nur mit `maxRows`      | autolist, timer, calendar        |
+| `children` | die Höhe kommt von den Kindern                                     | group, panels, universal, mirror |
+| `source`   | Inhalt kommt von außen (Instanz, freies HTML) und **kann** überlaufen | evcc, aircontrol, html        |
 
 Ein Test hält die Liste vollständig: jeder Typ im Schema muss einer Klasse
 zugeordnet sein.
+
+**Warum die fünfte.** `fills` war der Auffangbehälter: alles, was weder gezählt
+noch Laufzeitliste noch Gruppe war, bekam es — samt dem Satz „überlaufen kann
+nichts“. Aus der Praxis gemeldet am Wetter-Widget, das keines davon ist: `h=7`,
+vier Vorhersagetage, Inhalt 191 px in einer 188 px hohen Karte — es scrollt. Eine
+Klasse, die Überlauf ausschließt, ist schlimmer als keine, weil sie die Prüfung
+verhindert, die es gefunden hätte. `fills` wird daher nur noch behauptet, wo es
+**gemessen** ist (der Typ hat eine `minimum`-Messung, also einen abgelaufenen
+Walk-Down, und zentriert oder skaliert darüber) oder wo der Kasten selbst der
+Inhalt ist (Kamera, Bild, iframe, Karte, Canvas). Alles andere ist `source`.
+
+Zwei Sonderfälle stehen jetzt in der Messtabelle statt im Code:
+
+- `counted.<typ>.freeLayouts` — Layouts eines gezählten Typs, deren Höhe **nicht**
+  an der Anzahl hängt: `weather` in „compact“/„minimal“ zeichnet nur das aktuelle
+  Wetter in einer Zeile (gemessen identisch bei zwei und bei sechs Tagen), die
+  Statusübersicht in „count“ nur die Zahl. Ohne das erbten sie die Gerade des
+  Standard-Layouts — 92 px + 17 px je Tag für ein Widget mit einer Zeile.
+- `counted.<typ>.voids` — Optionen, die die Höhe nicht um ein Delta verschieben,
+  sondern die **Typografie ersetzen**, mit der gemessen wurde (`tempFontSize`,
+  `options.fontScale`, `forecastRowGap`). Ein Widget, das eine davon setzt, behält
+  die Zahl als Größenordnung; `aura_measure` schreibt aber ACHTUNG an die Zeile
+  und sagt, dass das Urteil dort keins ist. Genau der gemeldete Fall: „passt
+  (28 px Luft)“ für ein Widget, dessen Inhalt 191 px braucht.
+
+## Zwei Typen, die jetzt gemessen sind
+
+`weather` und `statusoverview` standen in `SKIP` („Inhalt kommt aus einer
+Wetter-Instanz“, „Zeilen entstehen erst zur Laufzeit“) — und beide sind aus der
+Praxis als Fehlauskunft gemeldet worden. Der Messstand kann sie jetzt
+(`tools/schema/measure-widget-metrics.mjs`):
+
+- **weather**: die Vorhersage wird über `page.route` aus einer festen Antwort
+  bedient (über das echte open-meteo hingen die Zeilenhöhen am Netz und am
+  Wetter). Gemessen: 92 px + 17 px je Vorhersagetag, Layout „card“ genauso;
+  `forecastDays` liest `itemCount` direkt aus den Optionen (Standard 5), also
+  braucht niemand `items=N`.
+- **statusoverview**: seine Zeilen kommen aus der Datenpunkt-Erkennung, nicht aus
+  den Optionen. Der Messstand sät zwölf Fensterkontakte über `mockObjectView`
+  (einmal — `ensureDatapointCache` hält sein Ergebnis fünf Minuten) und variiert
+  die Zeilenzahl über **`maxRows`**, also genau so, wie ein Dashboard dieses
+  Widget planbar macht. Gemessen: 98 px + 24 px/Zeile (Standard, eine Kategorie),
+  58 px + 24 px/Zeile in „compact“. Die „+N weitere“-Zeile rechnet `aura_measure`
+  selbst dazu, deshalb messen die Proben mit `showMore: false`.
+
+Beide tragen ihre Einschränkungen in `notIncluded` — bei der Statusübersicht vor
+allem: gemessen mit Zeilen **einer** Kategorie (im Layout „default“ bringt jede
+weitere Kategorie eine Überschriftszeile mit), und die Layouts „card“/„minimal“
+ordnen nach Breite.
 
 ## Mehrere Widgets, ein Schreibvorgang
 
@@ -1174,6 +1259,48 @@ Dazu `aura_types` mit `names: ["WidgetCondition","CustomCell"]`: holt einen
 benannten Typ **einmal**. Klammern und Groß-/Kleinschreibung werden verziehen
 (`WidgetCondition[]`, `customcell`), ein Fehlgriff bekommt die naheliegenden
 Namen genannt.
+
+### Das eingebettete Bild
+
+Aus der Praxis gemeldet: `aura_tab` auf einen ganz normalen Tab antwortete mit
+**943 KB** — 918 KB davon eine einzige `groupDef` mit einem
+`data:image/png;base64,…` als Hintergrund. Die zwölf Widgets, um die es ging,
+waren 16 KB. Für einen MCP-Client ist der Tab damit nicht lesbar; die Antwort
+musste in eine Datei umgeleitet und lokal gefiltert werden.
+
+Ein Modell kann eine `data:`-URI nicht ansehen, nicht ändern und nicht prüfen —
+sie muss nur unverändert überleben, und genau das tut ein Patch-Werkzeug
+(`aura_update_widget`) ohne sie je zu sehen. `lib/mcp/slim.js` ersetzt daher jeden
+String über 400 Zeichen durch seinen Kopf (48 Zeichen, damit `data:image/png;base64`
+noch erkennbar ist) plus Marker mit Größe. Angewandt auf `aura_tab`, `aura_group`
+und `aura_popup`; `images: "full"` liefert alles.
+
+Der Marker ist absichtlich auffällig und maschinenlesbar: `parseJson` **verweigert**
+jeden Payload, der ihn noch enthält (`findTrimMark`), denn zurückgeschrieben
+würde er das Bild durch Markertext ersetzen und niemand könnte danach sagen, was
+verloren ging. `aura_tab` kennt außerdem `groupDefs: "summary" | "none"` — die
+Gruppen-Kinder als Zeile „N Kind(er): value, switch" statt vollständig, für den
+Fall, dass der Tab nur als Stilvorlage gelesen wird.
+
+### Der Payload, der zweimal durchging
+
+„Erst validieren, dann schreiben" — beide Werkzeuge nahmen die Widgets nur inline,
+ein Tab mit fünfzehn Widgets (~13 KB) ging also **zweimal** durch das Gespräch.
+An der zweiten Kopie ist nichts neu; sie muss nur fehlerfrei reproduziert werden,
+sonst schreibt man einen anderen Tab als den geprüften.
+
+`aura_validate` behält daher, was es geprüft hat, und gibt ein kurzes Token
+zurück (`keepValidated`, eine halbe Stunde, acht Payloads, nur im laufenden
+Adapter). `validated: "v-…"` legt es in `runTool` in das Argument, das das jeweilige
+Werkzeug liest (`applyValidated`) — `aura_add_widget`, `aura_write_tab`,
+`aura_create_tab`, `aura_write_popup`, `aura_write_group`. Beides zusammen ist ein
+Fehler, ein unbekanntes Token auch.
+
+Dafür musste `widgets` aus `required` heraus (ein JSON-Schema kann kein
+„eines von beiden"), und damit wurde eine Wache nötig: ohne Payload **und** ohne
+Token liest `readWidgetList` eine leere Liste, und eine leere Liste heißt bei
+`aura_write_tab` „lösche jedes Widget dieses Tabs". Ein vergessenes Argument darf
+das nicht tun.
 
 ## Ein Rezept für die Zeilenregel
 
@@ -1312,8 +1439,38 @@ Hell/Dunkel-Paar) und setzt beides zusammen:
 - **`aura_dashboard`** trägt die Basis-Palette im Kopf mit — dort fängt jedes
   Gespräch an, und genau dort wurde die Farbe erfunden. Größen (`--widget-radius`,
   `--widget-shadow`) sind rausgefiltert, sie helfen bei einer Farbe nicht.
-- **`aura_theme`** liefert alles, inklusive der Element-Token mit ihrer Vererbung
-  (`elements: false` kürzt auf die Basis).
+- **`aura_theme`** liefert alles, inklusive der Element-Token — und zwar in der
+  Schreibweise, die **funktioniert** (`elements: false` kürzt auf die Basis).
+
+**Die Vererbung, die es im CSS nicht gibt.** Aus dem laufenden Frontend mit einem
+Probe-Element gemeldet: **keines** der Element-Token ist auf `:root` definiert.
+`--light-on`, `--switch-bg`, `--switch-off-bg`, `--chip-active`, `--badge-ok`,
+`--slider-fill` lösen alle zu `rgba(0,0,0,0)` auf, während die Basis-Palette
+korrekt auflöst. Und das ist Absicht (`themes/index.ts`: optionale Overrides, sie
+liegen nur in `customVars`, wenn der Nutzer sie setzt) — den Rückfall bringt
+**jedes Widget in seinem eigenen Code** mit: `var(--switch-bg, var(--accent-green))`.
+
+Eine Konfiguration bringt ihn nicht mit. `activeColor: "var(--light-on)"` ist
+damit zur Rechenzeit ungültig und färbt **gar nichts**: gemeldet als Zeile von
+Listen-Schaltern, die im Ein-Zustand dunkelgrau statt gelb aussahen (der
+Aus-Zustand fiel nicht auf, dafür steht fest `var(--app-border)` im Code). Die
+Ausgabe „ohne eigene Einstellung wie `--accent-green`" lud genau dazu ein.
+
+Drei Änderungen, keine davon am CSS (die Token global zu definieren würde die
+Standard-Optik ändern: `SwitchWidget` liest je Layout `var(--switch-bg, var(--accent))`
+_oder_ `var(--accent-green)`):
+
+1. `elementTokenIndex` in `theme.js` baut je Token die benutzbare Form. `aura_theme`
+   druckt `var(--light-on, var(--accent-yellow)) = wie --accent-yellow` statt
+   `var(--light-on)` — und sagt darüber, dass ein nacktes `var()` transparent ist.
+2. `bareElementTokenFindings` in `validate.js` läuft über **jeden** String in den
+   Optionen, beliebig tief (`activeColor`, eine Zeilenfarbe, `styleOverride`, ein
+   Badge — die Feldnamen aufzuzählen hätte genau den gemeldeten Fall verpasst) und
+   meldet `var(--x)` ohne Komma, sofern `--x` ein Element-Token ist, das niemand
+   gesetzt hat. Mit Rückfall geschrieben: kein Befund. Vom Nutzer gesetzt (global
+   **oder** je Layout/Bereich, `styledVars` in `themeCtx`): kein Befund.
+3. `aura_review` prüft dasselbe im Gesundheitscheck — das ist die Antwort auf
+   „warum ist mein Schalter grau" bei einem Dashboard, das schon steht.
 
 **Die eine Stelle, an der die Regel fast nicht gegolten hätte.** Aus der Praxis
 gemeldet: `var(--accent)` in `echartSeries[].color` — Diagramm dauerhaft leer.
@@ -1603,6 +1760,22 @@ Warnung, kein Fehler: die Rahmenhöhen sind kalibrierte Schätzungen (das Fronte
 misst sie selbst, der Adapter kann das nicht), und Scrollen darf eine Entscheidung
 sein.
 
+**Die Zeile, die ein Bereich nur vorläufig hat.** Aus der Praxis gemeldet: ein
+Bereich mit **einem** Tab wurde auf „endet auf Zeile 42 von 42" gebaut — und jeder
+Tab darin ging kaputt, sobald jemand einen zweiten anlegte. Die Tab-Leiste
+erscheint erst ab zwei Tabs (`tabBarShowsOnOwn`), nimmt dann 44 px und damit genau
+die letzte Zeile. Nachprüfen ließ sich das nicht einmal: mit einem Tab nennt die
+Rahmen-Zeile gar keine Tab-Leiste. Betroffen waren dort vier weitere Bereiche.
+
+`designCanvas` liefert deshalb `tabBarPending` (die Leiste fehlt **nur** wegen des
+einzigen Tabs) und `maxRowsWithTabBar` — die Zahl, die auch danach noch gilt (bei
+schon sichtbarer Leiste und bei einer Leiste unten identisch mit `maxRows`, also
+bedenkenlos benutzbar). Gesagt wird es an drei Stellen: `renderCanvas` („die 42
+Zeilen gelten nur, solange dieser Bereich GENAU EINEN Tab hat … auf Dauer mit 41
+planen"), die Tab-Zeile in `aura_dashboard` („passt nur solange dieser Bereich
+einen einzigen Tab hat") und der Schlussblock von `aura_measure`, der die Widgets
+nennt, die in dieser einen Zeile enden.
+
 **Der offene Editor.** Ein Editor-Fenster mit ungespeicherten Änderungen kann eine
 MCP-Änderung beim nächsten Speichern überschreiben. Die Antwort jedes
 Schreibwerkzeugs sagt das dazu.
@@ -1709,7 +1882,7 @@ sich selbst getestet wird, beweist nichts.
 
 ## Tests
 
-`npm run test:mcp` — 205 Checks: die Validierungsregeln gegen das echte Schema, die
+`npm run test:mcp` — über 400 Checks: die Validierungsregeln gegen das echte Schema, die
 Config-Helfer, Token-Abweisung (fehlend, falsch, nicht konfiguriert), der
 Handshake mit dem echten Client, die `instructions`, jedes Werkzeug, und die
 Schreibpfade gegen ein Adapter-Doppel — inklusive der Zusicherung, dass ein
@@ -1727,3 +1900,18 @@ Und den Rückblick: jede Regel einzeln, mit dem Gegenbeispiel daneben (unter der
 Schwelle wird nicht gemeldet, ein Widget mit Schwellen taucht nicht auf, ein
 aggregiertes Balkendiagramm auch nicht), dass ein sauberer Tab **keine** Befunde
 erfindet, und dass jeder Befund auf ein existierendes Rezept zeigt.
+
+Die Punkte aus der letzten Rückmeldung haben jeder seinen Check: die fünf
+Höhenklassen (jeder Typ im Schema fällt in genau eine, `aircontrol`/`html` sind
+`source` und nicht „überlaufen kann nichts"), die entwertete Zahl bei gesetzter
+Widget-Typografie, die gekappte Zeile eines Bereichs mit einem einzigen Tab, das
+eingebettete Bild (943 KB → unter 20 KB, `images: "full"` wieder vollständig, ein
+gekürzter Payload wird abgewiesen), die Token-Übergabe von `aura_validate` zum
+Schreibwerkzeug samt der Wache gegen den vergessenen Payload, und der Probe-Render
+(Anfrage geschrieben, Antwort abgewartet, „kein Browser hat geantwortet" als
+eigene Auskunft). `AURA_PROBE_WAIT_MS` dreht die Wartezeit für den Test herunter.
+
+Im Browser dazu `npm run test:render-probe` (braucht den Dev-Server) — der Teil,
+den kein Unit-Test erreicht: dass ein off-screen geparkter Container überhaupt
+ausgelayoutet wird, dass die Kamera darin ein leerer Kasten bleibt, und dass sich
+die Probe wieder abbaut.

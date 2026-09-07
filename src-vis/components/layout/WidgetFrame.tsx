@@ -138,6 +138,7 @@ import { TrashScheduleConfig } from '../widgets/TrashScheduleWidget';
 // Single source of truth for type → component. WidgetFrame, the mirror widget and the
 // popup/tab embeds all render through this one map, so a new widget type works everywhere.
 import { getWidgetMap } from '../widgets/widgetMap';
+import { PROBE_SKIP_TYPES, ProbeBox, useIsProbe } from '../../utils/probeContext';
 import { MirrorConfig } from '../config/MirrorConfig';
 import { AirControlConfig } from '../config/AirControlConfig';
 import { WC_PRESETS, WC_PRESET_LABELS } from '../widgets/WindowContactWidget';
@@ -6496,7 +6497,15 @@ export function WidgetFrame({
     }, [customCellContextMenu]);
 
     const menuBtnRef = useRef<HTMLButtonElement>(null);
-    const Widget = getWidgetMap()[config.type as keyof ReturnType<typeof getWidgetMap>];
+    // In an off-screen probe render (components/layout/RenderProbe.tsx) two types
+    // are replaced by an empty card: a camera would start a stream and write
+    // SLEEP again when the probe unmounts, an iframe would load a foreign page.
+    // Both fill whatever box they get, so the measurement loses nothing.
+    const isProbe = useIsProbe();
+    const Widget =
+        isProbe && PROBE_SKIP_TYPES.has(config.type)
+            ? ProbeBox
+            : getWidgetMap()[config.type as keyof ReturnType<typeof getWidgetMap>];
     // Bumped by a condition rule with "reload widget" — mixed into the body's key so
     // embedded documents (iframe, camera, image) actually re-fetch (issue #537).
     const refreshNonce = useWidgetRefreshNonce(config.id);

@@ -5,6 +5,7 @@ import { useDashboardStore, useActiveLayout, resolveTabBarSettings } from '../..
 import { useConfigStore } from '../../store/configStore';
 import { guidelinesTopInset, insetKeyFor, readMeasuredInset, storeMeasuredInset } from '../../utils/guidelinesInset';
 import { tabBarShowsOnOwn } from '../../utils/tabBarVisible';
+import { useIsProbe } from '../../utils/probeContext';
 import { useGroupDefsStore } from '../../store/groupDefsStore';
 import { useGroupCollapseStore } from '../../store/groupCollapseStore';
 import { useIframeStore, type IframeFullscreenData } from '../../store/iframeStore';
@@ -218,6 +219,10 @@ export function Dashboard({
     }, [activeTabId, editMode]);
 
     const reflowHiddenIds = useReflowHiddenIds();
+    // An off-screen probe render measures the same way and says so in its report
+    // (utils/probeContext.tsx). Without the flag a measurement from a tab nobody
+    // had open would read exactly like one from a screen in use.
+    const isProbe = useIsProbe();
 
     // ── Rendered geometry → the MCP server (utils/renderReport.ts) ──────────
     // Only from the real frontend (viewTabs), never from the admin editor: its
@@ -242,6 +247,7 @@ export function Dashboard({
                 presentation: { fontScale: settings.fontScale ?? 1, widgetPadding },
                 grid: { rowHeight: cellSize, gap: MARGIN, snapX },
                 widgets,
+                ...(isProbe ? { probe: true } : {}),
                 // A condition with „Reflow“ takes the card out of the grid entirely
                 // (it stays mounted off-screen). Without this list the server sees a
                 // widget it knows from the configuration simply not reported and
@@ -278,6 +284,7 @@ export function Dashboard({
         MARGIN,
         snapX,
         reflowHiddenIds,
+        isProbe,
     ]);
 
     // Raw condition verdict (works in edit mode too) — drives group auto-shrink.

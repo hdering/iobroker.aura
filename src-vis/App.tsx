@@ -32,6 +32,7 @@ import { getTheme } from './themes';
 import { useGroupStore } from './store/groupStore';
 import { loadConfigFromIoBroker, applyRaw } from './utils/configLoader';
 import { Dashboard } from './components/layout/Dashboard';
+import { RenderProbe } from './components/layout/RenderProbe';
 import { FocusedWidgetContext } from './contexts/FocusedWidgetContext';
 import { TabBar } from './components/layout/TabBar';
 import { LayoutDrawer } from './components/layout/LayoutDrawer';
@@ -1326,6 +1327,12 @@ export default function App() {
                                     layoutId={layout?.id}
                                     sectionId={section?.id}
                                 />
+                                {/* Measures a tab NOBODY has open, off-screen, when the
+                                    adapter asks for it (aura_rendered probe:true). Until
+                                    this existed, the one tool that can say what a widget
+                                    really measures had no answer for a tab that had just
+                                    been built — the model had to ask a human to open it. */}
+                                <RenderProbe activeTabId={activeTabId} />
                             </FocusedWidgetContext.Provider>
                         )}
                     </div>

@@ -25,6 +25,11 @@ import { createRequire } from 'node:module';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 
+// The render probe waits for a browser to answer (twelve seconds in the field).
+// Here nobody answers on purpose in one case, so the wait is turned down to keep
+// the suite quick — the tool reads it from the environment for exactly this.
+process.env.AURA_PROBE_WAIT_MS = process.env.AURA_PROBE_WAIT_MS || '1500';
+
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -1054,16 +1059,90 @@ check('a type measured only as a minimum is compared against that', () => {
 // for an autolist whose rows do not exist yet. Told apart, the player is not
 // resized three times to find a number it never needed.
 
-check('every widget type is filed under one of the four height classes', () => {
+check('every widget type is filed under one of the five height classes', () => {
     for (const type of Object.keys(schema.widgets)) {
         const cls = heightClass(type, METRICS);
-        assert.ok(['fills', 'content', 'runtime', 'children'].includes(cls), `${type}: unknown height class ${cls}`);
+        assert.ok(
+            ['fills', 'content', 'runtime', 'children', 'source'].includes(cls),
+            `${type}: unknown height class ${cls}`,
+        );
     }
     assert.equal(heightClass('list', METRICS), 'content');
     assert.equal(heightClass('autolist', METRICS), 'runtime');
     assert.equal(heightClass('mediaplayer', METRICS), 'fills');
     assert.equal(heightClass('echart', METRICS), 'fills');
     assert.equal(heightClass('group', METRICS), 'children');
+});
+
+// `fills` used to be the catch-all, and with it the sentence "überlaufen kann
+// nichts". Reported from use: weather is none of the other classes, and at h=7
+// with four forecast days its content is 191 px in a 188 px card — it scrolls.
+// A class that promises no overflow stops the check that would have found it.
+check('a type whose content comes from outside is not promised to fit', () => {
+    // aircontrol: no measurement, not a list, not a group — the content follows
+    // an air conditioner's datapoints and can be taller than the card.
+    assert.equal(heightClass('aircontrol', METRICS), 'source');
+    assert.equal(heightClass('html', METRICS), 'source');
+    // The box IS the content here: a stream, a picture, a foreign page.
+    assert.equal(heightClass('camera', METRICS), 'fills');
+    assert.equal(heightClass('iframe', METRICS), 'fills');
+    // And weather is measured now, per forecast day.
+    assert.equal(heightClass('weather', METRICS), 'content');
+});
+
+// The option describes itself as the answer to "the height cannot be planned":
+// with a cap the row count is known. The class said "runtime — not plannable"
+// while the same answer computed the height.
+check('a capped runtime list is content, not runtime', () => {
+    const open = { id: 's', type: 'statusoverview', title: 'S', datapoint: '', gridPos: { x: 0, y: 0, w: 6, h: 7 } };
+    const capped = { ...open, options: { maxRows: 5 } };
+    assert.equal(heightClass('statusoverview', METRICS, open), 'runtime');
+    assert.equal(heightClass('statusoverview', METRICS, capped), 'content');
+    const m = measureWidget(capped, { metrics: METRICS, grid: GRID });
+    assert.ok(m.requiredPx > 0, 'and it has a number');
+    assert.equal(m.heightClass, 'content');
+});
+
+// A layout of a counted type that draws a summary instead of stacking items:
+// weather's compact/minimal show the current conditions on ONE line at any
+// number of forecast days (measured identical at two and at six). Falling back
+// to the default layout's line would charge 17 px a day for rows nothing draws.
+check('a free-scaling layout of a counted type is not counted', () => {
+    const compact = {
+        id: 'w',
+        type: 'weather',
+        title: 'W',
+        datapoint: '',
+        layout: 'compact',
+        gridPos: { x: 0, y: 0, w: 10, h: 3 },
+        options: { forecastDays: 6 },
+    };
+    const m = measureWidget(compact, { metrics: METRICS, grid: GRID });
+    assert.equal(m.heightClass, 'fills');
+    assert.ok(!m.requiredPx, 'and no number that could be mistaken for a requirement');
+    assert.match(m.unknown, /skaliert/);
+});
+
+// The measured number is only a fact for the typography it was measured with.
+// Reported from use: „passt (28 px Luft)“ for a weather widget running
+// tempFontSize 1.5 and forecastRowGap 0.4, whose content is 191 px in 188 px.
+check('options that replace the typography void the verdict, out loud', () => {
+    const styled = {
+        id: 'w',
+        type: 'weather',
+        title: 'W',
+        datapoint: '',
+        gridPos: { x: 0, y: 0, w: 36, h: 7 },
+        options: { forecastDays: 4, tempFontSize: 1.5, fontScale: 0.95, forecastRowGap: 0.4 },
+    };
+    const plain = { ...styled, id: 'p', options: { forecastDays: 4 } };
+    const rows = [styled, plain].map((w) => measureWidget(w, { metrics: METRICS, grid: GRID }));
+    assert.deepEqual(rows[1].voided, []);
+    assert.ok(rows[0].voided.length === 3, JSON.stringify(rows[0].voided));
+    const out = renderMeasure(rows, { grid: GRID, metrics: METRICS });
+    assert.match(out, /- w — weather.*ACHTUNG: tempFontSize/);
+    assert.match(out, /dieses Urteil daher keins/);
+    assert.ok(!/- p — weather.*ACHTUNG/.test(out), 'and nothing of the sort for the plain one');
 });
 
 check('the class is on every line of the answer, with its legend underneath', () => {
@@ -2318,9 +2397,15 @@ check("a user's own colour is shown as theirs, not as the theme's", () => {
     assert.match(out, /var\(--accent\) = #ff6600 \[angepasst\]/);
 });
 
-check('aura_theme adds the per-element tokens and what they inherit', () => {
+// An element token is printed WITH its fallback, because bare it is undefined
+// CSS. Reported from the running frontend: none of them is defined on :root, so
+// `activeColor: "var(--light-on)"` painted nothing and a row of switches came out
+// grey instead of yellow — while this answer read as if the token inherited.
+check('aura_theme prints the per-element tokens in the form that works', () => {
     const full = renderTheme(THEME_TOKENS, { themeId: 'light', customVars: {} }, { elements: true });
-    assert.match(full, /var\(--switch-bg\).*wie --accent-green/);
+    assert.match(full, /var\(--switch-bg, var\(--accent-green\)\) = wie --accent-green/);
+    assert.match(full, /var\(--light-on, var\(--accent-yellow\)\)/);
+    assert.match(full, /im CSS NICHT definiert/, 'and says why the fallback is not optional');
     assert.match(full, /## Switch \/ toggle/, 'the groups from the source are worth keeping');
     const base = renderTheme(THEME_TOKENS, { themeId: 'light', customVars: {} }, { elements: false });
     assert.ok(!/--switch-bg/.test(base));
@@ -2405,6 +2490,27 @@ check('a section may state a screen of its own', () => {
     assert.equal(cv.width, 800);
     assert.equal(cv.height, 480);
     assert.equal(cv.maxCols, 26);
+});
+
+// Reported from use: a section with ONE tab was built to "endet auf Zeile 42 von
+// 42", and every tab in it broke the moment a second tab appeared — the bar that
+// comes with it takes 44 px, i.e. the last row. Nothing had said so, because
+// with one tab the chrome line does not even mention a tab bar.
+check('a single-tab section is told which row it only has for now', () => {
+    const single = designCanvas({ frontend: TABLET, tabCount: 1 });
+    const two = designCanvas({ frontend: TABLET, tabCount: 2 });
+    assert.equal(single.tabBarPending, true);
+    assert.equal(single.maxRows, two.maxRows + 1, 'exactly the row the bar will take');
+    assert.equal(single.maxRowsWithTabBar, two.maxRows);
+    const said = renderCanvas(single);
+    assert.match(said, /GENAU EINEN Tab/);
+    assert.match(said, new RegExp(`${two.maxRows}`));
+    // With the bar already there (or at the bottom) there is nothing to warn about.
+    assert.equal(two.tabBarPending, false);
+    assert.equal(two.maxRowsWithTabBar, two.maxRows);
+    assert.ok(!/GENAU EINEN Tab/.test(renderCanvas(two)));
+    const footer = designCanvas({ frontend: { ...TABLET, tabBar: { position: 'bottom' } }, tabCount: 1 });
+    assert.equal(footer.tabBarPending, false);
 });
 
 check('without guidelines the answer says so instead of inventing a size', () => {
@@ -2855,7 +2961,7 @@ check('aura_theme answers with the full palette of the selected theme', () => {
     assert.ok(!themeRes.isError, t);
     assert.match(t, /Ausgewähltes Theme: Hell \(light\)/);
     assert.match(t, /var\(--text-secondary\) = #6b7280/);
-    assert.match(t, /var\(--switch-bg\).*wie --accent-green/, 'the per-element tokens too');
+    assert.match(t, /var\(--switch-bg, var\(--accent-green\)\)/, 'the per-element tokens too');
     assert.ok(!/--switch-bg/.test(themeBase.content[0].text), 'elements=false keeps it to the base palette');
 });
 
@@ -2920,6 +3026,74 @@ const tabRes = await client.callTool({ name: 'aura_tab', arguments: { tab: 'Klim
 check('aura_tab returns the aura-tab payload', () => {
     assert.match(tabRes.content[0].text, /"_type": "aura-tab"/);
 });
+
+// Reported from use: aura_tab on an ordinary tab answered with 943 KB, 918 KB of
+// which were ONE group definition holding a background image. For an MCP client
+// the tab was simply not readable — the answer had to be redirected into a file
+// and filtered locally. A data: URI is of no use to a model in any case.
+const BIG_IMAGE = `data:image/png;base64,${'A'.repeat(300000)}`;
+// Put back afterwards: the later write tests count the widgets of this very tab.
+const dashBeforeImage = adapter.states['config.dashboard'];
+const defsBeforeImage = adapter.states['config.group-defs'];
+const dashWithImage = JSON.parse(adapter.states['config.dashboard']);
+const klimaTabForImage = dashWithImage.state.layouts[0].sections[0].tabs[1];
+klimaTabForImage.widgets.push({
+    id: 'grp-img',
+    type: 'group',
+    title: 'VW e-up!',
+    datapoint: '',
+    gridPos: { x: 0, y: 30, w: 10, h: 6 },
+    options: { defId: 'd-img' },
+});
+adapter.states['config.dashboard'] = JSON.stringify(dashWithImage);
+const defsWithImage = JSON.parse(adapter.states['config.group-defs']);
+defsWithImage.state.defs['d-img'] = [
+    {
+        id: 'img-child',
+        type: 'value',
+        title: 'Ladestand',
+        datapoint: 'demo.a',
+        gridPos: { x: 0, y: 0, w: 4, h: 2 },
+        options: { backgroundImage: BIG_IMAGE },
+    },
+];
+adapter.states['config.group-defs'] = JSON.stringify(defsWithImage);
+
+const tabTrimmed = await client.callTool({ name: 'aura_tab', arguments: { tab: 'Klima' } });
+const tabFull = await client.callTool({ name: 'aura_tab', arguments: { tab: 'Klima', images: 'full' } });
+const tabSummary = await client.callTool({ name: 'aura_tab', arguments: { tab: 'Klima', groupDefs: 'summary' } });
+check('an embedded image is trimmed out of the answer, with a way to get it whole', () => {
+    const trimmed = tabTrimmed.content[0].text;
+    assert.ok(!tabTrimmed.isError, trimmed);
+    assert.ok(trimmed.length < 20000, `${trimmed.length} chars`);
+    assert.match(trimmed, /AURA-gekürzt/);
+    assert.match(trimmed, /data:image\/png;base64/, 'the head stays, so it is still recognisable');
+    assert.match(trimmed, /images="full"/);
+    // The widgets themselves are all there — only the blob is short.
+    assert.match(trimmed, /"id": "grp-img"/);
+    assert.ok(tabFull.content[0].text.length > 300000, 'images=full hands it over whole');
+    // A summary keeps the group ids and says what is in them.
+    const summary = tabSummary.content[0].text;
+    assert.match(summary, /1 Kind\(er\): value/);
+    assert.ok(!/base64/.test(summary));
+});
+
+// Writing a trimmed payload back would replace the image with the marker text,
+// and nothing afterwards could say what was lost.
+const writeTrimmed = await client.callTool({
+    name: 'aura_write_group',
+    arguments: {
+        defId: 'd-img',
+        widgets: JSON.stringify(defsWithImage.state.defs['d-img']).slice(0, 200) + '…[AURA-gekürzt: 293 KB]"}}]',
+    },
+});
+check('a payload with trimmed data is refused instead of destroying the image', () => {
+    assert.ok(writeTrimmed.isError);
+    assert.match(writeTrimmed.content[0].text, /gekürzte Daten/);
+    assert.match(writeTrimmed.content[0].text, /aura_update_widget/);
+});
+adapter.states['config.dashboard'] = dashBeforeImage;
+adapter.states['config.group-defs'] = defsBeforeImage;
 
 const schemaRes = await client.callTool({ name: 'aura_widget_schema', arguments: { types: ['switch'] } });
 check('aura_widget_schema documents only what was asked for', () => {
@@ -3499,6 +3673,66 @@ check('a valid widget is appended below the existing content', () => {
     assert.equal(klima.widgets[1].id, 'neu');
     assert.equal(klima.widgets[1].gridPos.y, 4, 'must be placed below the existing widget, not on top of it');
 });
+
+// ── validate → write, without paying for the payload twice ─────────────────
+// Reported from use: the guidance is "validate, then write", and both tools took
+// the widgets inline only — so a tab of fifteen widgets (~13 KB) went through the
+// conversation twice for one change, and the second copy had to be reproduced
+// flawlessly or the write was a different tab from the one that was checked.
+
+// Put back afterwards, backups included: the checks below count both.
+const dashBeforeHandoff = adapter.states['config.dashboard'];
+const filesBeforeHandoff = Object.keys(adapter.files);
+const handoffWidget = JSON.stringify({ ...OK_SWITCH, id: 'per-token', gridPos: { x: 0, y: 12, w: 8, h: 4 } });
+const handoffCheck = await client.callTool({ name: 'aura_validate', arguments: { json: handoffWidget } });
+const handoffToken = (handoffCheck.content[0].text.match(/validated="([^"]+)"/) || [])[1];
+check('aura_validate hands back a token for what it just checked', () => {
+    assert.ok(!handoffCheck.isError, handoffCheck.content[0].text);
+    assert.ok(handoffToken, handoffCheck.content[0].text);
+});
+
+const byToken = await client.callTool({
+    name: 'aura_add_widget',
+    arguments: { tab: 'Klima', validated: handoffToken },
+});
+check('the write takes the token instead of the payload', () => {
+    assert.ok(!byToken.isError, byToken.content[0].text);
+    const layouts = JSON.parse(adapter.states['config.dashboard']).state.layouts;
+    const klima = layouts[0].sections[0].tabs[1];
+    assert.ok(
+        klima.widgets.some((w) => w.id === 'per-token'),
+        'the widget from the token is what was written',
+    );
+});
+
+const bothGiven = await client.callTool({
+    name: 'aura_add_widget',
+    arguments: { tab: 'Klima', validated: handoffToken, widget: handoffWidget },
+});
+const unknownToken = await client.callTool({
+    name: 'aura_write_tab',
+    arguments: { tab: 'Klima', validated: 'v-nichtdavon' },
+});
+const nothingGiven = await client.callTool({ name: 'aura_write_tab', arguments: { tab: 'Klima' } });
+check('the token cannot be mixed up with a payload, and a missing one is not an empty tab', () => {
+    assert.ok(bothGiven.isError);
+    assert.match(bothGiven.content[0].text, /nur eines von beiden/);
+    assert.ok(unknownToken.isError);
+    assert.match(unknownToken.content[0].text, /nicht \(mehr\) bekannt/);
+    // The important one: "widgets" used to be required by the schema. Now that a
+    // token can stand in for it, a forgotten argument must not read as "replace
+    // this tab with nothing".
+    assert.ok(nothingGiven.isError);
+    assert.match(nothingGiven.content[0].text, /"widgets" fehlt/);
+    const klima = JSON.parse(adapter.states['config.dashboard']).state.layouts[0].sections[0].tabs[1];
+    assert.ok(klima.widgets.length > 0, 'and nothing was removed');
+});
+adapter.states['config.dashboard'] = dashBeforeHandoff;
+for (const name of Object.keys(adapter.files)) {
+    if (!filesBeforeHandoff.includes(name)) {
+        delete adapter.files[name];
+    }
+}
 
 check('the write is backed up first and the answer says where', () => {
     const names = Object.keys(adapter.files);
@@ -4182,7 +4416,9 @@ const noReport = await client.callTool({ name: 'aura_rendered', arguments: {} })
 check('without a report from a browser aura_rendered says what to do about it', () => {
     assert.ok(!noReport.isError, noReport.content[0].text);
     assert.match(noReport.content[0].text, /keine Messung aus dem Browser/);
-    assert.match(noReport.content[0].text, /nicht im Editor/);
+    assert.match(noReport.content[0].text, /Der Editor meldet nichts/);
+    // …and it names the way to get one without asking a human: the probe render.
+    assert.match(noReport.content[0].text, /probe=true/);
 });
 
 const klimaTabId = JSON.parse(adapter.states['config.dashboard']).state.layouts[0].sections[0].tabs[1].id;
@@ -4243,6 +4479,69 @@ check('a card with reserve is not a deviation', () => {
     assert.doesNotMatch(t, /zu niedrig/);
     assert.doesNotMatch(t, /weicht die Schätzung/);
 });
+
+// ── The probe: measuring a tab NOBODY has open ──────────────────────────────
+// The one tool that can say what a widget really measures had no answer for a
+// tab that had just been built — the model had to ask a human to open it (and,
+// reported from a session, ended up opening the public URL in a browser itself).
+// probe=true writes the tab id into info.renderProbe; a live frontend renders it
+// off-screen and reports back through the same route.
+
+const probeNoTab = await client.callTool({ name: 'aura_rendered', arguments: { probe: true } });
+check('a probe without a tab is refused — it measures one tab, not all', () => {
+    assert.ok(probeNoTab.isError);
+    assert.match(probeNoTab.content[0].text, /braucht "tab"/);
+});
+
+delete adapter.states['info.rendered'];
+delete adapter.states['info.renderProbe'];
+const probeSilent = await client.callTool({ name: 'aura_rendered', arguments: { tab: 'Klima', probe: true } });
+check('a probe nobody answers says so, and names what it takes', () => {
+    const t = probeSilent.content[0].text;
+    assert.ok(!probeSilent.isError, t);
+    assert.match(t, /Kein Browser hat auf die Messung geantwortet/);
+    // The request itself was written, so a frontend that comes back later sees it.
+    const req = JSON.parse(adapter.states['info.renderProbe']);
+    assert.equal(req.tabId, klimaTabId);
+    assert.ok(Date.now() - req.ts < 60000);
+});
+
+// A frontend that DOES answer: the adapter plays one, writing a report the moment
+// the request lands — exactly the round trip the real probe makes.
+const realSet = adapter.setStateAsync;
+adapter.setStateAsync = async (id, v) => {
+    await realSet(id, v);
+    if (id !== 'info.renderProbe') {
+        return;
+    }
+    const { tabId } = JSON.parse(v.val);
+    adapter.states['info.rendered'] = JSON.stringify({
+        ts: Date.now(),
+        tabs: {
+            [tabId]: {
+                ts: Date.now(),
+                tab: 'Wohnzimmer / Start / Klima',
+                clientName: 'Wohnzimmer-Tablet',
+                probe: true,
+                viewport: { w: 1280, h: 800 },
+                presentation: { fontScale: 1, widgetPadding: 16 },
+                grid: { rowHeight: 20, gap: 10, snapX: 20 },
+                widgets: [{ id: 'stack-a', type: 'switch', rows: 8, px: 230, contentPx: 300, scrolls: true }],
+            },
+        },
+    });
+};
+const probeAnswered = await client.callTool({ name: 'aura_rendered', arguments: { tab: 'Klima', probe: true } });
+adapter.setStateAsync = realSet;
+check('a probe that is answered reads like any other measurement, and says it was one', () => {
+    const t = probeAnswered.content[0].text;
+    assert.ok(!probeAnswered.isError, t);
+    assert.match(t, /stack-a .*gerendert 230 px.*SCROLLT/);
+    assert.doesNotMatch(t, /Kein Browser/);
+    assert.match(t, /unsichtbar gemessen|Probe/, 'the answer distinguishes a probe from a screen in use');
+});
+delete adapter.states['info.rendered'];
+delete adapter.states['info.renderProbe'];
 
 // Everything the tab has but the browser never reported, plus a card that is in
 // the tree and measures nothing: both used to leave the table one line short.

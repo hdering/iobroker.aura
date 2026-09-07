@@ -545,6 +545,16 @@ export function SwitchControl({
         <ConfirmOverlay popup anchorRef={anchorRef} text={entry.confirmText} onConfirm={confirm} onCancel={cancel} />
     ) : null;
     const style = entry.switchStyle ?? 'slide';
+    // `switchStyle: 'slide'` written EXPLICITLY beats the labels.
+    //
+    // Reported from a dashboard that had both side by side: three rows with
+    // trueLabel/falseLabel rendered a text pill, three without rendered the
+    // toggle — same displayType, same switchStyle, and nothing said that the
+    // labels had taken the switch away. The labelled pill stays the default (the
+    // config panel never stores 'slide', so an unset style means "whatever fits"),
+    // but a config that names the style gets the style AND the label.
+    const labelled = !!(trueLabel || falseLabel);
+    const slideWins = labelled && entry.switchStyle === 'slide';
 
     if (style === 'icon' || style === 'image') {
         const size = entry.switchIconSize ?? entry.iconSize ?? 22;
@@ -581,7 +591,7 @@ export function SwitchControl({
     }
 
     // Labelled pill — the on/off texts replace the toggle, as in the auto path.
-    if (trueLabel || falseLabel) {
+    if (labelled && !slideWins) {
         const fill = cond?.color ?? (active ? activeColor : inactiveColor);
         return (
             <>
@@ -627,21 +637,39 @@ export function SwitchControl({
             </>
         );
 
+    const toggle = (
+        <button
+            ref={anchorRef}
+            onClick={onClick}
+            className={`shrink-0 relative w-9 h-[18px] rounded-full transition-colors ${writable ? '' : 'pointer-events-none'}`}
+            style={{ background: active ? activeColor : 'var(--app-border)' }}
+            aria-pressed={active}
+            aria-label={label}
+        >
+            <span
+                className="absolute top-[2px] w-[14px] h-[14px] rounded-full bg-white transition-all"
+                style={{ left: active ? 'calc(100% - 16px)' : '2px' }}
+            />
+        </button>
+    );
     return (
         <>
-            <button
-                ref={anchorRef}
-                onClick={onClick}
-                className={`shrink-0 relative w-9 h-[18px] rounded-full transition-colors ${writable ? '' : 'pointer-events-none'}`}
-                style={{ background: active ? activeColor : 'var(--app-border)' }}
-                aria-pressed={active}
-                aria-label={label}
-            >
-                <span
-                    className="absolute top-[2px] w-[14px] h-[14px] rounded-full bg-white transition-all"
-                    style={{ left: active ? 'calc(100% - 16px)' : '2px' }}
-                />
-            </button>
+            {slideWins ? (
+                <span className="shrink-0 flex items-center gap-1.5">
+                    <span
+                        className="text-xs font-medium"
+                        style={{
+                            color: cond?.color ?? (active ? activeColor : 'var(--text-secondary)'),
+                            ...condTextStyle(cond),
+                        }}
+                    >
+                        {label}
+                    </span>
+                    {toggle}
+                </span>
+            ) : (
+                toggle
+            )}
             {overlay}
         </>
     );

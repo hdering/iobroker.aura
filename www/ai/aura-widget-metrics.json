@@ -2,7 +2,7 @@
   "$meta": {
     "name": "AURA widget height metrics",
     "generator": "tools/schema/measure-widget-metrics.mjs",
-    "measured": "2026-09-04",
+    "measured": "2026-09-07",
     "reference": {
       "fontScale": 1,
       "widgetPaddingPx": 16
@@ -24,6 +24,8 @@
       "A minimum is the point where content starts to be lost, not a recommended size — defaultSize is that.",
       "A chart never loses content: eCharts and recharts paint into whatever box they get, so \"nothing is cut off\" is satisfied long before the chart is readable. Those types therefore carry a second number, minimum.<type>.usablePx — the height at which the plot surface first reaches 140 px. That is a stated recommendation, not a measured cliff; everything else here is a cliff.",
       "Every type is measured WITH content in it (OPTIONS_FOR). A type measured empty reports the height of its empty state, which is what chips, chart and echart used to do.",
+      "counted.<type>.voids names the options that do not shift the height by a delta but replace the typography the number was measured with (weather: tempFontSize, fontScale, forecastRowGap). A widget that sets one keeps the number as an order of magnitude, and aura_measure says the verdict is not a verdict — the browser (aura_rendered) is the only answer there.",
+      "counted.<type>.freeLayouts lists the layouts of a counted type whose height does NOT follow the item count: they draw a summary and scale it into any box (weather compact/minimal, the status overview's count). aura_measure reports those as [fills] instead of applying the default layout's line to them.",
       "Every number is measured at font scale 1 with 16 px widget padding (the reference above). aura_measure corrects for the dashboard it is asked about: the padding exactly (2 px of chrome per px of padding), the font scale from fontScalePx/addPx, which is exact at the two measured scales and an interpolation between and beyond them."
     ]
   },
@@ -664,6 +666,248 @@
           "px": 302
         }
       ]
+    },
+    "weather": {
+      "item": "Vorhersagetag",
+      "basePx": 92,
+      "perItemPx": 17,
+      "fontScalePx": {
+        "basePx": 0,
+        "perItemPx": 0
+      },
+      "atWidthPx": 200,
+      "measured": [
+        {
+          "n": 2,
+          "px": 126
+        },
+        {
+          "n": 4,
+          "px": 160
+        },
+        {
+          "n": 6,
+          "px": 194
+        }
+      ],
+      "variants": {
+        "card": {
+          "label": "Layout \"card\"",
+          "basePx": 92,
+          "perItemPx": 17,
+          "fontScalePx": {
+            "basePx": 0,
+            "perItemPx": 0
+          },
+          "measured": [
+            {
+              "n": 2,
+              "px": 126
+            },
+            {
+              "n": 6,
+              "px": 194
+            }
+          ]
+        }
+      },
+      "modifiers": [
+        {
+          "key": "noForecast",
+          "label": "ohne Vorhersage (showForecast: false)",
+          "when": {
+            "path": "showForecast",
+            "equals": false
+          },
+          "basePx": -6,
+          "perItemPx": -17
+        },
+        {
+          "key": "noHeader",
+          "label": "ohne Kopfzeile (showTitle und showIcon aus)",
+          "when": {
+            "all": [
+              {
+                "path": "showTitle",
+                "equals": false
+              },
+              {
+                "path": "showIcon",
+                "equals": false
+              }
+            ]
+          },
+          "basePx": -30,
+          "perItemPx": 0
+        },
+        {
+          "key": "rainAmount",
+          "label": "Regenmenge je Tag (showRainAmount)",
+          "when": {
+            "path": "showRainAmount",
+            "equals": true
+          },
+          "basePx": 0,
+          "perItemPx": 0
+        }
+      ],
+      "notIncluded": [
+        "die eigene Typografie des Widgets: tempFontSize, options.fontScale und forecastRowGap gehen unmittelbar in die Höhe ein und sind hier NICHT enthalten (gemessen mit den Standardwerten). Aus dem Betrieb gemeldet: tempFontSize 1.5, fontScale 0.95 und forecastRowGap 0.4 brauchten 191 px, wo die Standarddarstellung passt — mit diesen Optionen die Höhe mit aura_rendered im Browser prüfen",
+        "Unwetterwarnungen (showWarnings): sie kommen vom DWD, sind beliebig lang und scrollen in ihrem eigenen Bereich",
+        "Layout „custom“ zeichnet, was customGrid beschreibt",
+        "ein Ort mit langem Namen bricht um und macht die Kopfzeile höher"
+      ],
+      "voids": [
+        {
+          "path": "tempFontSize",
+          "label": "tempFontSize (Größe der Temperaturzeile)"
+        },
+        {
+          "path": "fontScale",
+          "label": "options.fontScale (eigener Schriftfaktor des Widgets)"
+        },
+        {
+          "path": "forecastRowGap",
+          "label": "forecastRowGap (Abstand der Vorhersagezeilen)"
+        },
+        {
+          "path": "showWarnings",
+          "label": "showWarnings (Unwetterwarnungen, beliebig lang)"
+        },
+        {
+          "path": "forecastWrap",
+          "label": "forecastWrap (Vorhersage umbrechen statt stapeln)"
+        }
+      ],
+      "freeLayouts": [
+        "compact",
+        "minimal",
+        "custom"
+      ]
+    },
+    "statusoverview": {
+      "item": "Zeile",
+      "basePx": 98,
+      "perItemPx": 24,
+      "fontScalePx": {
+        "basePx": 123.3,
+        "perItemPx": 15.7
+      },
+      "atWidthPx": 120,
+      "measured": [
+        {
+          "n": 2,
+          "px": 146
+        },
+        {
+          "n": 4,
+          "px": 194
+        },
+        {
+          "n": 8,
+          "px": 290
+        }
+      ],
+      "variants": {
+        "compact": {
+          "label": "Layout \"compact\"",
+          "basePx": 58,
+          "perItemPx": 24,
+          "fontScalePx": {
+            "basePx": 23.3,
+            "perItemPx": 15.7
+          },
+          "measured": [
+            {
+              "n": 2,
+              "px": 106
+            },
+            {
+              "n": 8,
+              "px": 250
+            }
+          ]
+        },
+        "card": {
+          "label": "Layout \"card\"",
+          "basePx": 53,
+          "perItemPx": 54.3,
+          "fontScalePx": {
+            "basePx": 30,
+            "perItemPx": 45.7
+          },
+          "measured": [
+            {
+              "n": 2,
+              "px": 162
+            },
+            {
+              "n": 8,
+              "px": 488
+            }
+          ]
+        },
+        "minimal": {
+          "label": "Layout \"minimal\"",
+          "basePx": 59,
+          "perItemPx": 153.3,
+          "fontScalePx": {
+            "basePx": 20,
+            "perItemPx": 138
+          },
+          "measured": [
+            {
+              "n": 2,
+              "px": 366
+            },
+            {
+              "n": 8,
+              "px": 1286
+            }
+          ]
+        }
+      },
+      "modifiers": [
+        {
+          "key": "noCount",
+          "label": "ohne Zähler-Chip (showCount: false)",
+          "when": {
+            "path": "showCount",
+            "equals": false
+          },
+          "basePx": -4,
+          "perItemPx": 0
+        },
+        {
+          "key": "noTitle",
+          "label": "ohne Titelzeile (showTitle: false)",
+          "when": {
+            "path": "showTitle",
+            "equals": false
+          },
+          "basePx": 0,
+          "perItemPx": 0
+        }
+      ],
+      "notIncluded": [
+        "gemessen mit Zeilen EINER Kategorie: im Layout „default“ zeichnet jede Kategorie, die Zeilen hat, eine Überschrift dazu (und showOkCategories auch die leeren) — je weitere Kategorie eine Zeile mehr",
+        "die Zeilen selbst stammen aus der Erkennung: ein langer Gerätename bricht um und macht seine Zeile höher (namePattern/nameFilters kürzen ihn)",
+        "die Layouts „card“ und „minimal“ ordnen Kacheln bzw. Pillen nach der BREITE an — gemessen an der Standardbreite (siehe atWidthPx). Auf einer breiteren Karte stehen mehrere in einer Zeile und die Höhe je Zeile sinkt entsprechend",
+        "ohne maxRows ist die Zeilenzahl unbekannt — dann ist diese Rechnung keine Auskunft über die Höhe"
+      ],
+      "voids": [
+        {
+          "path": "showOkCategories",
+          "label": "showOkCategories (Überschrift auch für leere Kategorien)"
+        },
+        {
+          "path": "namePattern",
+          "label": "namePattern (die Zeilenbeschriftung kann umbrechen)"
+        }
+      ],
+      "freeLayouts": [
+        "count"
+      ]
     }
   },
   "minimum": {
@@ -854,6 +1098,23 @@
       "minRowsDefaultGrid": 3,
       "fontScalePx": 26.7,
       "atWidthPx": 160
+    },
+    "statusoverview": {
+      "minPx": 194,
+      "minRowsDefaultGrid": 7,
+      "notIncluded": [
+        "gemessen mit vier Zeilen EINER Kategorie (maxRows 4). Die Zeilen dieses Widgets entstehen erst zur Laufzeit — mit maxRows steht die Zeilenzahl fest und aura_measure rechnet genau: siehe counted.statusoverview"
+      ],
+      "fontScalePx": 186.7,
+      "atWidthPx": 120
+    },
+    "weather": {
+      "minPx": 178,
+      "minRowsDefaultGrid": 7,
+      "notIncluded": [
+        "gemessen mit fünf Vorhersagetagen (der Standard). Mit bekanntem forecastDays rechnet aura_measure genau: siehe counted.weather"
+      ],
+      "atWidthPx": 200
     }
   },
   "notMeasurable": {
@@ -866,7 +1127,6 @@
     "universal": "Höhe ergibt sich aus den Kindern",
     "mirror": "spiegelt ein anderes Widget",
     "autolist": "Zeilen entstehen erst zur Laufzeit aus Raum und Gewerk — wie list rechnen",
-    "statusoverview": "Zeilen entstehen erst zur Laufzeit",
     "calendar": "Zeilen entstehen erst zur Laufzeit aus den Terminen",
     "messages": "Zeilen entstehen erst zur Laufzeit",
     "adapterlogs": "Zeilen entstehen erst zur Laufzeit",
@@ -874,7 +1134,6 @@
     "trash": "Zeilen entstehen erst zur Laufzeit",
     "trashSchedule": "Zeilen entstehen erst zur Laufzeit",
     "evcc": "Inhalt kommt aus einer evcc-Instanz",
-    "weather": "Inhalt kommt aus einer Wetter-Instanz",
     "echartsPreset": "rendert ein gespeichertes eCharts-Preset",
     "timer": "Zeilen entstehen erst zur Laufzeit",
     "alarm": "Zeilen entstehen erst zur Laufzeit",

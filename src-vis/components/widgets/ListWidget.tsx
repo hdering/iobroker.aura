@@ -609,7 +609,10 @@ function EntryValue({
         if (switchStyle === 'icon') {
             return renderIconToggle(on, () => setState(entry.id, isBool ? !on : on ? 0 : 1));
         }
-        if (hasLabels) {
+        // The labelled pill is the default for a boolean row — but a config that
+        // says switchStyle 'slide' gets the toggle, with the label next to it
+        // (see SwitchControl in entryControls.tsx; the two paths draw the same row).
+        if (hasLabels && entry.switchStyle !== 'slide') {
             const fill = condColor ?? (on ? activeColor : inactiveColor);
             return (
                 <button
@@ -626,20 +629,7 @@ function EntryValue({
                 </button>
             );
         }
-        if (!writable) {
-            return (
-                <span
-                    className="shrink-0 relative w-9 h-[18px] rounded-full pointer-events-none"
-                    style={{ background: on ? activeColor : 'var(--app-border)' }}
-                >
-                    <span
-                        className="absolute top-[2px] w-[14px] h-[14px] rounded-full bg-white"
-                        style={{ left: on ? 'calc(100% - 16px)' : '2px' }}
-                    />
-                </span>
-            );
-        }
-        return (
+        const toggle = writable ? (
             <button
                 onClick={() => setState(entry.id, isBool ? !on : on ? 0 : 1)}
                 className="shrink-0 relative w-9 h-[18px] rounded-full transition-colors"
@@ -650,6 +640,28 @@ function EntryValue({
                     style={{ left: on ? 'calc(100% - 16px)' : '2px' }}
                 />
             </button>
+        ) : (
+            <span
+                className="shrink-0 relative w-9 h-[18px] rounded-full pointer-events-none"
+                style={{ background: on ? activeColor : 'var(--app-border)' }}
+            >
+                <span
+                    className="absolute top-[2px] w-[14px] h-[14px] rounded-full bg-white"
+                    style={{ left: on ? 'calc(100% - 16px)' : '2px' }}
+                />
+            </span>
+        );
+        if (!hasLabels) return toggle;
+        return (
+            <span className="shrink-0 flex items-center gap-1.5">
+                <span
+                    className="text-xs font-medium"
+                    style={{ color: condColor ?? (on ? activeColor : 'var(--text-secondary)'), ...condFont }}
+                >
+                    {on ? trueLabel || 'AN' : falseLabel || 'AUS'}
+                </span>
+                {toggle}
+            </span>
         );
     }
 

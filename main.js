@@ -2554,6 +2554,26 @@ class Aura extends utils.Adapter {
             native: {},
         });
 
+        // ── Render probe request (written by the adapter, read by the frontends) ─
+        // aura_rendered can only report a tab somebody had OPEN — a hidden tab is
+        // display:none and measures zero. That left the one tool that can say what
+        // a widget really measures without an answer for a freshly built tab,
+        // which is exactly when the question matters: the model had to ask a human
+        // to open it. Writing a tab id here makes every live frontend render that
+        // tab off-screen once and report it (src-vis/components/layout/RenderProbe.tsx).
+        await this.setObjectNotExistsAsync('info.renderProbe', {
+            type: 'state',
+            common: {
+                name: 'Tab the frontends should measure off-screen (JSON, written by the adapter)',
+                type: 'string',
+                role: 'json',
+                read: true,
+                write: false,
+                def: '',
+            },
+            native: {},
+        });
+
         // ── Installed adapter version ────────────────────────────────────────
         // Read-only mirror of package.json/io-package common.version so the
         // running version can be bound anywhere in the frontend (or read by

@@ -51,6 +51,13 @@ export interface RenderedWidget {
 export interface RenderReport {
     tabId: string;
     tab: string;
+    /**
+     * Measured in an off-screen probe render (components/layout/RenderProbe.tsx)
+     * rather than on a screen somebody was looking at. Same grid, same width, and
+     * the camera/iframe widgets are left out — so the answer says so instead of
+     * passing it off as a measurement from a visible tab.
+     */
+    probe?: boolean;
     viewport: { w: number; h: number };
     presentation: { fontScale: number; widgetPadding: number };
     grid: { rowHeight: number; gap: number; snapX: number };

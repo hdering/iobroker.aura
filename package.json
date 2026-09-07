@@ -76,6 +76,7 @@
     "test:list-max-rows": "node tools/tests/list-max-rows.mjs",
     "test:list-row-heights": "node tools/tests/list-row-heights.mjs",
     "test:render-report": "node tools/tests/render-report.mjs",
+    "test:render-probe": "node tools/tests/render-probe.mjs",
     "test:echart-tokens": "node tools/tests/echart-token-colors.mjs",
     "test:list-switch": "node tools/tests/list-switch.mjs",
     "test:list-icon-size": "node tools/tests/list-icon-size.mjs",
