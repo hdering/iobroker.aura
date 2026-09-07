@@ -115,6 +115,10 @@ So the path of any release is: `-nextN` test build → **Latest** (published, on
 
 _Older releases: see [CHANGELOG_OLD.md](CHANGELOG_OLD.md)._
 
+### 0.55.1 (2026-09-07)
+- 🌟 **New feature:** Popups - the inner padding is now adjustable (globally, per popup view, per click action), and the scrollbar lane is only reserved while the popup really scrolls, so list rows in a popup get the full width ([#621](https://github.com/hdering/ioBroker.aura/issues/621))
+
+
 ### 0.55.0 (2026-09-06)
 - 🌟 **New feature:** Universal Widget - the select cell can now take its entries from a JSON datapoint, and shows icons, images and HTML inside the dropdown, just like the standalone select widget ([#615](https://github.com/hdering/ioBroker.aura/issues/615))
 - MCP server - aura_rendered now lists every widget of the tab, including the ones that draw nothing, and prints the content height next to the rendered one; a card that is simply larger than it needs to be is no longer reported as a deviation
@@ -245,12 +249,6 @@ _Older releases: see [CHANGELOG_OLD.md](CHANGELOG_OLD.md)._
 - Editor - the "AI prompt" dialog now pastes worked examples into the prompt (the same ones the MCP server hands out) and says what a good dashboard looks like, instead of only what is valid JSON. The old wording asked the model to leave options out, which is why generated views came back as bare tiles
 
 
-### 0.52.0 (2026-09-01)
-- 🌟 **New feature:** Sections and tabs can be protected with a PIN - the content only appears once the code was entered, no matter whether the section menu, the tab bar, a widget click action or a bookmarked URL led there. Set per section and per tab in the dashboard editor; a section and a tab inside it sharing the same code ask only once
-- Dashboard editor - the section settings popover follows the admin theme again instead of showing up dark, and its marker editor starts collapsed like the tab settings
-- 🌟 **New feature:** AI assistant (MCP, beta) - popup views and group children are now first class: every widget command works there too, and a single group tile can be added or changed without rewriting the whole group. New: reorder layouts, sections and tabs, copy or move a widget between tabs and whole tabs, sections, layouts and popup views, reusable widget templates (covered by backups), and a search that finds widgets by datapoint, type or title. Fewer silent failures: parallel edits no longer overwrite each other, an ambiguous widget id or view name is reported instead of guessed, an option written at the wrong level is an error instead of a no-op, deleting a group cleans up its leftover children, and slimmer schema answers keep prompts short
-
-
 ## License
 
 MIT License
@@ -262,6 +260,7 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 
 
 

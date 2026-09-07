@@ -1,5 +1,10 @@
 # Changelog (older entries)
 
+## 0.52.0 (2026-09-01)
+- 🌟 **New feature:** Sections and tabs can be protected with a PIN - the content only appears once the code was entered, no matter whether the section menu, the tab bar, a widget click action or a bookmarked URL led there. Set per section and per tab in the dashboard editor; a section and a tab inside it sharing the same code ask only once
+- Dashboard editor - the section settings popover follows the admin theme again instead of showing up dark, and its marker editor starts collapsed like the tab settings
+- 🌟 **New feature:** AI assistant (MCP, beta) - popup views and group children are now first class: every widget command works there too, and a single group tile can be added or changed without rewriting the whole group. New: reorder layouts, sections and tabs, copy or move a widget between tabs and whole tabs, sections, layouts and popup views, reusable widget templates (covered by backups), and a search that finds widgets by datapoint, type or title. Fewer silent failures: parallel edits no longer overwrite each other, an ambiguous widget id or view name is reported instead of guessed, an option written at the wrong level is an error instead of a no-op, deleting a group cleans up its leftover children, and slimmer schema answers keep prompts short
+
 ## 0.51.3 (2026-08-31)
 - 🌟 **New feature:** Messages - [[dp]] placeholders in a message title or body now read live in the Meldungen widget, the header bell and the admin history, not only on the toast. A message sent by a condition freezes those values when the rule fires, so the archive keeps what the datapoint said at that moment ([#605](https://github.com/hdering/ioBroker.aura/issues/605))
 - General - copying a tab, a section or a layout now gives every copied widget (and every group child) a new id, so the widget picker of a click action can tell the copies apart. Dashboards that already hold such twins are repaired on load ([#606](https://github.com/hdering/ioBroker.aura/issues/606))
