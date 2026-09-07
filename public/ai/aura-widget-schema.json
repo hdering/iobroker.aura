@@ -1,7 +1,7 @@
 {
   "$meta": {
     "name": "AURA widget schema",
-    "auraVersion": "0.55.1",
+    "auraVersion": "0.55.2",
     "generator": "tools/schema/gen-widget-schema.mjs",
     "purpose": "Describes every AURA widget type so a JSON widget/tab config can be generated and pasted into the dashboard editor (\"Widget importieren\").",
     "usage": [
@@ -8553,13 +8553,40 @@
         "transparent"
       ],
       "options": {
+        "accentColor": {
+          "type": "string",
+          "description": "Farbe des Strichs. Leer = --header-accent aus dem Theme."
+        },
+        "showAccent": {
+          "type": "boolean",
+          "default": true,
+          "description": "Strich anzeigen: der Akzentbalken links (default, card, compact, framed) bzw. die Trennlinie rechts vom Titel (minimal). Im Stil default zeichnet ihn nur ein linksbündiger Titel."
+        },
         "showSubtitle": {
           "type": "boolean",
           "default": true,
           "description": "Zweite Zeile unter dem Titel anzeigen."
         },
         "subtitle": {
-          "type": "string"
+          "type": "string",
+          "default": "",
+          "description": "Zweite Zeile unter dem Titel, in jedem Stil. Darf Bindings enthalten — {0_userdata.0.Temp}, {id;round(0)}, {{ a + b }} sowie die Kontextvariablen {view} / {wname} (siehe docs/widgets/bindings.md). Das Widget hat keinen eigenen Datenpunkt, {dp} gibt es hier also nicht."
+        },
+        "subtitleColor": {
+          "type": "string",
+          "description": "Farbe des Untertitels. Leer = --text-secondary aus dem Theme."
+        },
+        "subtitleSize": {
+          "type": "number",
+          "description": "Schriftgröße des Untertitels in px. Leer = 12."
+        },
+        "titleColor": {
+          "type": "string",
+          "description": "Farbe von Titel und Icon. Leer = --header-text aus dem Theme."
+        },
+        "titleSize": {
+          "type": "number",
+          "description": "Schriftgröße des Titels in px. Leer = Größe des Stils (default/framed 20, compact 16, minimal 12)."
         }
       }
     },

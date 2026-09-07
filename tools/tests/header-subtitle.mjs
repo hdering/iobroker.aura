@@ -34,9 +34,9 @@ page.on('pageerror', (e) => pageErrors.push(e.message));
 await page.goto(`${BASE}/?shot=1`, { waitUntil: 'domcontentloaded' });
 await page.waitForFunction(() => !!window.__auraShot?.ready, { timeout: 30000 });
 
-async function show({ layout, subtitle, titleAlign = 'left', showSubtitle = true, rows = 4 }) {
+async function show({ layout, subtitle, titleAlign = 'left', showSubtitle = true, rows = 4, extra = {} }) {
     await page.evaluate(
-        ([layout, subtitle, titleAlign, showSubtitle, rows]) => {
+        ([layout, subtitle, titleAlign, showSubtitle, rows, extra]) => {
             window.__auraShot.showWidgets([
                 {
                     id: 'hdr',
@@ -44,11 +44,11 @@ async function show({ layout, subtitle, titleAlign = 'left', showSubtitle = true
                     title: 'Wohnzimmer',
                     layout,
                     gridPos: { x: 0, y: 0, w: 12, h: rows },
-                    options: { titleAlign, showSubtitle, ...(subtitle ? { subtitle } : {}) },
+                    options: { titleAlign, showSubtitle, ...(subtitle ? { subtitle } : {}), ...extra },
                 },
             ]);
         },
-        [layout, subtitle, titleAlign, showSubtitle, rows],
+        [layout, subtitle, titleAlign, showSubtitle, rows, extra],
     );
     await page.waitForTimeout(300);
 }
@@ -212,6 +212,191 @@ for (const theme of ['light', 'dark']) {
     );
 }
 await page.evaluate(() => window.__auraShot.setTheme('light'));
+
+// ── 5. Der Strich ist ausblendbar und faerbbar ────────────────────────────────────────
+// "Strich" ist je Stil ein anderes Element: der Akzentbalken (default/compact/framed)
+// bzw. die Trennlinie rechts vom Titel (minimal). Ein Schalter deckt beide ab, also
+// wird hier auch beides gemessen.
+const ruleInfo = () =>
+    page.evaluate(() => {
+        const row = document.querySelector('.aura-widget-type-header .aura-widget-row');
+        const el = row?.querySelector('.rounded-full') ?? row?.querySelector('.h-px');
+        return { present: !!el, bg: el ? getComputedStyle(el).backgroundColor : null };
+    });
+
+for (const layout of ['default', 'compact', 'minimal', 'framed']) {
+    await show({ layout, subtitle: SUBTITLE });
+    const on = await ruleInfo();
+    check(`${layout}: Strich ist standardmaessig da`, on.present);
+
+    await show({ layout, subtitle: SUBTITLE, extra: { showAccent: false } });
+    const off = await ruleInfo();
+    check(`${layout}: Strich ausgeblendet`, !off.present);
+
+    await show({ layout, subtitle: SUBTITLE, extra: { accentColor: '#ff0000' } });
+    const col = await ruleInfo();
+    check(`${layout}: Strichfarbe wirkt`, col.bg === 'rgb(255, 0, 0)', `${col.bg}`);
+}
+
+// ── 6. Textfarbe und Textgroesse ──────────────────────────────────────────────────────
+const textInfo = () =>
+    page.evaluate(() => {
+        const w = document.querySelector('.aura-widget-type-header');
+        const read = (sel) => {
+            const el = w?.querySelector(sel);
+            if (!el) return null;
+            const cs = getComputedStyle(el);
+            const b = el.getBoundingClientRect();
+            return {
+                color: cs.color,
+                size: Math.round(parseFloat(cs.fontSize) * 10) / 10,
+                height: Math.round(b.height * 10) / 10,
+            };
+        };
+        return { title: read('.aura-widget-title'), sub: read('.aura-widget-value'), icon: read('.aura-widget-icon') };
+    });
+
+// Ohne Angabe bleibt es bei der Groesse des Stils …
+const STYLE_TITLE_PX = { default: 20, framed: 20, compact: 16, minimal: 12 };
+for (const [layout, expected] of Object.entries(STYLE_TITLE_PX)) {
+    await show({ layout, subtitle: SUBTITLE });
+    const g = await textInfo();
+    check(`${layout}: Titelgroesse des Stils unveraendert`, g.title?.size === expected, `${g.title?.size}`);
+    check(`${layout}: Untertitel bleibt 12 px`, g.sub?.size === 12, `${g.sub?.size}`);
+}
+
+// … und mit Angabe gilt der px-Wert, in jedem Stil, samt eigener Zeilenhoehe (sonst
+// schneidet die Zeile die Unterlaengen des groesseren Textes ab).
+for (const layout of ['default', 'compact', 'minimal', 'framed']) {
+    await show({
+        layout,
+        subtitle: SUBTITLE,
+        rows: 6,
+        extra: { titleColor: '#ff0000', subtitleColor: '#00ff00', titleSize: 32, subtitleSize: 18 },
+    });
+    const g = await textInfo();
+    check(`${layout}: Titelfarbe wirkt`, g.title?.color === 'rgb(255, 0, 0)', `${g.title?.color}`);
+    check(`${layout}: Icon folgt der Titelfarbe`, g.icon?.color === 'rgb(255, 0, 0)', `${g.icon?.color}`);
+    check(`${layout}: Untertitelfarbe wirkt`, g.sub?.color === 'rgb(0, 255, 0)', `${g.sub?.color}`);
+    check(`${layout}: Titelgroesse wirkt`, g.title?.size === 32, `${g.title?.size}`);
+    check(`${layout}: Untertitelgroesse wirkt`, g.sub?.size === 18, `${g.sub?.size}`);
+    check(
+        `${layout}: Titelzeile waechst mit der Schrift`,
+        (g.title?.height ?? 0) >= 32,
+        `${g.title?.height} bei 32 px Schrift`,
+    );
+    check(
+        `${layout}: Untertitelzeile waechst mit der Schrift`,
+        (g.sub?.height ?? 0) >= 18,
+        `${g.sub?.height} bei 18 px Schrift`,
+    );
+}
+
+// ── 7. Bindings im Untertitel ─────────────────────────────────────────────────────────
+// Dieselbe Ebene wie im HTML-Widget: `{id}` fuer einen Datenpunkt, `{{ … }}` fuer einen
+// Ausdruck. Ein String-Datenpunkt und eine reine Rechnung, damit kein Zahlenformat der
+// Instanz das Ergebnis verschiebt.
+await page.evaluate(() => {
+    window.__auraShot.mock({ '0_userdata.0.Etage': 'Erdgeschoss' });
+    window.__auraShot.mockServerState({ '0_userdata.0.Etage': 'Erdgeschoss' });
+});
+
+await show({ layout: 'default', subtitle: '{0_userdata.0.Etage}' });
+const bound = await geometry();
+check('Untertitel: {id} zeigt den Wert', bound?.subText === 'Erdgeschoss', `${bound?.subText}`);
+
+await show({ layout: 'default', subtitle: 'Etage: {0_userdata.0.Etage} · {{ 2 * 3 }} Raeume' });
+const mixed = await geometry();
+check(
+    'Untertitel: {{ … }} rechnet, Text bleibt stehen',
+    mixed?.subText === 'Etage: Erdgeschoss · 6 Raeume',
+    `${mixed?.subText}`,
+);
+
+// Die Popup-Ebene benutzt dieselben doppelten Klammern und muss unangetastet
+// durchlaufen — sonst wuerde ein Popup-Untertitel im Editor leer aussehen.
+await show({ layout: 'default', subtitle: '{{parent}}' });
+const popupToken = await geometry();
+check('Untertitel: {{parent}} bleibt der Popup-Ebene', popupToken?.subText === '{{parent}}', `${popupToken?.subText}`);
+
+// ── 8. Der Editor: alles steht im Widget-Bereich "Abschnittstitel" ────────────────────
+// Der Untertitel lag frueher oben bei Name/Typ; er gehoert in den widget-eigenen
+// Einstellungsbereich, zusammen mit Strich, Farben und Groessen.
+await page.evaluate(() => {
+    window.__auraShot.showWidgets(
+        [
+            {
+                id: 'hdr',
+                type: 'header',
+                title: 'Wohnzimmer',
+                layout: 'default',
+                gridPos: { x: 0, y: 0, w: 12, h: 4 },
+                options: {},
+            },
+        ],
+        { editMode: true },
+    );
+    window.__auraShot.setEditMode(true);
+});
+const opts = () => page.evaluate(() => window.__auraShot.widgetOptions('hdr'));
+
+await page.locator('.aura-edit-chrome button').first().click();
+await page.locator('button:text-is("Bearbeiten")').click();
+const dlg = page.locator('.aura-widget-edit-modal');
+await dlg.locator('input[placeholder="z.B. Erdgeschoss"]').waitFor({ timeout: 10000 });
+
+// Der Bereich traegt den Widget-Namen und enthaelt die Felder — nicht der Kopf des Dialogs.
+const box = dlg.locator('div:has(> p:text-is("Abschnittstitel"))').last();
+check(
+    'der Bereich "Abschnittstitel" fuehrt den Untertitel',
+    (await box.locator('input[placeholder="z.B. Erdgeschoss"]').count()) > 0,
+);
+check('… und den Schalter fuer den Strich', (await box.locator('span:text-is("Strich")').count()) > 0);
+
+await dlg.locator('input[placeholder="z.B. Erdgeschoss"]').fill('Erdgeschoss');
+await page.waitForTimeout(300);
+check('Untertitel wird geschrieben', (await opts()).subtitle === 'Erdgeschoss', `${(await opts()).subtitle}`);
+
+const ruleRow = dlg
+    .locator('div.flex.items-center.justify-between')
+    .filter({ has: page.locator('span:text-is("Strich")') })
+    .first();
+await ruleRow.locator('button').first().click();
+await page.waitForTimeout(300);
+check('Strich-Schalter schreibt showAccent=false', (await opts()).showAccent === false);
+// Aus heisst auch: kein Farbfeld fuer einen Strich, der nicht gezeichnet wird.
+check('ohne Strich verschwindet das Farbfeld', (await box.locator('label:text-is("Farbe")').count()) === 0);
+await ruleRow.locator('button').first().click();
+await page.waitForTimeout(300);
+check('… und wieder an', (await opts()).showAccent === true);
+check('Farbfeld ist zurueck', (await box.locator('label:text-is("Farbe")').count()) > 0);
+
+// Die drei Farbfelder in ihrer Reihenfolge: Strich, Titel, Untertitel.
+const colorInputs = box.locator('input[placeholder="auto"]');
+check('drei Farbfelder', (await colorInputs.count()) === 3, `${await colorInputs.count()}`);
+await colorInputs.nth(0).fill('#ff0000');
+await colorInputs.nth(1).fill('#00ff00');
+await colorInputs.nth(2).fill('#0000ff');
+await page.waitForTimeout(300);
+const afterColors = await opts();
+check('Strichfarbe wird geschrieben', afterColors.accentColor === '#ff0000', `${afterColors.accentColor}`);
+check('Titelfarbe wird geschrieben', afterColors.titleColor === '#00ff00', `${afterColors.titleColor}`);
+check('Untertitelfarbe wird geschrieben', afterColors.subtitleColor === '#0000ff', `${afterColors.subtitleColor}`);
+
+const sizeInputs = box.locator('input[type="number"]');
+check('zwei Groessenfelder', (await sizeInputs.count()) === 2, `${await sizeInputs.count()}`);
+await sizeInputs.nth(0).fill('28');
+await sizeInputs.nth(1).fill('16');
+await page.waitForTimeout(300);
+const afterSizes = await opts();
+check('Titelgroesse wird geschrieben', afterSizes.titleSize === 28, `${afterSizes.titleSize}`);
+check('Untertitelgroesse wird geschrieben', afterSizes.subtitleSize === 16, `${afterSizes.subtitleSize}`);
+
+// Der Untertitel steht nicht mehr oben beim Typ: genau ein Feld dafuer im Dialog.
+check(
+    'der Untertitel steht nur noch an einer Stelle',
+    (await dlg.locator('input[placeholder="z.B. Erdgeschoss"]').count()) === 1,
+);
 
 check('keine Seitenfehler', pageErrors.length === 0, pageErrors.join(' | '));
 

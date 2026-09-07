@@ -9,6 +9,7 @@ Gültig in:
 | [HTML](./html) | `htmlContent` (statisches HTML) **und** der Inhalt aus `htmlDatapoint` |
 | [Wert-Anzeige](./wert-anzeige) | `htmlTemplate` |
 | [Marker](../einstellungen/editor#marker-text-mit-datenpunkten) (Widget, Bereich, Tab) | `Text` beim Stil `Label` |
+| [Abschnittstitel](./abschnittstitel) | `subtitle` (Untertitel) |
 
 Die Syntax folgt [ioBroker.vis](https://github.com/ioBroker/ioBroker.vis-2#bindings-of-objects): Bindings aus einer bestehenden vis-Ansicht lassen sich übernehmen. Abweichungen stehen unter [Unterschiede zu ioBroker.vis](#unterschiede-zu-iobroker-vis).
 
@@ -446,7 +447,7 @@ Sie sehen ähnlich aus, machen aber Verschiedenes:
 | --- | --- | --- | --- |
 | Widget-Titel | `[[0_userdata.0.Temp]]` | Titelfeld jedes Widgets | live, bei jeder Wertänderung |
 | Popup-Views | `{{parent}}` `{{dp}}` `{{name}}` | alle Felder eines Popup-Widgets | einmal beim Öffnen, ersetzt **IDs**, keine Werte |
-| Bindings | `{…}` · `{{ … }}` | HTML-Widget, HTML-Template | live, bei jeder Wertänderung |
+| Bindings | `{…}` · `{{ … }}` | HTML-Widget, HTML-Template, Marker-Label, Untertitel des Abschnittstitels | live, bei jeder Wertänderung |
 
 Die Popup-Ebene benutzt ebenfalls doppelte Klammern, kollidiert aber nicht: `{{parent}}` ist ein einzelnes Wort ohne Leerzeichen und bleibt der Popup-Ebene vorbehalten. Alles mit Leerzeichen, Punkt oder Operator ist ein Ausdruck. Wer in einem Popup den **Wert** des Haupt-Datenpunkts will, schreibt `{dp}` mit einfachen Klammern.
 

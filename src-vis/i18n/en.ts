@@ -867,6 +867,17 @@ export const en: Record<TranslationKey, string> = {
     'wf.edit.header.compact': 'Compact (Left line)',
     'wf.edit.header.minimal': 'Minimal (Divider + Text)',
     'wf.edit.header.framed': 'Framed',
+    'wf.edit.header.section': 'Section title',
+    'wf.edit.header.subtitleBindings':
+        'Values in the subtitle: {{ 0_userdata.0.Temp }} or {0_userdata.0.Temp} — the same bindings as in the HTML widget, plus {view}, {wname}.',
+    'wf.edit.header.rule': 'Rule',
+    'wf.edit.header.ruleDivider': 'In the minimal style the rule is the divider right of the title.',
+    'wf.edit.header.ruleAlignHint': 'The accent bar is only drawn with a left-aligned title.',
+    'wf.edit.header.color': 'Color',
+    'wf.edit.header.titleText': 'Title',
+    'wf.edit.header.subtitleText': 'Subtitle',
+    'wf.edit.header.size': 'Text size (px)',
+    'wf.edit.header.textHint': 'Empty = size of the chosen style, color from the theme.',
 
     'wf.edit.layout.standard': 'Default',
     'wf.edit.layout.card': 'Card',

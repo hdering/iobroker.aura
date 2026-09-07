@@ -868,6 +868,17 @@ export const de = {
     'wf.edit.header.compact': 'Kompakt (Linie links)',
     'wf.edit.header.minimal': 'Minimal (Trennlinie + Text)',
     'wf.edit.header.framed': 'Mit Rahmen',
+    'wf.edit.header.section': 'Abschnittstitel',
+    'wf.edit.header.subtitleBindings':
+        'Werte im Untertitel: {{ 0_userdata.0.Temp }} oder {0_userdata.0.Temp} — dieselben Bindings wie im HTML-Widget, dazu {view}, {wname}.',
+    'wf.edit.header.rule': 'Strich',
+    'wf.edit.header.ruleDivider': 'Im Stil Minimal ist der Strich die Trennlinie rechts vom Titel.',
+    'wf.edit.header.ruleAlignHint': 'Der Akzentbalken erscheint nur bei linksbündigem Titel.',
+    'wf.edit.header.color': 'Farbe',
+    'wf.edit.header.titleText': 'Titel',
+    'wf.edit.header.subtitleText': 'Untertitel',
+    'wf.edit.header.size': 'Textgröße (px)',
+    'wf.edit.header.textHint': 'Leer = Größe des gewählten Stils, Farbe aus dem Theme.',
 
     'wf.edit.layout.standard': 'Standard',
     'wf.edit.layout.card': 'Karte',

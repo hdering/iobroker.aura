@@ -82,7 +82,7 @@ import { DEFAULT_KNOB_GRID } from '../widgets/KnobWidget';
 import { OVER_COLOR as FILL_OVER_COLOR } from '../widgets/FillWidget';
 import { DatapointPicker } from '../config/DatapointPicker';
 import { ScaleBoundsRow } from '../config/ScaleBoundsRow';
-import { ConditionEditor } from '../config/ConditionEditor';
+import { ConditionEditor, ColorField } from '../config/ConditionEditor';
 import { CellConditionEditor } from '../config/CellConditionEditor';
 import { BadgeEditor } from '../config/BadgeEditor';
 import { ImagePathHint } from '../config/ImagePathHint';
@@ -8321,65 +8321,35 @@ export function WidgetFrame({
                                 );
                             })()}
 
-                        {/* Header-spezifische Felder */}
-                        {config.type === 'header' &&
-                            (() => {
-                                const o = config.options ?? {};
-                                const set = (patch: Record<string, unknown>) =>
-                                    onConfigChange({ ...config, options: { ...o, ...patch } });
-                                return (
-                                    <>
-                                        <div>
-                                            <label
-                                                className="text-[11px] mb-1 block"
-                                                style={{ color: 'var(--text-secondary)' }}
-                                            >
-                                                {t('wf.edit.header.subtitle')}
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={(o.subtitle as string) ?? ''}
-                                                onChange={(e) => set({ subtitle: e.target.value || undefined })}
-                                                placeholder="z.B. Erdgeschoss"
-                                                className="w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
-                                                style={{
-                                                    background: 'var(--app-bg)',
-                                                    color: 'var(--text-primary)',
-                                                    border: '1px solid var(--app-border)',
-                                                }}
-                                            />
-                                        </div>
-                                        <div>
-                                            <label
-                                                className="text-[11px] mb-1 block"
-                                                style={{ color: 'var(--text-secondary)' }}
-                                            >
-                                                {t('wf.edit.header.style')}
-                                            </label>
-                                            <select
-                                                value={config.layout ?? 'default'}
-                                                onChange={(e) =>
-                                                    onConfigChange({
-                                                        ...config,
-                                                        layout: e.target.value as WidgetConfig['layout'],
-                                                    })
-                                                }
-                                                className="w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
-                                                style={{
-                                                    background: 'var(--app-bg)',
-                                                    color: 'var(--text-primary)',
-                                                    border: '1px solid var(--app-border)',
-                                                }}
-                                            >
-                                                <option value="default">{t('wf.edit.header.default')}</option>
-                                                <option value="compact">{t('wf.edit.header.compact')}</option>
-                                                <option value="minimal">{t('wf.edit.header.minimal')}</option>
-                                                <option value="framed">{t('wf.edit.header.framed')}</option>
-                                            </select>
-                                        </div>
-                                    </>
-                                );
-                            })()}
+                        {/* Header: nur der Stil steht hier oben beim Typ — Untertitel, Strich
+                            und Textfarben/-groessen leben im eigenen Abschnitt weiter unten. */}
+                        {config.type === 'header' && (
+                            <div>
+                                <label className="text-[11px] mb-1 block" style={{ color: 'var(--text-secondary)' }}>
+                                    {t('wf.edit.header.style')}
+                                </label>
+                                <select
+                                    value={config.layout ?? 'default'}
+                                    onChange={(e) =>
+                                        onConfigChange({
+                                            ...config,
+                                            layout: e.target.value as WidgetConfig['layout'],
+                                        })
+                                    }
+                                    className="w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
+                                    style={{
+                                        background: 'var(--app-bg)',
+                                        color: 'var(--text-primary)',
+                                        border: '1px solid var(--app-border)',
+                                    }}
+                                >
+                                    <option value="default">{t('wf.edit.header.default')}</option>
+                                    <option value="compact">{t('wf.edit.header.compact')}</option>
+                                    <option value="minimal">{t('wf.edit.header.minimal')}</option>
+                                    <option value="framed">{t('wf.edit.header.framed')}</option>
+                                </select>
+                            </div>
+                        )}
                     </div>
 
                     {/* ─── DARSTELLUNG ─────────────────────────────────────────────────── */}
@@ -9101,6 +9071,142 @@ export function WidgetFrame({
                                 {WIDGET_BY_TYPE[config.type]?.label ?? config.type}
                             </p>
                         )}
+                        {/* Abschnittstitel: Untertiteltext, der Strich (Akzentbalken bzw.
+                            Trennlinie) und Farbe/Groesse der beiden Textzeilen. Der Stil
+                            bleibt oben beim Widget-Typ — er ist dort das Layout. */}
+                        {config.type === 'header' &&
+                            (() => {
+                                const o = config.options ?? {};
+                                const set = (patch: Record<string, unknown>) =>
+                                    onConfigChange({ ...config, options: { ...o, ...patch } });
+                                const hLayout = config.layout ?? 'default';
+                                const accentOn = o.showAccent !== false;
+                                // Der Strich ist im Minimal-Stil die Trennlinie rechts vom Titel,
+                                // sonst der Akzentbalken — den zeichnet der Default-Stil aber nur
+                                // bei linksbuendigem Titel. Beides steht als Hinweis unter der
+                                // Zeile, damit ein wirkungsloser Schalter nicht als Fehler
+                                // gelesen wird.
+                                const ruleHint =
+                                    hLayout === 'minimal'
+                                        ? t('wf.edit.header.ruleDivider')
+                                        : hLayout !== 'compact' && ((o.titleAlign as string) ?? 'left') !== 'left'
+                                          ? t('wf.edit.header.ruleAlignHint')
+                                          : '';
+                                const titlePx = hLayout === 'compact' ? 16 : hLayout === 'minimal' ? 12 : 20;
+                                const hStyle: React.CSSProperties = {
+                                    background: 'var(--app-bg)',
+                                    color: 'var(--text-primary)',
+                                    border: '1px solid var(--app-border)',
+                                };
+                                const sizeInput = (
+                                    value: unknown,
+                                    placeholder: number,
+                                    onChange: (v: number | undefined) => void,
+                                ) => (
+                                    <div className="flex items-center gap-1 shrink-0">
+                                        <input
+                                            type="number"
+                                            min={8}
+                                            max={72}
+                                            value={(value as number) ?? ''}
+                                            onChange={(e) => onChange(Number(e.target.value) || undefined)}
+                                            placeholder={String(placeholder)}
+                                            title={t('wf.edit.header.size')}
+                                            className="w-14 text-[10px] rounded px-1.5 py-1 focus:outline-none"
+                                            style={hStyle}
+                                        />
+                                        <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>
+                                            px
+                                        </span>
+                                    </div>
+                                );
+                                return (
+                                    <>
+                                        <div>
+                                            <label
+                                                className="text-[11px] mb-1 block"
+                                                style={{ color: 'var(--text-secondary)' }}
+                                            >
+                                                {t('wf.edit.header.subtitle')}
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={(o.subtitle as string) ?? ''}
+                                                onChange={(e) => set({ subtitle: e.target.value || undefined })}
+                                                placeholder="z.B. Erdgeschoss"
+                                                className="w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
+                                                style={hStyle}
+                                            />
+                                            <p
+                                                className="text-[10px] mt-1 leading-tight"
+                                                style={{ color: 'var(--text-secondary)', opacity: 0.7 }}
+                                            >
+                                                {t('wf.edit.header.subtitleBindings')}
+                                            </p>
+                                        </div>
+
+                                        <div className="flex items-center justify-between gap-2">
+                                            <span className="text-[11px]" style={{ color: 'var(--text-primary)' }}>
+                                                {t('wf.edit.header.rule')}
+                                            </span>
+                                            <button
+                                                onClick={() => set({ showAccent: !accentOn })}
+                                                className="relative w-7 h-4 rounded-full transition-colors shrink-0"
+                                                style={{
+                                                    background: accentOn ? 'var(--accent)' : 'var(--app-border)',
+                                                }}
+                                            >
+                                                <span
+                                                    className="absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform"
+                                                    style={{ left: accentOn ? '14px' : '2px' }}
+                                                />
+                                            </button>
+                                        </div>
+                                        {accentOn && (
+                                            <ColorField
+                                                label={t('wf.edit.header.color')}
+                                                value={o.accentColor as string | undefined}
+                                                onChange={(v) => set({ accentColor: v })}
+                                            />
+                                        )}
+                                        {!!ruleHint && (
+                                            <p
+                                                className="text-[10px] leading-tight"
+                                                style={{ color: 'var(--text-secondary)', opacity: 0.7 }}
+                                            >
+                                                {ruleHint}
+                                            </p>
+                                        )}
+
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex-1 min-w-0">
+                                                <ColorField
+                                                    label={t('wf.edit.header.titleText')}
+                                                    value={o.titleColor as string | undefined}
+                                                    onChange={(v) => set({ titleColor: v })}
+                                                />
+                                            </div>
+                                            {sizeInput(o.titleSize, titlePx, (v) => set({ titleSize: v }))}
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex-1 min-w-0">
+                                                <ColorField
+                                                    label={t('wf.edit.header.subtitleText')}
+                                                    value={o.subtitleColor as string | undefined}
+                                                    onChange={(v) => set({ subtitleColor: v })}
+                                                />
+                                            </div>
+                                            {sizeInput(o.subtitleSize, 12, (v) => set({ subtitleSize: v }))}
+                                        </div>
+                                        <p
+                                            className="text-[10px] leading-tight"
+                                            style={{ color: 'var(--text-secondary)', opacity: 0.7 }}
+                                        >
+                                            {t('wf.edit.header.textHint')}
+                                        </p>
+                                    </>
+                                );
+                            })()}
                         {config.type === 'clock' &&
                             (() => {
                                 const o = config.options ?? {};

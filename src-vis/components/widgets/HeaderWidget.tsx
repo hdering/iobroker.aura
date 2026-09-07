@@ -1,5 +1,12 @@
+import { useMemo } from 'react';
 import { Heading2 } from 'lucide-react';
 import { getWidgetIcon } from '../../utils/widgetIconMap';
+import { useT } from '../../i18n';
+import { useTemplateStates } from '../../hooks/useTemplateValues';
+import { useTemplateSpecials } from '../../hooks/useTemplateSpecials';
+import { extractTemplateDpRefs, renderTemplate } from '../../utils/htmlTemplate';
+import { formatNum } from '../../utils/formatValue';
+import { useGlobalSettingsStore } from '../../store/globalSettingsStore';
 import type { WidgetConfig } from '../../types';
 
 interface Props {
@@ -8,7 +15,7 @@ interface Props {
 
 export function HeaderWidget({ config }: Props) {
     const opts = config.options ?? {};
-    const subtitle = opts.subtitle as string | undefined;
+    const rawSubtitle = (opts.subtitle as string | undefined) ?? '';
     const showTitle = opts.showTitle !== false;
     const showSubtitle = opts.showSubtitle !== false;
     const showIcon = opts.showIcon !== false;
@@ -16,6 +23,54 @@ export function HeaderWidget({ config }: Props) {
     const titleAlign = (opts.titleAlign as string) ?? 'left';
     const WidgetIcon = getWidgetIcon(opts.icon as string | undefined, Heading2);
     const layout = config.layout ?? 'default';
+
+    // The rule (accent bar in default/compact/framed, divider in minimal) is optional
+    // and takes its own colour; unset falls back to the theme variables it always used.
+    const showAccent = opts.showAccent !== false;
+    const accentColor = (opts.accentColor as string) || undefined;
+
+    // Own text colour / size per line. The size is a px value scaled by the global
+    // font scale (like every other explicit px size in the app), and it carries its
+    // own line-height — a Tailwind text-* class ships an absolute one, which would
+    // clip the descenders of a larger font.
+    const px = (v: number) => `calc(${v}px * var(--font-scale, 1))`;
+    const titleColor = (opts.titleColor as string) || undefined;
+    const subtitleColor = (opts.subtitleColor as string) || undefined;
+    const titleSize = Number(opts.titleSize) || undefined;
+    const subtitleSize = Number(opts.subtitleSize) || undefined;
+    const titleSizeStyle: React.CSSProperties = titleSize ? { fontSize: px(titleSize), lineHeight: 1.25 } : {};
+    const subtitleSizeStyle: React.CSSProperties = subtitleSize ? { fontSize: px(subtitleSize), lineHeight: 1.35 } : {};
+    // The icon sits in the title line and shares its colour today (--header-text); a
+    // coloured title next to a theme-coloured icon would just look like a bug.
+    const headerText = titleColor ?? 'var(--header-text, var(--text-primary))';
+
+    // ── Bindings in the subtitle ──────────────────────────────────────────────
+    // The subtitle carries the same binding layer as free HTML (utils/htmlTemplate,
+    // docs/widgets/bindings.md): `{0_userdata.0.Temp}`, `{id;round(0)}` and
+    // `{{ a + b }}`, plus the context variables (`{view}`, `{wname}`, …). The widget
+    // has no datapoint of its own, so there is no `{dp}` here — every reference is
+    // spelled out, which is also what makes the subscription set derivable from the
+    // text alone. A subtitle without a brace subscribes to nothing.
+    const t = useT();
+    const { defaultDecimals, numberFormat } = useGlobalSettingsStore();
+    const hasBinding = rawSubtitle.includes('{');
+    const tokenRefs = useMemo(() => (hasBinding ? extractTemplateDpRefs(rawSubtitle) : []), [rawSubtitle, hasBinding]);
+    const tokenStates = useTemplateStates(tokenRefs);
+    const specials = useTemplateSpecials(config);
+    const subtitle = useMemo(() => {
+        if (!hasBinding) return rawSubtitle;
+        const fmt = (v: unknown): string => {
+            if (v === null || v === undefined) return '–';
+            return typeof v === 'number' ? formatNum(v, defaultDecimals, numberFormat) : String(v);
+        };
+        return renderTemplate(rawSubtitle, {
+            vars: Object.fromEntries(Object.entries(specials).map(([k, v]) => [k, String(v)])),
+            resolve: (ref) => fmt(tokenStates[ref]?.val),
+            resolveRaw: (ref, field) => tokenStates[ref]?.[field] ?? null,
+            rawVars: { ...specials },
+            ops: { formatNum: (v, d) => formatNum(v, d, numberFormat), decimals: defaultDecimals, t },
+        });
+    }, [rawSubtitle, hasBinding, tokenStates, specials, defaultDecimals, numberFormat, t]);
 
     const justifyContent = titleAlign === 'center' ? 'center' : titleAlign === 'right' ? 'flex-end' : 'flex-start';
 
@@ -29,7 +84,11 @@ export function HeaderWidget({ config }: Props) {
         subtitle && showSubtitle ? (
             <p
                 className="aura-widget-value text-xs mt-0.5"
-                style={{ color: 'var(--text-secondary)', textAlign: align as React.CSSProperties['textAlign'] }}
+                style={{
+                    color: subtitleColor ?? 'var(--text-secondary)',
+                    textAlign: align as React.CSSProperties['textAlign'],
+                    ...subtitleSizeStyle,
+                }}
             >
                 {subtitle}
             </p>
@@ -43,18 +102,20 @@ export function HeaderWidget({ config }: Props) {
                         <WidgetIcon
                             className="aura-widget-icon"
                             size={iconSize}
-                            style={{ color: 'var(--text-secondary)', flexShrink: 0 }}
+                            style={{ color: titleColor ?? 'var(--text-secondary)', flexShrink: 0 }}
                         />
                     )}
                     {showTitle && (
                         <span
                             className="aura-widget-title text-xs font-semibold tracking-widest uppercase shrink-0"
-                            style={{ color: 'var(--text-secondary)' }}
+                            style={{ color: titleColor ?? 'var(--text-secondary)', ...titleSizeStyle }}
                         >
                             {config.title}
                         </span>
                     )}
-                    <div className="flex-1 h-px" style={{ background: 'var(--app-border)' }} />
+                    {showAccent && (
+                        <div className="flex-1 h-px" style={{ background: accentColor ?? 'var(--app-border)' }} />
+                    )}
                 </div>
                 {renderSubtitle()}
             </div>
@@ -66,22 +127,24 @@ export function HeaderWidget({ config }: Props) {
         // h-full row) — that is the compact look and stays true with a subtitle.
         return (
             <div className="aura-widget-row flex items-center gap-3 h-full">
-                <div
-                    className="w-1 self-stretch rounded-full"
-                    style={{ background: 'var(--header-accent, var(--accent))' }}
-                />
+                {showAccent && (
+                    <div
+                        className="w-1 self-stretch rounded-full"
+                        style={{ background: accentColor ?? 'var(--header-accent, var(--accent))' }}
+                    />
+                )}
                 {showIcon && (
                     <WidgetIcon
                         className="aura-widget-icon"
                         size={iconSize}
-                        style={{ color: 'var(--header-text, var(--text-primary))', flexShrink: 0 }}
+                        style={{ color: headerText, flexShrink: 0 }}
                     />
                 )}
                 <div className="flex flex-col min-w-0 flex-1">
                     {showTitle && (
                         <span
                             className="aura-widget-title font-semibold text-base"
-                            style={{ color: 'var(--header-text, var(--text-primary))' }}
+                            style={{ color: headerText, ...titleSizeStyle }}
                         >
                             {config.title}
                         </span>
@@ -99,10 +162,10 @@ export function HeaderWidget({ config }: Props) {
     return (
         <div className="aura-widget-row flex flex-col justify-center h-full">
             <div className="flex gap-3">
-                {titleAlign === 'left' && (
+                {titleAlign === 'left' && showAccent && (
                     <div
                         className="w-1 self-stretch rounded-full shrink-0"
-                        style={{ background: 'var(--header-accent, var(--accent))' }}
+                        style={{ background: accentColor ?? 'var(--header-accent, var(--accent))' }}
                     />
                 )}
                 <div className="flex flex-col gap-0.5 min-w-0 flex-1">
@@ -111,13 +174,13 @@ export function HeaderWidget({ config }: Props) {
                             <WidgetIcon
                                 className="aura-widget-icon"
                                 size={iconSize}
-                                style={{ color: 'var(--header-text, var(--text-primary))', flexShrink: 0 }}
+                                style={{ color: headerText, flexShrink: 0 }}
                             />
                         )}
                         {showTitle && (
                             <h2
                                 className="aura-widget-title font-bold text-xl leading-tight"
-                                style={{ color: 'var(--header-text, var(--text-primary))' }}
+                                style={{ color: headerText, ...titleSizeStyle }}
                             >
                                 {config.title}
                             </h2>

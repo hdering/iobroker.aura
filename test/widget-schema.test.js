@@ -66,10 +66,14 @@ for (const key of UNIVERSAL) {
 }
 
 // ── 1. Type coverage ─────────────────────────────────────────────────────────
+// A union member may carry a JSDoc comment of its own ('framed' does), so the
+// comments come out before the members are split apart — otherwise the comment
+// sticks to the member above it and that member stops matching.
 const union = (name) =>
     read('src-vis/types/index.ts')
         .split(`export type ${name} =`)[1]
         .split(';')[0]
+        .replace(/\/\*[\s\S]*?\*\//g, '')
         .split('|')
         .map((s) => s.trim().replace(/^'|'$/g, ''))
         .filter(Boolean);

@@ -38,3 +38,23 @@ Alle Optionen werden im Editor unter **Widget bearbeiten** gesetzt.
 | `icon` | `Heading2` | [Lucide-Icon](https://lucide.dev) |
 | `iconSize` | `20` | px |
 | `titleAlign` | `left` | `left` · `center` · `right` (nur Default/Card; Akzentbalken nur bei `left`) |
+
+Im Untertitel gelten die [Bindings](./bindings.md): `{0_userdata.0.Temp}`, `{id;round(0)}`, `{{ a + b }}` und die Kontextvariablen `{view}` / `{wname}`. Das Widget hat keinen eigenen Datenpunkt, `{dp}` gibt es hier also nicht.
+
+### Strich
+
+| Option | Standard | |
+| --- | --- | --- |
+| `showAccent` | `true` | Akzentbalken (Default/Card/Compact/Framed) bzw. Trennlinie (Minimal) |
+| `accentColor` | Theme | Farbe des Strichs; leer = `--header-accent` |
+
+### Text
+
+| Option | Standard | |
+| --- | --- | --- |
+| `titleColor` | Theme | Farbe von Titel **und** Icon; leer = `--header-text` |
+| `titleSize` | Stil | px; leer = 20 (Default/Framed), 16 (Compact), 12 (Minimal) |
+| `subtitleColor` | Theme | leer = `--text-secondary` |
+| `subtitleSize` | `12` | px |
+
+Die px-Werte werden mit der globalen Schriftskalierung multipliziert.

@@ -722,6 +722,29 @@ export const EXTRA_OPTIONS = {
                 'Mehrtägige Termine als einen Eintrag je Tag zeigen. Das Badge nennt dann den Tag der Laufzeit ("Tag 2/5").',
         },
     },
+    header: {
+        subtitle: {
+            type: 'string',
+            description:
+                'Zweite Zeile unter dem Titel, in jedem Stil. Darf Bindings enthalten — {0_userdata.0.Temp}, ' +
+                '{id;round(0)}, {{ a + b }} sowie die Kontextvariablen {view} / {wname} (siehe docs/widgets/bindings.md). ' +
+                'Das Widget hat keinen eigenen Datenpunkt, {dp} gibt es hier also nicht.',
+        },
+        showAccent: {
+            description:
+                'Strich anzeigen: der Akzentbalken links (default, card, compact, framed) bzw. die Trennlinie ' +
+                'rechts vom Titel (minimal). Im Stil default zeichnet ihn nur ein linksbündiger Titel.',
+        },
+        accentColor: { description: 'Farbe des Strichs. Leer = --header-accent aus dem Theme.' },
+        titleColor: { description: 'Farbe von Titel und Icon. Leer = --header-text aus dem Theme.' },
+        subtitleColor: { description: 'Farbe des Untertitels. Leer = --text-secondary aus dem Theme.' },
+        titleSize: {
+            type: 'number',
+            description:
+                'Schriftgröße des Titels in px. Leer = Größe des Stils (default/framed 20, compact 16, minimal 12).',
+        },
+        subtitleSize: { type: 'number', description: 'Schriftgröße des Untertitels in px. Leer = 12.' },
+    },
     group: {
         defId: {
             type: 'string',
