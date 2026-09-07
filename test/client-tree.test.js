@@ -45,6 +45,12 @@ function makeAdapter(initialObjects = {}) {
     a.setObjectAsync = async (id, obj) => {
         objects.set(id, obj);
     };
+    a.extendObjectAsync = async (id, patch) => {
+        const obj = objects.get(id);
+        if (obj) {
+            objects.set(id, { ...obj, ...patch, common: { ...obj.common, ...patch.common } });
+        }
+    };
     a.setObjectNotExistsAsync = async (id, obj) => {
         if (!objects.has(id)) {
             objects.set(id, obj);
@@ -248,6 +254,89 @@ const FULL_TREE = [
         assert.ok(!a._objects.has('clients.a1b2c3d4e5f60718.navigate.url'), 'the old tree must be gone');
         assert.ok(!a._states.has('clients.a1b2c3d4e5f60718.info.name'), 'the old name value must be gone');
         console.log('✓ moving a device to a speaking id leaves no orphan tree');
+    }
+
+    // ── #624: the delete relay leaves nothing behind, whatever the tree contains ──
+    {
+        const a = makeAdapter();
+        await a.onStateChange('aura.0.clients.register', {
+            val: JSON.stringify({ clientId: 'kitchen-tablet', name: 'Küche' }),
+            ack: false,
+        });
+        assert.ok(a._objects.has('clients.kitchen-tablet.messages.send'), 'precondition: messages DP exists');
+        // A datapoint the delete list never knew about — the messages channel was
+        // exactly that case, and it kept the client visible in the object tree.
+        a._objects.set('clients.kitchen-tablet.custom.deep.value', state('Something added later'));
+
+        await a.onStateChange('aura.0.clients.deleteRequest', { val: 'kitchen-tablet', ack: false });
+
+        const leftovers = [...a._objects.keys()].filter((k) => k.startsWith('clients.kitchen-tablet'));
+        assert.deepStrictEqual(leftovers, [], `nothing may survive the delete: ${leftovers.join(', ')}`);
+        const leftStates = [...a._states.keys()].filter((k) => k.startsWith('clients.kitchen-tablet'));
+        assert.deepStrictEqual(leftStates, [], `no orphan values either: ${leftStates.join(', ')}`);
+        assert.strictEqual(a._states.get('clients.deleteRequest').val, '', 'relay clears itself');
+        console.log('✓ delete relay removes the whole tree, including unlisted datapoints (#624)');
+    }
+
+    // ── #624: a manual write with "ack" ticked deletes just the same ─────────
+    {
+        const a = makeAdapter();
+        await a.onStateChange('aura.0.clients.register', {
+            val: JSON.stringify({ clientId: 'a1b2c3d4e5f60718', name: 'Tablet' }),
+            ack: false,
+        });
+        await a.onStateChange('aura.0.clients.deleteRequest', { val: 'a1b2c3d4e5f60718', ack: true });
+        assert.ok(!a._objects.has('clients.a1b2c3d4e5f60718'), 'an acknowledged write must delete too');
+        // The adapter's own clear must not re-enter the handler.
+        await a.onStateChange('aura.0.clients.deleteRequest', { val: '', ack: true });
+        console.log('✓ deleteRequest also accepts an acknowledged write (#624)');
+    }
+
+    // ── #624: only fingerprint ids get the 8-char short name ─────────────────
+    {
+        const a = makeAdapter();
+        // Resolution relay first (no name in the payload) — this is what truncated
+        // speaking ids to "wohnzimm" in the object tree.
+        await a.onStateChange('aura.0.clients.resolution', {
+            val: JSON.stringify({ clientId: 'wohnzimmer-tablet', width: 1280, height: 800 }),
+            ack: false,
+        });
+        assert.strictEqual(
+            a._objects.get('clients.wohnzimmer-tablet').common.name,
+            'wohnzimmer-tablet',
+            'a speaking id must not be cut after 8 characters',
+        );
+
+        const b = makeAdapter();
+        await b.onStateChange('aura.0.clients.resolution', {
+            val: JSON.stringify({ clientId: 'a1b2c3d4e5f60718', width: 1280, height: 800 }),
+            ack: false,
+        });
+        assert.strictEqual(
+            b._objects.get('clients.a1b2c3d4e5f60718').common.name,
+            'a1b2c3d4',
+            'fingerprints keep their short label',
+        );
+        console.log('✓ fallback client name keeps speaking ids whole (#624)');
+    }
+
+    // ── #624: renaming a client updates the channel name as well ─────────────
+    {
+        const a = makeAdapter();
+        await a.onStateChange('aura.0.clients.resolution', {
+            val: JSON.stringify({ clientId: 'kitchen-tablet', width: 1280, height: 800 }),
+            ack: false,
+        });
+        // Registering right after the resolution relay corrects the fallback name.
+        await a.onStateChange('aura.0.clients.register', {
+            val: JSON.stringify({ clientId: 'kitchen-tablet', name: 'Küche' }),
+            ack: false,
+        });
+        assert.strictEqual(a._objects.get('clients.kitchen-tablet').common.name, 'Küche');
+        // A later rename writes info.name — the channel has to follow.
+        await a.onStateChange('aura.0.clients.kitchen-tablet.info.name', { val: 'Küche oben', ack: false });
+        assert.strictEqual(a._objects.get('clients.kitchen-tablet').common.name, 'Küche oben');
+        console.log('✓ a rename is mirrored onto the client channel (#624)');
     }
 
     console.log('\nAll client-tree tests passed.');

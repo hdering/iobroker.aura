@@ -36,3 +36,27 @@ Skripte, die noch die alte ID verwenden, laufen danach ins Leere.
 Wird der Browser eines Geräts gewechselt (Chrome → Edge), meldet sich das Gerät als
 neuer Client. Mit einer festen ID über `?client=` bekommen beide dieselbe ID.
 :::
+
+## Gerät entfernen
+
+| Weg | |
+| --- | --- |
+| Einstellungen → Verbundene Geräte | Beim Gerät auf 🗑, bestätigen |
+| Datenpunkt | Client-ID in `aura.0.clients.deleteRequest` schreiben |
+| Blockly / Skript | `setState('aura.0.clients.deleteRequest', '129841a3ce70e541')` |
+
+Der Adapter löscht `aura.0.clients.<ID>` samt allen Unterpunkten und leert den
+Datenpunkt wieder. Geschrieben wird nur die ID — nicht der ganze Pfad. Das
+Bestätigt-Flag (`ack`) spielt keine Rolle. Ergebnis steht im Instanz-Log
+(`[clients] deleted: …`).
+
+Ist das Gerät noch offen, meldet es sich beim nächsten Kontakt sofort neu an —
+erst Browser/Kiosk schließen, dann löschen.
+
+| Relais-Datenpunkte unter `aura.0.clients.` | |
+| --- | --- |
+| `register` | JSON `{clientId, name}` — legt einen Client an |
+| `resolution` | JSON `{clientId, width, height}` — Auflösung melden |
+| `deleteRequest` | Client-ID — löscht diesen Client |
+
+Alle drei leeren sich nach der Ausführung selbst.

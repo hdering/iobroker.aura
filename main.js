@@ -85,6 +85,16 @@ function sanitizeClientId(raw) {
     return RESERVED_CLIENT_IDS.includes(clean) ? '' : clean;
 }
 
+/**
+ * Fallback object name for a client that registered without one. A generated
+ * fingerprint (16 hex chars) is shortened to its first 8 — the label the whole UI
+ * uses for it — but a pinned speaking id is kept whole: cutting "wohnzimmer-tablet"
+ * down to "wohnzimm" only looked like a bug in the object tree (#624).
+ */
+function defaultClientName(cId) {
+    return /^[0-9a-f]{16}$/.test(cId) ? cId.slice(0, 8) : cId;
+}
+
 const MESSAGE_SEVERITIES = ['info', 'success', 'warning', 'error'];
 
 const MESSAGE_POSITIONS = [
@@ -668,9 +678,14 @@ class Aura extends utils.Adapter {
                 await this.setStateAsync('clients.register', '', true);
                 return;
             }
-            const displayName = reg.name ? String(reg.name) : cId.slice(0, 8);
+            const displayName = reg.name ? String(reg.name) : defaultClientName(cId);
 
             await this._ensureClientTree(cId, displayName);
+            // The resolution relay fires on every connect and may have built the tree
+            // first — with the fallback name, since it carries none. Registering right
+            // after that has to correct the channel name, or the object tree keeps the
+            // fallback forever (#624).
+            await this._setClientChannelName(cId, displayName);
             // Populate the freshly-created selector with the current view/tab list.
             await this._syncNavigateTargets();
 
@@ -731,44 +746,25 @@ class Aura extends utils.Adapter {
             return;
         }
 
-        // Client delete relay: frontend writes clientId → adapter deletes all child objects explicitly
-        if (id.endsWith('clients.deleteRequest') && state && !state.ack && state.val) {
+        // Client delete relay: write a clientId here → the adapter tears down that
+        // client's whole object tree. Documented in docs/einstellungen/settings.md.
+        // Acknowledged writes count too: the adapter's own clear is empty, so the value
+        // check already tells the two apart — and a manual write from the Admin object
+        // tree with "Bestätigt" ticked used to be swallowed without a word (#624).
+        if (id.endsWith('clients.deleteRequest') && state && state.val) {
             const clientId = sanitizeClientId(state.val);
-            if (clientId) {
-                const base = `${this.namespace}.clients.${clientId}`;
-                const toDelete = [
-                    `${base}.info.name`,
-                    `${base}.info.lastSeen`,
-                    `${base}.info.resolutionWidth`,
-                    `${base}.info.resolutionHeight`,
-                    `${base}.info.userAgent`,
-                    `${base}.info`,
-                    `${base}.navigate.url`,
-                    `${base}.navigate.target`,
-                    `${base}.navigate`,
-                    `${base}.popup.open`,
-                    `${base}.popup`,
-                    base,
-                ];
-                this.log.info(`[clients] deleting client: ${base}`);
-                for (const objId of toDelete) {
-                    try {
-                        await this.delForeignObjectAsync(objId);
-                    } catch {
-                        /* ignore missing */
-                    }
-                    // Renaming a half-built client writes info.name via setState even though
-                    // no object exists; delObject leaves that orphan value behind, and the
-                    // stale name would keep the frontend from ever re-registering (#532).
-                    try {
-                        await this.delForeignStateAsync(objId);
-                    } catch {
-                        /* not a state, or already gone */
-                    }
-                }
-                this.log.info(`[clients] deleted: ${base}`);
-            }
+            if (clientId) await this._deleteClientTree(clientId);
+            else this.log.warn(`[clients] deleteRequest: "${state.val}" is not a valid client id`);
             await this.setStateAsync('clients.deleteRequest', '', true);
+            return;
+        }
+
+        // A client rename writes clients.<id>.info.name (Admin → Verbundene Geräte, or a
+        // script). Mirror it onto the channel so the object tree shows the same name —
+        // it otherwise keeps whatever the client was called when it first registered.
+        if (/\.clients\.[^.]+\.info\.name$/.test(id) && state && state.val) {
+            const cId = id.split('.')[3];
+            if (cId) await this._setClientChannelName(cId, String(state.val));
             return;
         }
 
@@ -1517,7 +1513,7 @@ class Aura extends utils.Adapter {
         // navigate.url is the sentinel: it is created together with the rest of the tree
         // and never on its own. Datapoints added later need their own backfill.
         if (await this.getObjectAsync(`${base}.navigate.url`)) return false;
-        const name = displayName || cId.slice(0, 8);
+        const name = displayName || defaultClientName(cId);
 
         await this.setObjectNotExistsAsync(base, { type: 'channel', common: { name }, native: {} });
         await this.setObjectNotExistsAsync(`${base}.info`, {
@@ -1609,6 +1605,65 @@ class Aura extends utils.Adapter {
         await this._ensureClientMessageDps(cId);
         this.log.info(`[clients] completed object tree for ${cId}`);
         return true;
+    }
+
+    /** Keep the client channel's name in sync with clients.<id>.info.name. */
+    async _setClientChannelName(cId, name) {
+        const base = `clients.${cId}`;
+        try {
+            const obj = await this.getObjectAsync(base);
+            if (!obj || !name || obj.common?.name === name) return;
+            await this.extendObjectAsync(base, { common: { name } });
+        } catch {
+            /* object vanished mid-rename */
+        }
+    }
+
+    /**
+     * Delete a client's whole object tree (clients.<id> and everything below it).
+     *
+     * The list of datapoints per client keeps growing — messages.* arrived with #429 —
+     * so the ids are enumerated instead of spelled out: an unlisted leftover kept the
+     * client visible in the object tree, which looked exactly like "delete does not
+     * work" (#624). Children go first so no parent is removed while it still has any.
+     */
+    async _deleteClientTree(cId) {
+        const base = `${this.namespace}.clients.${cId}`;
+        const ids = new Set([base]);
+        for (const type of ['state', 'channel', 'folder', 'device']) {
+            try {
+                const view = await this.getObjectViewAsync('system', type, {
+                    startkey: `${base}.`,
+                    endkey: `${base}.￿`,
+                });
+                for (const row of (view && view.rows) || []) ids.add(row.id);
+            } catch {
+                /* view unavailable → the known ids below still get us most of the way */
+            }
+        }
+        // Renaming a half-built client writes info.name via setState even though no
+        // object exists; delObject leaves that orphan value behind, and the stale name
+        // would keep the frontend from ever re-registering (#532). Such values are
+        // invisible to the object view, hence the explicit list.
+        for (const known of ['info.name', 'info.lastSeen', 'info.resolutionWidth', 'info.resolutionHeight']) {
+            ids.add(`${base}.${known}`);
+        }
+        // Deepest first, so clients.<id> is the last object to go.
+        const ordered = [...ids].sort((a, b) => b.split('.').length - a.split('.').length || b.localeCompare(a));
+        this.log.info(`[clients] deleting client: ${base} (${ordered.length} objects)`);
+        for (const objId of ordered) {
+            try {
+                await this.delForeignObjectAsync(objId);
+            } catch {
+                /* ignore missing */
+            }
+            try {
+                await this.delForeignStateAsync(objId);
+            } catch {
+                /* not a state, or already gone */
+            }
+        }
+        this.log.info(`[clients] deleted: ${base}`);
     }
 
     /**
@@ -2824,6 +2879,8 @@ class Aura extends utils.Adapter {
         // with the dashboard config (views/tabs added, renamed or removed).
         this.subscribeStates('navigate.target');
         this.subscribeStates('clients.*.navigate.target');
+        // Renames: mirror clients.<id>.info.name onto the client channel (#624).
+        this.subscribeStates('clients.*.info.name');
         this.subscribeStates('config.dashboard');
         // Also completes the object tree of every known client (navigate.*, popup.*,
         // messages.*) and syncs the per-layout message datapoints.
