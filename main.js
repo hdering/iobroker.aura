@@ -140,8 +140,13 @@ const MESSAGE_DEFAULT_TIME_FORMAT = 'time';
 // repo (stable/beta) the user has activated.
 /** Delay after startup before the first check — the repo object may still be loading. */
 const UPDATE_CHECK_DELAY_MS = 30_000;
-/** How often the repo is re-read afterwards. Admin refreshes it roughly daily. */
-const UPDATE_CHECK_INTERVAL_MS = 6 * 3600_000;
+/**
+ * How often the repo object is re-read afterwards. Hourly: it costs two object
+ * reads against the local objects DB, and the admin refreshes the repository on
+ * its own schedule — checking more often than that only shortens the gap between
+ * a new release appearing there and the notice going out.
+ */
+const UPDATE_CHECK_INTERVAL_MS = 3600_000;
 /** Message ids carry the version so a fresh release is a new entry, not a silent replace. */
 const UPDATE_MESSAGE_ID_PREFIX = 'aura-update-';
 

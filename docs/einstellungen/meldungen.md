@@ -253,7 +253,7 @@ Gelesen/ungelesen gilt geräteübergreifend: eine auf dem Tablet bestätigte Mel
 
 ## Hinweis auf neue Adapter-Versionen
 
-Der Adapter vergleicht die installierte Version mit dem Repository, das im ioBroker-Admin aktiviert ist (stable, beta oder beides) — 30 Sekunden nach dem Start und danach alle sechs Stunden. Kein eigener Datenpunkt, kein externer Abruf.
+Der Adapter vergleicht die installierte Version mit dem Repository, das im ioBroker-Admin aktiviert ist (stable, beta oder beides) — 30 Sekunden nach dem Start und danach jede Stunde. Kein eigener Datenpunkt, kein externer Abruf.
 
 | Anzeige | |
 | --- | --- |
