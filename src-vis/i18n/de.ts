@@ -867,7 +867,7 @@ export const de = {
     'wf.edit.header.default': 'Standard (Akzentlinie + Titel)',
     'wf.edit.header.compact': 'Kompakt (Linie links)',
     'wf.edit.header.minimal': 'Minimal (Trennlinie + Text)',
-    'wf.edit.header.framed': 'Mit Rahmen (wie ein Widget)',
+    'wf.edit.header.framed': 'Mit Rahmen',
 
     'wf.edit.layout.standard': 'Standard',
     'wf.edit.layout.card': 'Karte',
