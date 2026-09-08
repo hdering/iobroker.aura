@@ -1,5 +1,8 @@
 # Changelog (older entries)
 
+## 0.52.6 (2026-09-01)
+- MCP - aura_measure sizes widgets against measured heights, aura_review checks existing tabs for dead datapoints and ineffective options, aura_types fetches shared types once
+
 ## 0.52.5 (2026-09-01)
 - Chart (advanced) - in "manage datapoints" the mode is picked on its description card (the duplicate button row is gone), and the JSON mode is now called "Categories (JSON)" to tell it apart from a time series with a JSON data source
 - Chart (advanced) - a JSON series whose labels are no timestamps no longer fails silently in a time series: the empty chart and the series editor both name the reason, and the editor offers to switch to "Categories (JSON)"
