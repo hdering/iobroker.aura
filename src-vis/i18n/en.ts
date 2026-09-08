@@ -438,7 +438,7 @@ export const en: Record<TranslationKey, string> = {
     'pin.field': 'PIN',
     'pin.placeholder': 'e.g. 1234',
     'pin.setPlaceholder': 'PIN set – type a new one to change it',
-    'pin.protectedHint': 'Protected server-side. Clearing the field removes protection.',
+    'pin.protectedHint': 'Protected server-side. Type a new PIN to change it, “Remove PIN” lifts the protection.',
     'pin.hint': 'Empty = no protection. The content only appears once the PIN was entered.',
     'pin.keepUnlocked': 'Stay unlocked',
     'pin.keepUnlockedHint':
@@ -447,7 +447,9 @@ export const en: Record<TranslationKey, string> = {
     'pin.mcpWriteHint':
         'Lets the AI server (MCP) read and change the protected content. Off: structure only (id, type, size), ' +
         'no write access. The PIN is not needed for this.',
+    'pin.mcpWritePending': 'Applied with the next save.',
     'pin.mcpWriteFailed': 'Could not set the release – check the login.',
+    'pin.remove': 'Remove PIN',
     'pin.promptSection': 'This section is protected by a PIN.',
     'pin.promptTab': 'This tab is protected by a PIN.',
     'pin.wrong': 'Wrong PIN',

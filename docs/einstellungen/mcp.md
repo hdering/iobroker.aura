@@ -197,7 +197,7 @@ Der Inhalt eines [PIN-geschützten](./editor#pin-schutz) Bereichs/Tabs liegt ser
 | `aura_write_tab`: abgelehnt | **abgelehnt** — ersetzt den ganzen Tab |
 | Löschen/Kopieren des Bereichs/Tabs: abgelehnt | abgelehnt |
 
-Freigeben im Editor: Zahnrad des Bereichs bzw. des Tabs → Schalter **„Über MCP bearbeitbar"** (nur bei gesetzter PIN, Admin-Anmeldung nötig). Die PIN wird dafür nicht gebraucht und gehört nicht in den Chat.
+Freigeben im Editor: Zahnrad des Bereichs bzw. des Tabs → Schalter **„Über MCP bearbeitbar"** (nur bei gesetzter PIN, Admin-Anmeldung nötig). Die PIN wird dafür nicht gebraucht und gehört nicht in den Chat. Bei einer gerade eingetippten, noch nicht gespeicherten PIN wird die Freigabe vorgemerkt und mit dem Speichern gesetzt.
 
 | | |
 | --- | --- |

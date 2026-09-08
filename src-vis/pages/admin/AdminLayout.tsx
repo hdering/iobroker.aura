@@ -28,7 +28,8 @@ import {
     Shapes,
 } from 'lucide-react';
 import { useAuthStore, logout, adminToken } from '../../store/authStore';
-import { vaultRead } from '../../utils/pinApi';
+import { vaultRead, vaultSetMcp } from '../../utils/pinApi';
+import { flushVaultRemovals } from '../../utils/vaultPending';
 import { useMcpReleaseStore } from '../../store/mcpReleaseStore';
 import { useThemeStore } from '../../store/themeStore';
 import { getTheme, ADMIN_DARK_THEME } from '../../themes';
@@ -80,6 +81,9 @@ function useSaveState() {
         try {
             saveAll();
             saveToIoBroker();
+            // A PIN removed in the editor: the content just went out in plaintext,
+            // so the vault copy may now be dropped (see utils/vaultPending).
+            flushVaultRemovals(adminToken());
             const widgets = useDashboardStore
                 .getState()
                 .layouts.flatMap((l) => l.sections.flatMap((s) => s.tabs.flatMap((t) => t.widgets)));
@@ -155,6 +159,22 @@ function useProtectedContentMerge(connected: boolean) {
                 // Same read, the other half of it: which views the admin released
                 // for the MCP server (the switch in the section/tab panel).
                 setReleases(Object.fromEntries(Object.entries(sections).map(([key, s]) => [key, s.mcpWrite === true])));
+                // A release flipped while the view had no vault entry yet (PIN typed,
+                // then saved) — the entry exists now, so write it for real.
+                const { pending, set: setRelease, clearPending } = useMcpReleaseStore.getState();
+                for (const [key, want] of Object.entries(pending)) {
+                    const entry = sections[key];
+                    if (!entry) continue; // still nothing to release — keep it parked
+                    if ((entry.mcpWrite === true) === want) {
+                        clearPending(key);
+                        continue;
+                    }
+                    void vaultSetMcp(token, key, want).then((res) => {
+                        if (res !== 'ok') return; // 'unknown' cannot happen here, 'error' keeps it parked
+                        clearPending(key);
+                        setRelease(key, want);
+                    });
+                }
             })
             .finally(() => {
                 busyRef.current = false;

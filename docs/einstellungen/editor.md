@@ -30,11 +30,12 @@ Bereiche und Tabs lassen sich mit einer PIN sperren. Der Inhalt wird erst nach E
 | --- | --- |
 | PIN | Beliebiger Code; leer = kein Schutz. Bereich im Zahnrad des Bereichs-Chips, Tab im Zahnrad des Tabs |
 | Offen lassen | Aus (Standard): sperrt beim Verlassen sofort wieder. An: bleibt bis zum Neuladen der Seite offen |
-| Über MCP bearbeitbar | Aus (Standard): der [KI-Zugriff](./mcp#pin-geschützte-bereiche-und-tabs) sieht nur die Struktur und darf nicht schreiben. An: liest und ändert den Inhalt. Erscheint erst bei serverseitig gesetzter PIN |
+| Über MCP bearbeitbar | Aus (Standard): der [KI-Zugriff](./mcp#pin-geschützte-bereiche-und-tabs) sieht nur die Struktur und darf nicht schreiben. An: liest und ändert den Inhalt. Erscheint, sobald eine PIN im Feld steht; vor dem ersten Speichern wird die Freigabe vorgemerkt |
+| PIN entfernen | Hebt den Schutz auf: der Inhalt wandert beim nächsten Speichern zurück in die Konfiguration, der Tresor-Eintrag wird danach gelöscht |
 
 Ein gesperrter Bereich blendet auch seine Tabs aus der Tab-Leiste aus. Gesperrte Einträge tragen ein Schloss-Symbol. Eine Bereichs-PIN schützt den ganzen Bereich; eine eigene PIN an einem Tab darin entfällt.
 
-Die Prüfung läuft **serverseitig** im Adapter: PIN und geschützte Inhalte verlassen den Server erst, wenn der Code stimmt (scrypt-Hash, Rate-Limit gegen Durchprobieren). Im Editor zeigt ein geschützter Bereich „PIN gesetzt" — eine neue PIN eintippen ändert sie, das Feld leeren entfernt den Schutz.
+Die Prüfung läuft **serverseitig** im Adapter: PIN und geschützte Inhalte verlassen den Server erst, wenn der Code stimmt (scrypt-Hash, Rate-Limit gegen Durchprobieren). Im Editor zeigt ein geschützter Bereich „PIN gesetzt" — eine neue PIN eintippen ändert sie, **PIN entfernen** hebt den Schutz auf. Das Feld selbst bleibt leer, weil der Editor die PIN nie zurückbekommt.
 
 ::: tip
 Die Datenpunkt-**Werte** eines Bereichs laufen nach dem Entsperren über die normale Socket-Verbindung; die zugehörigen Datenpunkt-IDs erfährt ein nicht entsperrter Client aber nicht. Für echte Vertraulichkeit einzelner Datenpunkte zusätzlich ioBroker-Benutzer/ACL nutzen.

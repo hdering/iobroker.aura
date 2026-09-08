@@ -432,6 +432,10 @@ interface DashboardState {
                 | 'conditions'
                 | 'pin'
                 | 'pinRelock'
+                // Cleared together with `pin` when the protection is removed — a
+                // leftover stub flag would keep the view locked with no PIN.
+                | 'pinProtected'
+                | 'pinLength'
                 | 'badges'
                 | 'badgeAggregate'
             >

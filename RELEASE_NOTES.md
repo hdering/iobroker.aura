@@ -6,3 +6,5 @@
 #   Settings - <what changed>               e.g.  Settings - add hex color mode for RGB lights
 # Issue reference (optional): append (#519) — or paste the full issue URL — and the
 # release turns it into a changelog link. release.ps1 also asks per entry.
+- PIN protection - the "Editable via MCP" release now shows up as soon as a PIN is typed, instead of only after saving and reloading
+- PIN protection - sections and tabs got a "Remove PIN" button; a PIN kept server-side could not be taken back, because its input field is always empty

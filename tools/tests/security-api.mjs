@@ -173,6 +173,21 @@ try {
     r = await call('POST', 'pin/unlock', { body: { key: bruteKey, pin: '1234' } });
     ok(r.status === 429, 'correct PIN also blocked during lockout window');
 
+    // ── vault/remove („PIN entfernen“ in the editor) ─────────────────────────
+    // Last, because it takes the seeded view away. Idempotent on purpose: the
+    // editor fires it after a save, and a retry must not turn into an error.
+    r = await call('POST', 'vault/remove', { body: { key: 'section:sLocked' } });
+    ok(r.status === 401, 'forgetting a view without an admin token → 401');
+    r = await call('POST', 'vault/remove', { token: adminToken, body: {} });
+    ok(r.status === 400, 'a removal without a key → 400');
+    r = await call('POST', 'vault/remove', { token: adminToken, body: { key: 'section:sLocked' } });
+    ok(r.status === 200 && r.json.removed === true, 'admin drops the view whose PIN was removed');
+    ok(!vault.load().sections['section:sLocked'], 'the entry is gone from the vault');
+    r = await call('POST', 'vault/remove', { token: adminToken, body: { key: 'section:sLocked' } });
+    ok(r.status === 200 && r.json.removed === false, 'a second removal is a no-op, not an error');
+    r = await call('GET', 'vault', { token: adminToken });
+    ok(!r.json.sections['section:sLocked'], 'the editor no longer sees the view either');
+
     // ── unknown route → JSON 404 (never the SPA) ─────────────────────────────
     r = await call('GET', 'nope');
     ok(r.status === 404 && r.json && r.json.error, 'unknown endpoint → JSON 404');

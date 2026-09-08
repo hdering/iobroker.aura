@@ -87,9 +87,30 @@ export async function vaultRead(token: string): Promise<Record<string, VaultSect
  * Admin token, never a PIN: the point of the switch is that the AI server gets
  * access without the code ever being typed into a chat. Stored in the vault, so a
  * socket client cannot grant itself a release by writing the config state.
+ *
+ * `unknown` is its own outcome, not a failure: the vault only learns about a view
+ * when the adapter redacts the saved config, so a PIN that was just typed has no
+ * entry yet. The editor then parks the release and applies it after the save
+ * (see mcpReleaseStore.pending) instead of showing an error.
  */
-export async function vaultSetMcp(token: string, key: string, enabled: boolean): Promise<boolean> {
+export type McpReleaseOutcome = 'ok' | 'unknown' | 'error';
+
+export async function vaultSetMcp(token: string, key: string, enabled: boolean): Promise<McpReleaseOutcome> {
     const { status } = await request('POST', 'vault/mcp', { body: { key, enabled }, token });
+    if (status === 200) return 'ok';
+    return status === 404 ? 'unknown' : 'error';
+}
+
+/**
+ * Drop one view from the vault — the PIN was removed in the editor.
+ *
+ * Only ever called *after* the save that wrote the view's content back into
+ * `config.dashboard` in plaintext: the vault entry is the only other copy, so
+ * dropping it earlier would put the content one discarded edit away from gone.
+ * Idempotent — a key the vault does not know still answers 200.
+ */
+export async function vaultRemove(token: string, key: string): Promise<boolean> {
+    const { status } = await request('POST', 'vault/remove', { body: { key }, token });
     return status === 200;
 }
 

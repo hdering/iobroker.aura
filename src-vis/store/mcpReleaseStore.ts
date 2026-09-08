@@ -13,14 +13,36 @@ import { create } from 'zustand';
  */
 interface McpReleaseState {
     flags: Record<string, boolean>;
-    /** Replace the whole map — what a /vault read yields. */
+    /**
+     * Releases flipped for a view the vault does not know yet — a PIN that was
+     * typed but not saved. The vault only gets an entry once the adapter redacts
+     * the saved config, so the switch would otherwise have to stay hidden until
+     * the next save; it is applied from AdminLayout as soon as the entry appears.
+     */
+    pending: Record<string, boolean>;
+    /** Replace the whole map — what a /vault read yields. Leaves `pending` alone. */
     setAll: (flags: Record<string, boolean>) => void;
     /** Optimistic single update after the switch was flipped. */
     set: (key: string, enabled: boolean) => void;
+    setPending: (key: string, enabled: boolean) => void;
+    clearPending: (key: string) => void;
+    /** Forget a view entirely — its PIN was removed. */
+    forget: (key: string) => void;
+}
+
+function without<T>(map: Record<string, T>, key: string): Record<string, T> {
+    if (!(key in map)) return map;
+    const next = { ...map };
+    delete next[key];
+    return next;
 }
 
 export const useMcpReleaseStore = create<McpReleaseState>((set) => ({
     flags: {},
+    pending: {},
     setAll: (flags) => set({ flags }),
     set: (key, enabled) => set((s) => ({ flags: { ...s.flags, [key]: enabled } })),
+    setPending: (key, enabled) => set((s) => ({ pending: { ...s.pending, [key]: enabled } })),
+    clearPending: (key) => set((s) => ({ pending: without(s.pending, key) })),
+    forget: (key) => set((s) => ({ flags: without(s.flags, key), pending: without(s.pending, key) })),
 }));

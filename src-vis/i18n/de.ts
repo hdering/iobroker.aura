@@ -439,7 +439,7 @@ export const de = {
     'pin.field': 'PIN',
     'pin.placeholder': 'z.B. 1234',
     'pin.setPlaceholder': 'PIN gesetzt – neue eingeben zum Ändern',
-    'pin.protectedHint': 'Serverseitig geschützt. Feld leeren entfernt den Schutz.',
+    'pin.protectedHint': 'Serverseitig geschützt. Neue PIN eingeben zum Ändern, „PIN entfernen“ hebt den Schutz auf.',
     'pin.hint': 'Leer = kein Schutz. Der Inhalt erscheint erst nach Eingabe der PIN.',
     'pin.keepUnlocked': 'Offen lassen',
     'pin.keepUnlockedHint':
@@ -448,7 +448,9 @@ export const de = {
     'pin.mcpWriteHint':
         'Der KI-Server (MCP) darf den geschützten Inhalt lesen und ändern. Aus: nur Struktur (Id, Typ, Größe), ' +
         'kein Schreibzugriff. Die PIN wird dafür nicht gebraucht.',
+    'pin.mcpWritePending': 'Wird mit dem nächsten Speichern übernommen.',
     'pin.mcpWriteFailed': 'Freigabe konnte nicht gesetzt werden – Anmeldung prüfen.',
+    'pin.remove': 'PIN entfernen',
     'pin.promptSection': 'Dieser Bereich ist mit einer PIN geschützt.',
     'pin.promptTab': 'Dieser Tab ist mit einer PIN geschützt.',
     'pin.wrong': 'Falsche PIN',

@@ -69,6 +69,7 @@
     "test:widget-copy": "node tools/tests/widget-copy.mjs",
     "test:pin-lock": "node tools/tests/pin-lock.mjs",
     "test:pin-lock-ui": "node tools/tests/pin-lock-ui.mjs",
+    "test:pin-editor-ui": "node tools/tests/pin-editor-ui.mjs",
     "test:security-core": "node tools/tests/security-core.mjs",
     "test:security-api": "node tools/tests/security-api.mjs",
     "test:modal-clamp": "node tools/tests/modal-viewport-clamp.mjs",

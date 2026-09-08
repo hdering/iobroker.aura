@@ -24,6 +24,7 @@ import {
     Shapes,
     FolderInput,
     Copy,
+    ShieldOff,
 } from 'lucide-react';
 import { ImportWidgetDialog } from '../../components/config/ImportWidgetDialog';
 import { Icon } from '@iconify/react';
@@ -33,6 +34,7 @@ import { useDashboardStore, useActiveSection } from '../../store/dashboardStore'
 import { KEEP_PIN } from '../../utils/pinLock';
 import { useMcpReleaseStore } from '../../store/mcpReleaseStore';
 import { vaultSetMcp } from '../../utils/pinApi';
+import { queueVaultRemoval, unqueueVaultRemoval } from '../../utils/vaultPending';
 import { adminToken } from '../../store/authStore';
 import { ConditionEditor } from '../../components/config/ConditionEditor';
 import { BadgeEditor } from '../../components/config/BadgeEditor';
@@ -1073,8 +1075,14 @@ const SectionSwitcher = memo(function SectionSwitcher() {
                                     openSection.pin === KEEP_PIN ? t('pin.setPlaceholder') : t('pin.placeholder')
                                 }
                                 value={openSection.pin === KEEP_PIN ? '' : (openSection.pin ?? '')}
-                                onChange={(e) => updateSection(openSection.id, { pin: e.target.value || undefined })}
-                                className="w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
+                                onChange={(e) => {
+                                    const value = e.target.value || undefined;
+                                    // A typed PIN replaces the vault entry instead of
+                                    // dropping it — cancel a queued removal.
+                                    if (value) unqueueVaultRemoval(`section:${openSection.id}`);
+                                    updateSection(openSection.id, { pin: value });
+                                }}
+                                className="aura-pin-input w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
                                 style={{
                                     background: 'var(--app-bg)',
                                     color: 'var(--text-primary)',
@@ -1121,8 +1129,20 @@ const SectionSwitcher = memo(function SectionSwitcher() {
                                     {t('pin.hint')}
                                 </p>
                             )}
-                            {openSection.pin === KEEP_PIN && (
-                                <McpReleaseToggle vaultKey={`section:${openSection.id}`} />
+                            {openSection.pin && <McpReleaseToggle vaultKey={`section:${openSection.id}`} />}
+                            {openSection.pin && (
+                                <PinRemoveButton
+                                    vaultKey={`section:${openSection.id}`}
+                                    stored={openSection.pin === KEEP_PIN}
+                                    onRemove={() =>
+                                        updateSection(openSection.id, {
+                                            pin: undefined,
+                                            pinRelock: undefined,
+                                            pinProtected: undefined,
+                                            pinLength: undefined,
+                                        })
+                                    }
+                                />
                             )}
 
                             {/* ── Badges section (collapsed, like the tab panel) ──────────── */}
@@ -1329,6 +1349,8 @@ const TabBar = memo(function TabBar() {
     };
 
     const settingsTab = tabs.find((t) => t.id === settingsTabId);
+    /** Vault key of the tab whose settings panel is open (see lib/security/dashboardVault). */
+    const tabVaultKey = `tab:${currentSectionId}:${settingsTabId ?? ''}`;
 
     const currentTargetKey = `${currentLayoutId}::${currentSectionId}`;
     const runTabMove = (mode: 'move' | 'copy') => {
@@ -1421,7 +1443,7 @@ const TabBar = memo(function TabBar() {
                             ) : (
                                 <div className="flex flex-col gap-0.5">
                                     <div
-                                        className="flex items-center gap-1 rounded-lg px-2 py-1"
+                                        className="aura-tab-manage-row flex items-center gap-1 rounded-lg px-2 py-1"
                                         style={{
                                             background: isActive ? 'var(--accent)22' : 'var(--app-surface)',
                                             border: `1px solid ${isActive ? 'var(--accent)' : 'var(--app-border)'}`,
@@ -1751,8 +1773,14 @@ const TabBar = memo(function TabBar() {
                                         settingsTab.pin === KEEP_PIN ? t('pin.setPlaceholder') : t('pin.placeholder')
                                     }
                                     value={settingsTab.pin === KEEP_PIN ? '' : (settingsTab.pin ?? '')}
-                                    onChange={(e) => updateTab(settingsTabId, { pin: e.target.value || undefined })}
-                                    className="w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
+                                    onChange={(e) => {
+                                        const value = e.target.value || undefined;
+                                        // A typed PIN replaces the vault entry instead
+                                        // of dropping it — cancel a queued removal.
+                                        if (value) unqueueVaultRemoval(tabVaultKey);
+                                        updateTab(settingsTabId, { pin: value });
+                                    }}
+                                    className="aura-pin-input w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
                                     style={{
                                         background: 'var(--app-bg)',
                                         color: 'var(--text-primary)',
@@ -1803,8 +1831,20 @@ const TabBar = memo(function TabBar() {
                                         {t('pin.hint')}
                                     </p>
                                 )}
-                                {settingsTab.pin === KEEP_PIN && (
-                                    <McpReleaseToggle vaultKey={`tab:${currentSectionId}:${settingsTab.id}`} />
+                                {settingsTab.pin && <McpReleaseToggle vaultKey={tabVaultKey} />}
+                                {settingsTab.pin && (
+                                    <PinRemoveButton
+                                        vaultKey={tabVaultKey}
+                                        stored={settingsTab.pin === KEEP_PIN}
+                                        onRemove={() =>
+                                            updateTab(settingsTabId, {
+                                                pin: undefined,
+                                                pinRelock: undefined,
+                                                pinProtected: undefined,
+                                                pinLength: undefined,
+                                            })
+                                        }
+                                    />
                                 )}
                             </div>
 
@@ -2047,21 +2087,64 @@ const TabBar = memo(function TabBar() {
 });
 
 /**
+ * „PIN entfernen“ for one section/tab.
+ *
+ * The PIN field cannot do this itself: a view that is protected server-side shows
+ * an EMPTY input (the editor never receives the code back), so there is nothing
+ * to clear — which is why the old hint „Feld leeren entfernt den Schutz“ pointed
+ * at a gesture nobody could make.
+ *
+ * `stored` marks a view the vault already holds. Its content only exists there
+ * and in this editor's memory until the next save writes it back in plaintext, so
+ * the vault entry is queued for removal and dropped after that save, never here.
+ */
+function PinRemoveButton({ vaultKey, stored, onRemove }: { vaultKey: string; stored: boolean; onRemove: () => void }) {
+    const t = useT();
+    const forget = useMcpReleaseStore((s) => s.forget);
+    return (
+        <button
+            onClick={() => {
+                if (stored) queueVaultRemoval(vaultKey);
+                forget(vaultKey);
+                onRemove();
+            }}
+            className="aura-pin-remove flex items-center gap-1.5 w-full px-2.5 py-2 mt-2 rounded-lg text-xs hover:opacity-80 transition-opacity"
+            style={{
+                background: 'var(--app-bg)',
+                border: '1px solid var(--app-border)',
+                color: 'var(--accent-red)',
+            }}
+        >
+            <ShieldOff size={11} />
+            {t('pin.remove')}
+        </button>
+    );
+}
+
+/**
  * „Über MCP bearbeitbar“ for one protected view.
  *
  * The release the AI server needs to change PIN-protected content — and the reason
  * a PIN never has to be typed into a chat: the decision is made here, with the
  * admin session, and stored in the server-side vault (POST /api/aura/vault/mcp).
- * Shown only for a view that is already protected server-side (`pin === KEEP_PIN`),
- * because only then is there a vault entry to release.
+ * Shown for every view that carries a PIN — including one that was only just
+ * typed. The vault gets its entry when the adapter redacts the saved config, so a
+ * release flipped before that cannot be stored yet; it is parked in
+ * `mcpReleaseStore.pending` and written by AdminLayout once the entry appears.
+ * Hiding the switch until then is what made it look as if it only existed for
+ * some views.
  */
 function McpReleaseToggle({ vaultKey }: { vaultKey: string }) {
     const t = useT();
-    const enabled = useMcpReleaseStore((s) => s.flags[vaultKey] === true);
+    const stored = useMcpReleaseStore((s) => s.flags[vaultKey] === true);
+    const parked = useMcpReleaseStore((s) => s.pending[vaultKey]);
     const setFlag = useMcpReleaseStore((s) => s.set);
+    const setPending = useMcpReleaseStore((s) => s.setPending);
+    const clearPending = useMcpReleaseStore((s) => s.clearPending);
     const [failed, setFailed] = useState(false);
+    const enabled = parked ?? stored;
     return (
-        <div className="mt-2">
+        <div className="aura-pin-mcp mt-2">
             <div className="flex items-center justify-between">
                 <div>
                     <p className="text-[11px] font-medium" style={{ color: 'var(--text-primary)' }}>
@@ -2080,11 +2163,22 @@ function McpReleaseToggle({ vaultKey }: { vaultKey: string }) {
                         }
                         const next = !enabled;
                         setFlag(vaultKey, next);
-                        void vaultSetMcp(token, vaultKey, next).then((ok) => {
-                            setFailed(!ok);
+                        setFailed(false);
+                        void vaultSetMcp(token, vaultKey, next).then((res) => {
+                            if (res === 'ok') {
+                                clearPending(vaultKey);
+                                return;
+                            }
+                            // No vault entry yet (PIN typed, not saved): park the
+                            // decision instead of calling it an error.
+                            if (res === 'unknown') {
+                                setPending(vaultKey, next);
+                                return;
+                            }
                             // Never leave the switch showing a release that the vault
                             // did not take — this one is a permission.
-                            if (!ok) setFlag(vaultKey, enabled);
+                            setFailed(true);
+                            setFlag(vaultKey, enabled);
                         });
                     }}
                     className="relative w-9 h-5 rounded-full transition-colors shrink-0"
@@ -2096,6 +2190,11 @@ function McpReleaseToggle({ vaultKey }: { vaultKey: string }) {
                     />
                 </button>
             </div>
+            {parked !== undefined && !failed && (
+                <p className="text-[9px] mt-1" style={{ color: 'var(--text-secondary)' }}>
+                    {t('pin.mcpWritePending')}
+                </p>
+            )}
             {failed && (
                 <p className="text-[9px] mt-1" style={{ color: 'var(--accent-red)' }}>
                     {t('pin.mcpWriteFailed')}
