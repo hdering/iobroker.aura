@@ -214,6 +214,27 @@ nächstliegenden gültigen Namen und dem Hinweis, dass `"key": null` sie entfern
 `aura_review` sammelt sie zusätzlich unter `ignored-options` — der Bericht über
 den Bestand ist die richtige Stelle dafür, nicht die Absage an einen Write.
 
+### Die Fehler derselben Prüfung: `schema-drift`
+
+Was der Validator einen **Fehler** nennt und kein Eimer oben eingesammelt hat,
+landet im Health-Sweep unter `schema-drift`. Vorher fiel es auf den Boden, und
+genau da klaffte das Loch: `layout: "framed"` lag gespeichert in einem Tab, vom
+Editor dorthin geschrieben, und `aura_validate` lehnte denselben Wert als Fehler
+ab — der MCP konnte einen Zustand nicht reproduzieren, den der Editor täglich
+herstellt. Gemeldet hat es niemand, weil `aura_review` den Bestand nie gegen das
+Schema geprüft hat.
+
+Drift entsteht ausschließlich dort, wo der MCP **nicht** schreibt. Der Sweep über
+das Gespeicherte ist deshalb die einzige Stelle, an der sie auffallen kann — und
+sie fällt jetzt in beide Richtungen auf: ein Layout, das der Editor anbietet und
+das Schema nicht kennt, ebenso wie eines, das im Schema steht und das Widget nie
+liest (das rendert still den Standard).
+
+Die Layouts kommen dafür aus **einer** Liste: `src-vis/utils/widgetLayouts.ts`.
+Der Editor baut seine Auswahl daraus, `gen-widget-schema.mjs` führt sie aus, die
+Doku-Tabelle in `docs/widgets/referenz.md` liest sie aus dem generierten Schema.
+`test/widget-schema.test.js` hält die drei zusammen.
+
 ### Gespeicherte Überlappungen und `aura_compact`
 
 Aus der Praxis gemeldet: eine Startseite, die **korrekt aussieht** und drei

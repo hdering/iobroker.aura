@@ -8,48 +8,48 @@ Nicht nur das Default-Layout verwenden: jedes Widget kann in **allen** unten gel
 
 | Widget | `type` | Layouts | Default-Grid (w×h) |
 | --- | --- | --- | --- |
-| [Rollladen](./rollladen) | `shutter` | `default` | 9×6 |
-| [Dimmer](./dimmer) | `dimmer` | `default` | 11×6 |
-| [Schieberegler](./schieberegler) | `slider` | `default` | 11×5 |
+| [Rollladen](./rollladen) | `shutter` | `default` · `compact` · `minimal` · `custom` | 9×6 |
+| [Dimmer](./dimmer) | `dimmer` | `default` · `compact` · `minimal` · `custom` | 11×6 |
+| [Schieberegler](./schieberegler) | `slider` | `default` · `custom` | 11×5 |
 | [Thermostat](./thermostat) | `thermostat` | `default` · `compact` · `minimal` · `dial` · `custom` | 11×7 |
-| [Wert-Anzeige](./wert-anzeige) | `value` | `default` | 11×5 |
+| [Wert-Anzeige](./wert-anzeige) | `value` | `default` · `card` · `compact` · `minimal` · `custom` | 11×5 |
 | [Gauge](./gauge) | `gauge` | `default` | 11×8 |
-| [Füllstandsanzeige](./fuellstandsanzeige) | `fill` | `default` · `battery` · `bar` · `segments` · `wave` · `custom` | 9×9 |
-| [Drehregler](./drehregler) | `knob` | `default` | 8×8 |
-| [Fenster-/Türkontakt](./fensterkontakt) | `windowcontact` | `default` | 11×5 |
-| [Binärsensor](./binaersensor) | `binarysensor` | `default` | 11×5 |
+| [Füllstandsanzeige](./fuellstandsanzeige) | `fill` | `default` · `battery` · `bar` · `segments` · `wave` | 9×9 |
+| [Drehregler](./drehregler) | `knob` | `default` · `knob-scale` · `knob-endless` · `custom` | 8×8 |
+| [Fenster-/Türkontakt](./fensterkontakt) | `windowcontact` | `default` · `card` · `compact` · `minimal` · `custom` | 11×5 |
+| [Binärsensor](./binaersensor) | `binarysensor` | `default` · `card` · `compact` · `minimal` · `custom` | 11×5 |
 | [Raumklima](./raumklima) | `climate` | `default` | 12×7 |
-| [Datumswähler](./datumswaehler) | `datepicker` | `default` | 11×5 |
-| [Eingabefeld](./eingabefeld) | `input` | `default` | 12×4 |
-| [Auswahlfeld](./auswahlfeld) | `enum` | `default` | 12×6 |
-| [Diagramm (einfach)](./diagramm) | `chart` | `default` | 12×6 |
-| [Diagramm (erweitert)](./diagramm-erweitert) | `echart` | `default` | 12×6 |
+| [Datumswähler](./datumswaehler) | `datepicker` | `default` · `card` · `compact` · `minimal` | 11×5 |
+| [Eingabefeld](./eingabefeld) | `input` | `default` · `compact` · `custom` | 12×4 |
+| [Auswahlfeld](./auswahlfeld) | `enum` | `default` · `compact` · `minimal` · `card` · `custom` | 12×6 |
+| [Diagramm (einfach)](./diagramm) | `chart` | `default` · `card` | 12×6 |
+| [Diagramm (erweitert)](./diagramm-erweitert) | `echart` | `default` · `custom` | 12×6 |
 | [Diagramm (Verteilung)](./verteilung) | `energiebilanz` | `default` | 8×8 |
 | [eCharts](./echarts) | `echartsPreset` | `default` | 12×6 |
-| [RGB-Licht](./rgb-licht) | `light` | `default` | 12×6 |
-| [Mediaplayer](./mediaplayer) | `mediaplayer` | `default` | 12×6 |
-| [Statische Liste](./liste) | `list` | `default` | 12×6 |
-| [Dynamische Liste](./dynamische-liste) | `autolist` | `default` | 12×6 |
+| [RGB-Licht](./rgb-licht) | `light` | `light-all` · `light-brightness` · `light-color` · `light-temperature` · `custom` | 12×6 |
+| [Mediaplayer](./mediaplayer) | `mediaplayer` | `default` · `compact` · `custom` | 12×6 |
+| [Statische Liste](./liste) | `list` | `default` · `card` · `compact` · `minimal` | 12×6 |
+| [Dynamische Liste](./dynamische-liste) | `autolist` | `default` · `card` · `compact` · `minimal` · `count` | 12×6 |
 | [Schnellzugriff-Chips](./chips) | `chips` | `default` | 12×6 |
-| [HTTP-Aktion](./http-aktion) | `httpRequest` | `default` | 12×6 |
-| [Universal-Widget](./universal-widget) | `universal` | `default` | 12×6 |
+| [HTTP-Aktion](./http-aktion) | `httpRequest` | `default` · `compact` · `minimal` · `custom` | 12×6 |
+| [Universal-Widget](./universal-widget) | `universal` | `custom` | 12×6 |
 
 ## Spezial
 
 | Widget | `type` | Layouts | Default-Grid (w×h) |
 | --- | --- | --- | --- |
-| [Uhrzeit](./uhrzeit) | `clock` | `default` | 11×6 |
-| [Wetter](./wetter) | `weather` | `default` | 12×6 |
-| [Kalender](./kalender) | `calendar` | `default` | 12×6 |
-| [evcc](./evcc) | `evcc` | `default` | 12×6 |
-| [Kamera](./kamera) | `camera` | `default` | 12×6 |
-| [Bild](./bild) | `image` | `default` | 12×6 |
+| [Uhrzeit](./uhrzeit) | `clock` | `default` · `card` · `minimal` · `custom` | 11×6 |
+| [Wetter](./wetter) | `weather` | `default` · `compact` · `minimal` · `custom` | 12×6 |
+| [Kalender](./kalender) | `calendar` | `default` · `card` · `compact` · `minimal` · `agenda` · `custom` | 12×6 |
+| [evcc](./evcc) | `evcc` | `default` · `compact` · `flow` · `battery` · `production` · `consumption` · `loadpoints` · `custom` | 12×6 |
+| [Kamera](./kamera) | `camera` | `minimal` · `default` · `custom` | 12×6 |
+| [Bild](./bild) | `image` | `default` · `custom` | 12×6 |
 | [Müllabfuhr](./muellabfuhr) | `trash` | `default` | 12×6 |
-| [Müllabfuhr-Zeitplan](./muellabfuhr-zeitplan) | `trashSchedule` | `default` | 12×6 |
+| [Müllabfuhr-Zeitplan](./muellabfuhr-zeitplan) | `trashSchedule` | `default` · `list` · `compact` | 12×6 |
 | [JSON-Tabelle](./json-tabelle) | `jsontable` | `default` | 13×6 |
 | [iFrame](./iframe) | `iframe` | `default` | 12×6 |
 | [HTML](./html) | `html` | `default` | 12×6 |
-| [Zustandsbild](./zustandsbild) | `stateimage` | `default` | 12×6 |
+| [Zustandsbild](./zustandsbild) | `stateimage` | `default` · `card` · `compact` · `minimal` · `custom` | 12×6 |
 | [Adapter-Status](./adapter-status) | `adapterstatus` | `default` | 12×6 |
 | [Skript-Status](./skript-status) | `scriptstatus` | `default` | 12×6 |
 | [Adapter-Logs](./adapter-logs) | `adapterlogs` | `default` | 12×6 |
@@ -62,8 +62,8 @@ Nicht nur das Default-Layout verwenden: jedes Widget kann in **allen** unten gel
 
 | Widget | `type` | Layouts | Default-Grid (w×h) |
 | --- | --- | --- | --- |
-| [Abschnittstitel](./abschnittstitel) | `header` | `default` · `card` · `compact` · `minimal` · `framed` | 14×2 |
-| [Button](./button) | `button` | `default` | 6×4 |
+| [Abschnittstitel](./abschnittstitel) | `header` | `default` · `compact` · `minimal` · `framed` | 14×2 |
+| [Button](./button) | `button` | `default` · `compact` · `minimal` · `custom` | 6×4 |
 | [Gruppe](./gruppe) | `group` | `default` | 12×6 |
 | [Panels](./panels) | `panels` | `default` | 12×6 |
 | [Menü](./menue) | `menu` | `default` | 12×2 |

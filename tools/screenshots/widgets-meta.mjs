@@ -77,7 +77,7 @@ export const WIDGETS = [
       runtime: r(72, { unit: 'kW', minValue: 0, maxValue: 100 }, { w: 11, h: 8 }) },
     { type: 'fill', slug: 'fuellstandsanzeige', label: 'Füllstandsanzeige', group: 'control',
       hint: 'Füllstand (z. B. Wassertank, Heizöl) als Balken visualisieren, mit verstellbaren Grenzen.',
-      layouts: ['default', 'battery', 'bar', 'segments', 'wave', 'custom'],
+      layouts: ['default', 'battery', 'bar', 'segments', 'wave'],
       runtime: r(68, { unit: '%' }, { w: 9, h: 9 }) },
     { type: 'knob', slug: 'drehregler', label: 'Drehregler', group: 'control',
       hint: 'Wert über Drehknopf einstellen – 3 Zeigertypen, Winkelbereich konfigurierbar.',
@@ -179,7 +179,7 @@ export const WIDGETS = [
     // ── Layout ──────────────────────────────────────────────────────────────
     { type: 'header', slug: 'abschnittstitel', label: 'Abschnittstitel', group: 'layout',
       hint: 'Trennlinie mit Überschrift zur Gliederung des Dashboards.',
-      layouts: ['default', 'card', 'compact', 'minimal', 'framed'],
+      layouts: ['default', 'compact', 'minimal', 'framed'],
       runtime: r(null, {}, { w: 14, h: 2, noDp: true, title: 'Wohnzimmer' }) },
     { type: 'button', slug: 'button', label: 'Button', group: 'layout',
       hint: 'Klick-Aktion auslösen (Datenpunkt schreiben, HTTP-Call, Szene …).',

@@ -58,6 +58,7 @@ import { SANDBOX_PRESETS, type SandboxPreset } from '../../utils/iframeSandbox';
 import { IFRAME_INTERACTION_MODES, resolveIframeInteractionMode } from '../../utils/iframeInteraction';
 import { applyDpNameFilter } from '../../utils/dpNameFilter';
 import { baseDpId } from '../../utils/dpRef';
+import { defaultLayoutFor, getLayoutOptions, isUnknownLayout } from '../../utils/widgetLayouts';
 import { isInteractiveTarget } from '../../utils/interactiveTargets';
 import { JsonPathButton } from '../config/JsonPathButton';
 import { ColorPicker } from '../common/ColorPicker';
@@ -232,29 +233,6 @@ const VIS_FIELDS_PER_TYPE: Partial<Record<WidgetType, { key: string; label: stri
         { key: 'showChips', label: 'Schnellzugriff-Chips' },
     ],
 };
-
-// Widget types that don't get a "Custom" entry in the Layout picker.
-// Mirror of NO_CUSTOM in src-vis/utils/widgetLayouts.ts.
-const NO_CUSTOM_LAYOUT_TYPES: WidgetType[] = [
-    'iframe',
-    'jsontable',
-    'html',
-    'trash',
-    'trashSchedule',
-    'header',
-    'fill',
-    'list',
-    'autolist',
-    'datepicker',
-    'adapterstatus',
-    'scriptstatus',
-    'adapterlogs',
-    'loadtimes',
-    'alarm',
-    'map',
-    'statusoverview',
-    'messages',
-];
 
 // ── Global custom-cell clipboard (shared across all WidgetFrames) ───────────
 let cellClipboardData: CustomCell | null = null;
@@ -7811,479 +7789,12 @@ export function WidgetFrame({
                             config.type !== 'aircontrol' &&
                             config.type !== 'energiebilanz' &&
                             (() => {
-                                const activeLayout = config.layout ?? 'default';
-                                const layouts: { value: string; label: string }[] =
-                                    config.type === 'camera'
-                                        ? [
-                                              { value: 'minimal', label: 'Minimal' },
-                                              { value: 'default', label: 'Standard' },
-                                              { value: 'custom', label: 'Custom Grid' },
-                                          ]
-                                        : config.type === 'fill'
-                                          ? [
-                                                { value: 'default', label: 'Tank' },
-                                                { value: 'battery', label: 'Batterie' },
-                                                { value: 'bar', label: 'Balken' },
-                                                { value: 'segments', label: 'LED-Segmente' },
-                                                { value: 'wave', label: 'Welle' },
-                                            ]
-                                          : config.type === 'gauge'
-                                            ? [{ value: 'default', label: t('wf.edit.layout.standard') }]
-                                            : config.type === 'knob'
-                                              ? [
-                                                    { value: 'default', label: 'Bogen' },
-                                                    { value: 'knob-scale', label: 'Skala' },
-                                                    { value: 'knob-endless', label: 'Endlos (3D)' },
-                                                    { value: 'custom', label: 'Custom' },
-                                                ]
-                                              : config.type === 'chart'
-                                                ? [
-                                                      { value: 'default', label: t('wf.edit.layout.standard') },
-                                                      { value: 'card', label: t('wf.edit.layout.card') },
-                                                  ]
-                                                : config.type === 'climate'
-                                                  ? [{ value: 'default', label: t('wf.edit.layout.standard') }]
-                                                  : config.type === 'echartsPreset'
-                                                    ? [{ value: 'default', label: t('wf.edit.layout.standard') }]
-                                                    : config.type === 'mediaplayer'
-                                                      ? [
-                                                            { value: 'default', label: t('wf.edit.layout.standard') },
-                                                            { value: 'compact', label: t('wf.edit.layout.compact') },
-                                                            { value: 'custom', label: 'Custom' },
-                                                        ]
-                                                      : config.type === 'chips'
-                                                        ? [{ value: 'default', label: t('wf.edit.layout.standard') }]
-                                                        : config.type === 'httpRequest'
-                                                          ? [
-                                                                {
-                                                                    value: 'default',
-                                                                    label: t('wf.edit.layout.standard'),
-                                                                },
-                                                                {
-                                                                    value: 'compact',
-                                                                    label: t('wf.edit.layout.compact'),
-                                                                },
-                                                                {
-                                                                    value: 'minimal',
-                                                                    label: t('wf.edit.layout.minimal'),
-                                                                },
-                                                                { value: 'custom', label: 'Custom' },
-                                                            ]
-                                                          : config.type === 'slider'
-                                                            ? [
-                                                                  {
-                                                                      value: 'default',
-                                                                      label: t('wf.edit.layout.standard'),
-                                                                  },
-                                                                  { value: 'custom', label: 'Custom' },
-                                                              ]
-                                                            : config.type === 'input'
-                                                              ? [
-                                                                    {
-                                                                        value: 'default',
-                                                                        label: t('wf.edit.layout.standard'),
-                                                                    },
-                                                                    {
-                                                                        value: 'compact',
-                                                                        label: t('wf.edit.layout.compact'),
-                                                                    },
-                                                                    { value: 'custom', label: 'Custom' },
-                                                                ]
-                                                              : config.type === 'button'
-                                                                ? [
-                                                                      {
-                                                                          value: 'default',
-                                                                          label: t('wf.edit.layout.standard'),
-                                                                      },
-                                                                      {
-                                                                          value: 'compact',
-                                                                          label: t('wf.edit.layout.compact'),
-                                                                      },
-                                                                      {
-                                                                          value: 'minimal',
-                                                                          label: t('wf.edit.layout.minimal'),
-                                                                      },
-                                                                      { value: 'custom', label: 'Custom' },
-                                                                  ]
-                                                                : config.type === 'group' ||
-                                                                    config.type === 'carousel' ||
-                                                                    config.type === 'panels'
-                                                                  ? [
-                                                                        {
-                                                                            value: 'default',
-                                                                            label: t('wf.edit.layout.standard'),
-                                                                        },
-                                                                    ]
-                                                                  : config.type === 'universal'
-                                                                    ? [{ value: 'custom', label: 'Custom' }]
-                                                                    : config.type === 'enum'
-                                                                      ? [
-                                                                            {
-                                                                                value: 'default',
-                                                                                label: t('wf.edit.layout.standard'),
-                                                                            },
-                                                                            {
-                                                                                value: 'compact',
-                                                                                label: t('wf.edit.layout.compact'),
-                                                                            },
-                                                                            {
-                                                                                value: 'minimal',
-                                                                                label: t('wf.edit.layout.minimal'),
-                                                                            },
-                                                                            {
-                                                                                value: 'card',
-                                                                                label: t('wf.edit.layout.card'),
-                                                                            },
-                                                                            { value: 'custom', label: 'Custom' },
-                                                                        ]
-                                                                      : config.type === 'shutter'
-                                                                        ? [
-                                                                              {
-                                                                                  value: 'default',
-                                                                                  label: t('wf.edit.layout.standard'),
-                                                                              },
-                                                                              {
-                                                                                  value: 'compact',
-                                                                                  label: t('wf.edit.layout.compact'),
-                                                                              },
-                                                                              {
-                                                                                  value: 'minimal',
-                                                                                  label: t('wf.edit.layout.minimal'),
-                                                                              },
-                                                                              { value: 'custom', label: 'Custom' },
-                                                                          ]
-                                                                        : config.type === 'light'
-                                                                          ? [
-                                                                                {
-                                                                                    value: 'light-all',
-                                                                                    label: 'Standard',
-                                                                                },
-                                                                                {
-                                                                                    value: 'light-brightness',
-                                                                                    label: 'Nur Helligkeit',
-                                                                                },
-                                                                                {
-                                                                                    value: 'light-color',
-                                                                                    label: 'Nur Farbe',
-                                                                                },
-                                                                                {
-                                                                                    value: 'light-temperature',
-                                                                                    label: 'Nur Lichtwärme',
-                                                                                },
-                                                                                { value: 'custom', label: 'Custom' },
-                                                                            ]
-                                                                          : config.type === 'switch'
-                                                                            ? [
-                                                                                  {
-                                                                                      value: 'default',
-                                                                                      label: t(
-                                                                                          'wf.edit.layout.standard',
-                                                                                      ),
-                                                                                  },
-                                                                                  {
-                                                                                      value: 'card',
-                                                                                      label: t('wf.edit.layout.card'),
-                                                                                  },
-                                                                                  {
-                                                                                      value: 'compact',
-                                                                                      label: t(
-                                                                                          'wf.edit.layout.compact',
-                                                                                      ),
-                                                                                  },
-                                                                                  { value: 'custom', label: 'Custom' },
-                                                                              ]
-                                                                            : config.type === 'dimmer'
-                                                                              ? [
-                                                                                    {
-                                                                                        value: 'default',
-                                                                                        label: t(
-                                                                                            'wf.edit.layout.standard',
-                                                                                        ),
-                                                                                    },
-                                                                                    {
-                                                                                        value: 'compact',
-                                                                                        label: t(
-                                                                                            'wf.edit.layout.compact',
-                                                                                        ),
-                                                                                    },
-                                                                                    {
-                                                                                        value: 'minimal',
-                                                                                        label: t(
-                                                                                            'wf.edit.layout.minimal',
-                                                                                        ),
-                                                                                    },
-                                                                                    {
-                                                                                        value: 'custom',
-                                                                                        label: 'Custom',
-                                                                                    },
-                                                                                ]
-                                                                              : config.type === 'thermostat'
-                                                                                ? [
-                                                                                      {
-                                                                                          value: 'default',
-                                                                                          label: t(
-                                                                                              'wf.edit.layout.standard',
-                                                                                          ),
-                                                                                      },
-                                                                                      {
-                                                                                          value: 'compact',
-                                                                                          label: t(
-                                                                                              'wf.edit.layout.compact',
-                                                                                          ),
-                                                                                      },
-                                                                                      {
-                                                                                          value: 'minimal',
-                                                                                          label: t(
-                                                                                              'wf.edit.layout.minimal',
-                                                                                          ),
-                                                                                      },
-                                                                                      {
-                                                                                          value: 'dial',
-                                                                                          label: t(
-                                                                                              'wf.edit.layout.dial',
-                                                                                          ),
-                                                                                      },
-                                                                                      {
-                                                                                          value: 'custom',
-                                                                                          label: 'Custom',
-                                                                                      },
-                                                                                  ]
-                                                                                : config.type === 'clock'
-                                                                                  ? [
-                                                                                        {
-                                                                                            value: 'default',
-                                                                                            label: t(
-                                                                                                'wf.edit.layout.standard',
-                                                                                            ),
-                                                                                        },
-                                                                                        {
-                                                                                            value: 'card',
-                                                                                            label: t(
-                                                                                                'wf.edit.layout.card',
-                                                                                            ),
-                                                                                        },
-                                                                                        {
-                                                                                            value: 'minimal',
-                                                                                            label: t(
-                                                                                                'wf.edit.layout.minimal',
-                                                                                            ),
-                                                                                        },
-                                                                                        {
-                                                                                            value: 'custom',
-                                                                                            label: 'Custom',
-                                                                                        },
-                                                                                    ]
-                                                                                  : config.type === 'weather'
-                                                                                    ? [
-                                                                                          {
-                                                                                              value: 'default',
-                                                                                              label: t(
-                                                                                                  'wf.edit.layout.standard',
-                                                                                              ),
-                                                                                          },
-                                                                                          {
-                                                                                              value: 'compact',
-                                                                                              label: t(
-                                                                                                  'wf.edit.layout.compact',
-                                                                                              ),
-                                                                                          },
-                                                                                          {
-                                                                                              value: 'minimal',
-                                                                                              label: t(
-                                                                                                  'wf.edit.layout.minimal',
-                                                                                              ),
-                                                                                          },
-                                                                                          {
-                                                                                              value: 'custom',
-                                                                                              label: 'Custom',
-                                                                                          },
-                                                                                      ]
-                                                                                    : config.type === 'trash'
-                                                                                      ? [
-                                                                                            {
-                                                                                                value: 'default',
-                                                                                                label: t(
-                                                                                                    'wf.edit.layout.standard',
-                                                                                                ),
-                                                                                            },
-                                                                                        ]
-                                                                                      : config.type === 'trashSchedule'
-                                                                                        ? [
-                                                                                              {
-                                                                                                  value: 'default',
-                                                                                                  label: t(
-                                                                                                      'wf.edit.layout.standard',
-                                                                                                  ),
-                                                                                              },
-                                                                                              {
-                                                                                                  value: 'list',
-                                                                                                  label: 'Liste',
-                                                                                              },
-                                                                                              {
-                                                                                                  value: 'compact',
-                                                                                                  label: 'Kompakt',
-                                                                                              },
-                                                                                          ]
-                                                                                        : config.type === 'evcc'
-                                                                                          ? [
-                                                                                                {
-                                                                                                    value: 'default',
-                                                                                                    label: t(
-                                                                                                        'wf.edit.layout.standard',
-                                                                                                    ),
-                                                                                                },
-                                                                                                {
-                                                                                                    value: 'compact',
-                                                                                                    label: t(
-                                                                                                        'wf.edit.layout.compact',
-                                                                                                    ),
-                                                                                                },
-                                                                                                {
-                                                                                                    value: 'flow',
-                                                                                                    label: 'Nur Fluss',
-                                                                                                },
-                                                                                                {
-                                                                                                    value: 'battery',
-                                                                                                    label: 'Nur Batterie',
-                                                                                                },
-                                                                                                {
-                                                                                                    value: 'production',
-                                                                                                    label: 'Nur Produktion',
-                                                                                                },
-                                                                                                {
-                                                                                                    value: 'consumption',
-                                                                                                    label: 'Nur Verbrauch',
-                                                                                                },
-                                                                                                {
-                                                                                                    value: 'loadpoints',
-                                                                                                    label: 'Nur Ladepunkte',
-                                                                                                },
-                                                                                                {
-                                                                                                    value: 'custom',
-                                                                                                    label: 'Custom',
-                                                                                                },
-                                                                                            ]
-                                                                                          : config.type === 'timer'
-                                                                                            ? [
-                                                                                                  {
-                                                                                                      value: 'default',
-                                                                                                      label: t(
-                                                                                                          'wf.edit.layout.standard',
-                                                                                                      ),
-                                                                                                  },
-                                                                                                  {
-                                                                                                      value: 'compact',
-                                                                                                      label: t(
-                                                                                                          'wf.edit.layout.compact',
-                                                                                                      ),
-                                                                                                  },
-                                                                                                  {
-                                                                                                      value: 'custom',
-                                                                                                      label: 'Custom',
-                                                                                                  },
-                                                                                              ]
-                                                                                            : config.type ===
-                                                                                                'statusoverview'
-                                                                                              ? [
-                                                                                                    {
-                                                                                                        value: 'default',
-                                                                                                        label: t(
-                                                                                                            'wf.edit.layout.standard',
-                                                                                                        ),
-                                                                                                    },
-                                                                                                    {
-                                                                                                        value: 'compact',
-                                                                                                        label: t(
-                                                                                                            'wf.edit.layout.compact',
-                                                                                                        ),
-                                                                                                    },
-                                                                                                    {
-                                                                                                        value: 'card',
-                                                                                                        label: t(
-                                                                                                            'wf.edit.layout.card',
-                                                                                                        ),
-                                                                                                    },
-                                                                                                    {
-                                                                                                        value: 'minimal',
-                                                                                                        label: t(
-                                                                                                            'wf.edit.layout.minimal',
-                                                                                                        ),
-                                                                                                    },
-                                                                                                    {
-                                                                                                        value: 'count',
-                                                                                                        label: 'Anzahl',
-                                                                                                    },
-                                                                                                ]
-                                                                                              : config.type ===
-                                                                                                  'messages'
-                                                                                                ? [
-                                                                                                      {
-                                                                                                          value: 'default',
-                                                                                                          label: t(
-                                                                                                              'wf.edit.layout.standard',
-                                                                                                          ),
-                                                                                                      },
-                                                                                                      {
-                                                                                                          value: 'count',
-                                                                                                          label: 'Anzahl',
-                                                                                                      },
-                                                                                                  ]
-                                                                                                : [
-                                                                                                      {
-                                                                                                          value: 'default',
-                                                                                                          label: t(
-                                                                                                              'wf.edit.layout.standard',
-                                                                                                          ),
-                                                                                                      },
-                                                                                                      {
-                                                                                                          value: 'card',
-                                                                                                          label: t(
-                                                                                                              'wf.edit.layout.card',
-                                                                                                          ),
-                                                                                                      },
-                                                                                                      {
-                                                                                                          value: 'compact',
-                                                                                                          label: t(
-                                                                                                              'wf.edit.layout.compact',
-                                                                                                          ),
-                                                                                                      },
-                                                                                                      {
-                                                                                                          value: 'minimal',
-                                                                                                          label: t(
-                                                                                                              'wf.edit.layout.minimal',
-                                                                                                          ),
-                                                                                                      },
-                                                                                                      ...(config.type ===
-                                                                                                      'calendar'
-                                                                                                          ? [
-                                                                                                                {
-                                                                                                                    value: 'agenda',
-                                                                                                                    label: t(
-                                                                                                                        'wf.edit.layout.agenda',
-                                                                                                                    ),
-                                                                                                                },
-                                                                                                            ]
-                                                                                                          : []),
-                                                                                                      ...(config.type ===
-                                                                                                      'autolist'
-                                                                                                          ? [
-                                                                                                                {
-                                                                                                                    value: 'count',
-                                                                                                                    label: 'Anzahl',
-                                                                                                                },
-                                                                                                            ]
-                                                                                                          : []),
-                                                                                                      ...(!NO_CUSTOM_LAYOUT_TYPES.includes(
-                                                                                                          config.type,
-                                                                                                      )
-                                                                                                          ? [
-                                                                                                                {
-                                                                                                                    value: 'custom',
-                                                                                                                    label: 'Custom',
-                                                                                                                },
-                                                                                                            ]
-                                                                                                          : []),
-                                                                                                  ];
+                                const activeLayout = config.layout ?? defaultLayoutFor(config.type);
+                                // One list for the picker, the popup type defaults and the AI
+                                // schema — see src-vis/utils/widgetLayouts.ts. The nested ternary
+                                // that used to stand here had drifted from it in both directions.
+                                const layouts = getLayoutOptions(config.type, t);
+                                const unknown = isUnknownLayout(config.type, config.layout);
                                 return (
                                     <div className="flex items-center gap-1 flex-wrap">
                                         <span
@@ -8326,6 +7837,14 @@ export function WidgetFrame({
                                                 </button>
                                             );
                                         })}
+                                        {unknown && (
+                                            <span
+                                                className="w-full text-[10px] mt-0.5"
+                                                style={{ color: 'var(--accent-orange, #f59e0b)' }}
+                                            >
+                                                {t('wf.edit.layout.unknown', { layout: String(config.layout) })}
+                                            </span>
+                                        )}
                                     </div>
                                 );
                             })()}
@@ -8352,11 +7871,25 @@ export function WidgetFrame({
                                         border: '1px solid var(--app-border)',
                                     }}
                                 >
-                                    <option value="default">{t('wf.edit.header.default')}</option>
-                                    <option value="compact">{t('wf.edit.header.compact')}</option>
-                                    <option value="minimal">{t('wf.edit.header.minimal')}</option>
-                                    <option value="framed">{t('wf.edit.header.framed')}</option>
+                                    {getLayoutOptions('header', t).map(({ value, label }) => (
+                                        <option key={value} value={value}>
+                                            {label}
+                                        </option>
+                                    ))}
+                                    {/* Without this the select would just stand empty on a stored
+                                        style nobody knows — the hint below says what it is. */}
+                                    {isUnknownLayout('header', config.layout) && (
+                                        <option value={config.layout}>{config.layout}</option>
+                                    )}
                                 </select>
+                                {isUnknownLayout('header', config.layout) && (
+                                    <span
+                                        className="block text-[10px] mt-1"
+                                        style={{ color: 'var(--accent-orange, #f59e0b)' }}
+                                    >
+                                        {t('wf.edit.layout.unknown', { layout: String(config.layout) })}
+                                    </span>
+                                )}
                             </div>
                         )}
                     </div>

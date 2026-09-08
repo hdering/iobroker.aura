@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generatedFrom": "tools/screenshots/widgets-meta.mjs",
-  "generatedAt": "2026-09-07",
+  "generatedAt": "2026-09-08",
   "note": "SSoT for Aura widgets. Options are seeded semi-automatically (see build-widget-catalog.mjs).",
   "groups": [
     {
@@ -73,7 +73,10 @@
         "h": 6
       },
       "layouts": [
-        "default"
+        "default",
+        "compact",
+        "minimal",
+        "custom"
       ],
       "options": [],
       "crosscutting": [
@@ -103,7 +106,10 @@
         "h": 6
       },
       "layouts": [
-        "default"
+        "default",
+        "compact",
+        "minimal",
+        "custom"
       ],
       "options": [],
       "crosscutting": [
@@ -133,7 +139,8 @@
         "h": 5
       },
       "layouts": [
-        "default"
+        "default",
+        "custom"
       ],
       "options": [],
       "crosscutting": [
@@ -309,7 +316,11 @@
         "h": 5
       },
       "layouts": [
-        "default"
+        "default",
+        "card",
+        "compact",
+        "minimal",
+        "custom"
       ],
       "options": [],
       "crosscutting": [
@@ -373,8 +384,7 @@
         "battery",
         "bar",
         "segments",
-        "wave",
-        "custom"
+        "wave"
       ],
       "options": [],
       "crosscutting": [
@@ -404,7 +414,10 @@
         "h": 8
       },
       "layouts": [
-        "default"
+        "default",
+        "knob-scale",
+        "knob-endless",
+        "custom"
       ],
       "options": [],
       "crosscutting": [
@@ -434,7 +447,11 @@
         "h": 5
       },
       "layouts": [
-        "default"
+        "default",
+        "card",
+        "compact",
+        "minimal",
+        "custom"
       ],
       "options": [],
       "crosscutting": [
@@ -464,7 +481,11 @@
         "h": 5
       },
       "layouts": [
-        "default"
+        "default",
+        "card",
+        "compact",
+        "minimal",
+        "custom"
       ],
       "options": [],
       "crosscutting": [
@@ -524,7 +545,10 @@
         "h": 5
       },
       "layouts": [
-        "default"
+        "default",
+        "card",
+        "compact",
+        "minimal"
       ],
       "options": [],
       "crosscutting": [
@@ -554,7 +578,9 @@
         "h": 4
       },
       "layouts": [
-        "default"
+        "default",
+        "compact",
+        "custom"
       ],
       "options": [],
       "crosscutting": [
@@ -584,7 +610,11 @@
         "h": 6
       },
       "layouts": [
-        "default"
+        "default",
+        "compact",
+        "minimal",
+        "card",
+        "custom"
       ],
       "options": [],
       "crosscutting": [],
@@ -606,7 +636,8 @@
         "h": 6
       },
       "layouts": [
-        "default"
+        "default",
+        "card"
       ],
       "options": [],
       "crosscutting": [],
@@ -628,7 +659,8 @@
         "h": 6
       },
       "layouts": [
-        "default"
+        "default",
+        "custom"
       ],
       "options": [],
       "crosscutting": [],
@@ -961,7 +993,11 @@
         "h": 6
       },
       "layouts": [
-        "default"
+        "light-all",
+        "light-brightness",
+        "light-color",
+        "light-temperature",
+        "custom"
       ],
       "options": [],
       "crosscutting": [],
@@ -983,7 +1019,9 @@
         "h": 6
       },
       "layouts": [
-        "default"
+        "default",
+        "compact",
+        "custom"
       ],
       "options": [],
       "crosscutting": [],
@@ -1005,7 +1043,10 @@
         "h": 6
       },
       "layouts": [
-        "default"
+        "default",
+        "card",
+        "compact",
+        "minimal"
       ],
       "options": [],
       "crosscutting": [],
@@ -1027,7 +1068,11 @@
         "h": 6
       },
       "layouts": [
-        "default"
+        "default",
+        "card",
+        "compact",
+        "minimal",
+        "count"
       ],
       "options": [],
       "crosscutting": [],
@@ -1071,7 +1116,10 @@
         "h": 6
       },
       "layouts": [
-        "default"
+        "default",
+        "compact",
+        "minimal",
+        "custom"
       ],
       "options": [],
       "crosscutting": [],
@@ -1093,7 +1141,7 @@
         "h": 6
       },
       "layouts": [
-        "default"
+        "custom"
       ],
       "options": [],
       "crosscutting": [],
@@ -1115,7 +1163,10 @@
         "h": 6
       },
       "layouts": [
-        "default"
+        "default",
+        "card",
+        "minimal",
+        "custom"
       ],
       "options": [],
       "crosscutting": [
@@ -1145,7 +1196,10 @@
         "h": 6
       },
       "layouts": [
-        "default"
+        "default",
+        "compact",
+        "minimal",
+        "custom"
       ],
       "options": [],
       "crosscutting": [],
@@ -1167,7 +1221,12 @@
         "h": 6
       },
       "layouts": [
-        "default"
+        "default",
+        "card",
+        "compact",
+        "minimal",
+        "agenda",
+        "custom"
       ],
       "options": [],
       "crosscutting": [],
@@ -1189,7 +1248,14 @@
         "h": 6
       },
       "layouts": [
-        "default"
+        "default",
+        "compact",
+        "flow",
+        "battery",
+        "production",
+        "consumption",
+        "loadpoints",
+        "custom"
       ],
       "options": [],
       "crosscutting": [],
@@ -1211,7 +1277,9 @@
         "h": 6
       },
       "layouts": [
-        "default"
+        "minimal",
+        "default",
+        "custom"
       ],
       "options": [],
       "crosscutting": [],
@@ -1233,7 +1301,8 @@
         "h": 6
       },
       "layouts": [
-        "default"
+        "default",
+        "custom"
       ],
       "options": [],
       "crosscutting": [],
@@ -1277,7 +1346,9 @@
         "h": 6
       },
       "layouts": [
-        "default"
+        "default",
+        "list",
+        "compact"
       ],
       "options": [],
       "crosscutting": [],
@@ -1373,7 +1444,11 @@
         "h": 6
       },
       "layouts": [
-        "default"
+        "default",
+        "card",
+        "compact",
+        "minimal",
+        "custom"
       ],
       "options": [],
       "crosscutting": [],
@@ -1551,7 +1626,6 @@
       },
       "layouts": [
         "default",
-        "card",
         "compact",
         "minimal",
         "framed"
@@ -1584,7 +1658,10 @@
         "h": 4
       },
       "layouts": [
-        "default"
+        "default",
+        "compact",
+        "minimal",
+        "custom"
       ],
       "options": [],
       "crosscutting": [

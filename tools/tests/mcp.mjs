@@ -2135,6 +2135,47 @@ check('a row setting left behind by a changed display is reported', () => {
     assert.match(f.items.join(' '), /trueLabel bei displayType "value"/);
 });
 
+check('a stored layout the widget type does not have is a finding', () => {
+    // The hole this closes: aura_validate calls an unknown layout an ERROR, so
+    // the MCP refuses to write it — while the very same value sat stored in the
+    // tab, put there by the editor, and the health sweep said nothing. Drift
+    // only ever appears where the MCP does not write, so the sweep over what is
+    // STORED is the only place it can be found.
+    const res = auditDashboard({
+        places: [
+            {
+                where: 'Wohnzimmer / Start / Übersicht',
+                widgets: [
+                    {
+                        id: 'w-s2-h1',
+                        type: 'header',
+                        title: 'Übersicht',
+                        datapoint: '',
+                        layout: 'framed',
+                        gridPos: { x: 0, y: 0, w: 14, h: 2 },
+                        options: {},
+                    },
+                    {
+                        id: 'w-s2-r1',
+                        type: 'shutter',
+                        title: 'Rollladen',
+                        datapoint: '',
+                        layout: 'card',
+                        gridPos: { x: 0, y: 2, w: 9, h: 6 },
+                        options: {},
+                    },
+                ],
+            },
+        ],
+        schema,
+    });
+    const f = res.findings.find((x) => x.id === 'schema-drift');
+    assert.ok(f, `expected the finding, got ${res.findings.map((x) => x.id).join(', ')}`);
+    assert.match(f.items.join(' '), /w-s2-r1: layout "card" gibt es für shutter nicht/);
+    // …and the style the editor really offers is NOT one of them any more.
+    assert.ok(!f.items.join(' ').includes('framed'), 'a layout the editor offers must validate');
+});
+
 check('the same widget id in two places is a finding', () => {
     const f = auditResult.findings.find((x) => x.id === 'duplicate-ids');
     assert.ok(f);

@@ -6,3 +6,7 @@
 #   Settings - <what changed>               e.g.  Settings - add hex color mode for RGB lights
 # Issue reference (optional): append (#519) — or paste the full issue URL — and the
 # release turns it into a changelog link. release.ps1 also asks per entry.
+- Section title - the "Framed" style is now part of the AI widget schema, so the MCP accepts what the editor writes
+- Layout styles come from one list for the editor, the AI schema and the documentation - styles no widget ever rendered are gone, and the light, camera and knob now show their real styles everywhere
+- Editor - a stored layout the widget type does not know is now named instead of silently falling back to the default
+- AI review - aura_review now checks the stored dashboard against the widget schema and reports values a write would refuse

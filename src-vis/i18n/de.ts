@@ -886,6 +886,8 @@ export const de = {
     'wf.edit.layout.minimal': 'Minimal',
     'wf.edit.layout.agenda': 'Agenda',
     'wf.edit.layout.dial': 'Rundskala',
+    'wf.edit.layout.unknown':
+        'Gespeichert ist „{layout}“ — diesen Stil gibt es hier nicht, angezeigt wird der Standard.',
 
     // Clock config
     'wf.clock.display': 'Anzeige',

@@ -173,17 +173,47 @@ for (const [type, field] of [
         }
     };
 
+    // Every layout the documentation shows must be one the schema offers, and
+    // the schema takes its list straight from src-vis/utils/widgetLayouts.ts —
+    // the same list the editor's picker reads. Three lists used to say three
+    // different things: the editor offered `framed` for the section title, the
+    // schema did not (so aura_validate refused what the editor writes every
+    // day), and the docs listed a `card` style that rendered as the default.
+    const badLayouts = [];
+    const checkLayout = (type, layout) => {
+        if (!layout) {
+            return;
+        }
+        const known = schema.widgets[type]?.layouts ?? [];
+        if (!known.includes(layout)) {
+            badLayouts.push(`${type}: "${layout}" (schema: ${known.join(', ') || 'none'})`);
+        }
+    };
+
     let checked = 0;
     for (const w of WIDGETS) {
+        for (const layout of w.layouts ?? []) {
+            checkLayout(w.type, layout);
+        }
         if (w.runtime) {
             check(w.type, w.runtime.options);
+            checkLayout(w.type, w.runtime.layout);
             checked++;
         }
         for (const shot of w.shots ?? []) {
             check(w.type, shot.options);
+            checkLayout(w.type, shot.layout);
             checked++;
         }
     }
+
+    assert.deepStrictEqual(
+        badLayouts,
+        [],
+        'layouts the documentation shows that the schema does not offer — ' +
+            'either widgetLayouts.ts is missing one the widget really renders, or the harness ' +
+            'shows a style nobody gets',
+    );
 
     // Widgets that need real adapter data have `runtime: null` and contribute
     // nothing here; the rest is a broad enough sample.

@@ -885,6 +885,7 @@ export const en: Record<TranslationKey, string> = {
     'wf.edit.layout.minimal': 'Minimal',
     'wf.edit.layout.agenda': 'Agenda',
     'wf.edit.layout.dial': 'Dial',
+    'wf.edit.layout.unknown': 'Stored style “{layout}” does not exist here — the default is shown.',
 
     // Clock config
     'wf.clock.display': 'Display',

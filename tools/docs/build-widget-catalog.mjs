@@ -9,8 +9,15 @@
 // options that apply to nearly all widgets live once in CROSSCUTTING.
 //
 // Run: node tools/docs/build-widget-catalog.mjs
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { WIDGETS, GROUPS } from '../screenshots/widgets-meta.mjs';
+
+// The layouts come from the generated AI schema, which takes them from
+// src-vis/utils/widgetLayouts.ts — the same list the editor's picker reads.
+// They used to be hand-kept in widgets-meta and had drifted: the table
+// advertised a `card` section title that renders exactly like the default, and
+// listed `default` alone for the 40-odd widgets nobody had filled in by hand.
+const SCHEMA = JSON.parse(readFileSync('public/ai/aura-widget-schema.json', 'utf8'));
 
 const DOCS = 'docs/widgets';
 
@@ -131,7 +138,7 @@ const widgets = WIDGETS.map((w) => {
         hint: w.hint,
         // Hand-documented widgets carry their own grid + images (no runtime.png).
         defaultGrid: w.defaultGrid ?? { w: rt.w ?? 12, h: rt.h ?? 6 },
-        layouts: w.layouts ?? ['default'],
+        layouts: SCHEMA.widgets[w.type]?.layouts ?? w.layouts ?? ['default'],
         options: OPTION_SEED[w.slug] ?? [],
         crosscutting: w.runtime === null ? [] : CROSSCUTTING.map((o) => o.key),
         customComponentKeys: CUSTOM_KEYS[w.slug] ?? null,
