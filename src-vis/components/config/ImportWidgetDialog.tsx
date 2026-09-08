@@ -260,8 +260,7 @@ export function ImportWidgetDialog({
                                             className="text-xs font-medium mb-1.5 block"
                                             style={{ color: 'var(--text-secondary)' }}
                                         >
-                                            {t('editor.manual.datapointId')}{' '}
-                                            <span style={{ color: 'var(--accent-red)' }}>*</span>
+                                            {t('editor.manual.datapointId')}
                                         </label>
                                         <div className="flex gap-1.5">
                                             <input
@@ -323,7 +322,6 @@ export function ImportWidgetDialog({
                                     </button>
                                     <button
                                         onClick={handleAddWidget}
-                                        disabled={needsDatapoint && !datapoint.trim()}
                                         className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white rounded-lg hover:opacity-80 disabled:opacity-30"
                                         style={{ background: 'var(--accent)' }}
                                     >
