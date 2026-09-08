@@ -444,6 +444,11 @@ export const de = {
     'pin.keepUnlocked': 'Offen lassen',
     'pin.keepUnlockedHint':
         'Nach dem Entsperren bis zum Neuladen der Seite offen bleiben. Aus: sperrt beim Verlassen sofort wieder.',
+    'pin.mcpWrite': 'Über MCP bearbeitbar',
+    'pin.mcpWriteHint':
+        'Der KI-Server (MCP) darf den geschützten Inhalt lesen und ändern. Aus: nur Struktur (Id, Typ, Größe), ' +
+        'kein Schreibzugriff. Die PIN wird dafür nicht gebraucht.',
+    'pin.mcpWriteFailed': 'Freigabe konnte nicht gesetzt werden – Anmeldung prüfen.',
     'pin.promptSection': 'Dieser Bereich ist mit einer PIN geschützt.',
     'pin.promptTab': 'Dieser Tab ist mit einer PIN geschützt.',
     'pin.wrong': 'Falsche PIN',

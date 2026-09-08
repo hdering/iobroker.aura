@@ -121,6 +121,24 @@ try {
         'vault content carries the protected widgets (for the editor)',
     );
     ok(!('pin' in secMeta) && !('hash' in secMeta), 'vault read never exposes the PIN or its hash');
+    ok(secMeta.mcpWrite === false, 'a view is NOT released for the MCP server by default');
+
+    // ── MCP release („Über MCP bearbeitbar“) ─────────────────────────────────
+    // The way a protected view is opened for the AI server WITHOUT anybody typing
+    // the PIN into a chat: an admin decides, and it is stored in the vault — not in
+    // the config state, which any socket client can write.
+    r = await call('POST', 'vault/mcp', { body: { key: 'section:sLocked', enabled: true } });
+    ok(r.status === 401, 'granting a release without an admin token → 401');
+    r = await call('POST', 'vault/mcp', { token: adminToken, body: { key: 'section:nope', enabled: true } });
+    ok(r.status === 404, 'a release for a view the vault does not know → 404');
+    r = await call('POST', 'vault/mcp', { token: adminToken, body: { key: 'section:sLocked', enabled: true } });
+    ok(r.status === 200 && r.json.mcpWrite === true, 'admin grants the release');
+    ok(vault.load().sections['section:sLocked'].mcpWrite === true, 'the release is stored in the vault');
+    r = await call('GET', 'vault', { token: adminToken });
+    ok(r.json.sections['section:sLocked'].mcpWrite === true, 'the editor sees the release it set');
+    r = await call('POST', 'vault/mcp', { token: adminToken, body: { key: 'section:sLocked', enabled: false } });
+    ok(r.status === 200 && r.json.mcpWrite === false, 'and can take it back');
+    ok(!('mcpWrite' in vault.load().sections['section:sLocked']), 'revoking removes the flag entirely');
 
     // ── admin change ─────────────────────────────────────────────────────────
     r = await call('POST', 'admin/change', { token: adminToken, body: { newPassword: 'newpass' } });

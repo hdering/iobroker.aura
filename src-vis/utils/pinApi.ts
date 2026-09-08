@@ -71,12 +71,26 @@ export interface VaultSectionMeta {
     scope: 'section' | 'tab';
     name: string;
     pinRelock: 'leave' | 'session';
+    /** Released for the MCP server to read and write this view's content. */
+    mcpWrite?: boolean;
     content: any;
 }
 
 export async function vaultRead(token: string): Promise<Record<string, VaultSectionMeta> | null> {
     const { status, json } = await request('GET', 'vault', { token });
     return status === 200 && json?.sections ? json.sections : null;
+}
+
+/**
+ * Grant or revoke „editable via MCP“ for one protected view.
+ *
+ * Admin token, never a PIN: the point of the switch is that the AI server gets
+ * access without the code ever being typed into a chat. Stored in the vault, so a
+ * socket client cannot grant itself a release by writing the config state.
+ */
+export async function vaultSetMcp(token: string, key: string, enabled: boolean): Promise<boolean> {
+    const { status } = await request('POST', 'vault/mcp', { body: { key, enabled }, token });
+    return status === 200;
 }
 
 export type UnlockOutcome =

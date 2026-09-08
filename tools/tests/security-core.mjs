@@ -90,6 +90,10 @@ const fullConfig = () => ({
                     slug: 'musik',
                     pin: '1234',
                     pinRelock: 'session',
+                    // Menu decoration on the section itself — neither stub nor tab,
+                    // and the reason it used to disappear the moment a PIN was set.
+                    badgeAggregate: { enabled: true },
+                    badges: [{ id: 'b1', dp: 'some.dp' }],
                     tabs: [
                         { id: 'tA', name: 'A', slug: 'a', widgets: [{ id: 'wSecret', type: 'gauge' }] },
                         { id: 'tB', name: 'B', slug: 'b', widgets: [{ id: 'wSecret2', type: 'chart' }] },
@@ -153,6 +157,16 @@ const fullConfig = () => ({
     ok(sec.content.tabs.length === 2 && sec.content.tabs[0].widgets[0].id === 'wSecret', 'section content = full tabs');
     const tab = prot.find((p) => p.key === 'tab:sTabLock:tPin');
     ok(tab && tab.pin === '9999' && tab.content.widgets[0].id === 'wHidden', 'tab payload has pin + widgets');
+
+    // The section's own badge settings: out of the public stub (a count of widgets
+    // behind the PIN is a leak) but INTO the vault, or setting a PIN silently
+    // deletes them — which is what happened to a live dashboard.
+    ok(locked.badgeAggregate === undefined && locked.badges === undefined, 'section decoration not in the stub');
+    ok(
+        sec.content.badgeAggregate && sec.content.badgeAggregate.enabled === true,
+        'section badgeAggregate kept in the vault',
+    );
+    ok(Array.isArray(sec.content.badges) && sec.content.badges[0].id === 'b1', 'section badges kept in the vault');
 
     // Idempotence: splitting the already-public config yields nothing more.
     const again = vault.splitDashboard(publicConfig);

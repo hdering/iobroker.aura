@@ -762,11 +762,19 @@ export const useDashboardStore = create<DashboardState>()(
                             sections: l.sections.map((sec) => {
                                 let next = sec;
                                 const sEntry = entries[`section:${sec.id}`];
-                                const sContent = sEntry?.content as { tabs?: Tab[] } | undefined;
+                                const sContent = sEntry?.content as
+                                    | { tabs?: Tab[]; badges?: Section['badges']; badgeAggregate?: BadgeAggregate }
+                                    | undefined;
                                 if (sContent && Array.isArray(sContent.tabs)) {
                                     next = {
                                         ...next,
                                         tabs: sContent.tabs,
+                                        // The menu decoration is vault content too —
+                                        // the stub never carries it, so a save that
+                                        // did not put it back dropped the section's
+                                        // badgeAggregate for good.
+                                        badges: sContent.badges,
+                                        badgeAggregate: sContent.badgeAggregate,
                                         pin: KEEP_PIN,
                                         pinProtected: undefined,
                                         pinLength: undefined,

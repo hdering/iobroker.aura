@@ -3577,6 +3577,249 @@ check('mode=style leaves the health half out', () => {
     assert.ok(!/Datenpunkt-Verweis\(e\) geprüft/.test(styleOnly.content[0].text));
 });
 
+// ── PIN-protected views ──────────────────────────────────────────────────────
+// A section/tab behind a PIN reaches this server as a redacted stub: pinProtected
+// and an EMPTY widget list, its content held in the vault (lib/security). Reported
+// from use: that read exactly like a data loss — „0 Widget(s), endet auf Zeile 0“,
+// `widgets: []` from aura_tab, and aura_review filing it under „ohne Widgets“. Half
+// an hour of hunting for a loss that had not happened, plus a false alarm.
+const dashBeforePin = adapter.states['config.dashboard'];
+{
+    const env = JSON.parse(dashBeforePin);
+    env.state.layouts[0].sections[0].tabs.push({
+        id: 't9',
+        name: 'Geheim',
+        slug: 'geheim',
+        pinProtected: true,
+        pinLength: 4,
+        widgets: [],
+    });
+    env.state.layouts[1].sections[0].pinProtected = true;
+    env.state.layouts[1].sections[0].tabs = [{ id: 't3', name: 'Licht', slug: 'licht', widgets: [] }];
+    adapter.states['config.dashboard'] = JSON.stringify(env);
+}
+
+const dashLocked = await client.callTool({ name: 'aura_dashboard', arguments: {} });
+check('aura_dashboard says PIN-protected instead of counting zero widgets', () => {
+    const t = dashLocked.content[0].text;
+    assert.match(t, /· Geheim — PIN-geschützt, Inhalt nicht einsehbar/);
+    // The zero must not appear for a locked view — that is the sentence that read
+    // as data loss.
+    assert.ok(!/Geheim — 0 Widget\(s\)/.test(t));
+    assert.ok(!/Geheim.*endet auf Zeile 0/.test(t));
+    // A locked SECTION is labelled at the section line, and its stub tabs say
+    // where the lock comes from.
+    assert.match(t, /- Tablet \/ Haupt — PIN-geschützt/);
+    assert.match(t, /· Licht — PIN-geschützt, Inhalt nicht einsehbar \(über den Bereich\)/);
+    // And the answer explains the label once, so nobody has to guess.
+    assert.match(t, /ist NICHT leer, und dass hier keine Widgets stehen, ist kein Datenverlust/);
+});
+
+const tabLocked = await client.callTool({ name: 'aura_tab', arguments: { tab: 'Geheim' } });
+check('aura_tab refuses a locked tab rather than handing over an empty payload', () => {
+    assert.ok(tabLocked.isError);
+    assert.match(tabLocked.content[0].text, /PIN-geschützt, Inhalt nicht einsehbar/);
+    // `widgets: []` fed back into aura_write_tab would look like a repair.
+    assert.ok(!/"widgets": \[\]/.test(tabLocked.content[0].text));
+});
+
+const sweepLocked = await client.callTool({ name: 'aura_review', arguments: {} });
+check('aura_review counts a locked view as not checked, never as empty', () => {
+    const t = sweepLocked.content[0].text;
+    assert.match(t, /PIN-geschützte Ansicht\(en\) NICHT geprüft/);
+    assert.match(t, /Wohnzimmer \/ Start \/ Geheim/);
+    // The „empty places“ finding must not name them any more.
+    const empty = t.split(/## /).find((b) => /ohne Widgets/.test(b)) || '';
+    assert.ok(
+        !/Geheim/.test(empty),
+        `locked tab still filed as empty:
+${empty}`,
+    );
+});
+
+const writeLocked = await client.callTool({
+    name: 'aura_add_widget',
+    arguments: {
+        tab: 'Geheim',
+        widget: JSON.stringify({
+            id: 'wNew',
+            type: 'switch',
+            title: 'Neu',
+            datapoint: 'alias.0.licht',
+            gridPos: { x: 0, y: 0, w: 8, h: 4 },
+        }),
+    },
+});
+check('a write into a locked tab is refused instead of landing next to the vault', () => {
+    assert.ok(writeLocked.isError);
+    assert.match(writeLocked.content[0].text, /PIN-geschützt/);
+    assert.ok(!adapter.states['config.dashboard'].includes('wNew'));
+});
+
+const deleteLocked = await client.callTool({
+    name: 'aura_delete',
+    arguments: { kind: 'section', target: 'Haupt', layout: 'Tablet' },
+});
+check('deleting a node with protected content is refused', () => {
+    assert.ok(deleteLocked.isError);
+    assert.match(deleteLocked.content[0].text, /PIN-geschützte Ansicht\(en\)/);
+    assert.ok(adapter.states['config.dashboard'].includes('"s2"'));
+});
+
+const copyLocked = await client.callTool({
+    name: 'aura_copy_node',
+    arguments: { kind: 'tab', target: 'Geheim', toLayout: 'Tablet', toSection: 'Haupt' },
+});
+check('copying a locked tab is refused — the copy would be empty', () => {
+    assert.ok(copyLocked.isError);
+    assert.match(copyLocked.content[0].text, /PIN-geschützt/);
+});
+
+// ── The vault half: structure without content, and the release ───────────────
+// With a vault behind it the adapter CAN see the protected content — it runs in
+// the same process. What it hands out is the question, and the answer is in two
+// stages: geometry always, everything else only after an admin flipped „Über MCP
+// bearbeitbar“ in AURA itself (no PIN in a chat, ever).
+const SECRET_WIDGETS = [
+    {
+        id: 'wSecret',
+        type: 'camera',
+        title: 'Kamera Hof',
+        datapoint: 'hm-rpc.0.LEQ1.1.STATE',
+        gridPos: { x: 0, y: 0, w: 20, h: 6 },
+        options: { url: 'rtsp://intern/hof' },
+    },
+    {
+        id: 'wSecret2',
+        type: 'switch',
+        title: 'Tor',
+        datapoint: 'alias.0.licht',
+        gridPos: { x: 0, y: 6, w: 20, h: 4 },
+        options: {},
+    },
+];
+let vaultData = {
+    version: 1,
+    serverSecret: 'x',
+    admin: null,
+    sections: {
+        'tab:s1:t9': {
+            scope: 'tab',
+            name: 'Geheim',
+            salt: 's',
+            hash: 'h',
+            len: 4,
+            pinRelock: 'leave',
+            content: { widgets: JSON.parse(JSON.stringify(SECRET_WIDGETS)) },
+        },
+    },
+};
+adapter.vault = {
+    load: () => vaultData,
+    save: (d) => {
+        vaultData = d;
+    },
+};
+
+const dashVault = await client.callTool({ name: 'aura_dashboard', arguments: {} });
+check('a locked tab reports its geometry — how many widgets and where they end', () => {
+    const t = dashVault.content[0].text;
+    assert.match(t, /· Geheim — PIN-geschützt, Inhalt nicht einsehbar: 2 Widget\(s\), endet auf Zeile 10/);
+    assert.ok(!/über MCP bearbeitbar/.test(t), 'nothing is released yet');
+});
+
+const tabStructure = await client.callTool({ name: 'aura_tab', arguments: { tab: 'Geheim' } });
+check('aura_tab hands over the structure of a locked tab, and nothing else', () => {
+    const t = tabStructure.content[0].text;
+    assert.ok(!tabStructure.isError, 'the structure is an answer, not an error');
+    assert.match(t, /aura-tab-structure/);
+    // Id, type and gridPos — the geometry work needs exactly this.
+    assert.match(t, /"id": "wSecret"/);
+    assert.match(t, /"type": "camera"/);
+    assert.match(t, /"h": 6/);
+    // And none of the content.
+    assert.ok(!/Kamera Hof/.test(t), 'no title');
+    assert.ok(!/rtsp:/.test(t), 'no options');
+    assert.ok(!/hm-rpc/.test(t), 'no datapoint');
+    // It says what it is and how to get further.
+    assert.match(t, /Über MCP bearbeitbar/);
+});
+
+const measureLocked = await client.callTool({ name: 'aura_measure', arguments: { tab: 'Geheim' } });
+check('aura_measure works on a locked tab — rows and pixels reveal no content', () => {
+    const t = measureLocked.content[0].text;
+    assert.match(t, /wSecret/);
+    assert.match(t, /Zeilenhöhe 20 px/);
+    assert.ok(!/Kamera Hof/.test(t) && !/rtsp:/.test(t));
+    assert.match(t, /Nur die Struktur/);
+});
+
+const addBlocked = await client.callTool({
+    name: 'aura_add_widget',
+    arguments: {
+        tab: 'Geheim',
+        widget: JSON.stringify({ ...OK_SWITCH, id: 'nope', gridPos: { x: 0, y: 20, w: 8, h: 4 } }),
+    },
+});
+check('without a release a write is refused and names the switch in AURA', () => {
+    assert.ok(addBlocked.isError);
+    assert.match(addBlocked.content[0].text, /nicht für den MCP freigegeben/);
+    assert.match(addBlocked.content[0].text, /Über MCP bearbeitbar/);
+    assert.ok(!JSON.stringify(vaultData).includes('nope'), 'nothing reached the vault');
+});
+
+// The release, as the admin API sets it (lib/security/apiHandler → setRelease).
+vaultData.sections['tab:s1:t9'].mcpWrite = true;
+
+const dashReleased = await client.callTool({ name: 'aura_dashboard', arguments: {} });
+check('a released view is marked as such', () => {
+    assert.match(dashReleased.content[0].text, /\[über MCP bearbeitbar\]/);
+});
+
+const tabReleased = await client.callTool({ name: 'aura_tab', arguments: { tab: 'Geheim' } });
+check('with a release aura_tab hands over the real content', () => {
+    const t = tabReleased.content[0].text;
+    assert.match(t, /Kamera Hof/);
+    assert.match(t, /über den MCP freigegeben/);
+    assert.match(t, /aura_write_tab bleibt hier gesperrt/);
+});
+
+const writeTabReleased = await client.callTool({
+    name: 'aura_write_tab',
+    arguments: { tab: 'Geheim', widgets: JSON.stringify([{ ...OK_SWITCH, id: 'ersetzt' }]) },
+});
+check('aura_write_tab stays refused even on a released view', () => {
+    assert.ok(writeTabReleased.isError);
+    assert.match(writeTabReleased.content[0].text, /aura_write_tab bleibt hier gesperrt/);
+    assert.equal(vaultData.sections['tab:s1:t9'].content.widgets.length, 2);
+});
+
+const patched = await client.callTool({
+    name: 'aura_update_widget',
+    arguments: { widgetId: 'wSecret2', patch: JSON.stringify({ gridPos: { x: 0, y: 6, w: 20, h: 7 } }) },
+});
+check('a released view takes a geometry change — into the vault, not into the state', () => {
+    assert.ok(!patched.isError, patched.content[0].text);
+    const stored = vaultData.sections['tab:s1:t9'].content.widgets.find((w) => w.id === 'wSecret2');
+    assert.equal(stored.gridPos.h, 7, 'the change is in the vault');
+    assert.equal(stored.datapoint, 'alias.0.licht', 'and the rest of the widget survived it');
+    // The undo copy the normal backup path cannot hold (it is world-readable).
+    assert.equal(vaultData.sections['tab:s1:t9'].contentPrev.widgets.find((w) => w.id === 'wSecret2').gridPos.h, 4);
+    // And the socket-readable state still has an empty stub.
+    const tab = JSON.parse(adapter.states['config.dashboard']).state.layouts[0].sections[0].tabs.find(
+        (t) => t.id === 't9',
+    );
+    assert.deepEqual(tab.widgets, [], 'protected content must never land in config.dashboard');
+    assert.ok(!adapter.states['config.dashboard'].includes('wSecret'));
+});
+
+delete adapter.vault;
+// The successful write above left a backup file; the write tests further down
+// count them from zero.
+for (const f of Object.keys(adapter.files)) delete adapter.files[f];
+
+adapter.states['config.dashboard'] = dashBeforePin;
+
 const measured = await client.callTool({
     name: 'aura_measure',
     arguments: {

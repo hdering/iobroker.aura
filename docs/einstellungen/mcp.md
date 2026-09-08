@@ -183,6 +183,29 @@ Unterhalb von **…und löschen** wird auch ein Schreibvorgang abgelehnt, der vo
 
 Mit **Nur lesen** anfangen und erst erhöhen, wenn das Ergebnis überzeugt.
 
+## PIN-geschützte Bereiche und Tabs
+
+Der Inhalt eines [PIN-geschützten](./editor#pin-schutz) Bereichs/Tabs liegt serverseitig im Tresor, nicht in der Konfiguration. Der MCP meldet ihn deshalb als **„PIN-geschützt, Inhalt nicht einsehbar"** — nicht als leer.
+
+| Ohne Freigabe | Mit Freigabe |
+| --- | --- |
+| `aura_dashboard`: Anzahl Widgets + Endzeile | dito |
+| `aura_tab`: nur Struktur (`id`, `type`, `gridPos`) | vollständiger Payload |
+| `aura_measure`, `aura_rendered`: normale Zahlen | dito |
+| `aura_review`: nicht geprüft, wird gezählt | dito |
+| Schreiben: abgelehnt | Widgets ändern, hinzufügen, `aura_compact` |
+| `aura_write_tab`: abgelehnt | **abgelehnt** — ersetzt den ganzen Tab |
+| Löschen/Kopieren des Bereichs/Tabs: abgelehnt | abgelehnt |
+
+Freigeben im Editor: Zahnrad des Bereichs bzw. des Tabs → Schalter **„Über MCP bearbeitbar"** (nur bei gesetzter PIN, Admin-Anmeldung nötig). Die PIN wird dafür nicht gebraucht und gehört nicht in den Chat.
+
+| | |
+| --- | --- |
+| Gespeichert in | `security.json` (Tresor), nicht im Datenpunkt `config.dashboard` |
+| Gilt | bis der Schalter wieder aus ist |
+| Änderungen landen | im Tresor; im Frontend erst nach dem nächsten Entsperren sichtbar |
+| Rückgängig | eine Vorversion je Ansicht im Tresor (`contentPrev`); die Sicherungen unter `aura.0.backups` enthalten geschützte Inhalte **nicht** |
+
 ## Schritt 5 — Loslegen
 
 Einfach sagen, was gebaut werden soll:

@@ -443,6 +443,11 @@ export const en: Record<TranslationKey, string> = {
     'pin.keepUnlocked': 'Stay unlocked',
     'pin.keepUnlockedHint':
         'Stay open after unlocking until the page is reloaded. Off: locks again as soon as you navigate away.',
+    'pin.mcpWrite': 'Editable via MCP',
+    'pin.mcpWriteHint':
+        'Lets the AI server (MCP) read and change the protected content. Off: structure only (id, type, size), ' +
+        'no write access. The PIN is not needed for this.',
+    'pin.mcpWriteFailed': 'Could not set the release – check the login.',
     'pin.promptSection': 'This section is protected by a PIN.',
     'pin.promptTab': 'This tab is protected by a PIN.',
     'pin.wrong': 'Wrong PIN',

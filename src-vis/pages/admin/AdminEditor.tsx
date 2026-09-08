@@ -31,6 +31,9 @@ import { getWidgetIcon } from '../../utils/widgetIconMap';
 import { IconPickerModal } from '../../components/config/IconPickerModal';
 import { useDashboardStore, useActiveSection } from '../../store/dashboardStore';
 import { KEEP_PIN } from '../../utils/pinLock';
+import { useMcpReleaseStore } from '../../store/mcpReleaseStore';
+import { vaultSetMcp } from '../../utils/pinApi';
+import { adminToken } from '../../store/authStore';
 import { ConditionEditor } from '../../components/config/ConditionEditor';
 import { BadgeEditor } from '../../components/config/BadgeEditor';
 import { usePortalTarget } from '../../contexts/PortalTargetContext';
@@ -1118,6 +1121,9 @@ const SectionSwitcher = memo(function SectionSwitcher() {
                                     {t('pin.hint')}
                                 </p>
                             )}
+                            {openSection.pin === KEEP_PIN && (
+                                <McpReleaseToggle vaultKey={`section:${openSection.id}`} />
+                            )}
 
                             {/* ── Badges section (collapsed, like the tab panel) ──────────── */}
                             <div
@@ -1797,6 +1803,9 @@ const TabBar = memo(function TabBar() {
                                         {t('pin.hint')}
                                     </p>
                                 )}
+                                {settingsTab.pin === KEEP_PIN && (
+                                    <McpReleaseToggle vaultKey={`tab:${currentSectionId}:${settingsTab.id}`} />
+                                )}
                             </div>
 
                             {/* ── Export tab ──────────────────────────────────────────────── */}
@@ -2036,6 +2045,65 @@ const TabBar = memo(function TabBar() {
         </>
     );
 });
+
+/**
+ * „Über MCP bearbeitbar“ for one protected view.
+ *
+ * The release the AI server needs to change PIN-protected content — and the reason
+ * a PIN never has to be typed into a chat: the decision is made here, with the
+ * admin session, and stored in the server-side vault (POST /api/aura/vault/mcp).
+ * Shown only for a view that is already protected server-side (`pin === KEEP_PIN`),
+ * because only then is there a vault entry to release.
+ */
+function McpReleaseToggle({ vaultKey }: { vaultKey: string }) {
+    const t = useT();
+    const enabled = useMcpReleaseStore((s) => s.flags[vaultKey] === true);
+    const setFlag = useMcpReleaseStore((s) => s.set);
+    const [failed, setFailed] = useState(false);
+    return (
+        <div className="mt-2">
+            <div className="flex items-center justify-between">
+                <div>
+                    <p className="text-[11px] font-medium" style={{ color: 'var(--text-primary)' }}>
+                        {t('pin.mcpWrite')}
+                    </p>
+                    <p className="text-[9px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                        {t('pin.mcpWriteHint')}
+                    </p>
+                </div>
+                <button
+                    onClick={() => {
+                        const token = adminToken();
+                        if (!token) {
+                            setFailed(true);
+                            return;
+                        }
+                        const next = !enabled;
+                        setFlag(vaultKey, next);
+                        void vaultSetMcp(token, vaultKey, next).then((ok) => {
+                            setFailed(!ok);
+                            // Never leave the switch showing a release that the vault
+                            // did not take — this one is a permission.
+                            if (!ok) setFlag(vaultKey, enabled);
+                        });
+                    }}
+                    className="relative w-9 h-5 rounded-full transition-colors shrink-0"
+                    style={{ background: enabled ? 'var(--accent)' : 'var(--app-border)' }}
+                >
+                    <span
+                        className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                        style={{ left: enabled ? '18px' : '2px' }}
+                    />
+                </button>
+            </div>
+            {failed && (
+                <p className="text-[9px] mt-1" style={{ color: 'var(--accent-red)' }}>
+                    {t('pin.mcpWriteFailed')}
+                </p>
+            )}
+        </div>
+    );
+}
 
 export function AdminEditor() {
     const t = useT();

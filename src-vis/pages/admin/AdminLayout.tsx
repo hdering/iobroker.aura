@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { useAuthStore, logout, adminToken } from '../../store/authStore';
 import { vaultRead } from '../../utils/pinApi';
+import { useMcpReleaseStore } from '../../store/mcpReleaseStore';
 import { useThemeStore } from '../../store/themeStore';
 import { getTheme, ADMIN_DARK_THEME } from '../../themes';
 import {
@@ -136,6 +137,7 @@ function useProtectedContentMerge(connected: boolean) {
     const sessionActive = useAuthStore((s) => s.sessionActive);
     const layouts = useDashboardStore((s) => s.layouts);
     const merge = useDashboardStore((s) => s.mergeProtectedContent);
+    const setReleases = useMcpReleaseStore((s) => s.setAll);
     const busyRef = useRef(false);
     const hasStub = useMemo(
         () => layouts.some((l) => l.sections.some((sec) => sec.pinProtected || sec.tabs.some((t) => t.pinProtected))),
@@ -148,12 +150,16 @@ function useProtectedContentMerge(connected: boolean) {
         busyRef.current = true;
         vaultRead(token)
             .then((sections) => {
-                if (sections) merge(sections);
+                if (!sections) return;
+                merge(sections);
+                // Same read, the other half of it: which views the admin released
+                // for the MCP server (the switch in the section/tab panel).
+                setReleases(Object.fromEntries(Object.entries(sections).map(([key, s]) => [key, s.mcpWrite === true])));
             })
             .finally(() => {
                 busyRef.current = false;
             });
-    }, [connected, sessionActive, hasStub, merge]);
+    }, [connected, sessionActive, hasStub, merge, setReleases]);
 }
 
 export function AdminLayout() {
