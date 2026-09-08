@@ -21,6 +21,8 @@ Icon und Kapitälchen-Titel mit durchgehender Trennlinie — dezente Gliederung.
 ### Framed
 Wie Default, aber als vollwertige Widget-Karte mit Hintergrund, Rahmen, Radius und Innenabstand — für Abschnitte, die sich optisch in die Widget-Reihe einfügen sollen. Die Theme-Variablen `--header-text` und `--header-accent` wirken weiter; der Kartenhintergrund kommt vom Widget-Design, nicht von `--header-bg`.
 
+Braucht mehr Höhe als die anderen Stile: mit Karte und Innenabstand sind **3 Zeilen** das Minimum, bei 2 sitzt der Titel im Rand.
+
 ## Einstellungen
 
 Alle Optionen werden im Editor unter **Widget bearbeiten** gesetzt.

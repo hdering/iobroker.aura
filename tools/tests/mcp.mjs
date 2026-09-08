@@ -1665,6 +1665,73 @@ check('a chart is judged by the height it is readable at, with the hard one name
     assert.ok(!/BRAUCHBAREN Mindesthöhe/.test(renderMeasure([g], { grid: GRID, metrics: plainMetrics })));
 });
 
+check('a framed header is measured as the card it is, not as a bare heading', () => {
+    // Reported from use: aura_measure answered „braucht 28 px, Minimum h=2“ for
+    // every header — including `framed`, which is the one style that sits in a
+    // card. At h=2 it renders without an error with its title in the border.
+    const metrics = {
+        $meta: { reference: { fontScale: 1, widgetPaddingPx: 16 }, usablePlotPx: 140 },
+        counted: {},
+        minimum: {
+            header: {
+                minPx: 22,
+                fontScalePx: 20,
+                atWidthPx: 240,
+                variants: {
+                    framed: {
+                        minPx: 32,
+                        usablePx: 54,
+                        fontScalePx: 20,
+                        usableWhy: 'ab hier steht der Titel mit dem vollen Innenabstand in der Karte',
+                        hardWhy: 'darunter rückt der Titel in den Rand der Karte',
+                    },
+                },
+            },
+        },
+    };
+    const at = (layout, h) =>
+        measureWidget(
+            { id: 'h', type: 'header', title: 'Wohnzimmer', layout, gridPos: { x: 0, y: 0, w: 12, h } },
+            { metrics, grid: GRID },
+        );
+
+    const bare = at('default', 2);
+    assert.equal(bare.requiredPx, 22, 'every other header style keeps the number of the type');
+    assert.ok(!bare.usable);
+
+    const framed = at('framed', 2);
+    assert.equal(framed.requiredPx, 54, 'the usable height decides the verdict');
+    assert.equal(framed.hardMinPx, 32);
+    assert.equal(framed.verdict, 'zu klein');
+    assert.equal(framed.needRows, 3, 'h=2 renders, h=3 is the one to build with');
+    assert.notEqual(at('framed', 3).verdict, 'zu klein', 'and h=3 is enough for it');
+
+    // The reason comes from the measurement — a squeezed card is not an
+    // unreadable diagram, and the chart sentence used to be printed for both.
+    assert.match(framed.basis, /vollen Innenabstand/);
+    assert.ok(!/Zeichenfläche/.test(framed.basis));
+    const out = renderMeasure([framed], { grid: GRID, metrics });
+    assert.match(out, /BRAUCHBAREN Mindesthöhe/);
+    assert.match(out, /h: 32 px/, 'the hard minimum is named as the floor');
+
+    // A card carries the widget padding twice; a bare header carries none. One
+    // number for both left a framed header on a 8 px dashboard 16 px too high.
+    const pres = { fontScale: 1, widgetPadding: 8 };
+    const padded = measureWidget(
+        { id: 'h', type: 'header', title: 'W', layout: 'framed', gridPos: { x: 0, y: 0, w: 12, h: 2 } },
+        { metrics, grid: GRID, presentation: pres },
+    );
+    assert.equal(padded.requiredPx, 54 - 16, 'the framed card follows the dashboard padding');
+    const bareAt8 = measureWidget(
+        { id: 'h', type: 'header', title: 'W', gridPos: { x: 0, y: 0, w: 12, h: 2 } },
+        { metrics, grid: GRID, presentation: pres },
+    );
+    assert.equal(bareAt8.requiredPx, 22, 'a bare header has no padding to correct');
+
+    // A layout with no entry of its own is answered by the type.
+    assert.equal(at('minimal', 2).requiredPx, 22);
+});
+
 const AT = (fontScale, widgetPadding) => ({
     metrics: METRICS,
     grid: GRID,

@@ -2,7 +2,7 @@
   "$meta": {
     "name": "AURA widget height metrics",
     "generator": "tools/schema/measure-widget-metrics.mjs",
-    "measured": "2026-09-07",
+    "measured": "2026-09-08",
     "reference": {
       "fontScale": 1,
       "widgetPaddingPx": 16
@@ -22,6 +22,8 @@
       "A variant with counted.<type>.variants.<v>.columns draws its rows in that many columns, so its height grows per ROW OF COLUMNS: aura_measure rounds the item count up to a full row before multiplying. The per-row surcharges are still counted per item, which is an approximation for a mixed list.",
       "counted.<type>.variants.<v>.modifiers overrides the top-level modifier of the same key for that layout: a factor that changes the ROW changes it differently per layout (the timestamp per entry is +13.5 px a row by default, +21.5 in \"card\", +6.0 in \"compact\" and ±0 in \"minimal\"). A key a variant does not list keeps the top-level number.",
       "A minimum is the point where content starts to be lost, not a recommended size — defaultSize is that.",
+      "minimum.<type>.variants.<layout> re-measures a layout that changes what the FRAME draws, and wins over the type-level numbers for a widget in that layout: a header in \"framed\" sits in a card, every other header style is bare. A layout that is not listed keeps the number of the type.",
+      "minimum.<type>.usablePx is not always the plot criterion. Where the entry carries usableWhy, that sentence is the criterion it was measured against — for a framed header, the height at which the title stops sitting in the padding of the card. Both are recommendations; minPx stays the cliff.",
       "A chart never loses content: eCharts and recharts paint into whatever box they get, so \"nothing is cut off\" is satisfied long before the chart is readable. Those types therefore carry a second number, minimum.<type>.usablePx — the height at which the plot surface first reaches 140 px. That is a stated recommendation, not a measured cliff; everything else here is a cliff.",
       "Every type is measured WITH content in it (OPTIONS_FOR). A type measured empty reports the height of its empty state, which is what chips, chart and echart used to do.",
       "counted.<type>.voids names the options that do not shift the height by a delta but replace the typography the number was measured with (weather: tempFontSize, fontScale, forecastRowGap). A widget that sets one keeps the number as an order of magnitude, and aura_measure says the verdict is not a verdict — the browser (aura_rendered) is the only answer there.",
@@ -1010,7 +1012,18 @@
       "minPx": 22,
       "minRowsDefaultGrid": 2,
       "fontScalePx": 20,
-      "atWidthPx": 240
+      "atWidthPx": 240,
+      "variants": {
+        "framed": {
+          "minPx": 32,
+          "minRowsDefaultGrid": 2,
+          "usablePx": 54,
+          "usableRowsDefaultGrid": 3,
+          "usableWhy": "ab hier steht der Titel mit dem vollen Innenabstand in der Karte",
+          "hardWhy": "darunter rückt der Titel in den Rand der Karte, und ab der harten Grenze wächst die Karte über ihre Rasterhöhe hinaus",
+          "fontScalePx": 20
+        }
+      }
     },
     "httpRequest": {
       "minPx": 96,

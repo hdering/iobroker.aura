@@ -747,6 +747,41 @@ const MIN_NOTES = {
 };
 
 /**
+ * Layouts of a MINIMUM type that have to be measured on their own, and by which
+ * criterion.
+ *
+ * A minimum is measured once per type, in that type's default layout — which is
+ * right for a type whose layouts only move things around, and wrong for one whose
+ * layout changes what the frame draws. Reported from use on the section title:
+ * aura_measure answered "braucht 28 px, Minimum h=2" for every header, including
+ * `framed` — and a framed header at h=2 renders without an error, with its title
+ * sitting in the card's border. Usable is h=3.
+ *
+ * `hard` and `usable` name the extra criterion for each of the two walks (see
+ * requiredPx). `usableWhy` and `hardWhy` are the two sentences aura_measure prints
+ * for the pair, because "the plot surface reaches 140 px" is not the reason here.
+ *
+ * Only layouts that need it: the other three header styles are the bare header
+ * without a card, all within 2 px of the number the type already carries.
+ */
+const MIN_VARIANTS = {
+    header: [
+        {
+            layout: 'framed',
+            // Without `box` this walk has no floor at all: the framed card stops
+            // shrinking at its content (measured 32 px) and grows out of its grid cell
+            // instead, so "nothing is cut off" stays true down to one row.
+            hard: 'box',
+            usable: 'pad',
+            usableWhy: 'ab hier steht der Titel mit dem vollen Innenabstand in der Karte',
+            hardWhy:
+                'darunter rückt der Titel in den Rand der Karte, und ab der harten Grenze wächst die Karte ' +
+                'über ihre Rasterhöhe hinaus',
+        },
+    ],
+};
+
+/**
  * Types that cannot be sized this way, with the reason kept in the output so the
  * next person does not go looking for the number again.
  */
@@ -806,8 +841,11 @@ const CONTENT = {
  * alone reported that a gauge fits in 20 px), and is the content the type is
  * supposed to draw actually THERE (CONTENT above).
  *
- * `plotPx` is reported alongside rather than judged here: a canvas never
- * overflows, so the usable minimum is a second walk with its own criterion.
+ * `plotPx` and `padInPx` are reported alongside rather than judged here: a canvas
+ * never overflows and a card whose content sits in its own padding does not
+ * either, so those are second walks with their own criteria (`plot`, `pad`).
+ * `height` is the card as the browser drew it, which is not always the height it
+ * was given — see the `box` criterion.
  */
 const FITS = ({ id, need, plot }) => {
     const root = document.querySelector(`.aura-widget-${id}`);
@@ -815,12 +853,19 @@ const FITS = ({ id, need, plot }) => {
         return { error: 'not rendered' };
     }
     const rb = root.getBoundingClientRect();
+    const rootStyle = getComputedStyle(root);
+    const padTop = parseFloat(rootStyle.paddingTop) || 0;
+    const padBottom = parseFloat(rootStyle.paddingBottom) || 0;
     let out = 0;
     let scroll = 0;
+    let into = 0;
     for (const el of root.querySelectorAll('*')) {
         const b = el.getBoundingClientRect();
         if (b.height) {
             out = Math.max(out, b.bottom - rb.bottom, rb.top - b.top);
+            // How far the content reaches INTO the card's own padding. Zero while
+            // the padding is intact, and that is the whole criterion.
+            into = Math.max(into, rb.top + padTop - b.top, b.bottom - (rb.bottom - padBottom));
         }
         if (getComputedStyle(el).overflowY !== 'visible') {
             scroll = Math.max(scroll, el.scrollHeight - el.clientHeight);
@@ -832,6 +877,7 @@ const FITS = ({ id, need, plot }) => {
         height: Math.round(rb.height),
         missing: !!need && !root.querySelector(need),
         plotPx: plotEl ? Math.round(plotEl.getBoundingClientRect().height) : null,
+        padInPx: Math.round(Math.max(0, into)),
     };
 };
 
@@ -932,43 +978,58 @@ async function render(type, { rows, cols, datapoint, options, mock, layout, font
 /**
  * Walk down from a height that fits and return the last one that still does.
  *
- * `setup.plot` turns on the usable-plot criterion instead of the "nothing is cut
- * off" one — the second walk the chart types need, because they never cut
- * anything off (MIN_PLOT_PX).
+ * Three criteria can be added to the "nothing is cut off" one, because there are
+ * three ways for a card to stop being right without cutting anything off:
+ *
+ *   plot  the drawing surface has to reach MIN_PLOT_PX — the chart types paint
+ *         into any box and never cut anything off at all
+ *   box   the card has to still BE the height it was given. A framed header
+ *         stops shrinking at its content and grows out of its grid cell instead,
+ *         over whatever sits below it: nothing is cut off, and nothing is right
+ *   pad   nothing may reach into the card's own padding. That is not a cliff but
+ *         a stated criterion — the card below it draws its content into its
+ *         border, which is the "technically fine, looks squeezed" range
  */
 async function requiredPx(type, setup) {
-    const { plot } = setup || {};
+    const { plot, box, pad } = setup || {};
     // The ceiling is raised rather than reported as "does not fit": a row that
     // grows with the font scale can push a tall layout past 800 px, and eight
     // card rows at scale 1.3 do exactly that (measured: 67 px over). Doubling
     // only costs the walk that needs it.
     // A height "fits" only when nothing is cut off AND the content the type is
-    // supposed to draw is present. `plot` adds the second criterion for the chart
-    // types, where nothing is ever cut off (see MIN_PLOT_PX).
-    const ok = (m) => m.over <= TOL && !m.missing && (!plot || (m.plotPx ?? 0) >= MIN_PLOT_PX);
+    // supposed to draw is present. The three optional criteria above are checked
+    // against the height the card was ASKED for, which is why `ok` takes it.
+    const ok = (m, rows) =>
+        m.over <= TOL &&
+        !m.missing &&
+        (!plot || (m.plotPx ?? 0) >= MIN_PLOT_PX) &&
+        (!box || m.height - rows * PX_PER_ROW <= TOL) &&
+        (!pad || (m.padInPx ?? 0) <= TOL);
 
     let start = TOP_ROWS;
     let top = await render(type, { ...setup, rows: start });
-    while (!top.error && !ok(top) && start < TOP_ROWS * 4) {
+    while (!top.error && !ok(top, start) && start < TOP_ROWS * 4) {
         start *= 2;
         top = await render(type, { ...setup, rows: start });
     }
     if (top.error) {
         return { error: top.error };
     }
-    if (!ok(top)) {
+    if (!ok(top, start)) {
         return {
             error:
                 `passt selbst in ${start * PX_PER_ROW} px nicht ` +
                 `(${top.over} px darüber${top.missing ? ', Inhalt fehlt' : ''}` +
-                `${plot ? `, Zeichenfläche ${top.plotPx} px` : ''})`,
+                `${plot ? `, Zeichenfläche ${top.plotPx} px` : ''}` +
+                `${box ? `, Karte ${top.height} px hoch` : ''}` +
+                `${pad ? `, ${top.padInPx} px im Innenabstand` : ''})`,
         };
     }
     let good = start;
     let rows = start - COARSE;
     while (rows >= 1) {
         const m = await render(type, { ...setup, rows });
-        if (m.error || !ok(m)) {
+        if (m.error || !ok(m, rows)) {
             break;
         }
         good = rows;
@@ -977,7 +1038,7 @@ async function requiredPx(type, setup) {
     // Refine the last coarse step one row at a time.
     for (let r = good - 1; r >= 1 && r > good - COARSE; r--) {
         const m = await render(type, { ...setup, rows: r });
-        if (m.error || !ok(m)) {
+        if (m.error || !ok(m, r)) {
             break;
         }
         good = r;
@@ -1394,6 +1455,50 @@ for (const type of Object.keys(schema.widgets)) {
             `${fontScalePx ? `, +${fontScalePx} px je Schriftskalierung` : ''})` +
             `${usable && usable.px ? `  brauchbar ab ${usable.px} px (${results[type].usableRowsDefaultGrid} Zeilen)` : ''}`,
     );
+
+    // Layouts that change what the FRAME draws, measured on their own (see
+    // MIN_VARIANTS). The slope is taken from the walk whose number decides the
+    // verdict — the usable one where there is one — because aura_measure applies
+    // a single fontScalePx to both numbers of an entry.
+    for (const v of MIN_VARIANTS[type] ?? []) {
+        const setup = { cols, layout: v.layout, ...(v.hard ? { [v.hard]: true } : {}) };
+        const hard = await requiredPx(type, setup);
+        const hardHigh = await requiredPx(type, { ...setup, fontScale: SCALE_HIGH });
+        if (hard.error || hardHigh.error) {
+            console.warn(`  ${type}/${v.layout}: ${hard.error || hardHigh.error}`);
+            continue;
+        }
+        const uSetup = { cols, layout: v.layout, ...(v.usable ? { [v.usable]: true } : {}) };
+        const u = v.usable ? await requiredPx(type, uSetup) : null;
+        const uHigh = v.usable ? await requiredPx(type, { ...uSetup, fontScale: SCALE_HIGH }) : null;
+        if (u && (u.error || uHigh.error)) {
+            console.warn(`  ${type}/${v.layout}: keine brauchbare Mindesthöhe (${u.error || uHigh.error})`);
+        }
+        const usableOk = u && u.px && uHigh && uHigh.px;
+        const slope = usableOk
+            ? denoiseSlope((uHigh.px - u.px) / SCALE_SPAN)
+            : denoiseSlope((hardHigh.px - hard.px) / SCALE_SPAN);
+        const entry = {
+            minPx: hard.px,
+            minRowsDefaultGrid: Math.ceil((hard.px + 10) / 30),
+            ...(usableOk
+                ? {
+                      usablePx: u.px,
+                      usableRowsDefaultGrid: Math.ceil((u.px + 10) / 30),
+                      usableWhy: v.usableWhy,
+                      hardWhy: v.hardWhy,
+                  }
+                : {}),
+            ...(slope ? { fontScalePx: slope } : {}),
+        };
+        results[type].variants = { ...(results[type].variants || {}), [v.layout]: entry };
+        console.log(
+            `  Layout "${v.layout}"`.padEnd(18) +
+                ` min ${String(hard.px).padStart(4)} px (${entry.minRowsDefaultGrid} Zeilen)` +
+                `${usableOk ? `  brauchbar ab ${u.px} px (${entry.usableRowsDefaultGrid} Zeilen)` : ''}` +
+                `${slope ? `, +${slope} px je Schriftskalierung` : ''}`,
+        );
+    }
 }
 
 await browser.close();
@@ -1427,6 +1532,8 @@ const metrics = {
             'A variant with counted.<type>.variants.<v>.columns draws its rows in that many columns, so its height grows per ROW OF COLUMNS: aura_measure rounds the item count up to a full row before multiplying. The per-row surcharges are still counted per item, which is an approximation for a mixed list.',
             'counted.<type>.variants.<v>.modifiers overrides the top-level modifier of the same key for that layout: a factor that changes the ROW changes it differently per layout (the timestamp per entry is +13.5 px a row by default, +21.5 in "card", +6.0 in "compact" and ±0 in "minimal"). A key a variant does not list keeps the top-level number.',
             'A minimum is the point where content starts to be lost, not a recommended size — defaultSize is that.',
+            'minimum.<type>.variants.<layout> re-measures a layout that changes what the FRAME draws, and wins over the type-level numbers for a widget in that layout: a header in "framed" sits in a card, every other header style is bare. A layout that is not listed keeps the number of the type.',
+            'minimum.<type>.usablePx is not always the plot criterion. Where the entry carries usableWhy, that sentence is the criterion it was measured against — for a framed header, the height at which the title stops sitting in the padding of the card. Both are recommendations; minPx stays the cliff.',
             `A chart never loses content: eCharts and recharts paint into whatever box they get, so "nothing is cut off" is satisfied long before the chart is readable. Those types therefore carry a second number, minimum.<type>.usablePx — the height at which the plot surface first reaches ${MIN_PLOT_PX} px. That is a stated recommendation, not a measured cliff; everything else here is a cliff.`,
             'Every type is measured WITH content in it (OPTIONS_FOR). A type measured empty reports the height of its empty state, which is what chips, chart and echart used to do.',
             'counted.<type>.voids names the options that do not shift the height by a delta but replace the typography the number was measured with (weather: tempFontSize, fontScale, forecastRowGap). A widget that sets one keeps the number as an order of magnitude, and aura_measure says the verdict is not a verdict — the browser (aura_rendered) is the only answer there.',
