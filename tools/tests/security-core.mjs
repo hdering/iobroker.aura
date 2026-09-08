@@ -32,7 +32,12 @@ const ok = (cond, msg) => {
     ok(salt && hash && hash.length === 128, 'hashSecret returns 64-byte hex hash + salt');
     ok(auth.verifySecret('1234', salt, hash), 'correct secret verifies');
     ok(!auth.verifySecret('1235', salt, hash), 'wrong secret rejected');
-    ok(!auth.verifySecret('1234', salt, hash.slice(0, -1) + '0'), 'tampered hash rejected');
+    // Flip the last nibble to something it is not — appending a fixed '0' left the
+    // hash unchanged (and the check passing) for every 16th run.
+    ok(
+        !auth.verifySecret('1234', salt, hash.slice(0, -1) + (hash.endsWith('0') ? '1' : '0')),
+        'tampered hash rejected',
+    );
     ok(!auth.verifySecret('1234', '', ''), 'missing salt/hash rejected, no throw');
 
     const a = auth.hashSecret('1234');
@@ -277,6 +282,37 @@ const fullConfig = () => ({
         pass++; // mode is a no-op on Windows; count the slot so totals match
     }
     fs.rmSync(dir, { recursive: true, force: true });
+}
+
+// ── restoreView („PIN entfernen“) ───────────────────────────────────────────
+// The mirror image of the split for one view: the payload goes back into the
+// stub and every protection marker goes away. Server-side, so removing a PIN
+// needs neither the PIN nor a save from the editor.
+{
+    const { publicConfig, protected: prot } = vault.splitDashboard(fullConfig());
+    vault.stampPinLengths(publicConfig, vault.buildVaultSections(prot).sections);
+    const byKey = Object.fromEntries(prot.map((p) => [p.key, p]));
+
+    ok(vault.restoreView(publicConfig, 'section:sLocked', byKey['section:sLocked'].content), 'section restored');
+    const sec = publicConfig.layouts[0].sections[1];
+    ok(sec.pin === undefined && sec.pinProtected === undefined, 'section protection markers gone');
+    ok(sec.pinLength === undefined && sec.pinRelock === undefined, 'stub PIN hints gone too');
+    ok(sec.tabs.length === 2 && sec.tabs[0].widgets[0].id === 'wSecret', 'section tabs and widgets are back');
+    ok(sec.badgeAggregate.enabled === true && sec.badges[0].id === 'b1', 'menu decoration comes back with it');
+
+    ok(vault.restoreView(publicConfig, 'tab:sTabLock:tPin', byKey['tab:sTabLock:tPin'].content), 'tab restored');
+    const tab = publicConfig.layouts[0].sections[2].tabs[1];
+    ok(tab.pin === undefined && tab.pinProtected === undefined && tab.pinLength === undefined, 'tab markers gone');
+    ok(tab.widgets[0].id === 'wHidden' && tab.conditions[0].dp === 'some.dp', 'tab widgets + conditions are back');
+    ok(tab.name === 'Secret' && tab.slug === 'secret', 'the stub fields survive the restore');
+
+    // Decoration the payload does not carry must go rather than linger from the stub.
+    const stub = vault.splitDashboard(fullConfig()).publicConfig;
+    stub.layouts[0].sections[2].tabs[1].badges = [{ id: 'leftover' }];
+    vault.restoreView(stub, 'tab:sTabLock:tPin', { widgets: [] });
+    ok(stub.layouts[0].sections[2].tabs[1].badges === undefined, 'decoration missing from the payload is dropped');
+
+    ok(vault.restoreView(publicConfig, 'tab:sTabLock:gone', { widgets: [] }) === false, 'unknown key → false');
 }
 
 console.log(`security-core: ${pass} checks passed`);

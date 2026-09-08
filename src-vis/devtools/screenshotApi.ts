@@ -31,7 +31,6 @@ import {
 } from '../hooks/useIoBroker';
 import { useDashboardStore, type DashboardLayout } from '../store/dashboardStore';
 import { useMcpReleaseStore } from '../store/mcpReleaseStore';
-import { queuedVaultRemovals } from '../utils/vaultPending';
 import { useGroupDefsStore } from '../store/groupDefsStore';
 import {
     usePopupConfigStore,
@@ -268,11 +267,6 @@ function installScreenshotApi(): void {
         /** „Über MCP bearbeitbar“ flipped for a view the vault does not know yet. */
         mcpPending(): Record<string, boolean> {
             return useMcpReleaseStore.getState().pending;
-        },
-
-        /** Vault entries waiting for the next save to be dropped (PIN removed). */
-        queuedVaultRemovals(): string[] {
-            return queuedVaultRemovals();
         },
 
         /** Populate group/panels children (they live in a separate RAM store, keyed

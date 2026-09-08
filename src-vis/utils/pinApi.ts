@@ -101,17 +101,32 @@ export async function vaultSetMcp(token: string, key: string, enabled: boolean):
     return status === 404 ? 'unknown' : 'error';
 }
 
+export interface VaultRemoveResult {
+    /** false when the vault did not know the key — nothing was protected. */
+    removed: boolean;
+    scope: 'section' | 'tab';
+    /** The payload the adapter wrote back into the config, for the editor to mirror. */
+    content?: unknown;
+}
+
 /**
- * Drop one view from the vault — the PIN was removed in the editor.
+ * Remove the PIN of one view: the adapter puts the content back into
+ * `config.dashboard` and forgets the vault entry, in one step.
  *
- * Only ever called *after* the save that wrote the view's content back into
- * `config.dashboard` in plaintext: the vault entry is the only other copy, so
- * dropping it earlier would put the content one discarded edit away from gone.
- * Idempotent — a key the vault does not know still answers 200.
+ * Both halves belong together — the vault holds the only copy of the content
+ * besides the stub's place in the state, so a client that just dropped the entry
+ * would need a save to land the content and a discarded edit in between would
+ * take it with it. The payload comes back so the editor can mirror the same
+ * result without waiting for the state. `null` = the call failed; nothing changed.
  */
-export async function vaultRemove(token: string, key: string): Promise<boolean> {
-    const { status } = await request('POST', 'vault/remove', { body: { key }, token });
-    return status === 200;
+export async function vaultRemove(token: string, key: string): Promise<VaultRemoveResult | null> {
+    const { status, json } = await request('POST', 'vault/remove', { body: { key }, token });
+    if (status !== 200) return null;
+    return {
+        removed: json?.removed === true,
+        scope: json?.scope === 'section' ? 'section' : 'tab',
+        content: json?.content,
+    };
 }
 
 export type UnlockOutcome =

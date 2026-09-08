@@ -451,6 +451,7 @@ export const de = {
     'pin.mcpWritePending': 'Wird mit dem nächsten Speichern übernommen.',
     'pin.mcpWriteFailed': 'Freigabe konnte nicht gesetzt werden – Anmeldung prüfen.',
     'pin.remove': 'PIN entfernen',
+    'pin.removeFailed': 'Schutz konnte nicht aufgehoben werden – Anmeldung prüfen.',
     'pin.promptSection': 'Dieser Bereich ist mit einer PIN geschützt.',
     'pin.promptTab': 'Dieser Tab ist mit einer PIN geschützt.',
     'pin.wrong': 'Falsche PIN',

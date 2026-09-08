@@ -54,7 +54,19 @@ const vault = new vaultMod.VaultFile(dir);
     vault.save(data);
 }
 
-const api = createSecurityApi({ vault, log: { info() {}, warn() {}, error() {} } });
+// The one thing the API cannot do on its own: write the restored payload back
+// into config.dashboard (main.js owns the state). Recorded here instead.
+const restored = [];
+let restoreFails = false;
+const api = createSecurityApi({
+    vault,
+    log: { info() {}, warn() {}, error() {} },
+    restoreView: async (key, content) => {
+        if (restoreFails) throw new Error('state write failed');
+        restored.push({ key, widgets: (content && content.tabs && content.tabs[0].widgets.length) ?? null });
+        return true;
+    },
+});
 const server = http.createServer((req, res) => {
     const parsedUrl = new URL(req.url, 'http://localhost');
     if (parsedUrl.pathname.startsWith('/api/aura/')) {
@@ -174,17 +186,31 @@ try {
     ok(r.status === 429, 'correct PIN also blocked during lockout window');
 
     // ── vault/remove („PIN entfernen“ in the editor) ─────────────────────────
-    // Last, because it takes the seeded view away. Idempotent on purpose: the
-    // editor fires it after a save, and a retry must not turn into an error.
+    // Last, because it takes the seeded view away. Restore first, forget second:
+    // until the content is back in config.dashboard the vault holds the only copy.
     r = await call('POST', 'vault/remove', { body: { key: 'section:sLocked' } });
-    ok(r.status === 401, 'forgetting a view without an admin token → 401');
+    ok(r.status === 401, 'lifting the protection without an admin token → 401');
     r = await call('POST', 'vault/remove', { token: adminToken, body: {} });
     ok(r.status === 400, 'a removal without a key → 400');
+
+    // A failing restore must NOT drop the entry — that would lose the content.
+    restoreFails = true;
     r = await call('POST', 'vault/remove', { token: adminToken, body: { key: 'section:sLocked' } });
-    ok(r.status === 200 && r.json.removed === true, 'admin drops the view whose PIN was removed');
+    ok(r.status === 500, 'a restore that throws answers 500');
+    ok(!!vault.load().sections['section:sLocked'], '… and keeps the vault entry, the only copy');
+    restoreFails = false;
+
+    r = await call('POST', 'vault/remove', { token: adminToken, body: { key: 'section:sLocked' } });
+    ok(r.status === 200 && r.json.removed === true && r.json.restored === true, 'admin lifts the protection');
+    ok(r.json.content.tabs[0].widgets[0].id === 'wSecret', 'the answer carries the payload for the editor');
+    ok(
+        restored.length === 1 && restored[0].key === 'section:sLocked' && restored[0].widgets === 1,
+        'the content went back into the config before the entry was dropped',
+    );
     ok(!vault.load().sections['section:sLocked'], 'the entry is gone from the vault');
     r = await call('POST', 'vault/remove', { token: adminToken, body: { key: 'section:sLocked' } });
     ok(r.status === 200 && r.json.removed === false, 'a second removal is a no-op, not an error');
+    ok(restored.length === 1, '… and does not restore anything twice');
     r = await call('GET', 'vault', { token: adminToken });
     ok(!r.json.sections['section:sLocked'], 'the editor no longer sees the view either');
 

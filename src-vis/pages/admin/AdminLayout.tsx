@@ -29,7 +29,6 @@ import {
 } from 'lucide-react';
 import { useAuthStore, logout, adminToken } from '../../store/authStore';
 import { vaultRead, vaultSetMcp } from '../../utils/pinApi';
-import { flushVaultRemovals } from '../../utils/vaultPending';
 import { useMcpReleaseStore } from '../../store/mcpReleaseStore';
 import { useThemeStore } from '../../store/themeStore';
 import { getTheme, ADMIN_DARK_THEME } from '../../themes';
@@ -81,9 +80,6 @@ function useSaveState() {
         try {
             saveAll();
             saveToIoBroker();
-            // A PIN removed in the editor: the content just went out in plaintext,
-            // so the vault copy may now be dropped (see utils/vaultPending).
-            flushVaultRemovals(adminToken());
             const widgets = useDashboardStore
                 .getState()
                 .layouts.flatMap((l) => l.sections.flatMap((s) => s.tabs.flatMap((t) => t.widgets)));

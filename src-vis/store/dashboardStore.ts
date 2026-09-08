@@ -397,7 +397,19 @@ interface DashboardState {
     removeSection: (id: string) => void;
     /** Merge server-vault content back onto the redacted stubs (admin editor). */
     mergeProtectedContent: (
-        entries: Record<string, { scope: 'section' | 'tab'; pinRelock?: PinRelock; content: unknown }>,
+        entries: Record<
+            string,
+            {
+                scope: 'section' | 'tab';
+                pinRelock?: PinRelock;
+                content: unknown;
+                /**
+                 * The protection is gone (the adapter restored this view and forgot
+                 * the vault entry) — take the content, but leave no PIN behind.
+                 */
+                open?: boolean;
+            }
+        >,
     ) => void;
     renameSection: (id: string, name: string) => void;
     setSectionSlug: (id: string, slug: string) => void;
@@ -779,10 +791,10 @@ export const useDashboardStore = create<DashboardState>()(
                                         // badgeAggregate for good.
                                         badges: sContent.badges,
                                         badgeAggregate: sContent.badgeAggregate,
-                                        pin: KEEP_PIN,
+                                        pin: sEntry?.open ? undefined : KEEP_PIN,
                                         pinProtected: undefined,
                                         pinLength: undefined,
-                                        pinRelock: sEntry?.pinRelock,
+                                        pinRelock: sEntry?.open ? undefined : sEntry?.pinRelock,
                                     };
                                 }
                                 return {
@@ -797,10 +809,10 @@ export const useDashboardStore = create<DashboardState>()(
                                             conditions: c.conditions,
                                             badges: c.badges,
                                             badgeAggregate: c.badgeAggregate,
-                                            pin: KEEP_PIN,
+                                            pin: tEntry.open ? undefined : KEEP_PIN,
                                             pinProtected: undefined,
                                             pinLength: undefined,
-                                            pinRelock: tEntry.pinRelock,
+                                            pinRelock: tEntry.open ? undefined : tEntry.pinRelock,
                                         };
                                     }),
                                 };

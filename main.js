@@ -14,6 +14,7 @@ const {
     splitDashboard,
     buildVaultSections,
     unredactView,
+    restoreView,
     stampPinLengths,
     hasPlaintextPin,
     readStateConfig,
@@ -974,7 +975,11 @@ class Aura extends utils.Adapter {
             data.serverSecret = generateServerSecret();
             this.vault.save(data);
         }
-        this._securityApi = createSecurityApi({ vault: this.vault, log: this.log });
+        this._securityApi = createSecurityApi({
+            vault: this.vault,
+            log: this.log,
+            restoreView: (key, content) => this._restoreProtectedView(key, content),
+        });
         try {
             const st = await this.getStateAsync('config.dashboard');
             if (st && st.val) await this._enforcePinVault(st);
@@ -1030,6 +1035,29 @@ class Aura extends utils.Adapter {
         this.log.info(
             `aura: config.dashboard redacted — ${Object.keys(sections).length} protected view(s) held server-side`,
         );
+    }
+
+    /**
+     * Put one view's vault payload back into `config.dashboard` and leave it open
+     * — the „PIN entfernen“ half that needs the state. Called by the security API
+     * before it forgets the entry; throwing keeps the entry, since it is the only
+     * other copy of the content.
+     *
+     * Returns false when the config has no node for that key any more (a tab
+     * deleted while it was protected) — then there is nothing to restore and the
+     * caller may still drop the orphaned entry.
+     */
+    async _restoreProtectedView(key, content) {
+        const st = await this.getStateAsync('config.dashboard');
+        if (!st || st.val == null) return false;
+        const parsed = JSON.parse(String(st.val));
+        const { config, wrapped } = readStateConfig(parsed);
+        if (!config) return false;
+        if (!restoreView(config, key, content)) return false;
+        const outValue = writeStateConfig(parsed, config, wrapped);
+        await this.setStateAsync('config.dashboard', { val: JSON.stringify(outValue), ack: true });
+        this.log.info(`aura: PIN vault — ${key} restored into config.dashboard (protection removed)`);
+        return true;
     }
 
     /** Dispatch a /api/aura/ request to the security API (see lib/security/apiHandler). */

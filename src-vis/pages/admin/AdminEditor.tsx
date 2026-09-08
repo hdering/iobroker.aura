@@ -33,8 +33,7 @@ import { IconPickerModal } from '../../components/config/IconPickerModal';
 import { useDashboardStore, useActiveSection } from '../../store/dashboardStore';
 import { KEEP_PIN } from '../../utils/pinLock';
 import { useMcpReleaseStore } from '../../store/mcpReleaseStore';
-import { vaultSetMcp } from '../../utils/pinApi';
-import { queueVaultRemoval, unqueueVaultRemoval } from '../../utils/vaultPending';
+import { vaultSetMcp, vaultRemove } from '../../utils/pinApi';
 import { adminToken } from '../../store/authStore';
 import { ConditionEditor } from '../../components/config/ConditionEditor';
 import { BadgeEditor } from '../../components/config/BadgeEditor';
@@ -942,6 +941,9 @@ const SectionSwitcher = memo(function SectionSwitcher() {
         const l = s.layouts.find((x) => x.id === s.activeLayoutId) ?? s.layouts[0];
         return l.sections.find((sec) => sec.id === settingsSectionId) ?? null;
     });
+    // Protected server-side — see tabPinStored below for why the stub marker counts.
+    const sectionPinStored = openSection?.pin === KEEP_PIN || openSection?.pinProtected === true;
+    const sectionHasPin = !!openSection?.pin || sectionPinStored;
 
     const create = () => {
         if (newName.trim()) addSection(newName.trim());
@@ -1071,17 +1073,9 @@ const SectionSwitcher = memo(function SectionSwitcher() {
                                 type="text"
                                 inputMode="numeric"
                                 autoComplete="off"
-                                placeholder={
-                                    openSection.pin === KEEP_PIN ? t('pin.setPlaceholder') : t('pin.placeholder')
-                                }
+                                placeholder={sectionPinStored ? t('pin.setPlaceholder') : t('pin.placeholder')}
                                 value={openSection.pin === KEEP_PIN ? '' : (openSection.pin ?? '')}
-                                onChange={(e) => {
-                                    const value = e.target.value || undefined;
-                                    // A typed PIN replaces the vault entry instead of
-                                    // dropping it — cancel a queued removal.
-                                    if (value) unqueueVaultRemoval(`section:${openSection.id}`);
-                                    updateSection(openSection.id, { pin: value });
-                                }}
+                                onChange={(e) => updateSection(openSection.id, { pin: e.target.value || undefined })}
                                 className="aura-pin-input w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
                                 style={{
                                     background: 'var(--app-bg)',
@@ -1089,12 +1083,12 @@ const SectionSwitcher = memo(function SectionSwitcher() {
                                     border: '1px solid var(--app-border)',
                                 }}
                             />
-                            {openSection.pin === KEEP_PIN && (
+                            {sectionPinStored && (
                                 <p className="text-[9px] mt-1" style={{ color: 'var(--text-secondary)' }}>
                                     {t('pin.protectedHint')}
                                 </p>
                             )}
-                            {openSection.pin ? (
+                            {sectionHasPin ? (
                                 <div className="flex items-center justify-between mt-2">
                                     <div>
                                         <p className="text-[11px] font-medium" style={{ color: 'var(--text-primary)' }}>
@@ -1129,11 +1123,11 @@ const SectionSwitcher = memo(function SectionSwitcher() {
                                     {t('pin.hint')}
                                 </p>
                             )}
-                            {openSection.pin && <McpReleaseToggle vaultKey={`section:${openSection.id}`} />}
-                            {openSection.pin && (
+                            {sectionHasPin && <McpReleaseToggle vaultKey={`section:${openSection.id}`} />}
+                            {sectionHasPin && (
                                 <PinRemoveButton
                                     vaultKey={`section:${openSection.id}`}
-                                    stored={openSection.pin === KEEP_PIN}
+                                    stored={sectionPinStored}
                                     onRemove={() =>
                                         updateSection(openSection.id, {
                                             pin: undefined,
@@ -1351,6 +1345,15 @@ const TabBar = memo(function TabBar() {
     const settingsTab = tabs.find((t) => t.id === settingsTabId);
     /** Vault key of the tab whose settings panel is open (see lib/security/dashboardVault). */
     const tabVaultKey = `tab:${currentSectionId}:${settingsTabId ?? ''}`;
+    /**
+     * Protected server-side. KEEP_PIN means the editor pulled this view's content
+     * out of the vault; `pinProtected` is the redacted stub the adapter serves —
+     * which is what the panel sees right after a save, before (or without) that
+     * pull. Both count, so the PIN settings never vanish just because the vault
+     * read is late or failed.
+     */
+    const tabPinStored = settingsTab?.pin === KEEP_PIN || settingsTab?.pinProtected === true;
+    const tabHasPin = !!settingsTab?.pin || tabPinStored;
 
     const currentTargetKey = `${currentLayoutId}::${currentSectionId}`;
     const runTabMove = (mode: 'move' | 'copy') => {
@@ -1769,17 +1772,9 @@ const TabBar = memo(function TabBar() {
                                     type="text"
                                     inputMode="numeric"
                                     autoComplete="off"
-                                    placeholder={
-                                        settingsTab.pin === KEEP_PIN ? t('pin.setPlaceholder') : t('pin.placeholder')
-                                    }
+                                    placeholder={tabPinStored ? t('pin.setPlaceholder') : t('pin.placeholder')}
                                     value={settingsTab.pin === KEEP_PIN ? '' : (settingsTab.pin ?? '')}
-                                    onChange={(e) => {
-                                        const value = e.target.value || undefined;
-                                        // A typed PIN replaces the vault entry instead
-                                        // of dropping it — cancel a queued removal.
-                                        if (value) unqueueVaultRemoval(tabVaultKey);
-                                        updateTab(settingsTabId, { pin: value });
-                                    }}
+                                    onChange={(e) => updateTab(settingsTabId, { pin: e.target.value || undefined })}
                                     className="aura-pin-input w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
                                     style={{
                                         background: 'var(--app-bg)',
@@ -1787,12 +1782,12 @@ const TabBar = memo(function TabBar() {
                                         border: '1px solid var(--app-border)',
                                     }}
                                 />
-                                {settingsTab.pin === KEEP_PIN && (
+                                {tabPinStored && (
                                     <p className="text-[9px] mt-1" style={{ color: 'var(--text-secondary)' }}>
                                         {t('pin.protectedHint')}
                                     </p>
                                 )}
-                                {settingsTab.pin ? (
+                                {tabHasPin ? (
                                     <div className="flex items-center justify-between mt-2">
                                         <div>
                                             <p
@@ -1831,11 +1826,11 @@ const TabBar = memo(function TabBar() {
                                         {t('pin.hint')}
                                     </p>
                                 )}
-                                {settingsTab.pin && <McpReleaseToggle vaultKey={tabVaultKey} />}
-                                {settingsTab.pin && (
+                                {tabHasPin && <McpReleaseToggle vaultKey={tabVaultKey} />}
+                                {tabHasPin && (
                                     <PinRemoveButton
                                         vaultKey={tabVaultKey}
-                                        stored={settingsTab.pin === KEEP_PIN}
+                                        stored={tabPinStored}
                                         onRemove={() =>
                                             updateTab(settingsTabId, {
                                                 pin: undefined,
@@ -2094,30 +2089,68 @@ const TabBar = memo(function TabBar() {
  * to clear — which is why the old hint „Feld leeren entfernt den Schutz“ pointed
  * at a gesture nobody could make.
  *
- * `stored` marks a view the vault already holds. Its content only exists there
- * and in this editor's memory until the next save writes it back in plaintext, so
- * the vault entry is queued for removal and dropped after that save, never here.
+ * `stored` = the vault holds this view. Then removing is the adapter's job, in one
+ * step (POST /api/aura/vault/remove): it writes the content back into
+ * config.dashboard and forgets the entry, and hands the payload back so the editor
+ * lands on the same result without a save of its own — and without depending on
+ * having pulled the protected content at all. A PIN that was only typed has no
+ * vault entry, so there this is a plain local clear.
  */
 function PinRemoveButton({ vaultKey, stored, onRemove }: { vaultKey: string; stored: boolean; onRemove: () => void }) {
     const t = useT();
     const forget = useMcpReleaseStore((s) => s.forget);
+    const merge = useDashboardStore((s) => s.mergeProtectedContent);
+    const [busy, setBusy] = useState(false);
+    const [failed, setFailed] = useState(false);
     return (
-        <button
-            onClick={() => {
-                if (stored) queueVaultRemoval(vaultKey);
-                forget(vaultKey);
-                onRemove();
-            }}
-            className="aura-pin-remove flex items-center gap-1.5 w-full px-2.5 py-2 mt-2 rounded-lg text-xs hover:opacity-80 transition-opacity"
-            style={{
-                background: 'var(--app-bg)',
-                border: '1px solid var(--app-border)',
-                color: 'var(--accent-red)',
-            }}
-        >
-            <ShieldOff size={11} />
-            {t('pin.remove')}
-        </button>
+        <>
+            <button
+                disabled={busy}
+                onClick={() => {
+                    if (!stored) {
+                        forget(vaultKey);
+                        onRemove();
+                        return;
+                    }
+                    const token = adminToken();
+                    if (!token) {
+                        setFailed(true);
+                        return;
+                    }
+                    setBusy(true);
+                    setFailed(false);
+                    void vaultRemove(token, vaultKey).then((res) => {
+                        setBusy(false);
+                        if (!res) {
+                            // Nothing changed server-side — leave the view protected
+                            // rather than opening it locally over a live vault entry.
+                            setFailed(true);
+                            return;
+                        }
+                        forget(vaultKey);
+                        // The adapter already restored the content into the config;
+                        // mirror it here (suppressed-dirty) so editor and state agree.
+                        if (res.content) merge({ [vaultKey]: { scope: res.scope, content: res.content, open: true } });
+                        else onRemove();
+                    });
+                }}
+                className="aura-pin-remove flex items-center gap-1.5 w-full px-2.5 py-2 mt-2 rounded-lg text-xs hover:opacity-80 transition-opacity"
+                style={{
+                    background: 'var(--app-bg)',
+                    border: '1px solid var(--app-border)',
+                    color: 'var(--accent-red)',
+                    opacity: busy ? 0.6 : 1,
+                }}
+            >
+                <ShieldOff size={11} />
+                {t('pin.remove')}
+            </button>
+            {failed && (
+                <p className="text-[9px] mt-1" style={{ color: 'var(--accent-red)' }}>
+                    {t('pin.removeFailed')}
+                </p>
+            )}
+        </>
     );
 }
 

@@ -450,6 +450,7 @@ export const en: Record<TranslationKey, string> = {
     'pin.mcpWritePending': 'Applied with the next save.',
     'pin.mcpWriteFailed': 'Could not set the release – check the login.',
     'pin.remove': 'Remove PIN',
+    'pin.removeFailed': 'Could not lift the protection – check the login.',
     'pin.promptSection': 'This section is protected by a PIN.',
     'pin.promptTab': 'This tab is protected by a PIN.',
     'pin.wrong': 'Wrong PIN',
