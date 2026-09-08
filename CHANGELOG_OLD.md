@@ -1,5 +1,8 @@
 # Changelog (older entries)
 
+## 0.52.4 (2026-09-01)
+- Chart (advanced) - a JSON series now shows the accepted JSON shapes right under its datapoint, unfolded until the payload could be read
+
 ## 0.52.3 (2026-09-01)
 - Settings - MCP fields are only shown when MCP is enabled, and the token is no longer displayed in clear text ([#610](https://github.com/hdering/ioBroker.aura/issues/610))
 - Settings - the MCP token is now stored encrypted; a hand-typed token has to be entered once more after this update ([#610](https://github.com/hdering/ioBroker.aura/issues/610))
