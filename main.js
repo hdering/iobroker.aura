@@ -16,6 +16,8 @@ const {
     unredactView,
     stampPinLengths,
     hasPlaintextPin,
+    readStateConfig,
+    writeStateConfig,
     VaultFile,
 } = require('./lib/security/dashboardVault');
 const { createSecurityApi } = require('./lib/security/apiHandler');
@@ -989,12 +991,15 @@ class Aura extends utils.Adapter {
      */
     async _enforcePinVault(state) {
         if (!this.vault || !state || state.val == null) return;
-        let config;
+        let parsed;
         try {
-            config = JSON.parse(String(state.val));
+            parsed = JSON.parse(String(state.val));
         } catch {
             return;
         }
+        // The state carries zustand's persist wrapper ({ state:{layouts}, version });
+        // work on the inner config and re-wrap the redacted copy the same way.
+        const { config, wrapped } = readStateConfig(parsed);
         if (!config || !hasPlaintextPin(config)) return; // already clean → nothing to do
 
         const { publicConfig, protected: prot } = splitDashboard(config);
@@ -1020,7 +1025,8 @@ class Aura extends utils.Adapter {
         stampPinLengths(publicConfig, sections);
         data.sections = sections;
         this.vault.save(data);
-        await this.setStateAsync('config.dashboard', { val: JSON.stringify(publicConfig), ack: true });
+        const outValue = writeStateConfig(parsed, publicConfig, wrapped);
+        await this.setStateAsync('config.dashboard', { val: JSON.stringify(outValue), ack: true });
         this.log.info(
             `aura: config.dashboard redacted — ${Object.keys(sections).length} protected view(s) held server-side`,
         );

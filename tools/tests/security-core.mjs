@@ -159,6 +159,30 @@ const fullConfig = () => ({
     ok(again.protected.length === 0, 're-splitting a redacted config is a no-op (re-entrancy guard)');
 }
 
+// ── zustand persist wrapper (the actual config.dashboard state shape) ────────
+{
+    // The state is not the bare config — zustand persist wraps it as {state,version}.
+    // Reading the wrong level here is what made redaction a silent no-op (#bug).
+    const wrapped = { state: fullConfig(), version: 3 };
+    const r = vault.readStateConfig(wrapped);
+    ok(
+        r.wrapped === true && Array.isArray(r.config.layouts),
+        'readStateConfig unwraps {state,version} to the inner config',
+    );
+    ok(vault.hasPlaintextPin(r.config) === true, 'hasPlaintextPin sees the PIN once unwrapped');
+
+    const bare = vault.readStateConfig(fullConfig());
+    ok(bare.wrapped === false && Array.isArray(bare.config.layouts), 'a bare config passes through unwrapped');
+
+    const { publicConfig } = vault.splitDashboard(r.config);
+    const out = vault.writeStateConfig(wrapped, publicConfig, r.wrapped);
+    ok(
+        out.version === 3 && out.state.layouts[0].sections[1].pinProtected === true,
+        'writeStateConfig re-wraps the redacted config and keeps version',
+    );
+    ok(JSON.stringify(out).indexOf('1234') < 0, 'wrapped writeback carries no plaintext PIN');
+}
+
 // ── vault sections build (hashing) ──────────────────────────────────────────
 {
     const { protected: prot } = vault.splitDashboard(fullConfig());
