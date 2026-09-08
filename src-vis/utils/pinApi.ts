@@ -44,9 +44,12 @@ async function request(
     }
 }
 
-export async function adminStatus(): Promise<{ configured: boolean }> {
+export async function adminStatus(): Promise<{ configured: boolean; available: boolean }> {
     const { status, json } = await request('GET', 'admin/status');
-    return { configured: status === 200 && !!json?.configured };
+    // status 0 = network error, 404 = no adapter behind this origin (vite dev
+    // server). Either way the security API is not reachable here.
+    if (status === 0 || status === 404) return { configured: false, available: false };
+    return { configured: status === 200 && !!json?.configured, available: true };
 }
 
 export async function adminSetup(password: string): Promise<{ token: string } | null> {
