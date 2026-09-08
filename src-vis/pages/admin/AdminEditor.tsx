@@ -30,6 +30,7 @@ import { Icon } from '@iconify/react';
 import { getWidgetIcon } from '../../utils/widgetIconMap';
 import { IconPickerModal } from '../../components/config/IconPickerModal';
 import { useDashboardStore, useActiveSection } from '../../store/dashboardStore';
+import { KEEP_PIN } from '../../utils/pinLock';
 import { ConditionEditor } from '../../components/config/ConditionEditor';
 import { BadgeEditor } from '../../components/config/BadgeEditor';
 import { usePortalTarget } from '../../contexts/PortalTargetContext';
@@ -1065,8 +1066,10 @@ const SectionSwitcher = memo(function SectionSwitcher() {
                                 type="text"
                                 inputMode="numeric"
                                 autoComplete="off"
-                                placeholder={t('pin.placeholder')}
-                                value={openSection.pin ?? ''}
+                                placeholder={
+                                    openSection.pin === KEEP_PIN ? t('pin.setPlaceholder') : t('pin.placeholder')
+                                }
+                                value={openSection.pin === KEEP_PIN ? '' : (openSection.pin ?? '')}
                                 onChange={(e) => updateSection(openSection.id, { pin: e.target.value || undefined })}
                                 className="w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
                                 style={{
@@ -1075,6 +1078,11 @@ const SectionSwitcher = memo(function SectionSwitcher() {
                                     border: '1px solid var(--app-border)',
                                 }}
                             />
+                            {openSection.pin === KEEP_PIN && (
+                                <p className="text-[9px] mt-1" style={{ color: 'var(--text-secondary)' }}>
+                                    {t('pin.protectedHint')}
+                                </p>
+                            )}
                             {openSection.pin ? (
                                 <div className="flex items-center justify-between mt-2">
                                     <div>
@@ -1733,8 +1741,10 @@ const TabBar = memo(function TabBar() {
                                     type="text"
                                     inputMode="numeric"
                                     autoComplete="off"
-                                    placeholder={t('pin.placeholder')}
-                                    value={settingsTab.pin ?? ''}
+                                    placeholder={
+                                        settingsTab.pin === KEEP_PIN ? t('pin.setPlaceholder') : t('pin.placeholder')
+                                    }
+                                    value={settingsTab.pin === KEEP_PIN ? '' : (settingsTab.pin ?? '')}
                                     onChange={(e) => updateTab(settingsTabId, { pin: e.target.value || undefined })}
                                     className="w-full text-xs rounded-lg px-2.5 py-2 focus:outline-none"
                                     style={{
@@ -1743,6 +1753,11 @@ const TabBar = memo(function TabBar() {
                                         border: '1px solid var(--app-border)',
                                     }}
                                 />
+                                {settingsTab.pin === KEEP_PIN && (
+                                    <p className="text-[9px] mt-1" style={{ color: 'var(--text-secondary)' }}>
+                                        {t('pin.protectedHint')}
+                                    </p>
+                                )}
                                 {settingsTab.pin ? (
                                     <div className="flex items-center justify-between mt-2">
                                         <div>

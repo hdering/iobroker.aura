@@ -5,7 +5,7 @@ import { useGroupDefsStore, newGroupDefId } from './groupDefsStore';
 import { cloneWidget, finishClone, makeIdDeduper, newCloneScope, remapWidgetRefs } from '../utils/widgetCopy';
 import { slugify } from '../utils/slugify';
 import type { WidgetConfig, WidgetCondition, BadgeDef, BadgeAggregate } from '../types';
-import type { PinRelock } from '../utils/pinLock';
+import { KEEP_PIN, type PinRelock } from '../utils/pinLock';
 import type { AllVars } from '../themes';
 
 // ── Tab bar items (clock / datapoint / static text) ───────────────────────────
@@ -192,6 +192,8 @@ export interface Tab {
     badges?: BadgeDef[]; // own overlay badges on the tab button
     badgeAggregate?: BadgeAggregate; // auto-count of widgets on this tab that show a badge
     pin?: string; // PIN gate: the tab's content only renders after this code was entered
+    pinProtected?: boolean; // adapter marker on a redacted stub — content lives server-side
+    pinLength?: number; // digit count of the PIN (keypad hint), never the PIN itself
     pinRelock?: PinRelock; // 'leave' (default) re-locks on navigating away, 'session' until reload
 }
 
@@ -212,6 +214,8 @@ export interface Section {
     badges?: BadgeDef[]; // own overlay badges on the section menu entry
     badgeAggregate?: BadgeAggregate; // auto-count of widgets across the section's tabs that show a badge
     pin?: string; // PIN gate for the whole section (its tabs included)
+    pinProtected?: boolean; // adapter marker on a redacted stub — content lives server-side
+    pinLength?: number; // digit count of the PIN (keypad hint), never the PIN itself
     pinRelock?: PinRelock; // 'leave' (default) re-locks on navigating away, 'session' until reload
     settings?: LayoutSettings; // per-section content overrides (undefined = inherit)
 }
@@ -391,6 +395,10 @@ interface DashboardState {
         mode: 'move' | 'copy',
     ) => void;
     removeSection: (id: string) => void;
+    /** Merge server-vault content back onto the redacted stubs (admin editor). */
+    mergeProtectedContent: (
+        entries: Record<string, { scope: 'section' | 'tab'; pinRelock?: PinRelock; content: unknown }>,
+    ) => void;
     renameSection: (id: string, name: string) => void;
     setSectionSlug: (id: string, slug: string) => void;
     setSectionIcon: (id: string, icon: string | undefined) => void;
@@ -740,6 +748,54 @@ export const useDashboardStore = create<DashboardState>()(
                 set((s) => ({
                     layouts: patchSection(s.layouts, s.activeLayoutId, id, (sec) => ({ ...sec, ...patch })),
                 })),
+
+            // The adapter serves protected views as redacted stubs; after an admin
+            // login the editor pulls the real content back from the vault and merges
+            // it here (suppressed-dirty, so the merge itself is not a user edit). An
+            // unchanged PIN becomes KEEP_PIN — the adapter reuses its stored hash on
+            // the next save. Runs across every layout, not just the active one.
+            mergeProtectedContent: (entries) =>
+                withSuppressedDirty(() =>
+                    set((s) => ({
+                        layouts: s.layouts.map((l) => ({
+                            ...l,
+                            sections: l.sections.map((sec) => {
+                                let next = sec;
+                                const sEntry = entries[`section:${sec.id}`];
+                                const sContent = sEntry?.content as { tabs?: Tab[] } | undefined;
+                                if (sContent && Array.isArray(sContent.tabs)) {
+                                    next = {
+                                        ...next,
+                                        tabs: sContent.tabs,
+                                        pin: KEEP_PIN,
+                                        pinProtected: undefined,
+                                        pinLength: undefined,
+                                        pinRelock: sEntry?.pinRelock,
+                                    };
+                                }
+                                return {
+                                    ...next,
+                                    tabs: next.tabs.map((tb) => {
+                                        const tEntry = entries[`tab:${sec.id}:${tb.id}`];
+                                        if (!tEntry?.content) return tb;
+                                        const c = tEntry.content as Partial<Tab>;
+                                        return {
+                                            ...tb,
+                                            widgets: c.widgets ?? tb.widgets,
+                                            conditions: c.conditions,
+                                            badges: c.badges,
+                                            badgeAggregate: c.badgeAggregate,
+                                            pin: KEEP_PIN,
+                                            pinProtected: undefined,
+                                            pinLength: undefined,
+                                            pinRelock: tEntry.pinRelock,
+                                        };
+                                    }),
+                                };
+                            }),
+                        })),
+                    })),
+                ),
 
             setSectionHidden: (id, hidden) =>
                 set((s) => ({

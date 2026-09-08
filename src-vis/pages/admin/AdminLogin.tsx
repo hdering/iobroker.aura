@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Eye, EyeOff } from 'lucide-react';
-import { loginWithPin, setupPin, loadPinHash, useAuthStore } from '../../store/authStore';
+import { loginWithPin, setupAdmin, loadAdminStatus, useAuthStore } from '../../store/authStore';
 import { useT } from '../../i18n';
 
 export function AdminLogin() {
     const t = useT();
-    const { pinHash, pinHashLoaded } = useAuthStore();
-    const isFirstTime = !pinHash;
+    const { configured, statusLoaded } = useAuthStore();
+    const isFirstTime = !configured;
     const [pin, setPin] = useState('');
     const [confirm, setConfirm] = useState('');
     const [show, setShow] = useState(false);
@@ -16,7 +16,7 @@ export function AdminLogin() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        loadPinHash();
+        loadAdminStatus();
     }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -34,10 +34,14 @@ export function AdminLogin() {
                 setLoading(false);
                 return;
             }
-            setupPin(pin);
-            navigate('/admin');
+            const ok = await setupAdmin(pin);
+            if (ok) navigate('/admin');
+            else {
+                setError(t('login.wrong'));
+                setLoading(false);
+            }
         } else {
-            const ok = loginWithPin(pin);
+            const ok = await loginWithPin(pin);
             if (ok) navigate('/admin');
             else {
                 setError(t('login.wrong'));
@@ -46,7 +50,7 @@ export function AdminLogin() {
         }
     };
 
-    if (!pinHashLoaded) {
+    if (!statusLoaded) {
         return (
             <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--app-bg)' }}>
                 <div

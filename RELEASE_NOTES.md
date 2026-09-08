@@ -10,3 +10,5 @@
 - Layout styles come from one list for the editor, the AI schema and the documentation - styles no widget ever rendered are gone, and the light, camera and knob now show their real styles everywhere
 - Editor - a stored layout the widget type does not know is now named instead of silently falling back to the default
 - AI review - aura_review now checks the stored dashboard against the widget schema and reports values a write would refuse
+- PIN protection - section and tab PINs are now enforced server-side: the PIN and the protected widgets stay in the adapter and only reach the browser after the code is verified (scrypt hash + rate limit against guessing), so the gate holds up even against the dev tools
+- Admin login - now verified server-side instead of in the browser; please set the admin password once after this update (the previous one does not carry over)

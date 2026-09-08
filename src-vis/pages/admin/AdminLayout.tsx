@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useConfigSync } from '../../hooks/useConfigSync';
 import { version as appVersion } from '../../../package.json';
 import { FEATURES } from '../../featureFlags';
@@ -27,7 +27,8 @@ import {
     Activity,
     Shapes,
 } from 'lucide-react';
-import { useAuthStore, logout } from '../../store/authStore';
+import { useAuthStore, logout, adminToken } from '../../store/authStore';
+import { vaultRead } from '../../utils/pinApi';
 import { useThemeStore } from '../../store/themeStore';
 import { getTheme, ADMIN_DARK_THEME } from '../../themes';
 import {
@@ -122,6 +123,37 @@ function useFrontendUrl(): string {
         if (tabSlug && manyTabs) return base === '#' ? `#/tab/${tabSlug}` : `${base}/tab/${tabSlug}`;
         return base === '#' ? '#/' : base;
     });
+}
+
+/**
+ * The editor can only edit a PIN-protected view if it has the real content, which
+ * the adapter keeps server-side. Once logged in (Bearer token), pull it from the
+ * vault and merge it onto the redacted stubs. Self-healing: it re-runs whenever a
+ * stub reappears — e.g. after a save, when the adapter re-serves the redacted
+ * config and useConfigSync applies it — and idempotently stops once none remain.
+ */
+function useProtectedContentMerge(connected: boolean) {
+    const sessionActive = useAuthStore((s) => s.sessionActive);
+    const layouts = useDashboardStore((s) => s.layouts);
+    const merge = useDashboardStore((s) => s.mergeProtectedContent);
+    const busyRef = useRef(false);
+    const hasStub = useMemo(
+        () => layouts.some((l) => l.sections.some((sec) => sec.pinProtected || sec.tabs.some((t) => t.pinProtected))),
+        [layouts],
+    );
+    useEffect(() => {
+        if (!connected || !sessionActive || !hasStub || busyRef.current) return;
+        const token = adminToken();
+        if (!token) return;
+        busyRef.current = true;
+        vaultRead(token)
+            .then((sections) => {
+                if (sections) merge(sections);
+            })
+            .finally(() => {
+                busyRef.current = false;
+            });
+    }, [connected, sessionActive, hasStub, merge]);
 }
 
 export function AdminLayout() {
@@ -244,6 +276,9 @@ export function AdminLayout() {
 
     // React to external changes on aura.0.config.dashboard (subscription + polling)
     useConfigSync(connected, adminConfigLoadedRef);
+
+    // Pull protected content out of the vault so the editor can edit it.
+    useProtectedContentMerge(connected);
 
     // ── Ctrl+S / Cmd+S keyboard shortcut ──────────────────────────────────
     useEffect(() => {

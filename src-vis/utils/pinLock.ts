@@ -23,11 +23,29 @@ export type PinRelock =
     | 'session';
 
 export interface PinProtected {
+    /**
+     * Legacy plaintext PIN. In production the adapter strips this out of the
+     * config it serves (server-side enforcement), leaving only `pinProtected`; it
+     * still appears in a config the adapter has not redacted yet (e.g. the vite dev
+     * server with no adapter behind it), where the old client-side path applies.
+     */
     pin?: string;
+    /** Set by the adapter on a redacted stub: this view is PIN-gated server-side. */
+    pinProtected?: boolean;
+    /** Digit count of the PIN, so the keypad shows the right dots without the code. */
+    pinLength?: number;
     pinRelock?: PinRelock;
 }
 
 export type PinScope = 'section' | 'tab';
+
+/**
+ * Sentinel an admin edit keeps in a section/tab `pin` to mean "the PIN that is
+ * already set, unchanged". The editor never sees the plaintext PIN (only a scrypt
+ * hash lives in the server vault), so this is how an unchanged PIN survives a save
+ * — the adapter reuses the stored hash. Must equal KEEP_PIN in lib/security/dashboardVault.js.
+ */
+export const KEEP_PIN = '__aura_keep__';
 
 /** Trim + coerce; anything non-string counts as "no PIN". */
 export function normalizePin(raw: unknown): string {
@@ -35,7 +53,7 @@ export function normalizePin(raw: unknown): string {
 }
 
 export function hasPin(item?: PinProtected | null): boolean {
-    return normalizePin(item?.pin).length > 0;
+    return item?.pinProtected === true || normalizePin(item?.pin).length > 0;
 }
 
 export function relockMode(item?: PinProtected | null): PinRelock {

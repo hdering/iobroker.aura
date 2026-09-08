@@ -9,6 +9,16 @@ const SunCalc = require('suncalc');
 const { handleAuthDiscovery, handleMcpRequest } = require('./lib/mcp/httpEndpoint');
 const { maskClientConfig, resolveBothConfigs } = require('./lib/mcp/clientConfig');
 const { mergeRenderReport, renderReportEntry } = require('./lib/mcp/auraConfig');
+const { generateServerSecret } = require('./lib/security/authCore');
+const {
+    splitDashboard,
+    buildVaultSections,
+    unredactView,
+    stampPinLengths,
+    hasPlaintextPin,
+    VaultFile,
+} = require('./lib/security/dashboardVault');
+const { createSecurityApi } = require('./lib/security/apiHandler');
 
 // ── Calendar fetch helper ────────────────────────────────────────────────────
 
@@ -788,6 +798,11 @@ class Aura extends utils.Adapter {
         // Dashboard config changed → rebuild the navigate selector dropdowns and
         // the per-layout message datapoints.
         if (id.endsWith('.config.dashboard') && state) {
+            // Server-side PIN gate: strip protected sections/tabs (their PINs and
+            // widgets) out of this socket-readable state into the vault BEFORE any
+            // other client can read it. Idempotent — a redacted config carries no
+            // plaintext PIN, so the writeback does not re-enter here.
+            await this._enforcePinVault(state);
             await this._syncNavigateTargets();
             return;
         }
@@ -927,6 +942,95 @@ class Aura extends utils.Adapter {
             return { host: '127.0.0.1', secure: false, source: null, found: false, conflicts: [] };
         }
         return pickSocketBackend(objs, socketPort);
+    }
+
+    // ── server-side PIN / admin security ────────────────────────────────────────
+
+    /**
+     * Prepare the on-disk vault (security.json in the instance data dir, NOT the
+     * socket-readable files namespace), generate the token-signing secret once and
+     * migrate any plaintext PIN that is still sitting in config.dashboard into it.
+     * Runs early in onReady so the HTTP endpoints always find a ready vault.
+     */
+    async _initPinVault() {
+        let dir;
+        try {
+            dir = utils.getAbsoluteInstanceDataDir(this);
+        } catch {
+            const base = typeof utils.getAbsoluteDefaultDataDir === 'function' ? utils.getAbsoluteDefaultDataDir() : '.';
+            dir = path.join(base, this.namespace);
+        }
+        try {
+            fs.mkdirSync(dir, { recursive: true });
+        } catch {
+            /* exists */
+        }
+        this.vault = new VaultFile(dir);
+        const data = this.vault.load();
+        if (!data.serverSecret) {
+            data.serverSecret = generateServerSecret();
+            this.vault.save(data);
+        }
+        this._securityApi = createSecurityApi({ vault: this.vault, log: this.log });
+        try {
+            const st = await this.getStateAsync('config.dashboard');
+            if (st && st.val) await this._enforcePinVault(st);
+        } catch (e) {
+            this.log.warn(`aura: PIN vault init could not read config.dashboard — ${e.message}`);
+        }
+        this.log.info(`aura: PIN vault ready (${dir})`);
+    }
+
+    /**
+     * Given a config.dashboard state value that still carries plaintext PINs, move
+     * the protected sections/tabs into the vault and write the redacted copy back.
+     * A no-op once the config is already redacted — that is the re-entrancy guard.
+     */
+    async _enforcePinVault(state) {
+        if (!this.vault || !state || state.val == null) return;
+        let config;
+        try {
+            config = JSON.parse(String(state.val));
+        } catch {
+            return;
+        }
+        if (!config || !hasPlaintextPin(config)) return; // already clean → nothing to do
+
+        const { publicConfig, protected: prot } = splitDashboard(config);
+        const data = this.vault.load();
+        // Data-loss guard: a view that arrived as a redacted stub (fromStub) has no
+        // real widgets in this payload — reuse the content already in the vault so
+        // setting/keeping a PIN on a stub never wipes what it was protecting.
+        for (const p of prot) {
+            if (p.fromStub && data.sections && data.sections[p.key]) {
+                p.content = data.sections[p.key].content;
+            }
+        }
+        const { sections, unresolved } = buildVaultSections(prot, data.sections || {});
+        if (unresolved.length) {
+            // A "keep the current PIN" marker pointed at a PIN the vault does not
+            // know (only reachable by hand-editing the state). Never drop the view's
+            // content: restore it into the public copy, open, and warn.
+            this.log.warn(
+                `aura: PIN vault — ${unresolved.length} view(s) referenced an unknown stored PIN; left open: ${unresolved.join(', ')}`,
+            );
+            for (const key of unresolved) unredactView(publicConfig, config, key);
+        }
+        stampPinLengths(publicConfig, sections);
+        data.sections = sections;
+        this.vault.save(data);
+        await this.setStateAsync('config.dashboard', { val: JSON.stringify(publicConfig), ack: true });
+        this.log.info(`aura: config.dashboard redacted — ${Object.keys(sections).length} protected view(s) held server-side`);
+    }
+
+    /** Dispatch a /api/aura/ request to the security API (see lib/security/apiHandler). */
+    async handleSecurityApi(req, res, parsedUrl) {
+        if (!this._securityApi) {
+            if (!res.headersSent) res.writeHead(503, { 'Content-Type': 'application/json; charset=utf-8' });
+            res.end(JSON.stringify({ error: 'vault not ready' }));
+            return;
+        }
+        return this._securityApi.handle(req, res, parsedUrl);
     }
 
     async startHttpServer() {
@@ -1227,6 +1331,19 @@ class Aura extends utils.Adapter {
 
                 res.writeHead(404);
                 res.end('Unknown fs endpoint');
+                return;
+            }
+
+            // Security API: server-side admin login + PIN unlock. Kept ahead of the
+            // SPA fallback so an unknown /api path returns JSON 404, not index.html.
+            if (pathname === '/api/aura' || pathname.startsWith('/api/aura/')) {
+                this.handleSecurityApi(req, res, parsedUrl).catch((err) => {
+                    this.log.warn(`aura: security API crashed — ${err.message}`);
+                    if (!res.headersSent) {
+                        res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+                    }
+                    res.end(JSON.stringify({ error: 'internal error' }));
+                });
                 return;
             }
 
@@ -2427,6 +2544,7 @@ class Aura extends utils.Adapter {
         this.log.info('aura adapter started');
 
         await this.migratePlainMcpToken();
+        await this._initPinVault();
 
         await this.setObjectNotExistsAsync('config', {
             type: 'channel',

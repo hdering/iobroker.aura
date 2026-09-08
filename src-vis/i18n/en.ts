@@ -437,6 +437,8 @@ export const en: Record<TranslationKey, string> = {
     // ── PIN protection (sections / tabs) ────────────────────────────────────────
     'pin.field': 'PIN',
     'pin.placeholder': 'e.g. 1234',
+    'pin.setPlaceholder': 'PIN set – type a new one to change it',
+    'pin.protectedHint': 'Protected server-side. Clearing the field removes protection.',
     'pin.hint': 'Empty = no protection. The content only appears once the PIN was entered.',
     'pin.keepUnlocked': 'Stay unlocked',
     'pin.keepUnlockedHint':

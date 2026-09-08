@@ -60,7 +60,17 @@ import { initPerfMetrics, setPerfTracking, reportBackendPing } from './utils/per
 import { setBreakdownTracking, recordBackendCall } from './utils/perfBreakdown';
 import { PinPrompt } from './components/common/PinPrompt';
 import { usePinStore, unlockedReader } from './store/pinStore';
-import { activePinKeys, pendingPinTarget, pinEscapeTarget, unlocksFor, type EscapeTarget } from './utils/pinLock';
+import { useUnlockContentStore } from './store/unlockContentStore';
+import {
+    activePinKeys,
+    pendingPinTarget,
+    pinEscapeTarget,
+    sectionPinKey,
+    tabPinKey,
+    unlocksFor,
+    type EscapeTarget,
+} from './utils/pinLock';
+import { pinUnlock } from './utils/pinApi';
 
 const STORE_REHYDRATORS: Record<string, () => void> = {
     'aura-dashboard': () => useDashboardStore.persist.rehydrate(),
@@ -1002,12 +1012,72 @@ export default function App() {
         [shotEditMode, section, activeTab, isPinUnlocked],
     );
 
+    // Content the server handed back after a successful unlock (RAM-only). Merged
+    // over the redacted stubs so the real widgets render once a view is open.
+    const unlockedContent = useUnlockContentStore((s) => s.content);
+    const setUnlockContent = useUnlockContentStore((s) => s.setContent);
+    const retainUnlockContent = useUnlockContentStore((s) => s.retain);
+
+    // Digit count of the pending PIN — drives the keypad; never the PIN itself.
+    const promptPinLength = useMemo(() => {
+        if (!pinTarget) return 4;
+        const item = pinTarget.scope === 'section' ? section : activeTab;
+        return item?.pinLength ?? 4;
+    }, [pinTarget, section, activeTab]);
+
+    // The tabs actually rendered: a section unlock swaps in its full tabs, a tab
+    // unlock swaps that tab's widgets back in. While still locked, pinTarget wins
+    // and PinPrompt renders instead — so this only matters once a view is open.
+    const effectiveTabs = useMemo(() => {
+        if (!section) return tabs;
+        const secEntry = unlockedContent[sectionPinKey(section.id)];
+        const secContent = secEntry?.content as { tabs?: Tab[] } | undefined;
+        let result: Tab[] = Array.isArray(secContent?.tabs) ? (secContent!.tabs as Tab[]) : tabs;
+        result = result.map((tb) => {
+            const entry = unlockedContent[tabPinKey(section.id, tb.id)];
+            if (!entry) return tb;
+            const c = entry.content as Partial<Tab>;
+            return {
+                ...tb,
+                widgets: c.widgets ?? tb.widgets,
+                conditions: c.conditions,
+                badges: c.badges,
+                badgeAggregate: c.badgeAggregate,
+                pinProtected: undefined,
+            };
+        });
+        return result;
+    }, [tabs, section, unlockedContent]);
+
+    // Verify a code server-side (production) or fall back to the client-side match
+    // when the config still carries a plaintext PIN (dev server with no adapter, or
+    // the brief window before the adapter has redacted a freshly saved config).
+    const handlePinUnlock = useCallback(
+        async (code: string): Promise<boolean> => {
+            if (!pinTarget) return false;
+            const legacy = section?.pin || activeTab?.pin;
+            if (legacy) {
+                const grants = unlocksFor(section, activeTab, code);
+                if (!grants.length) return false;
+                grants.forEach((g) => unlockPin(g.key, g.relock));
+                return true;
+            }
+            const res = await pinUnlock(pinTarget.key, code);
+            if (!res.ok) return false;
+            setUnlockContent(pinTarget.key, res.result.content, res.result.pinRelock);
+            unlockPin(pinTarget.key, res.result.pinRelock);
+            return true;
+        },
+        [pinTarget, section, activeTab, unlockPin, setUnlockContent],
+    );
+
     // Everything unlocked with the default relock mode falls shut again as soon as
     // the viewer moves on to another section / tab.
     const activeKeys = useMemo(() => activePinKeys(section?.id, activeTabId), [section?.id, activeTabId]);
     useEffect(() => {
         retainPins(activeKeys);
-    }, [activeKeys, retainPins]);
+        retainUnlockContent(activeKeys);
+    }, [activeKeys, retainPins, retainUnlockContent]);
 
     // Last view the viewer was actually allowed to see — where "cancel" returns to.
     const lastFreeViewRef = useRef<EscapeTarget | null>(null);
@@ -1311,10 +1381,8 @@ export default function App() {
                                 key={pinTarget.key}
                                 scope={pinTarget.scope}
                                 name={pinTarget.name}
-                                pin={pinTarget.pin}
-                                onUnlock={(code) =>
-                                    unlocksFor(section, activeTab, code).forEach((g) => unlockPin(g.key, g.relock))
-                                }
+                                pinLength={promptPinLength}
+                                onUnlock={handlePinUnlock}
                                 onCancel={pinEscape ? () => goToView(pinEscape) : undefined}
                             />
                         ) : (
@@ -1322,7 +1390,7 @@ export default function App() {
                                 <Dashboard
                                     readonly={!shotEditMode}
                                     editMode={shotEditMode}
-                                    viewTabs={tabs}
+                                    viewTabs={effectiveTabs}
                                     viewActiveTabId={activeTabId}
                                     layoutId={layout?.id}
                                     sectionId={section?.id}

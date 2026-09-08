@@ -1,7 +1,7 @@
 {
   "$meta": {
     "name": "AURA widget schema",
-    "auraVersion": "0.55.3",
+    "auraVersion": "0.55.4",
     "generator": "tools/schema/gen-widget-schema.mjs",
     "purpose": "Describes every AURA widget type so a JSON widget/tab config can be generated and pasted into the dashboard editor (\"Widget importieren\").",
     "usage": [
@@ -7121,7 +7121,6 @@
       "layouts": [
         "default",
         "card",
-        "compact",
         "minimal",
         "custom"
       ],
@@ -7293,7 +7292,6 @@
       },
       "layouts": [
         "default",
-        "card",
         "compact",
         "minimal",
         "custom"
@@ -7424,9 +7422,6 @@
       },
       "layouts": [
         "default",
-        "card",
-        "compact",
-        "minimal",
         "custom"
       ],
       "conditionSlots": [
@@ -8104,9 +8099,9 @@
       "layouts": [
         "default",
         "battery",
+        "bar",
         "segments",
-        "wave",
-        "bar"
+        "wave"
       ],
       "conditionSlots": [
         "icon",
@@ -8531,9 +8526,9 @@
       },
       "layouts": [
         "default",
-        "card",
         "compact",
-        "minimal"
+        "minimal",
+        "framed"
       ],
       "conditionSlots": [
         "icon",
@@ -8600,10 +8595,7 @@
         "h": 5
       },
       "layouts": [
-        "default",
-        "card",
-        "compact",
-        "minimal"
+        "default"
       ],
       "conditionSlots": [
         "icon",
@@ -8750,10 +8742,7 @@
         "h": 6
       },
       "layouts": [
-        "default",
-        "card",
-        "compact",
-        "minimal"
+        "default"
       ],
       "conditionSlots": [
         "icon",
@@ -8840,9 +8829,6 @@
       },
       "layouts": [
         "default",
-        "card",
-        "compact",
-        "minimal",
         "custom"
       ],
       "conditionSlots": [
@@ -8901,6 +8887,7 @@
       },
       "layouts": [
         "default",
+        "compact",
         "custom"
       ],
       "conditionSlots": [
@@ -9016,10 +9003,7 @@
         "h": 5
       },
       "layouts": [
-        "default",
-        "card",
-        "compact",
-        "minimal"
+        "default"
       ],
       "conditionSlots": [
         "icon",
@@ -9223,10 +9207,10 @@
         "h": 9
       },
       "layouts": [
-        "default",
-        "card",
-        "compact",
-        "minimal",
+        "light-all",
+        "light-brightness",
+        "light-color",
+        "light-temperature",
         "custom"
       ],
       "conditionSlots": [
@@ -10244,11 +10228,7 @@
         "h": 2
       },
       "layouts": [
-        "default",
-        "card",
-        "compact",
-        "minimal",
-        "custom"
+        "default"
       ],
       "conditionSlots": [],
       "commonOptions": [
@@ -10423,11 +10403,7 @@
         "h": 4
       },
       "layouts": [
-        "default",
-        "card",
-        "compact",
-        "minimal",
-        "custom"
+        "default"
       ],
       "conditionSlots": [],
       "commonOptions": [
@@ -10637,7 +10613,6 @@
       },
       "layouts": [
         "default",
-        "card",
         "compact",
         "minimal",
         "custom"
@@ -11345,7 +11320,6 @@
         "default",
         "card",
         "compact",
-        "minimal",
         "custom"
       ],
       "conditionSlots": [
@@ -11607,9 +11581,7 @@
       },
       "layouts": [
         "default",
-        "card",
         "compact",
-        "minimal",
         "custom"
       ],
       "conditionSlots": [
@@ -11969,7 +11941,6 @@
       },
       "layouts": [
         "default",
-        "card",
         "compact",
         "minimal",
         "custom"

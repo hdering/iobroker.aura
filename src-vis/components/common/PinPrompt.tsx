@@ -7,53 +7,70 @@ import type { PinScope } from '../../utils/pinLock';
  * The unlock dialog for a PIN-protected section / tab. Rendered in place of the
  * dashboard content, so the protected widgets never mount while it is up.
  *
+ * The code is verified server-side: `onUnlock` posts it to the adapter and
+ * resolves `true` only when the server accepted it (and handed back the content).
+ * The plaintext PIN is never in the browser — only its length reaches here, so the
+ * keypad can show the right dots and auto-submit a full code without a confirm tap.
+ *
  * Touch first: a keypad big enough for a wall tablet, plus normal keyboard input
- * (digits, Backspace, Enter, Escape) for desktop. The entry is checked as soon as
- * it reaches the length of the PIN — no extra confirm tap on a 4-digit code.
+ * (digits, Backspace, Enter, Escape) for desktop.
  */
 export function PinPrompt({
     scope,
     name,
-    pin,
+    pinLength = 4,
     onUnlock,
     onCancel,
 }: {
     scope: PinScope;
     /** Name of the locked section / tab, shown above the input. */
     name: string;
-    pin: string;
-    /** Receives the code that opened the lock — it may open more on the way in. */
-    onUnlock: (code: string) => void;
+    /** Digit count of the PIN (drives dots + auto-submit); never the PIN itself. */
+    pinLength?: number;
+    /** Verifies the code server-side; resolves true when it unlocked the view. */
+    onUnlock: (code: string) => Promise<boolean>;
     onCancel?: () => void;
 }) {
     const t = useT();
     const [entry, setEntry] = useState('');
     const [error, setError] = useState(false);
+    const [busy, setBusy] = useState(false);
     const entryRef = useRef(entry);
     entryRef.current = entry;
+    const busyRef = useRef(busy);
+    busyRef.current = busy;
+    const len = pinLength > 0 ? pinLength : 4;
 
     // A new target starts from scratch — never carry a half-typed code over.
     useEffect(() => {
         setEntry('');
         setError(false);
-    }, [scope, name, pin]);
+    }, [scope, name, pinLength]);
 
-    const submit = (value: string) => {
-        if (value === pin) {
-            onUnlock(value);
-            return;
+    const submit = async (value: string) => {
+        if (busyRef.current) return;
+        setBusy(true);
+        let ok = false;
+        try {
+            ok = await onUnlock(value);
+        } catch {
+            ok = false;
         }
-        setError(true);
-        setEntry('');
+        setBusy(false);
+        if (!ok) {
+            setError(true);
+            setEntry('');
+        }
     };
 
     const push = (digit: string) => {
+        if (busyRef.current) return;
         setError(false);
-        const next = (entryRef.current + digit).slice(0, Math.max(pin.length, entryRef.current.length + 1));
+        const next = (entryRef.current + digit).slice(0, Math.max(len, entryRef.current.length + 1));
         setEntry(next);
         // Auto-check once the entry is as long as the code; a wrong code of the
         // same length is reported immediately instead of silently swallowing keys.
-        if (next.length >= pin.length) submit(next);
+        if (next.length >= len) submit(next);
     };
 
     const back = () => {
@@ -85,9 +102,9 @@ export function PinPrompt({
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pin, onCancel, onUnlock]);
+    }, [len, onCancel, onUnlock]);
 
-    const dots = Math.max(pin.length, entry.length, 4);
+    const dots = Math.max(len, entry.length, 4);
 
     return (
         <div

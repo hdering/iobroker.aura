@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { setupPin } from '../../store/authStore';
+import { changeAdmin } from '../../store/authStore';
 import { useActiveLayout } from '../../store/dashboardStore';
 
 import { useConnectionStore, sanitizeClientId } from '../../store/connectionStore';
@@ -1067,7 +1067,7 @@ export function AdminSettings() {
     const [showReset, setShowReset] = useState(false);
     const [resetting, setResetting] = useState(false);
 
-    const handlePinChange = (e: React.FormEvent) => {
+    const handlePinChange = async (e: React.FormEvent) => {
         e.preventDefault();
         if (newPin.length < 4) {
             setPinMsg(t('settings.pin.tooShort'));
@@ -1077,10 +1077,12 @@ export function AdminSettings() {
             setPinMsg(t('settings.pin.mismatch'));
             return;
         }
-        setupPin(newPin);
-        setPinMsg(t('settings.pin.success'));
-        setNewPin('');
-        setConfirm('');
+        const ok = await changeAdmin(newPin);
+        setPinMsg(ok ? t('settings.pin.success') : t('login.wrong'));
+        if (ok) {
+            setNewPin('');
+            setConfirm('');
+        }
         setTimeout(() => setPinMsg(''), 3000);
     };
 

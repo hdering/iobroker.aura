@@ -1,66 +1,79 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { getStateDirect, setStateDirect } from '../hooks/useIoBroker';
-import { NS } from '../utils/namespace';
+import { adminStatus, adminSetup, adminLogin, adminChange } from '../utils/pinApi';
 
-const ADMIN_PIN_DP = `${NS}.admin.pinHash`;
-
-// Simple FNV-1a hash – works over plain HTTP (no crypto.subtle needed).
-// Sufficient for local PIN protection; not intended for cryptographic security.
-function hashPin(text: string): string {
-    let h = 0x811c9dc5;
-    for (let i = 0; i < text.length; i++) {
-        h ^= text.charCodeAt(i);
-        h = (h * 0x01000193) >>> 0;
-    }
-    return h.toString(16).padStart(8, '0');
-}
+/**
+ * Admin authentication — now verified server-side (main.js /api/aura/admin/*).
+ *
+ * The old FNV-1a-in-the-browser check is gone: it stored a reversible, socket-
+ * readable hash and the "login" was a client-side flag anyone could flip. The
+ * password is now scrypt-checked on the adapter host; on success the server hands
+ * back a signed session token, which is all this store keeps. Admin API calls
+ * (vault read, config save) carry it as a Bearer token.
+ */
 
 interface AuthState {
-    pinHash: string | null; // loaded from ioBroker, NOT persisted
-    pinHashLoaded: boolean; // true once fetched from ioBroker
-    sessionActive: boolean; // persisted in localStorage
-    setPinHash: (hash: string | null) => void;
-    setSession: (active: boolean) => void;
+    /** Whether an admin password has been set on the server (null = not yet checked). */
+    configured: boolean | null;
+    statusLoaded: boolean;
+    /** Signed admin session token from the server, or null when logged out. */
+    token: string | null;
+    sessionActive: boolean;
+    setStatus: (configured: boolean) => void;
+    setSession: (token: string | null) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
     persist(
         (set) => ({
-            pinHash: null,
-            pinHashLoaded: false,
+            configured: null,
+            statusLoaded: false,
+            token: null,
             sessionActive: false,
-            setPinHash: (hash) => set({ pinHash: hash, pinHashLoaded: true }),
-            setSession: (active) => set({ sessionActive: active }),
+            setStatus: (configured) => set({ configured, statusLoaded: true }),
+            // A token is the session; the server enforces its expiry, so a stale one
+            // simply fails the next admin call and bounces back to the login page.
+            setSession: (token) => set({ token, sessionActive: !!token }),
         }),
-        { name: 'aura-auth', partialize: (s) => ({ sessionActive: s.sessionActive }) },
+        { name: 'aura-auth', partialize: (s) => ({ token: s.token, sessionActive: s.sessionActive }) },
     ),
 );
 
-/** Load the PIN hash from ioBroker into the store. Call this on the login page mount. */
-export async function loadPinHash(): Promise<void> {
-    const state = await getStateDirect(ADMIN_PIN_DP);
-    const hash = state?.val && typeof state.val === 'string' && state.val.length > 0 ? state.val : null;
-    useAuthStore.getState().setPinHash(hash);
+/** Ask the server whether an admin password exists yet. Call on the login page. */
+export async function loadAdminStatus(): Promise<void> {
+    const { configured } = await adminStatus();
+    useAuthStore.getState().setStatus(configured);
 }
 
-export function loginWithPin(pin: string): boolean {
-    const { pinHash, setSession } = useAuthStore.getState();
-    if (!pinHash) return false;
-    if (hashPin(pin) === pinHash) {
-        setSession(true);
-        return true;
-    }
-    return false;
+/** First-run: set the admin password on the server and start a session. */
+export async function setupAdmin(password: string): Promise<boolean> {
+    const res = await adminSetup(password);
+    if (!res) return false;
+    useAuthStore.getState().setSession(res.token);
+    useAuthStore.getState().setStatus(true);
+    return true;
 }
 
-export function setupPin(pin: string): void {
-    const hash = hashPin(pin);
-    setStateDirect(ADMIN_PIN_DP, hash);
-    useAuthStore.getState().setPinHash(hash);
-    useAuthStore.getState().setSession(true);
+/** Verify the password server-side; on success keep the returned session token. */
+export async function loginWithPin(password: string): Promise<boolean> {
+    const res = await adminLogin(password);
+    if (!res) return false;
+    useAuthStore.getState().setSession(res.token);
+    return true;
+}
+
+/** Change the admin password (requires an active session). */
+export async function changeAdmin(newPassword: string): Promise<boolean> {
+    const token = useAuthStore.getState().token;
+    if (!token) return false;
+    return adminChange(token, newPassword);
+}
+
+/** The current admin Bearer token, or null. Used by admin-only API calls. */
+export function adminToken(): string | null {
+    return useAuthStore.getState().token;
 }
 
 export function logout(): void {
-    useAuthStore.getState().setSession(false);
+    useAuthStore.getState().setSession(null);
 }

@@ -438,6 +438,8 @@ export const de = {
     // ── PIN protection (sections / tabs) ────────────────────────────────────────
     'pin.field': 'PIN',
     'pin.placeholder': 'z.B. 1234',
+    'pin.setPlaceholder': 'PIN gesetzt – neue eingeben zum Ändern',
+    'pin.protectedHint': 'Serverseitig geschützt. Feld leeren entfernt den Schutz.',
     'pin.hint': 'Leer = kein Schutz. Der Inhalt erscheint erst nach Eingabe der PIN.',
     'pin.keepUnlocked': 'Offen lassen',
     'pin.keepUnlockedHint':
