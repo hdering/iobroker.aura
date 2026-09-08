@@ -172,7 +172,10 @@ const fullConfig = () => ({
     ok(JSON.stringify(sections).indexOf('1234') < 0, 'plaintext PIN not stored in the vault sections');
 
     // A section PIN supersedes its inner tab PINs — no plaintext PIN in content.
-    ok(sec.content.tabs.every((t) => t.pin === undefined), 'inner tab PINs stripped from section content');
+    ok(
+        sec.content.tabs.every((t) => t.pin === undefined),
+        'inner tab PINs stripped from section content',
+    );
 
     // Stamping pin lengths onto the redacted stubs (keypad hint, not a secret).
     const { publicConfig } = vault.splitDashboard(fullConfig());
@@ -200,11 +203,11 @@ const fullConfig = () => ({
 
     ok(unresolved.length === 0, 'KEEP resolves against the existing vault');
     ok(sections2['section:sLocked'].hash === origHash, 'KEEP reuses the existing hash (PIN unchanged)');
-    ok(auth.verifySecret('1234', sections2['section:sLocked'].salt, sections2['section:sLocked'].hash), 'KEEP still verifies old PIN');
     ok(
-        sections2['section:sLocked'].content.tabs[0].widgets[0].id === 'wEdited',
-        'KEEP takes the newly edited content',
+        auth.verifySecret('1234', sections2['section:sLocked'].salt, sections2['section:sLocked'].hash),
+        'KEEP still verifies old PIN',
     );
+    ok(sections2['section:sLocked'].content.tabs[0].widgets[0].id === 'wEdited', 'KEEP takes the newly edited content');
 
     // KEEP with no existing entry cannot be resolved → reported, not silently kept.
     const orphan = vault.buildVaultSections(split2.protected, {});

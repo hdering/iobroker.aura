@@ -116,7 +116,10 @@ try {
     r = await call('GET', 'vault', { token: adminToken });
     ok(r.status === 200 && r.json.sections['section:sLocked'], 'vault read with admin token returns sections');
     const secMeta = r.json.sections['section:sLocked'];
-    ok(secMeta.content.tabs[0].widgets[0].id === 'wSecret', 'vault content carries the protected widgets (for the editor)');
+    ok(
+        secMeta.content.tabs[0].widgets[0].id === 'wSecret',
+        'vault content carries the protected widgets (for the editor)',
+    );
     ok(!('pin' in secMeta) && !('hash' in secMeta), 'vault read never exposes the PIN or its hash');
 
     // ── admin change ─────────────────────────────────────────────────────────

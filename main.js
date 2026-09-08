@@ -957,7 +957,8 @@ class Aura extends utils.Adapter {
         try {
             dir = utils.getAbsoluteInstanceDataDir(this);
         } catch {
-            const base = typeof utils.getAbsoluteDefaultDataDir === 'function' ? utils.getAbsoluteDefaultDataDir() : '.';
+            const base =
+                typeof utils.getAbsoluteDefaultDataDir === 'function' ? utils.getAbsoluteDefaultDataDir() : '.';
             dir = path.join(base, this.namespace);
         }
         try {
@@ -1020,7 +1021,9 @@ class Aura extends utils.Adapter {
         data.sections = sections;
         this.vault.save(data);
         await this.setStateAsync('config.dashboard', { val: JSON.stringify(publicConfig), ack: true });
-        this.log.info(`aura: config.dashboard redacted — ${Object.keys(sections).length} protected view(s) held server-side`);
+        this.log.info(
+            `aura: config.dashboard redacted — ${Object.keys(sections).length} protected view(s) held server-side`,
+        );
     }
 
     /** Dispatch a /api/aura/ request to the security API (see lib/security/apiHandler). */
