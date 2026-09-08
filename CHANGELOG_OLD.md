@@ -1,5 +1,9 @@
 # Changelog (older entries)
 
+## 0.52.3 (2026-09-01)
+- Settings - MCP fields are only shown when MCP is enabled, and the token is no longer displayed in clear text ([#610](https://github.com/hdering/ioBroker.aura/issues/610))
+- Settings - the MCP token is now stored encrypted; a hand-typed token has to be entered once more after this update ([#610](https://github.com/hdering/ioBroker.aura/issues/610))
+
 ## 0.52.2 (2026-09-01)
 - 🌟 **New feature:** Calendar - each calendar source can carry its own icon, shown in front of its entries ([#608](https://github.com/hdering/ioBroker.aura/issues/608))
 - 🌟 **New feature:** Calendar - optional calendar week, printed at the first entry of every week ([#608](https://github.com/hdering/ioBroker.aura/issues/608))

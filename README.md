@@ -115,6 +115,11 @@ So the path of any release is: `-nextN` test build → **Latest** (published, on
 
 _Older releases: see [CHANGELOG_OLD.md](CHANGELOG_OLD.md)._
 
+### 0.55.4 (2026-09-08)
+- List - a switch row with switchStyle "slide" plus on/off labels now keeps the slide toggle and puts the label next to it, instead of silently replacing the toggle with a text pill
+- AI access - broad round of improvements for the MCP tools that let an AI read and build dashboards: more widget types report an honest height (weather and status overview are measured now, content from an instance or free HTML is flagged as "check it in the browser"), options that void a measurement say so instead of reporting "fits", aura_rendered can measure a tab nobody has open by rendering it off-screen at the real grid width, a section with a single tab is warned that its last grid row disappears once a second tab is added, aura_tab keeps embedded images readable via trimming plus images/groupDefs switches (and write tools refuse a trimmed payload), aura_validate hands back a token the write tools accept instead of sending a tab through the conversation twice, and theme colors are reported in the only form a configuration accepts, var(--light-on, var(--accent-yellow))
+
+
 ### 0.55.3 (2026-09-07)
 - Section title - new "framed" style that looks like a normal widget card, subtitle now shows in the compact and minimal styles too, the accent bar spans title and subtitle, and the title is no longer clipped at the top of the mobile view; the rule can now be hidden or given its own color, title and subtitle take their own color and text size, and the subtitle accepts the same value bindings as the HTML widget
 - Settings - deleting a connected device now removes its whole datapoint tree instead of leaving parts of it behind, works from the aura.0.clients.deleteRequest datapoint regardless of the ack flag, and a renamed or speaking client id is no longer cut after 8 characters in the object tree ([#624](https://github.com/hdering/ioBroker.aura/issues/624))
@@ -243,11 +248,6 @@ _Older releases: see [CHANGELOG_OLD.md](CHANGELOG_OLD.md)._
 - Chart (advanced) - a JSON series now shows the accepted JSON shapes right under its datapoint, unfolded until the payload could be read
 
 
-### 0.52.3 (2026-09-01)
-- Settings - MCP fields are only shown when MCP is enabled, and the token is no longer displayed in clear text ([#610](https://github.com/hdering/ioBroker.aura/issues/610))
-- Settings - the MCP token is now stored encrypted; a hand-typed token has to be entered once more after this update ([#610](https://github.com/hdering/ioBroker.aura/issues/610))
-
-
 ## License
 
 MIT License
@@ -259,6 +259,7 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 
 
 
