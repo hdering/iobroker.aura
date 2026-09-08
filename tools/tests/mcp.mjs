@@ -3752,6 +3752,50 @@ check('aura_measure works on a locked tab — rows and pixels reveal no content'
     assert.match(t, /Zeilenhöhe 20 px/);
     assert.ok(!/Kamera Hof/.test(t) && !/rtsp:/.test(t));
     assert.match(t, /Nur die Struktur/);
+    // The note used to list aura_compact among the things that work here, and
+    // aura_compact writes: it is refused (see below). A hint that walks the
+    // caller into a refusal is worse than no hint.
+    assert.match(t, /jeder Schreibzugriff braucht die Freigabe, aura_compact eingeschlossen/);
+    assert.ok(!/aura_rendered, aura_compact\)/.test(t), 'aura_compact must not read as available');
+});
+
+check('the same note in aura_tab does not promise aura_compact either', () => {
+    assert.match(tabStructure.content[0].text, /jeder Schreibzugriff braucht die Freigabe/);
+});
+
+const compactLocked = await client.callTool({ name: 'aura_compact', arguments: { tab: 'Geheim' } });
+check('aura_compact is refused on a locked tab — it writes', () => {
+    assert.ok(compactLocked.isError);
+    assert.match(compactLocked.content[0].text, /nicht für den MCP freigegeben/);
+});
+
+// Reported from use: the id came out of aura_tab, and aura_update_widgets answered
+// „Kein Widget mit der id …“ — the block was right, the reason was not, and it
+// sent the caller hunting for a phantom id.
+const patchLockedById = await client.callTool({
+    name: 'aura_update_widgets',
+    arguments: {
+        dryRun: true,
+        patches: JSON.stringify([{ widgetId: 'wSecret', patch: { gridPos: { h: 7 } } }]),
+    },
+});
+check('a widget id inside a locked view is refused by the lock, not called a phantom', () => {
+    const t = patchLockedById.content[0].text;
+    assert.ok(patchLockedById.isError);
+    assert.ok(!/Kein Widget mit der id/.test(t), `the id exists — the lock is the reason:\n${t}`);
+    assert.match(t, /nicht für den MCP freigegeben/);
+    assert.match(t, /Wohnzimmer \/ Start \/ Geheim/);
+    assert.match(t, /Über MCP bearbeitbar/);
+});
+
+const patchLockedOne = await client.callTool({
+    name: 'aura_update_widget',
+    arguments: { widgetId: 'wSecret', patch: JSON.stringify({ gridPos: { h: 7 } }) },
+});
+check('aura_update_widget says the same thing for a single patch', () => {
+    assert.ok(patchLockedOne.isError);
+    assert.ok(!/Kein Widget mit der id/.test(patchLockedOne.content[0].text));
+    assert.match(patchLockedOne.content[0].text, /nicht für den MCP freigegeben/);
 });
 
 const addBlocked = await client.callTool({
