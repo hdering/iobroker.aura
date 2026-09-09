@@ -6,3 +6,5 @@
 #   Settings - <what changed>               e.g.  Settings - add hex color mode for RGB lights
 # Issue reference (optional): append (#519) — or paste the full issue URL — and the
 # release turns it into a changelog link. release.ps1 also asks per entry.
+
+- General - verified on Node.js 26; the CI adapter tests now run on Node 22, 24 and 26 (#631)
